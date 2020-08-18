@@ -1,9 +1,23 @@
 const dotenv = require('dotenv').config();
 const fs = require('fs');
 const Discord = require('discord.js');
+const mongo = require('./mongo');
 
 const client = new Discord.Client();
 client.commands = new Discord.Collection();
+
+let db;
+mongo.connectDB().then(result => {
+    if (result.success) {
+        db = mongo.getDB();
+        console.log('Connected to database successfully');
+    } else {
+        throw result.err;
+    }
+}).catch(err => {
+    console.error(err);
+});
+
 
 const commandFiles = fs.readdirSync('./commands').filter(file => file.endsWith('.js'));
 
@@ -32,6 +46,6 @@ client.on('message', message => {
         console.error(err);
         message.reply('We ran into an error trying to exceute that command')
     }
-})
+});
 
 client.login(process.env.DISCORD_TOKEN);
