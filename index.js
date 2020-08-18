@@ -36,14 +36,21 @@ client.on('message', message => {
     if (!message.content.startsWith(prefix) || message.author.bot) return;
 
     const args = message.content.slice(prefix.length).trim().split(/ +/);
-    const command = args.shift().toLowerCase();
+    const commandName = args.shift().toLowerCase();
+    const command = client.commands.get(commandName);
 
-    if (!client.commands.has(command)) {
-        return;
+    if (!command) return;
+
+    if (command.guildOnly && message.channel.type === 'dm') {
+        return message.reply('That command can\'t be used in DMs.');
+    }
+
+    if (command.args && args.length === 0) {
+        return message.reply(`The ${commandName} command requires arguments, ${message.author}`);
     }
 
     try {
-        client.commands.get(command).execute(message, args);
+        command.execute(message, args);
     } catch (err) {
         console.error(err);
         message.reply('We ran into an error trying to exceute that command')
