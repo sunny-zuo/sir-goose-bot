@@ -1,19 +1,29 @@
+const mongo = require('./mongo');
+
 let servers = new Map();
 
 const defaultSettings = {
     prefix: "~"
 }
 
-// insert function to fetch settings from db on init here
+const loadSettings = () => {
+    return mongo.getDB().collection("settings").find({}).toArray(function (err, result) {
+        if (err) throw err;
+        result.forEach(setting => {
+            servers.set(setting.serverID, setting);
+        });
+        console.log("Settings loaded successfully");
+    });
+}
 
 const get = (serverID) => {
     // return server data if exists, else default settings
-    return servers.get(serverID) || defaultSettings;
+    return servers.get(serverID) || { ...defaultSettings, serverID: serverID };
 }
 
 const set = (serverID, settings) => {
     servers.set(serverID, settings);
-    // insert function to write settings to db here
+    mongo.getDB().collection("settings").replaceOne({ serverID: serverID }, settings, { upsert: true });
 }
 
-module.exports = { get, set };
+module.exports = { get, set, loadSettings };

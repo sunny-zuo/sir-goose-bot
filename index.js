@@ -7,19 +7,6 @@ const settings = require('./settings');
 const client = new Discord.Client();
 client.commands = new Discord.Collection();
 
-let db;
-mongo.connectDB().then(result => {
-    if (result.success) {
-        db = mongo.getDB();
-        console.log('Connected to database successfully');
-    } else {
-        throw result.err;
-    }
-}).catch(err => {
-    console.error(err);
-});
-
-
 const commandFiles = fs.readdirSync('./commands').filter(file => file.endsWith('.js'));
 
 for (const file of commandFiles) {
@@ -27,8 +14,16 @@ for (const file of commandFiles) {
     client.commands.set(command.name, command);
 }
 
-client.once('ready', () => {
-    console.log(`Ready to go. Logged in as ${client.user.tag}`);
+client.once('ready', async () => {
+    console.log(`Logged in as ${client.user.tag}`);
+    client.user.setActivity("~help");
+    const dbConnection = await mongo.connectDB();
+    if (dbConnection.success) {
+        console.log('Connected to database successfully');
+        await settings.loadSettings();
+    } else {
+        console.error(dbConnection.err);
+    }
 });
 
 client.on('message', message => {
