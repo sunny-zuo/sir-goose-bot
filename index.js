@@ -46,7 +46,13 @@ client.on('message', message => {
     }
 
     if (command.args && args.length === 0) {
-        return message.reply(`The ${commandName} command requires arguments, ${message.author}`);
+        return message.reply(`The ${commandName} command requires arguments`);
+    }
+
+    if (command.permissions) {
+        if (!message.member.hasPermission(command.permissions)) {
+            return message.reply(`You need the following permissions to use this command: ${JSON.stringify(command.permissions)}`);
+        }
     }
 
     try {
