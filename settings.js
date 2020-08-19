@@ -16,8 +16,4 @@ const set = (serverID, settings) => {
     // insert function to write settings to db here
 }
 
-servers.set("532052305982259210", {
-    prefix: "!"
-})
-
 module.exports = { get, set };
