@@ -1,5 +1,17 @@
 const mongo = require('../mongo');
 const fetch = require('node-fetch');
+const settings = require('../settings');
+
+const nodemailer = require("nodemailer");
+const mailAccount = nodemailer.createTransport({
+    host: process.env.EMAIL_HOST,
+    port: process.env.EMAIL_PORT,
+    secure: false,
+    auth: {
+        user: process.env.EMAIL,
+        pass: process.env.EMAIL_PASS,
+    },
+});
 
 module.exports = {
     name: 'verify',
@@ -23,6 +35,9 @@ module.exports = {
         const request = await fetch(`https://api.uwaterloo.ca/v2/directory/${uwid}.json?key=${process.env.UW_API_KEY}`);
         const userData = await request.json();
 
+        if (userData.meta.status === 204) {
+            return message.reply('There\'s no Waterloo account associated with that user ID! Please double check the user ID and try again')
+        };
         let user = {
             discordID: message.author.id,
             program: userData.data.department,
@@ -34,6 +49,21 @@ module.exports = {
             user.uwid.push(email.slice(0, -13));
         });
         mongo.getDB().collection("users").insertOne(user);
-        console.log(user);
+
+        mailAccount.sendMail({
+            from: `"Sir Goose Bot 👻" <${process.env.EMAIL}>`,
+            to: `${uwid}@uwaterloo.ca`,
+            subject: `UW Verification Code [${user.token}]`,
+            text: `Token: ${user.token}`,
+            html: `<b>HONK</b></br>
+                Hey, your verification code is: <b>${user.token}</b></br>
+                You can verify yourself using this command in the Discord channel:</br>
+                <code>${settings.get(message.guild?.id).prefix}confirm ${user.token}</code>
+                </br></br>
+                Also! If you have time, reply to this email with something random to prevent this account from being flagged as spam.`,
+        });
+        message.channel.send(
+            `I'm sending a token to your UW email!\nGo ahead and type \`${settings.get(message.guild?.id).prefix}confirm TOKEN\` to finish the verification process`
+        );
     }
 }
