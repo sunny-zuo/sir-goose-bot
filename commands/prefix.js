@@ -7,7 +7,7 @@ module.exports = {
     guildOnly: true,
     permissions: ['MANAGE_GUILD'],
     execute(message, args) {
-        const prefix = args[0];
+        const prefix = args;
 
         if (prefix.length > 6) {
             return message.channel.send('The prefix must be shorter than 7 characters.')

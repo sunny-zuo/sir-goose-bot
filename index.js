@@ -30,7 +30,7 @@ client.on('message', message => {
     const prefix = settings.get(message.guild?.id).prefix
     if (!message.content.startsWith(prefix) || message.author.bot) return;
 
-    const args = message.content.slice(prefix.length).trim().split(/ +/);
+    const args = message.content.slice(prefix.length).trim().split(/ (.+)/);
     const commandName = args.shift().toLowerCase();
     const command = client.commands.get(commandName);
 
@@ -51,7 +51,7 @@ client.on('message', message => {
     }
 
     try {
-        command.execute(message, args);
+        command.execute(message, args[0]);
     } catch (err) {
         console.error(err);
         message.reply('We ran into an error trying to exceute that command')

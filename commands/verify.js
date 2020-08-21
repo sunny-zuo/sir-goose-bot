@@ -19,7 +19,7 @@ module.exports = {
     args: true,
     guildOnly: true,
     async execute(message, args) {
-        let uwid = args[0].toLowerCase().replace(/[^a-z0-9.@-]/g, "");
+        let uwid = args.toLowerCase().replace(/[^a-z0-9.@-]/g, "");
 
         if (uwid.endsWith("@uwaterloo.ca")) {
             uwid = uwid.slice(0, -13);
