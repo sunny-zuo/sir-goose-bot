@@ -25,12 +25,21 @@ module.exports = {
             uwid = uwid.slice(0, -13);
         }
 
-        /* add checks to see if user exists
-        mongo.getDB().collection("users").findOne({ uwid: uwid }).then((user) => {
-            if (user) {
+        // check if user already exists
+        const existingUser = await mongo.getDB().collection("users").findOne({ uwid: uwid });
+        if (existingUser) {
+            if (existingUser.discordID === message.author.id) {
+                if (existingUser.verified) {
+                    // TODO: auto confirm user
+                    return message.reply('Thanks for verifying!');
+                } else {
+                    return message.reply('We\'ve already sent you a verification code! Please check your email');
+                }
+                
+            } else {
                 return message.reply(`That user ID has already been registered. If you think this is a mistake, message <@${process.env.ADMIN_ID}>`, { "allowedMentions": { "users": [] } });
             }
-        });*/
+        }
 
         const request = await fetch(`https://api.uwaterloo.ca/v2/directory/${uwid}.json?key=${process.env.UW_API_KEY}`);
         const userData = await request.json();
@@ -48,7 +57,7 @@ module.exports = {
         userData.data.email_addresses.forEach(email => {
             user.uwid.push(email.slice(0, -13));
         });
-        mongo.getDB().collection("users").insertOne(user);
+        mongo.getDB().collection("users").replaceOne({ discordID: message.author.id }, user, { upsert: true });
 
         mailAccount.sendMail({
             from: `"Sir Goose Bot 👻" <${process.env.EMAIL}>`,
