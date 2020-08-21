@@ -1,6 +1,7 @@
 const mongo = require('../mongo');
 const fetch = require('node-fetch');
 const settings = require('../settings');
+const confirm = require('./confirm');
 
 const nodemailer = require("nodemailer");
 const mailAccount = nodemailer.createTransport({
@@ -35,8 +36,8 @@ module.exports = {
         if (existingUser) {
             if (existingUser.discordID === message.author.id) {
                 if (existingUser.verified) {
-                    // TODO: auto confirm user
-                    return message.reply('Thanks for verifying!');
+                    confirm.assignRole(message, existingUser);
+                    return;
                 } else {
                     return message.reply('We\'ve already sent you a verification code! Please check your email');
                 }
