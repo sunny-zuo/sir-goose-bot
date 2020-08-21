@@ -3,7 +3,12 @@ const mongo = require('./mongo');
 let servers = new Map();
 
 const defaultSettings = {
-    prefix: "~"
+    prefix: "~",
+    verificationEnabled: false,
+    verificationProgram: "VPA/Software Engineering",
+    verifiedRole: "SE",
+    guestRole: "Non-SE",
+    autoGuest: true
 }
 
 const loadSettings = () => {

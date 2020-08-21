@@ -19,6 +19,11 @@ module.exports = {
     args: true,
     guildOnly: true,
     async execute(message, args) {
+        const guildSettings = settings.get(message.guild?.id);
+        if (!guildSettings.verificationEnabled) {
+            return message.reply('This server does not have verification enabled');
+        }
+
         let uwid = args.toLowerCase().replace(/[^a-z0-9.@-]/g, "");
 
         if (uwid.endsWith("@uwaterloo.ca")) {
@@ -67,7 +72,7 @@ module.exports = {
             html: `<b>HONK</b></br>
                 Hey, your verification code is: <b>${user.token}</b></br>
                 You can verify yourself using this command in the Discord channel:</br>
-                <code>${settings.get(message.guild?.id).prefix}confirm ${user.token}</code>
+                <code>${guildSettings.prefix}confirm ${user.token}</code>
                 </br></br>
                 Also! If you have time, reply to this email with something random to prevent this account from being flagged as spam.`,
         });
