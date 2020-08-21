@@ -14,8 +14,8 @@ module.exports = {
         }
 
         let serverSetting = { ...settings.get(message.guild.id) };
-        serverSetting.prefix = args[0];
+        serverSetting.prefix = args;
         settings.set(message.guild.id, serverSetting);
-        message.channel.send(`The bot\'s prefix has been updated to ${args[0]}`);
+        message.channel.send(`The bot\'s prefix has been updated to ${args}`);
     }
 }
