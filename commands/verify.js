@@ -1,7 +1,7 @@
-const mongo = require('../mongo');
+const mongo = require('../mongo.js');
 const fetch = require('node-fetch');
-const settings = require('../settings');
-const confirm = require('./confirm');
+const settings = require('../settings.js');
+const confirm = require('./confirm.js');
 
 const nodemailer = require("nodemailer");
 const mailAccount = nodemailer.createTransport({

@@ -1,8 +1,8 @@
 const dotenv = require('dotenv').config();
 const fs = require('fs');
 const Discord = require('discord.js');
-const mongo = require('./mongo');
-const settings = require('./settings');
+const mongo = require('./mongo.js');
+const settings = require('./settings.js');
 
 const client = new Discord.Client();
 client.commands = new Discord.Collection();

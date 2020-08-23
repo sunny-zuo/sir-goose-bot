@@ -1,6 +1,6 @@
 const Discord = require('discord.js');
 
-const settings = require('../settings');
+const settings = require('../settings.js');
 
 module.exports = {
     name: 'verifyhelp',

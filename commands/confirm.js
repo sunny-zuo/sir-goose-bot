@@ -1,7 +1,7 @@
-const mongo = require('../mongo');
+const mongo = require('../mongo.js');
 const fetch = require('node-fetch');
 
-const settings = require('../settings');
+const settings = require('../settings.js');
 
 module.exports = {
     name: 'confirm',
