@@ -35,7 +35,7 @@ module.exports = {
         const userData = await request.json();
 
         if (userData.meta.status === 204) {
-            return message.reply('There\'s no Waterloo account associated with that user ID! Please double check the user ID and try again')
+            return message.reply('There\'s no Waterloo account associated with that user ID! Please double check the user ID and try again');
         };
 
         const uwid = userData.data.user_id;
