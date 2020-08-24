@@ -25,11 +25,20 @@ module.exports = {
             return message.reply('This server does not have verification enabled');
         }
 
-        let uwid = args.toLowerCase().replace(/[^a-z0-9.@-]/g, "");
+        let requestID = args.toLowerCase().replace(/[^a-z0-9.@-]/g, "");
 
-        if (uwid.endsWith("@uwaterloo.ca")) {
-            uwid = uwid.slice(0, -13);
+        if (requestID.endsWith("@uwaterloo.ca")) {
+            requestID = requestID.slice(0, -13);
         }
+
+        const request = await fetch(`https://api.uwaterloo.ca/v2/directory/${requestID}.json?key=${process.env.UW_API_KEY}`);
+        const userData = await request.json();
+
+        if (userData.meta.status === 204) {
+            return message.reply('There\'s no Waterloo account associated with that user ID! Please double check the user ID and try again')
+        };
+
+        const uwid = userData.data.user_id;
 
         // check if user already exists
         const existingUser = await mongo.getDB().collection("users").findOne({ uwid: uwid });
@@ -47,22 +56,14 @@ module.exports = {
             }
         }
 
-        const request = await fetch(`https://api.uwaterloo.ca/v2/directory/${uwid}.json?key=${process.env.UW_API_KEY}`);
-        const userData = await request.json();
-
-        if (userData.meta.status === 204) {
-            return message.reply('There\'s no Waterloo account associated with that user ID! Please double check the user ID and try again')
-        };
+        
         let user = {
             discordID: message.author.id,
             program: userData.data.department,
-            uwid: [],
+            uwid: uwid,
             verified: false,
             token: Math.floor(Math.random() * 899999 + 100000)
         }
-        userData.data.email_addresses.forEach(email => {
-            user.uwid.push(email.slice(0, -13));
-        });
         mongo.getDB().collection("users").replaceOne({ discordID: message.author.id }, user, { upsert: true });
 
         mailAccount.sendMail({
@@ -78,7 +79,7 @@ module.exports = {
                 Also! If you have time, reply to this email with something random to prevent this account from being flagged as spam.`,
         });
         message.channel.send(
-            `I'm sending a token to your UW email!\nGo ahead and type \`${settings.get(message.guild?.id).prefix}confirm TOKEN\` to finish the verification process`
+            `${message.author}, I'm sending a token to your UW email!\nGo ahead and type \`${settings.get(message.guild?.id).prefix}confirm TOKEN\` to finish the verification process`
         );
     }
 }
