@@ -45,6 +45,11 @@ module.exports = {
         if (existingUser) {
             if (existingUser.discordID === message.author.id) {
                 if (existingUser.verified) {
+                    // handle edge case where user transfers departments
+                    if (existingUser.program != userData.data.department) {
+                        await mongo.getDB().collection("users").updateOne({ uwid: uwid }, { $set: { program: userData.data.department } });
+                        existingUser.program = userData.data.department;
+                    }
                     confirm.assignRole(message, existingUser);
                     return;
                 } else {
