@@ -7,10 +7,9 @@ module.exports = {
     description: 'Bot owner only - reload bot settings',
     args: false,
     guildOnly: false,
+    ownerOnly: true,
     async execute(message, args) {
-        if (message.author.id === process.env.ADMIN_ID) {
-            await settings.loadSettings();
-            message.channel.send('Settings have been successfully reloaded');
-        }
+        await settings.loadSettings();
+        message.channel.send('Settings have been successfully reloaded');
     }
 }

@@ -50,6 +50,10 @@ client.on('message', message => {
         }
     }
 
+    if (command.ownerOnly && message.author.id !== process.env.ADMIN_ID) {
+        return message.reply('only the bot owner can use this command');
+    }
+
     try {
         command.execute(message, args[0]);
     } catch (err) {
