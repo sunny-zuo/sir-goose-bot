@@ -6,6 +6,7 @@ module.exports = {
     description: 'Unlink your UW identity and delete all of your user data. This will remove any verified roles that you have.',
     args: false,
     guildOnly: false,
+    displayHelp: false,
     async execute(message, args) {
         const user = await mongo.getDB().collection("users").findOne({ discordID: message.author.id });
 

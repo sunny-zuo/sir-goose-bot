@@ -8,6 +8,7 @@ module.exports = {
     description: 'Confirm your UW identity using the code given',
     args: true,
     guildOnly: true,
+    displayHelp: false,
     async execute(message, args) {
         const guildSettings = settings.get(message.guild?.id);
         if (!guildSettings.verificationEnabled) {
