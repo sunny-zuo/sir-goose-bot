@@ -5,6 +5,7 @@ module.exports = {
     description: 'Set the server\'s bot prefix',
     args: true,
     guildOnly: true,
+    displayHelp: true,
     permissions: ['MANAGE_GUILD'],
     execute(message, args) {
         const prefix = args;

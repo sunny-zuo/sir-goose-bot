@@ -7,6 +7,7 @@ module.exports = {
     description: 'Get UW identity verification help',
     args: false,
     guildOnly: true,
+    displayHelp: true,
     execute(message, args) {
         const guildSettings = settings.get(message.guild?.id);
         const verifyHelpEmbed = new Discord.MessageEmbed()
