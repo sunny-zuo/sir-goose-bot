@@ -6,6 +6,7 @@ module.exports = {
     args: true,
     guildOnly: true,
     displayHelp: true,
+    usage: '[prefix]',
     permissions: ['MANAGE_GUILD'],
     execute(message, args) {
         const prefix = args;
