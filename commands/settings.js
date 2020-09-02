@@ -10,6 +10,31 @@ const settingsInfo = {
     autoGuest: 'Set whether or not the bot should assign the specified guestRole to users who are in a different program. Either `true` or `false`'
 }
 
+function buildSettingListEmbed(message) {
+    const serverSetting = { ...settings.get(message.guild.id) };
+    const keys = Object.keys(serverSetting);
+
+    const blacklistedKeys = ["serverID", "_id"];
+    if (!serverSetting.verificationEnabled) {
+        blacklistedKeys.push('verificationProgram', 'verifiedRole', 'guestRole', 'autoGuest');
+    }
+
+    let settingsString = "";
+    for (let key in keys) {
+        if (!blacklistedKeys.includes(keys[key])) {
+            settingsString += `**${keys[key]}**: ${serverSetting[keys[key]]}\n`;
+        }
+    }
+
+    const settingListEmbed = new Discord.MessageEmbed()
+        .setColor('#0099ff')
+        .addFields(
+            { name: `__${message.guild.name} Settings__`, value: settingsString },
+        )
+
+    return settingListEmbed;
+}
+
 module.exports = {
     name: 'settings',
     description: 'List all of the server\'s settings or edit them',
@@ -17,17 +42,30 @@ module.exports = {
     guildOnly: true,
     displayHelp: true,
     usage: "(setting) (new value)",
-    execute(message, args) {
+    permissions: ['MANAGE_GUILD'],
+    async execute(message, args) {
         const subArgs = args?.trim().split(/ (.+)/);
-        const serverSetting = { ...settings.get(message.guild.id) };
         
         // if the user attempts to change a setting
         if (subArgs?.length >= 2) {
-            
+            const blacklistedKeys = ["serverID", "_id"];
+            let serverSetting = { ...settings.get(message.guild.id) };
+            if (serverSetting[subArgs[0]] !== undefined && !blacklistedKeys.includes(subArgs[0])) {
+                if (typeof serverSetting[subArgs[0]] === "boolean") {
+                    serverSetting[subArgs[0]] = (subArgs[1] == 'true');
+                } else {
+                    serverSetting[subArgs[0]] = subArgs[1];
+                }
+                await settings.set(message.guild.id, serverSetting);
+                return message.channel.send({ content: 'Setting updated successfully. New settings:', embed: buildSettingListEmbed(message)})
+            } else {
+                return message.reply(`That setting does not exist. Please note that settings are **case sensitive**! Use \`${serverSetting.prefix}settings\` for a list of settings.`);
+            }
         }
         
         // if the user wants more info on a specific setting
         else if (subArgs?.length === 1) {
+            const serverSetting = { ...settings.get(message.guild.id) };
             if (settingsInfo[subArgs[0]]) {
                 const settingInfoEmbed = new Discord.MessageEmbed()
                     .setColor('#0099ff')
@@ -42,25 +80,7 @@ module.exports = {
 
         // if the user wants general settings info
         else {
-            const keys = Object.keys(serverSetting);
-
-            const blacklistedKeys = ["serverID", "_id"];
-            if (!serverSetting.verificationEnabled) {
-                blacklistedKeys.push('verificationProgram', 'verifiedRole', 'guestRole', 'autoGuest');
-            }
-
-            let settingsString = "";
-            for (let key in keys) {
-                if (!blacklistedKeys.includes(keys[key])) {
-                    settingsString += `**${keys[key]}**: ${serverSetting[keys[key]]}\n`;
-                }
-            }
-
-            const settingListEmbed = new Discord.MessageEmbed()
-                .setColor('#0099ff')
-                .addFields(
-                    { name: `__${message.guild.name} Settings__`, value: settingsString },
-                )
+            const settingListEmbed = buildSettingListEmbed(message);
             return message.channel.send(settingListEmbed);
         }
     }

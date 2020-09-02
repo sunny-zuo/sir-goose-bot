@@ -26,9 +26,9 @@ const get = (serverID) => {
     return servers.get(serverID) || { ...defaultSettings, serverID: serverID };
 }
 
-const set = (serverID, settings) => {
+const set = async (serverID, settings) => {
     servers.set(serverID, settings);
-    mongo.getDB().collection("settings").replaceOne({ serverID: serverID }, settings, { upsert: true });
+    return mongo.getDB().collection("settings").replaceOne({ serverID: serverID }, settings, { upsert: true });
 }
 
 module.exports = { get, set, loadSettings };
