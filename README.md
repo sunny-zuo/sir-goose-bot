@@ -67,6 +67,20 @@ Managing settings requires the user to have the MANAGE_GUILD or ADMINISTRATOR pe
 > 
 > Example usage: `~prefix !`
 
+### Misc Commands
+
+> **~help**
+> 
+> Get a help message with a list of all of the commands
+
+> **~help (command name)**
+> 
+> Get specific information on a specific command
+
+> **~honk**
+> 
+> HONK
+
 ---
 
 ## Setup
