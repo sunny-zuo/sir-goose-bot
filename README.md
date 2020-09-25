@@ -2,7 +2,7 @@
 
 Sir Goose Bot is a rewritten version of [shivam-sh's goose-bot](https://github.com/shivam-sh/goose-bot), built for improved scalability, usability, privacy and security. Its primary functionality is to integrate with UWaterloo's LDAP in order to verify the identity of new Discord members and assign their respective roles.
 
-This bot is currently ran on the UWaterloo SE 2025 discord server. If you would like to invite this bot to your server, please message Dark#4321 on Discord!
+This bot is currently ran on the UWaterloo SE 2025 and the UWaterloo Tron 2025 discord server. If you would like to invite this bot to your server, please message Dark#4321 on Discord!
 
 ---
 
@@ -10,7 +10,7 @@ This bot is currently ran on the UWaterloo SE 2025 discord server. If you would 
 - Link a Discord account with a UWaterloo identity and verify the connection via email confirmation
 - Assign roles based on the UWaterloo program the user is in
 - Easily configurable settings on a per-server basis via bot commands
-- Automatically verify users who have previously verified with the bot on a different discord server
+- **Automatically verify users who have previously verified with the bot on a different discord server**
 - MongoDB integration for persisting data
 
 ---
