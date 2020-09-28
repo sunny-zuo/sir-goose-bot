@@ -51,7 +51,11 @@ module.exports = {
                         await mongo.getDB().collection("users").updateOne({ uwid: uwid }, { $set: { program: userData.data.department } });
                         existingUser.program = userData.data.department;
                     }
-                    confirm.assignRole(message, existingUser);
+                    confirm.assignRole(message.member, existingUser).then(result => {
+                        message.channel.send(result);
+                    }).catch(error => {
+                        message.channel.send(error);
+                    });
                     return;
                 } else {
                     return message.reply('We\'ve already sent you a verification code! Please check your email');
@@ -73,7 +77,7 @@ module.exports = {
         mongo.getDB().collection("users").replaceOne({ discordID: message.author.id }, user, { upsert: true });
 
         mailAccount.sendMail({
-            from: `"Sir Goose Bot 👻" <${process.env.EMAIL}>`,
+            from: `"Sir Goose Bot" <${process.env.EMAIL}>`,
             to: `${uwid}@uwaterloo.ca`,
             subject: `UW Verification Code [${user.token}]`,
             text: `Token: ${user.token}`,
