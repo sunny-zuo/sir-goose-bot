@@ -81,12 +81,14 @@ module.exports = {
             to: `${uwid}@uwaterloo.ca`,
             subject: `UW Verification Code [${user.token}]`,
             text: `Token: ${user.token}`,
-            html: `<b>HONK</b></br>
-                Hey, your verification code is: <b>${user.token}</b></br>
-                You can verify yourself using this command in the Discord channel:</br>
+            html: `<b>HONK</b><br>
+                Hey, your verification code is: <b>${user.token}</b><br>
+                You can verify yourself using this command in the Discord channel:<br>
                 <code>${guildSettings.prefix}confirm ${user.token}</code>
-                </br></br>
-                Also! If you have time, reply to this email with something random to prevent this account from being flagged as spam.`,
+                <br><br>
+                Also! If you have time, reply to this email with something random to prevent this account from being flagged as spam.
+                <hr>
+                This email was sent because a Discord user attempted to verify with your email. If you did not request this email, please ignore this message.`,
         });
         message.channel.send(
             `${message.author}, I'm sending a token to your UW email!\nGo ahead and type \`${settings.get(message.guild?.id).prefix}confirm TOKEN\` to finish the verification process`
