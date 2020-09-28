@@ -68,11 +68,13 @@ client.on('guildMemberAdd', async (member) => {
         const serverSettings = settings.get(member.guild.id);
         if (serverSettings.verificationEnabled) {
             const user = await mongo.getDB().collection("users").findOne({ discordID: member.id });
-            confirm.assignRole(member, user).then(response => {
-                member.send(`Since you've verified with the bot in the past, you've been automatically verified in ${member.guild.name}. Welcome!`)
-            }).catch(error => {
-                console.log(`Error with auto verification: ${error}`);
-            });
+            if (user) {
+                confirm.assignRole(member, user).then(response => {
+                    member.send(`Since you've verified with the bot in the past, you've been automatically verified in ${member.guild.name}. Welcome!`)
+                }).catch(error => {
+                    console.log(`Error with auto verification: ${error}`);
+                });
+            }
         }
     } catch (err) {
         console.log(`Error with auto verification: ${err}`)
