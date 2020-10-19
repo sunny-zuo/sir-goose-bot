@@ -1,0 +1,764 @@
+[
+    {
+        "class": "CS 137",
+        "name": "Assignment 0",
+        "type": "📌 Assignment",
+        "time": 1600041600000
+    },
+    {
+        "class": "MATH 117",
+        "name": "Assignment 1 Sapling",
+        "type": "📌 Assignment",
+        "time": 1600221540000
+    },
+    {
+        "class": "MATH 117",
+        "name": "Assignment 1 Crowdmark",
+        "type": "📌 Assignment",
+        "time": 1600221540000
+    },
+    {
+        "class": "SE 101",
+        "name": "Class Rep Due",
+        "type": "📌 Assignment",
+        "time": 1600214400000
+    },
+    {
+        "class": "MATH 135",
+        "name": "Mobius Assignment 01",
+        "type": "📌 Assignment",
+        "time": 1600307700000
+    },
+    {
+        "class": "CS 137",
+        "name": "Quiz 1",
+        "type": "📝 Quiz",
+        "time": 1600300800000
+    },
+    {
+        "class": "MATH 115",
+        "name": "Assignment 1 Mobius",
+        "type": "📌 Assignment",
+        "time": 1600425000000
+    },
+    {
+        "class": "MATH 115",
+        "name": "Assignment 1 Written",
+        "type": "📌 Assignment",
+        "time": 1600425000000
+    },
+    {
+        "class": "MATH 135",
+        "name": "Written Assignment 01",
+        "type": "📌 Assignment",
+        "time": 1600480500000
+    },
+    {
+        "class": "ECE 105",
+        "name": "Assignment 1",
+        "type": "📌 Assignment",
+        "time": 1600652940000
+    },
+    {
+        "class": "SE 101",
+        "name": "Spaceship Activity Reflection",
+        "type": "📌 Assignment",
+        "time": 1600653300000
+    },
+    {
+        "class": "CS 137",
+        "name": "Assignment 1",
+        "type": "📌 Assignment",
+        "time": 1600646400000
+    },
+    {
+        "class": "ECE 105",
+        "name": "Quiz 1",
+        "type": "📝 Quiz",
+        "time": 1600732800000
+    },
+    {
+        "class": "MATH 117",
+        "name": "Assignment 2 Sapling",
+        "type": "📌 Assignment",
+        "time": 1600826340000
+    },
+    {
+        "class": "MATH 117",
+        "name": "Assignment 2 Crowdmark",
+        "type": "📌 Assignment",
+        "time": 1600826340000
+    },
+    {
+        "class": "MATH 135",
+        "name": "Mobius Assignment 02",
+        "type": "📌 Assignment",
+        "time": 1600912500000
+    },
+    {
+        "class": "CS 137",
+        "name": "Quiz 2",
+        "type": "📝 Quiz",
+        "time": 1600905600000
+    },
+    {
+        "class": "MATH 115",
+        "name": "Assignment 2 Mobius",
+        "type": "📌 Assignment",
+        "time": 1601029800000
+    },
+    {
+        "class": "MATH 115",
+        "name": "Assignment 2 Written",
+        "type": "📌 Assignment",
+        "time": 1601029800000
+    },
+    {
+        "class": "MATH 135",
+        "name": "Written Assignment 02",
+        "type": "📌 Assignment",
+        "time": 1601085300000
+    },
+    {
+        "class": "SE 101",
+        "name": "Project Introduction",
+        "type": "📌 Assignment",
+        "time": 1601164800000
+    },
+    {
+        "class": "CS 137",
+        "name": "Assignment 2",
+        "type": "📌 Assignment",
+        "time": 1601251200000
+    },
+    {
+        "class": "ECE 105",
+        "name": "Assignment 2",
+        "type": "📌 Assignment",
+        "time": 1601258400000
+    },
+    {
+        "class": "ECE 105",
+        "name": "Quiz 2",
+        "type": "📝 Quiz",
+        "time": 1601251200000
+    },
+    {
+        "class": "ECE 105",
+        "name": "Assignment 3",
+        "type": "📌 Assignment",
+        "time": 1601863200000
+    },
+    {
+        "class": "MATH 117",
+        "name": "Assignment 3 Sapling",
+        "type": "📌 Assignment",
+        "time": 1601431140000
+    },
+    {
+        "class": "MATH 117",
+        "name": "Assignment 3 Crowdmark",
+        "type": "📌 Assignment",
+        "time": 1601431140000
+    },
+    {
+        "class": "MATH 135",
+        "name": "Mobius Assignment 03",
+        "type": "📌 Assignment",
+        "time": 1601517300000
+    },
+    {
+        "class": "CS 137",
+        "name": "Quiz 3",
+        "type": "📝 Quiz",
+        "time": 1601510400000
+    },
+    {
+        "class": "MATH 115",
+        "name": "Assignment 3 Mobius",
+        "type": "📌 Assignment",
+        "time": 1601634600000
+    },
+    {
+        "class": "MATH 115",
+        "name": "Assignment 3 Written",
+        "type": "📌 Assignment",
+        "time": 1601634600000
+    },
+    {
+        "class": "MATH 135",
+        "name": "Written Assignment 03",
+        "type": "📌 Assignment",
+        "time": 1601690100000
+    },
+    {
+        "class": "SE 101",
+        "name": "A New Beginning",
+        "type": "📌 Assignment",
+        "time": 1601862900000
+    },
+    {
+        "class": "SE 101",
+        "name": "Project Final Proposal",
+        "type": "📌 Assignment",
+        "time": 1601862900000
+    },
+    {
+        "class": "ECE 105",
+        "name": "Quiz 3",
+        "type": "📝 Quiz",
+        "time": 1601856000000
+    },
+    {
+        "class": "CS 137",
+        "name": "Assignment 3",
+        "type": "📌 Assignment",
+        "time": 1601856000000
+    },
+    {
+        "class": "MATH 117",
+        "name": "Assignment 4 Sapling",
+        "type": "📌 Assignment",
+        "time": 1602035940000
+    },
+    {
+        "class": "MATH 117",
+        "name": "Assignment 4 Crowdmark",
+        "type": "📌 Assignment",
+        "time": 1602035940000
+    },
+    {
+        "class": "ECE 105",
+        "name": "Test 1 (due Oct 8 2 PM)",
+        "type": "💡 Test",
+        "time": 1602028800000
+    },
+    {
+        "class": "MATH 135",
+        "name": "Mobius Assignment 04",
+        "type": "📌 Assignment",
+        "time": 1602122100000
+    },
+    {
+        "class": "CS 137",
+        "name": "Quiz 4",
+        "type": "📝 Quiz",
+        "time": 1602115200000
+    },
+    {
+        "class": "MATH 115",
+        "name": "Term Test 1 (available 7th)",
+        "type": "💡 Test",
+        "time": 1602239400000
+    },
+    {
+        "class": "CS 137",
+        "name": "Assignment 4",
+        "type": "📌 Assignment",
+        "time": 1602201600000
+    },
+    {
+        "class": "MATH 135",
+        "name": "Written Assignment 04",
+        "type": "📌 Assignment",
+        "time": 1602294900000
+    },
+    {
+        "class": "SE 101",
+        "name": "Get to Know Each Other",
+        "type": "📌 Assignment",
+        "time": 1602374400000
+    },
+    {
+        "class": "ECE 105",
+        "name": "Assignment 4",
+        "type": "📌 Assignment",
+        "time": 1603072800000
+    },
+    {
+        "class": "ECE 105",
+        "name": "Quiz 4",
+        "type": "📝 Quiz",
+        "time": 1603137600000
+    },
+    {
+        "class": "MATH 117",
+        "name": "Midterm",
+        "type": "📌 Assignment",
+        "time": 1603152000000
+    },
+    {
+        "class": "MATH 135",
+        "name": "Midterm",
+        "type": "💡 Test",
+        "time": 1603324800000
+    },
+    {
+        "class": "CS 137",
+        "name": "Quiz 5",
+        "type": "📝 Quiz",
+        "time": 1603411200000
+    },
+    {
+        "class": "MATH 115",
+        "name": "Assignment 4 Mobius",
+        "type": "📌 Assignment",
+        "time": 1603449000000
+    },
+    {
+        "class": "MATH 115",
+        "name": "Assignment 4 Written",
+        "type": "📌 Assignment",
+        "time": 1603449000000
+    },
+    {
+        "class": "SE 101",
+        "name": "Professional Characteristics",
+        "type": "📌 Assignment",
+        "time": 1603677300000
+    },
+    {
+        "class": "ECE 105",
+        "name": "Assignment 5",
+        "type": "📌 Assignment",
+        "time": 1603677600000
+    },
+    {
+        "class": "ECE 105",
+        "name": "Quiz 5",
+        "type": "📝 Quiz",
+        "time": 1603742400000
+    },
+    {
+        "class": "CS 137",
+        "name": "Assignment 5",
+        "type": "📌 Assignment",
+        "time": 1603756800000
+    },
+    {
+        "class": "MATH 117",
+        "name": "Assignment 5 Sapling",
+        "type": "📌 Assignment",
+        "time": 1603850340000
+    },
+    {
+        "class": "MATH 117",
+        "name": "Assignment 5 Crowdmark",
+        "type": "📌 Assignment",
+        "time": 1603850340000
+    },
+    {
+        "class": "MATH 135",
+        "name": "Mobius Assignment 05",
+        "type": "📌 Assignment",
+        "time": 1603936500000
+    },
+    {
+        "class": "CS 137",
+        "name": "Quiz 6",
+        "type": "📝 Quiz",
+        "time": 1604016000000
+    },
+    {
+        "class": "MATH 115",
+        "name": "Assignment 5 Mobius",
+        "type": "📌 Assignment",
+        "time": 1604053800000
+    },
+    {
+        "class": "MATH 115",
+        "name": "Assignment 5 Written",
+        "type": "📌 Assignment",
+        "time": 1604053800000
+    },
+    {
+        "class": "MATH 135",
+        "name": "Written Assignment 05",
+        "type": "📌 Assignment",
+        "time": 1604109300000
+    },
+    {
+        "class": "SE 101",
+        "name": "Code of Ethics",
+        "type": "📌 Assignment",
+        "time": 1604282100000
+    },
+    {
+        "class": "ECE 105",
+        "name": "Assignment 6",
+        "type": "📌 Assignment",
+        "time": 1604282400000
+    },
+    {
+        "class": "ECE 105",
+        "name": "Quiz 6",
+        "type": "📝 Quiz",
+        "time": 1604347200000
+    },
+    {
+        "class": "CS 137",
+        "name": "Assignment 6",
+        "type": "📌 Assignment",
+        "time": 1604361600000
+    },
+    {
+        "class": "MATH 117",
+        "name": "Assignment 6 Sapling",
+        "type": "📌 Assignment",
+        "time": 1604455140000
+    },
+    {
+        "class": "MATH 117",
+        "name": "Assignment 6 Crowdmark",
+        "type": "📌 Assignment",
+        "time": 1604455140000
+    },
+    {
+        "class": "ECE 105",
+        "name": "Test 2",
+        "type": "💡 Test",
+        "time": 1604448000000
+    },
+    {
+        "class": "MATH 135",
+        "name": "Mobius Assignment 06",
+        "type": "📌 Assignment",
+        "time": 1604541300000
+    },
+    {
+        "class": "CS 137",
+        "name": "Quiz 7",
+        "type": "📝 Quiz",
+        "time": 1604620800000
+    },
+    {
+        "class": "MATH 115",
+        "name": "Assignment 3 Mobius",
+        "type": "📌 Assignment",
+        "time": 1604658600000
+    },
+    {
+        "class": "MATH 115",
+        "name": "Assignment 6 Written",
+        "type": "📌 Assignment",
+        "time": 1604658600000
+    },
+    {
+        "class": "MATH 135",
+        "name": "Written Assignment 06",
+        "type": "📌 Assignment",
+        "time": 1604714100000
+    },
+    {
+        "class": "SE 101",
+        "name": "Prototype",
+        "type": "📌 Assignment",
+        "time": 1604886900000
+    },
+    {
+        "class": "ECE 105",
+        "name": "Assignment 7",
+        "type": "📌 Assignment",
+        "time": 1604887200000
+    },
+    {
+        "class": "ECE 105",
+        "name": "Quiz 7",
+        "type": "📝 Quiz",
+        "time": 1604952000000
+    },
+    {
+        "class": "CS 137",
+        "name": "Assignment 7",
+        "type": "📌 Assignment",
+        "time": 1604966400000
+    },
+    {
+        "class": "MATH 117",
+        "name": "Assignment 7 Sapling",
+        "type": "📌 Assignment",
+        "time": 1605059940000
+    },
+    {
+        "class": "MATH 117",
+        "name": "Assignment 7 Crowdmark",
+        "type": "📌 Assignment",
+        "time": 1605059940000
+    },
+    {
+        "class": "MATH 135",
+        "name": "Mobius Assignment 07",
+        "type": "📌 Assignment",
+        "time": 1605146100000
+    },
+    {
+        "class": "CS 137",
+        "name": "Quiz 8",
+        "type": "📝 Quiz",
+        "time": 1605225600000
+    },
+    {
+        "class": "MATH 115",
+        "name": "Test 2",
+        "type": "💡 Test",
+        "time": 1605225600000
+    },
+    {
+        "class": "MATH 135",
+        "name": "Written Assignment 07",
+        "type": "📌 Assignment",
+        "time": 1605318900000
+    },
+    {
+        "class": "ECE 105",
+        "name": "Assignment 8",
+        "type": "📌 Assignment",
+        "time": 1605492000000
+    },
+    {
+        "class": "ECE 105",
+        "name": "Quiz 8",
+        "type": "📝 Quiz",
+        "time": 1605556800000
+    },
+    {
+        "class": "CS 137",
+        "name": "Assignment 8",
+        "type": "📌 Assignment",
+        "time": 1605571200000
+    },
+    {
+        "class": "MATH 117",
+        "name": "Assignment 8 Sapling",
+        "type": "📌 Assignment",
+        "time": 1605664740000
+    },
+    {
+        "class": "MATH 117",
+        "name": "Assignment 8 Crowdmark",
+        "type": "📌 Assignment",
+        "time": 1605664740000
+    },
+    {
+        "class": "MATH 135",
+        "name": "Mobius Assignment 08",
+        "type": "📌 Assignment",
+        "time": 1605750900000
+    },
+    {
+        "class": "CS 137",
+        "name": "Quiz 9",
+        "type": "📝 Quiz",
+        "time": 1605830400000
+    },
+    {
+        "class": "MATH 115",
+        "name": "Assignment 7 Mobius",
+        "type": "📌 Assignment",
+        "time": 1605868200000
+    },
+    {
+        "class": "MATH 115",
+        "name": "Assignment 7 Written",
+        "type": "📌 Assignment",
+        "time": 1605868200000
+    },
+    {
+        "class": "MATH 135",
+        "name": "Written Assignment 08",
+        "type": "📌 Assignment",
+        "time": 1605923700000
+    },
+    {
+        "class": "ECE 105",
+        "name": "Assignment 9",
+        "type": "📌 Assignment",
+        "time": 1606096800000
+    },
+    {
+        "class": "ECE 105",
+        "name": "Quiz 9",
+        "type": "📝 Quiz",
+        "time": 1606161600000
+    },
+    {
+        "class": "CS 137",
+        "name": "Assignment 9",
+        "type": "📌 Assignment",
+        "time": 1606176000000
+    },
+    {
+        "class": "MATH 117",
+        "name": "Assignment 9 Sapling",
+        "type": "📌 Assignment",
+        "time": 1606269540000
+    },
+    {
+        "class": "MATH 117",
+        "name": "Assignment 9 Crowdmark",
+        "type": "📌 Assignment",
+        "time": 1606269540000
+    },
+    {
+        "class": "MATH 135",
+        "name": "Mobius Assignment 09",
+        "type": "📌 Assignment",
+        "time": 1606355700000
+    },
+    {
+        "class": "CS 137",
+        "name": "Quiz 10",
+        "type": "📝 Quiz",
+        "time": 1606435200000
+    },
+    {
+        "class": "MATH 115",
+        "name": "Assignment 8 Mobius",
+        "type": "📌 Assignment",
+        "time": 1606473000000
+    },
+    {
+        "class": "MATH 115",
+        "name": "Assignment 8 Written",
+        "type": "📌 Assignment",
+        "time": 1606473000000
+    },
+    {
+        "class": "MATH 135",
+        "name": "Written Assignment 09",
+        "type": "📌 Assignment",
+        "time": 1606528500000
+    },
+    {
+        "class": "ECE 105",
+        "name": "Assignment 10",
+        "type": "📌 Assignment",
+        "time": 1606701600000
+    },
+    {
+        "class": "ECE 105",
+        "name": "Quiz 10",
+        "type": "📝 Quiz",
+        "time": 1606766400000
+    },
+    {
+        "class": "CS 137",
+        "name": "Assignment 10",
+        "type": "📌 Assignment",
+        "time": 1606780800000
+    },
+    {
+        "class": "SE 101",
+        "name": "Final Demo",
+        "type": "📌 Assignment",
+        "time": 1606787700000
+    },
+    {
+        "class": "MATH 117",
+        "name": "Assignment 10 Sapling",
+        "type": "📌 Assignment",
+        "time": 1606874340000
+    },
+    {
+        "class": "MATH 117",
+        "name": "Assignment 10 Crowdmark",
+        "type": "📌 Assignment",
+        "time": 1606874340000
+    },
+    {
+        "class": "CS 137",
+        "name": "Quiz 11",
+        "type": "📝 Quiz",
+        "time": 1607040000000
+    },
+    {
+        "class": "MATH 115",
+        "name": "Assignment 9 Mobius",
+        "type": "📌 Assignment",
+        "time": 1607077800000
+    },
+    {
+        "class": "MATH 115",
+        "name": "Assignment 9 Written",
+        "type": "📌 Assignment",
+        "time": 1607077800000
+    },
+    {
+        "class": "MATH 135",
+        "name": "Written Assignment 10",
+        "type": "📌 Assignment",
+        "time": 1607133300000
+    },
+    {
+        "class": "CS 137",
+        "name": "Assignment 11",
+        "type": "📌 Assignment",
+        "time": 1607385600000
+    },
+    {
+        "class": "MATH 135",
+        "name": "Mobius Assignment 10",
+        "type": "📌 Assignment",
+        "time": 1607392500000
+    },
+    {
+        "class": "MATH 135",
+        "name": "Bonus Quiz 3",
+        "type": "📌 Assignment",
+        "time": 1607392500000
+    },
+    {
+        "class": "MATH 135",
+        "name": "Bonus Quiz 4",
+        "type": "📌 Assignment",
+        "time": 1607392500000
+    },
+    {
+        "class": "MATH 135",
+        "name": "Bonus Quiz 2",
+        "type": "📌 Assignment",
+        "time": 1607392500000
+    },
+    {
+        "class": "MATH 135",
+        "name": "Bonus Quiz 1",
+        "type": "📌 Assignment",
+        "time": 1607392500000
+    },
+    {
+        "class": "ECE 105",
+        "name": "Test 3",
+        "type": "💡 Test",
+        "time": 1607472000000
+    },
+    {
+        "class": "MATH 117",
+        "name": "Final Assessment",
+        "type": "📌 Assignment",
+        "time": 1607990400000
+    },
+    {
+        "class": "MATH 135",
+        "name": "Final Assessment",
+        "type": "📌 Assignment",
+        "time": 1608774900000
+    },
+    {
+        "class": "CS 137",
+        "name": "Final Assignment",
+        "type": "📌 Assignment",
+        "time": 1608213600000
+    },
+    {
+        "class": "MATH 115",
+        "name": "Assignment 0",
+        "type": "📌 Assignment",
+        "time": 1599782400000
+    },
+    {
+        "class": "MATH 135",
+        "name": "Submission Practice",
+        "type": "📌 Assignment",
+        "time": 1599782400000
+    }
+]
