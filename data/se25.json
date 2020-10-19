@@ -75,7 +75,7 @@
         "class": "ECE 105",
         "name": "Quiz 1",
         "type": "📝 Quiz",
-        "time": 1600732800000
+        "time": 1600725600000
     },
     {
         "class": "MATH 117",
@@ -141,7 +141,7 @@
         "class": "ECE 105",
         "name": "Quiz 2",
         "type": "📝 Quiz",
-        "time": 1601251200000
+        "time": 1601244000000
     },
     {
         "class": "ECE 105",
@@ -207,7 +207,7 @@
         "class": "ECE 105",
         "name": "Quiz 3",
         "type": "📝 Quiz",
-        "time": 1601856000000
+        "time": 1601848800000
     },
     {
         "class": "CS 137",
@@ -279,7 +279,7 @@
         "class": "ECE 105",
         "name": "Quiz 4",
         "type": "📝 Quiz",
-        "time": 1603144800000
+        "time": 1603137600000
     },
     {
         "class": "MATH 117",
@@ -327,7 +327,7 @@
         "class": "ECE 105",
         "name": "Quiz 5",
         "type": "📝 Quiz",
-        "time": 1603749600000
+        "time": 1603742400000
     },
     {
         "class": "CS 137",
@@ -393,7 +393,7 @@
         "class": "ECE 105",
         "name": "Quiz 6",
         "type": "📝 Quiz",
-        "time": 1604354400000
+        "time": 1604347200000
     },
     {
         "class": "CS 137",
@@ -465,7 +465,7 @@
         "class": "ECE 105",
         "name": "Quiz 7",
         "type": "📝 Quiz",
-        "time": 1604959200000
+        "time": 1604952000000
     },
     {
         "class": "CS 137",
@@ -519,7 +519,7 @@
         "class": "ECE 105",
         "name": "Quiz 8",
         "type": "📝 Quiz",
-        "time": 1605564000000
+        "time": 1605556800000
     },
     {
         "class": "CS 137",
@@ -579,7 +579,7 @@
         "class": "ECE 105",
         "name": "Quiz 9",
         "type": "📝 Quiz",
-        "time": 1606168800000
+        "time": 1606161600000
     },
     {
         "class": "CS 137",
@@ -639,7 +639,7 @@
         "class": "ECE 105",
         "name": "Quiz 10",
         "type": "📝 Quiz",
-        "time": 1606773600000
+        "time": 1606766400000
     },
     {
         "class": "CS 137",
@@ -760,9 +760,5 @@
         "name": "Submission Practice",
         "type": "📌 Assignment",
         "time": 1599782400000
-    },
-    {
-        "class": "",
-        "time": null
     }
 ]
