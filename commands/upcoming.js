@@ -33,7 +33,8 @@ module.exports = {
 
         const outputEmbed = new Discord.MessageEmbed()
             .setColor('#0099ff')
-            .setTitle('Upcoming Dates for SE 25');
+            .setTitle('Upcoming Dates for SE 25')
+            .setDescription('These are all upcoming quizzes, due dates, and other important dates for the upcoming week. Please contact Sunny (Dark#4321) if there are any issues');
 
         const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
         for (currentEvent of events) {
