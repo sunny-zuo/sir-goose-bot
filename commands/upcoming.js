@@ -41,7 +41,7 @@ module.exports = {
             const dt = DateTime.fromMillis(currentEvent.time, { zone: 'America/Toronto' });
             // if there is no specific time, trim it
             let dateFormat;
-            if (currentEvent.time % (1000 * 60 * 60 * 24) == 0) {
+            if ((currentEvent.time - 1000 * 60 * 60 * 6) % (1000 * 60 * 60 * 24) == 0) {
                 dateFormat = dt.toLocaleString({ month: 'long', day: 'numeric', weekday: 'long' });
             } else {
                 dateFormat = dt.toLocaleString({ month: 'long', day: 'numeric', hour: 'numeric', minute: '2-digit', timeZoneName: 'short', weekday: 'long' });

@@ -3,7 +3,7 @@
         "class": "CS 137",
         "name": "Assignment 0",
         "type": "📌 Assignment",
-        "time": 1600041600000
+        "time": 1600063200000
     },
     {
         "class": "MATH 117",
@@ -21,7 +21,7 @@
         "class": "SE 101",
         "name": "Class Rep Due",
         "type": "📌 Assignment",
-        "time": 1600214400000
+        "time": 1600236000000
     },
     {
         "class": "MATH 135",
@@ -33,7 +33,7 @@
         "class": "CS 137",
         "name": "Quiz 1",
         "type": "📝 Quiz",
-        "time": 1600300800000
+        "time": 1600322400000
     },
     {
         "class": "MATH 115",
@@ -69,13 +69,13 @@
         "class": "CS 137",
         "name": "Assignment 1",
         "type": "📌 Assignment",
-        "time": 1600646400000
+        "time": 1600668000000
     },
     {
         "class": "ECE 105",
         "name": "Quiz 1",
         "type": "📝 Quiz",
-        "time": 1600725600000
+        "time": 1600747200000
     },
     {
         "class": "MATH 117",
@@ -99,7 +99,7 @@
         "class": "CS 137",
         "name": "Quiz 2",
         "type": "📝 Quiz",
-        "time": 1600905600000
+        "time": 1600927200000
     },
     {
         "class": "MATH 115",
@@ -123,13 +123,13 @@
         "class": "SE 101",
         "name": "Project Introduction",
         "type": "📌 Assignment",
-        "time": 1601164800000
+        "time": 1601186400000
     },
     {
         "class": "CS 137",
         "name": "Assignment 2",
         "type": "📌 Assignment",
-        "time": 1601251200000
+        "time": 1601272800000
     },
     {
         "class": "ECE 105",
@@ -141,7 +141,7 @@
         "class": "ECE 105",
         "name": "Quiz 2",
         "type": "📝 Quiz",
-        "time": 1601244000000
+        "time": 1601265600000
     },
     {
         "class": "ECE 105",
@@ -171,7 +171,7 @@
         "class": "CS 137",
         "name": "Quiz 3",
         "type": "📝 Quiz",
-        "time": 1601510400000
+        "time": 1601532000000
     },
     {
         "class": "MATH 115",
@@ -207,13 +207,13 @@
         "class": "ECE 105",
         "name": "Quiz 3",
         "type": "📝 Quiz",
-        "time": 1601848800000
+        "time": 1601870400000
     },
     {
         "class": "CS 137",
         "name": "Assignment 3",
         "type": "📌 Assignment",
-        "time": 1601856000000
+        "time": 1601877600000
     },
     {
         "class": "MATH 117",
@@ -231,7 +231,7 @@
         "class": "ECE 105",
         "name": "Test 1 (due Oct 8 2 PM)",
         "type": "💡 Test",
-        "time": 1602028800000
+        "time": 1602050400000
     },
     {
         "class": "MATH 135",
@@ -243,7 +243,7 @@
         "class": "CS 137",
         "name": "Quiz 4",
         "type": "📝 Quiz",
-        "time": 1602115200000
+        "time": 1602136800000
     },
     {
         "class": "MATH 115",
@@ -255,7 +255,7 @@
         "class": "CS 137",
         "name": "Assignment 4",
         "type": "📌 Assignment",
-        "time": 1602201600000
+        "time": 1602223200000
     },
     {
         "class": "MATH 135",
@@ -267,7 +267,7 @@
         "class": "SE 101",
         "name": "Get to Know Each Other",
         "type": "📌 Assignment",
-        "time": 1602374400000
+        "time": 1602396000000
     },
     {
         "class": "ECE 105",
@@ -285,13 +285,13 @@
         "class": "MATH 117",
         "name": "Midterm",
         "type": "📌 Assignment",
-        "time": 1603152000000
+        "time": 1603173600000
     },
     {
         "class": "MATH 135",
         "name": "Midterm",
         "type": "💡 Test",
-        "time": 1603324800000
+        "time": 1603346400000
     },
     {
         "class": "CS 137",
@@ -417,7 +417,7 @@
         "class": "ECE 105",
         "name": "Test 2",
         "type": "💡 Test",
-        "time": 1604448000000
+        "time": 1604469600000
     },
     {
         "class": "MATH 135",
@@ -501,7 +501,7 @@
         "class": "MATH 115",
         "name": "Test 2",
         "type": "💡 Test",
-        "time": 1605225600000
+        "time": 1605247200000
     },
     {
         "class": "MATH 135",
@@ -729,13 +729,13 @@
         "class": "ECE 105",
         "name": "Test 3",
         "type": "💡 Test",
-        "time": 1607472000000
+        "time": 1607493600000
     },
     {
         "class": "MATH 117",
         "name": "Final Assessment",
         "type": "📌 Assignment",
-        "time": 1607990400000
+        "time": 1608012000000
     },
     {
         "class": "MATH 135",
@@ -753,12 +753,12 @@
         "class": "MATH 115",
         "name": "Assignment 0",
         "type": "📌 Assignment",
-        "time": 1599782400000
+        "time": 1599804000000
     },
     {
         "class": "MATH 135",
         "name": "Submission Practice",
         "type": "📌 Assignment",
-        "time": 1599782400000
+        "time": 1599804000000
     }
 ]
