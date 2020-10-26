@@ -35,8 +35,7 @@ module.exports = {
         const request = await fetch(`https://api.uwaterloo.ca/v2/directory/${requestID}.json?key=${process.env.UW_API_KEY}`);
         const userData = await request.json();
 
-        console.log(userData?.data?.department);
-        if (userData.meta.status === 204 || !userData?.data?.department || !userData?.data?.uwid) {
+        if (userData.meta.status === 204 || !userData?.data?.department || !userData?.data?.user_id) {
             return message.reply('There\'s no Waterloo account associated with that user ID! Please double check the user ID and try again');
         };
 
