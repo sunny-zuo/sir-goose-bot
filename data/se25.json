@@ -513,7 +513,7 @@
         "class": "ECE 105",
         "name": "Assignment 8",
         "type": "📌 Assignment",
-        "time": 1605502800000
+        "time": 1605502740000
     },
     {
         "class": "ECE 105",
@@ -573,7 +573,7 @@
         "class": "ECE 105",
         "name": "Assignment 9",
         "type": "📌 Assignment",
-        "time": 1606107600000
+        "time": 1606107540000
     },
     {
         "class": "ECE 105",
@@ -633,13 +633,7 @@
         "class": "ECE 105",
         "name": "Assignment 10",
         "type": "📌 Assignment",
-        "time": 1606712400000
-    },
-    {
-        "class": "CAROL",
-        "name": "BIRTHDAY #19",
-        "type": "🎂🎂 OwO!?! 🎂🎂",
-        "time": 1606712400000
+        "time": 1606712340000
     },
     {
         "class": "ECE 105",
@@ -772,5 +766,11 @@
         "name": "Midterm Reflection",
         "type": "📌 Assignment",
         "time": 1605502500000
+    },
+    {
+        "class": "SE 101",
+        "name": "GoSudoku",
+        "type": "📌 Assignment",
+        "time": 1606107540000
     }
 ]
