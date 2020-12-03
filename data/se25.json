@@ -703,13 +703,7 @@
     },
     {
         "class": "MATH 135",
-        "name": "Bonus Quiz 3",
-        "type": "📌 Assignment",
-        "time": 1607403300000
-    },
-    {
-        "class": "MATH 135",
-        "name": "Bonus Quiz 4",
+        "name": "Bonus Quiz 1",
         "type": "📌 Assignment",
         "time": 1607403300000
     },
@@ -721,7 +715,13 @@
     },
     {
         "class": "MATH 135",
-        "name": "Bonus Quiz 1",
+        "name": "Bonus Quiz 3",
+        "type": "📌 Assignment",
+        "time": 1607403300000
+    },
+    {
+        "class": "MATH 135",
+        "name": "Bonus Quiz 4",
         "type": "📌 Assignment",
         "time": 1607403300000
     },
@@ -732,22 +732,28 @@
         "time": 1607493600000
     },
     {
+        "class": "MATH 115",
+        "name": "Term Test 3",
+        "type": "💡 Test",
+        "time": 1608271200000
+    },
+    {
         "class": "MATH 117",
         "name": "Final Assessment",
-        "type": "📌 Assignment",
-        "time": 1608012000000
+        "type": "💡 Test",
+        "time": 1608098400000
     },
     {
         "class": "MATH 135",
         "name": "Final Assessment",
-        "type": "📌 Assignment",
-        "time": 1608785700000
+        "type": "💡 Test",
+        "time": 1607925600000
     },
     {
         "class": "CS 137",
         "name": "Final Assignment",
         "type": "📌 Assignment",
-        "time": 1608224400000
+        "time": 1608530400000
     },
     {
         "class": "MATH 115",
@@ -778,5 +784,11 @@
         "name": "Hallway Hello",
         "type": "📌 Assignment",
         "time": 1606712340000
+    },
+    {
+        "class": "SE 101",
+        "name": "Introduction to WatPD-Engineering",
+        "type": "📝 Quiz",
+        "time": 1607389200000
     }
 ]
