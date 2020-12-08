@@ -703,27 +703,9 @@
     },
     {
         "class": "MATH 135",
-        "name": "Bonus Quiz 1",
-        "type": "📌 Assignment",
-        "time": 1607403300000
-    },
-    {
-        "class": "MATH 135",
-        "name": "Bonus Quiz 2",
-        "type": "📌 Assignment",
-        "time": 1607403300000
-    },
-    {
-        "class": "MATH 135",
-        "name": "Bonus Quiz 3",
-        "type": "📌 Assignment",
-        "time": 1607403300000
-    },
-    {
-        "class": "MATH 135",
-        "name": "Bonus Quiz 4",
-        "type": "📌 Assignment",
-        "time": 1607403300000
+        "name": "Bonus Quizzes (1-4)",
+        "type": "📝 Quiz",
+        "time": 1607950800000
     },
     {
         "class": "ECE 105",
