@@ -5,13 +5,15 @@ const mongo = require('../mongo.js');
 
 module.exports = {
     name: 'upcoming',
-    description: 'List deadlines and events within the next week. Currently only supports SE 25.',
+    description: 'List deadlines and events within the next week.',
+    usage: '[days = 7]',
     args: false,
     guildOnly: false,
     displayHelp: true,
     async execute(message, args) {
         if (args && isNaN(parseFloat(args))) {
             message.channel.send(new Discord.MessageEmbed().setColor('#FF0000').setTitle('Error').setDescription('You did not provide a valid number of days to display.').setFooter('https://github.com/sunny-zuo/sir-goose-bot'));
+            return;
         }
         const fromDate = Date.now();
         const toDate = fromDate + 1000 * 60 * 60 * 24 * ((args) ? parseFloat(args) : 7) // ms => s => hr = > day => week
