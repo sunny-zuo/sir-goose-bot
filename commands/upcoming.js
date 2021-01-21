@@ -28,16 +28,26 @@ module.exports = {
 
 
         for (currentEvent of events) {
-            const dt = DateTime.fromJSDate(currentEvent.endTime, { zone: 'America/Toronto' });
+            const startDt = DateTime.fromJSDate(currentEvent.startTime, { zone: 'America/Toronto' });
+            const endDt = DateTime.fromJSDate(currentEvent.endTime, { zone: 'America/Toronto' });
 
-            let dateFormat;
+            let startDateFormat;
+            let endDateFormat;
+
             if (currentEvent.ignoreTime) {
-                dateFormat = `${dt.toLocaleString({ month: 'long', day: 'numeric', weekday: 'long' })} (${dt.toRelative()})`;
+                startDateFormat = `${startDt.toLocaleString({ month: 'long', day: 'numeric', weekday: 'long' })} (${startDt.toRelative()})`;
+                endDateFormat = `${endDt.toLocaleString({ month: 'long', day: 'numeric', weekday: 'long' })} (${endDt.toRelative()})`;
             } else {
-                dateFormat = `${dt.toLocaleString({ month: 'long', day: 'numeric', hour: 'numeric', minute: '2-digit', timeZoneName: 'short', weekday: 'long' })} (${dt.toRelative()})`;
+                startDateFormat = `${startDt.toLocaleString({ month: 'long', day: 'numeric', hour: 'numeric', minute: '2-digit', timeZoneName: 'short', weekday: 'long' })} (${startDt.toRelative()})`;
+                endDateFormat = `${endDt.toLocaleString({ month: 'long', day: 'numeric', hour: 'numeric', minute: '2-digit', timeZoneName: 'short', weekday: 'long' })} (${endDt.toRelative()})`;
             }
 
-            outputEmbed.addField(`${currentEvent.type}: ${currentEvent.name} for ${currentEvent.class}`, dateFormat)
+            if (startDt.equals(endDt)) {
+                outputEmbed.addField(`${currentEvent.type}: ${currentEvent.name} for ${currentEvent.class} (#${currentEvent.seqId})`, endDateFormat)
+            } else {
+                outputEmbed.addField(`${currentEvent.type}: ${currentEvent.name} for ${currentEvent.class} (#${currentEvent.seqId})`, `Starts ${startDateFormat}\nDue ${endDateFormat}`) 
+            }
+            
         }
 
         message.channel.send(outputEmbed);
