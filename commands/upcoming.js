@@ -11,18 +11,36 @@ module.exports = {
     guildOnly: false,
     displayHelp: true,
     async execute(message, args) {
-        if (args && isNaN(parseFloat(args))) {
+        const argArray = (args) ? args.split(' ') : [];
+        const daysToView = (argArray[0]) ? argArray[0] : 7;
+        const viewType = (argArray[1]) ? argArray[1].toLowerCase() : "incomplete"
+
+        if (daysToView && isNaN(parseFloat(daysToView))) {
             message.channel.send(new Discord.MessageEmbed().setColor('#FF0000').setTitle('Error').setDescription('You did not provide a valid number of days to display.').setFooter('https://github.com/sunny-zuo/sir-goose-bot'));
             return;
         }
         const fromDate = Date.now();
-        const toDate = fromDate + 1000 * 60 * 60 * 24 * ((args) ? parseFloat(args) : 7) // ms => s => hr = > day => week
+        const toDate = fromDate + 1000 * 60 * 60 * 24 * daysToView // ms => s => hr = > day => week
         
-        const events = await mongo.getDB().collection("tasks").find({ endTime: { $gte: new Date(fromDate), $lte: new Date(toDate) }}).sort({ endTime: 1 }).toArray();
+        let events;
+        let viewDescr;
+        if (viewType === "all") {
+            events = await mongo.getDB().collection("tasks").find({ endTime: { $gte: new Date(fromDate), $lte: new Date(toDate) } }).sort({ endTime: 1 }).toArray();
+            viewDescr = "All Tasks"
+        } else if (viewType === "incomplete") {
+            events = await mongo.getDB().collection("tasks").find({ endTime: { $gte: new Date(fromDate), $lte: new Date(toDate) }, completed: { $not: { $eq: message.author.id }}}).sort({ endTime: 1 }).toArray();
+            viewDescr = `${message.author.username}'s Incomplete Tasks`
+        } else if (viewType === "complete") {
+            events = await mongo.getDB().collection("tasks").find({ endTime: { $gte: new Date(fromDate), $lte: new Date(toDate) }, completed: message.author.id }).sort({ endTime: 1 }).toArray();
+            viewDescr = `${message.author.username}'s Completed Tasks`
+        } else {
+            message.channel.send(new Discord.MessageEmbed().setColor('#FF0000').setTitle('Error').setDescription('You did not provide a valid display type. Valid options: `all`, `incomplete`, `complete`').setFooter('https://github.com/sunny-zuo/sir-goose-bot'));
+            return;
+        }
 
         const outputEmbed = new Discord.MessageEmbed()
             .setColor('#0099ff')
-            .setTitle('Upcoming Dates for SE 25')
+            .setTitle(`Upcoming Dates for SE 25 - ${viewDescr}`)
             .setDescription(`These are all upcoming quizzes, due dates, and other important dates for the upcoming week. Please contact <@${process.env.ADMIN_ID}> if there are any issues`)
             .setFooter('https://github.com/sunny-zuo/sir-goose-bot');
 
