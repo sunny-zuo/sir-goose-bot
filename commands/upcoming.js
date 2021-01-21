@@ -1,7 +1,7 @@
 const Discord = require('discord.js');
-const fs = require('fs');
 const { DateTime } = require("luxon");
 const mongo = require('../mongo.js');
+const settings = require('../settings');
 
 module.exports = {
     name: 'upcoming',
@@ -41,7 +41,7 @@ module.exports = {
         const outputEmbed = new Discord.MessageEmbed()
             .setColor('#0099ff')
             .setTitle(`Upcoming Dates for SE 25 - ${viewDescr}`)
-            .setDescription(`These are all upcoming quizzes, due dates, and other important dates for the upcoming week. Please contact <@${process.env.ADMIN_ID}> if there are any issues`)
+            .setDescription(`These are all upcoming quizzes, due dates, and other important dates for the upcoming week. Please contact <@${process.env.ADMIN_ID}> if there are any issues!\n${settings.get('global').upcomingMessage}`)
             .setFooter('https://github.com/sunny-zuo/sir-goose-bot');
 
 
