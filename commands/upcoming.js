@@ -6,7 +6,7 @@ const mongo = require('../mongo.js');
 module.exports = {
     name: 'upcoming',
     description: 'List deadlines and events within the next week.',
-    usage: '[days = 7]',
+    usage: '[days = 7] [view type]',
     args: false,
     guildOnly: false,
     displayHelp: true,
@@ -24,13 +24,13 @@ module.exports = {
         
         let events;
         let viewDescr;
-        if (viewType === "all") {
+        if (viewType === "all" || viewType === "everything") {
             events = await mongo.getDB().collection("tasks").find({ endTime: { $gte: new Date(fromDate), $lte: new Date(toDate) } }).sort({ endTime: 1 }).toArray();
             viewDescr = "All Tasks"
         } else if (viewType === "incomplete") {
             events = await mongo.getDB().collection("tasks").find({ endTime: { $gte: new Date(fromDate), $lte: new Date(toDate) }, completed: { $not: { $eq: message.author.id }}}).sort({ endTime: 1 }).toArray();
             viewDescr = `${message.author.username}'s Incomplete Tasks`
-        } else if (viewType === "complete") {
+        } else if (viewType === "complete" || viewType === "completed") {
             events = await mongo.getDB().collection("tasks").find({ endTime: { $gte: new Date(fromDate), $lte: new Date(toDate) }, completed: message.author.id }).sort({ endTime: 1 }).toArray();
             viewDescr = `${message.author.username}'s Completed Tasks`
         } else {
