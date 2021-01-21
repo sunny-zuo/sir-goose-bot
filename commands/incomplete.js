@@ -1,10 +1,9 @@
 const Discord = require('discord.js');
 const mongo = require('../mongo.js');
-const settings = require('../settings');
 
 module.exports = {
-    name: 'complete',
-    description: 'Mark a task as completed',
+    name: 'incomplete',
+    description: 'Mark a task as incomplete',
     args: true,
     guildOnly: false,
     displayHelp: true,
@@ -18,10 +17,10 @@ module.exports = {
             return;
         }
 
-        await mongo.getDB().collection("tasks").updateOne({ seqId: id }, { $push: { completed: message.author.id }});
+        await mongo.getDB().collection("tasks").updateOne({ seqId: id }, { $pull: { completed: message.author.id } });
         message.channel.send(new Discord.MessageEmbed().setColor("#00ff00")
             .setTitle('Success')
-            .setDescription(`Marked task '${task.name}' from class ${task.class} as completed!\nIf this was a mistake, use \`${settings.get(message.guild?.id).prefix}incomplete ${id}\``))
+            .setDescription(`Marked task '${task.name}' from class ${task.class} as incomplete!`))
         return;
     }
 }
