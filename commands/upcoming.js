@@ -19,8 +19,9 @@ module.exports = {
             message.channel.send(new Discord.MessageEmbed().setColor('#FF0000').setTitle('Error').setDescription('You did not provide a valid number of days to display.').setFooter('https://github.com/sunny-zuo/sir-goose-bot'));
             return;
         }
-        const fromDate = DateTime.utc();
-        const toDate = DateTime.fromJSDate(new Date(new Date().setHours(24, 0, 0, 0)), { zone: 'America/Toronto' }).plus({ days: daysToView })
+        const fromDate = DateTime.local().setZone('America/Toronto');
+        const midnightFrom = DateTime.local().setZone('America/Toronto').set({ hour: 0, minute: 0, second: 0, millisecond: 0 });
+        const toDate = DateTime.local().setZone('America/Toronto').plus({ days: daysToView }).set({ hour: 24, minute: 0, second: 0, millisecond: 0 });
         
         let events;
         let viewDescr;
@@ -61,8 +62,8 @@ module.exports = {
             }
 
             // Add relative times (in 1 day, in 5 hours, etc)
-            endDateFormat += (fromDate.until(endDt).length('days') < 1) ? ` (${endDt.toRelative()})` : ` (${endDt.toRelativeCalendar()})`
-            startDateFormat += (fromDate.until(startDt).length('days') < 1) ? ` (${startDt.toRelative()})` : ` (${startDt.toRelativeCalendar()})`
+            endDateFormat += (fromDate.until(endDt).length('days') < 1) ? ` (${endDt.toRelative()})` : ` (${endDt.toRelative(midnightFrom)})`
+            startDateFormat += (fromDate.until(startDt).length('days') < 1) ? ` (${startDt.toRelative()})` : ` (${startDt.toRelative(midnightFrom)})`
 
             if (startDt.equals(endDt)) {
                 outputEmbed.addField(`${currentEvent.type}: ${currentEvent.name} for ${currentEvent.class} (#${currentEvent.seqId})`, endDateFormat)
