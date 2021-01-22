@@ -9,20 +9,23 @@ module.exports = {
     guildOnly: false,
     displayHelp: true,
     async execute(message, args) {
-        const id = parseFloat(args.split(' ')[0].replace(/[^0-9]/g, ''));
-        const task = await mongo.getDB().collection("tasks").findOne({ seqId: id });
-        if (!task) {
-            message.channel.send(new Discord.MessageEmbed().setColor("#ff0000")
-                .setTitle('Error: Invalid Task ID')
-                .setDescription(`No task with the ID ${id} was found`)
-                .setFooter('https://github.com/sunny-zuo/sir-goose-bot'))
-            return;
+        const taskIds = args.split(' ');
+        let resultText = '';
+        for (taskId of taskIds) {
+            const id = parseFloat(taskId.replace(/[^0-9]/g, ''));
+            const task = await mongo.getDB().collection("tasks").findOne({ seqId: id });
+
+            if (!task) {
+                resultText += `No task with the ID ${taskId} was found\n`
+            } else {
+                await mongo.getDB().collection("tasks").updateOne({ seqId: id }, { $push: { completed: message.author.id } });
+                resultText += `Marked task '${task.name}' (#${task.seqId}) from class ${task.class} as completed\n`
+            }
         }
 
-        await mongo.getDB().collection("tasks").updateOne({ seqId: id }, { $push: { completed: message.author.id }});
         message.channel.send(new Discord.MessageEmbed().setColor("#00ff00")
-            .setTitle('Success')
-            .setDescription(`Marked task '${task.name}' from class ${task.class} as completed!\nIf this was a mistake, use \`${settings.get(message.guild?.id).prefix}incomplete ${id}\``)
+            .setTitle('Marked Tasks as Complete')
+            .setDescription(`${resultText}\nIf this was a mistake, use \`${settings.get(message.guild?.id).prefix}incomplete <id>\` to undo`)
             .setFooter('https://github.com/sunny-zuo/sir-goose-bot'))
         return;
     }

@@ -14,15 +14,29 @@ module.exports = {
             .setColor('#0099ff')
             .setTitle('Todo Help')
             .addFields(
-                { name: `${guildSettings.prefix}upcoming [days = 7] [viewType = incomplete]`, 
+                { 
+                    name: `${guildSettings.prefix}upcoming [days = 7] [viewType = incomplete]`, 
                     value: `View a list of tasks in the next number of days.
                         Example usages:
                         \`${guildSettings.prefix}upcoming\` - View incomplete tasks due in the next 7 days
-                        \`${guildSettings.prefix}upcoming 4\` - View incomplete tasks due in the next 4 days
-                        \`${guildSettings.prefix}upcoming 5 all\` - View all tasks due in the next 5 days
-                        \`${guildSettings.prefix}upcoming 6 complete\` - View complete tasks in the next 6 days` },
-                { name: `${guildSettings.prefix}complete (id)`, value: `Mark a task as complete by ID\nExample usage: \`${guildSettings.prefix}complete #23\`` },
-                { name: `${guildSettings.prefix}incomplete (id)`, value: `Mark a task as incomplete by ID\nExample usage: \`${guildSettings.prefix}incomplete #23\`` })
+                        \`${guildSettings.prefix}upcoming 7\` - View incomplete tasks due in the next 7 days
+                        \`${guildSettings.prefix}upcoming 7 all\` - View all tasks due in the next 7 days
+                        \`${guildSettings.prefix}upcoming 7 complete\` - View complete tasks in the next 7 days` 
+                },
+                { 
+                    name: `${guildSettings.prefix}complete (id)`, 
+                    value: `Mark a task(s) as complete by ID
+                        Example usages: 
+                        \`${guildSettings.prefix}complete 23\` - Marks task #23 as complete
+                        \`${guildSettings.prefix}complete 10 43 84\` - Marks tasks #10, 43 and 84 as complete` 
+                },
+                {
+                    name: `${guildSettings.prefix}incomplete (id)`,
+                    value: `Mark a task(s) as incomplete by ID
+                        Example usages: 
+                        \`${guildSettings.prefix}incomplete 23\` - Marks task #23 as incomplete
+                        \`${guildSettings.prefix}incomplete 10 43 84\` - Marks tasks #10, 43 and 84 as incomplete`
+                },)
             .setFooter('https://github.com/sunny-zuo/sir-goose-bot');
         message.channel.send(verifyHelpEmbed);
     }
