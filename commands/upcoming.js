@@ -19,19 +19,19 @@ module.exports = {
             message.channel.send(new Discord.MessageEmbed().setColor('#FF0000').setTitle('Error').setDescription('You did not provide a valid number of days to display.').setFooter('https://github.com/sunny-zuo/sir-goose-bot'));
             return;
         }
-        const fromDate = Date.now();
-        const toDate = fromDate + 1000 * 60 * 60 * 24 * daysToView // ms => s => hr = > day => week
+        const fromDate = DateTime.utc();
+        const toDate = DateTime.fromJSDate(new Date(new Date().setHours(24, 0, 0, 0)), { zone: 'America/Toronto' }).plus({ days: daysToView })
         
         let events;
         let viewDescr;
         if (viewType === "all" || viewType === "everything") {
-            events = await mongo.getDB().collection("tasks").find({ endTime: { $gte: new Date(fromDate), $lte: new Date(toDate) } }).sort({ endTime: 1 }).toArray();
+            events = await mongo.getDB().collection("tasks").find({ endTime: { $gte: fromDate.toJSDate(), $lte: toDate.toJSDate() } }).sort({ endTime: 1 }).toArray();
             viewDescr = "All Tasks"
         } else if (viewType === "incomplete") {
-            events = await mongo.getDB().collection("tasks").find({ endTime: { $gte: new Date(fromDate), $lte: new Date(toDate) }, completed: { $not: { $eq: message.author.id }}}).sort({ endTime: 1 }).toArray();
+            events = await mongo.getDB().collection("tasks").find({ endTime: { $gte: fromDate.toJSDate(), $lte: toDate.toJSDate() }, completed: { $not: { $eq: message.author.id }}}).sort({ endTime: 1 }).toArray();
             viewDescr = `${message.author.username}'s Incomplete Tasks`
         } else if (viewType === "complete" || viewType === "completed") {
-            events = await mongo.getDB().collection("tasks").find({ endTime: { $gte: new Date(fromDate), $lte: new Date(toDate) }, completed: message.author.id }).sort({ endTime: 1 }).toArray();
+            events = await mongo.getDB().collection("tasks").find({ endTime: { $gte: fromDate.toJSDate(), $lte: toDate.toJSDate() }, completed: message.author.id }).sort({ endTime: 1 }).toArray();
             viewDescr = `${message.author.username}'s Completed Tasks`
         } else {
             message.channel.send(new Discord.MessageEmbed().setColor('#FF0000').setTitle('Error').setDescription('You did not provide a valid display type. Valid options: `all`, `incomplete`, `complete`').setFooter('https://github.com/sunny-zuo/sir-goose-bot'));
