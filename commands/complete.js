@@ -5,6 +5,7 @@ const settings = require('../settings');
 module.exports = {
     name: 'complete',
     description: 'Mark a task as completed',
+    aliases: ['completed', 'c'],
     args: true,
     guildOnly: false,
     displayHelp: true,

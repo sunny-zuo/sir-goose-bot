@@ -4,6 +4,7 @@ const fetch = require('node-fetch');
 module.exports = {
     name: 'course',
     description: 'Get information about a UWaterloo course',
+    aliases: ['class'],
     args: true,
     guildOnly: false,
     displayHelp: true,

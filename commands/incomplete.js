@@ -5,6 +5,7 @@ const settings = require('../settings');
 module.exports = {
     name: 'incomplete',
     description: 'Mark a task as incomplete',
+    aliases: ['incompleted', 'inc'],
     args: true,
     guildOnly: false,
     displayHelp: true,

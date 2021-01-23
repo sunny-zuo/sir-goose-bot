@@ -6,6 +6,7 @@ const settings = require('../settings');
 module.exports = {
     name: 'upcoming',
     description: 'List deadlines and events within the next week.',
+    aliases: ['todo'],
     usage: '[days = 7] [view type]',
     args: false,
     guildOnly: false,
