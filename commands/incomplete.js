@@ -6,6 +6,7 @@ module.exports = {
     name: 'incomplete',
     description: 'Mark a task as incomplete',
     aliases: ['incompleted', 'inc'],
+    usage: '(task ID)',
     args: true,
     guildOnly: false,
     displayHelp: true,

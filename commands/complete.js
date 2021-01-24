@@ -6,6 +6,7 @@ module.exports = {
     name: 'complete',
     description: 'Mark a task as completed',
     aliases: ['completed', 'c'],
+    usage: '(task ID)',
     args: true,
     guildOnly: false,
     displayHelp: true,
