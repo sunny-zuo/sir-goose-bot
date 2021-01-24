@@ -26,16 +26,22 @@ module.exports = {
         };
 
         const commandName = args.split(/\s/)[0].toLowerCase();
-        const command = commands.get(commandName);
+        const command = commands.get(commandName) || commands.find(cmd => cmd.aliases && cmd.aliases.includes(commandName));
 
         if (!command) {
-            return message.reply("that's not a valid command!");
+            message.channel.send(new Discord.MessageEmbed().setColor("#9932cc")
+                .setTitle('Error: Invalid Command')
+                .setDescription(`No command with the name '${commandName}' was found.`))
+            return;
         }
 
         const commandEmbed = new Discord.MessageEmbed()
             .setColor('#0099ff')
-            .setTitle(`Command: \`${prefix}${command.name}\``)
-            .addFields(
+            .setTitle(`Command: \`${prefix}${command.name}\``);
+
+        if (command.aliases) { commandEmbed.setDescription(`Aliases: *${prefix}${command.aliases.join(`, ${prefix}`)}*`)};
+
+        commandEmbed.addFields(
                 { name: 'Description', value: command.description },
                 { name: 'Usage', value: `\`${prefix}${command.name}${command.usage ? ` ${command.usage}` : ''}\``}
             )
