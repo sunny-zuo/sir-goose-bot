@@ -59,7 +59,7 @@ module.exports = {
                 await settings.set(message.guild.id, serverSetting);
                 return message.channel.send({ content: 'Setting updated successfully. New settings:', embed: buildSettingListEmbed(message)})
             } else {
-                return message.reply(`That setting does not exist. Please note that settings are **case sensitive**! Use \`${serverSetting.prefix}settings\` for a list of settings.`);
+                return message.reply(`That setting does not exist. Please note that settings are **case sensitive**! Use \`${serverSetting.prefix}config\` for a list of settings.`);
             }
         }
         
