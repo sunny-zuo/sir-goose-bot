@@ -26,31 +26,17 @@ module.exports = {
             return message.reply('This server does not have verification enabled');
         }
 
-        let requestID = args.toLowerCase().replace(/[^a-z0-9.@-]/g, "");
+        let uwid = args.toLowerCase().replace(/[^a-z0-9.@-]/g, "");
 
-        if (requestID.endsWith("@uwaterloo.ca")) {
-            requestID = requestID.slice(0, -13);
+        if (uwid.endsWith("@uwaterloo.ca")) {
+            uwid = requestID.slice(0, -13);
         }
-
-        const request = await fetch(`https://api.uwaterloo.ca/v2/directory/${requestID}.json?key=${process.env.UW_API_KEY}`);
-        const userData = await request.json();
-
-        if (userData.meta.status === 204 || !userData?.data?.department || !userData?.data?.user_id) {
-            return message.reply('There\'s no Waterloo account associated with that user ID! Please double check the user ID and try again');
-        };
-
-        const uwid = userData.data.user_id;
 
         // check if user already exists
         const existingUser = await mongo.getDB().collection("users").findOne({ uwid: uwid });
         if (existingUser) {
             if (existingUser.discordID === message.author.id) {
                 if (existingUser.verified) {
-                    // handle edge case where user transfers departments
-                    if (existingUser.program != userData.data.department) {
-                        await mongo.getDB().collection("users").updateOne({ uwid: uwid }, { $set: { program: userData.data.department } });
-                        existingUser.program = userData.data.department;
-                    }
                     confirm.assignRole(message.member, existingUser).then(result => {
                         message.channel.send(result);
                     }).catch(error => {
@@ -69,7 +55,7 @@ module.exports = {
         
         let user = {
             discordID: message.author.id,
-            program: userData.data.department,
+            program: '???',
             uwid: uwid,
             verified: false,
             token: Math.floor(Math.random() * 899999 + 100000)
