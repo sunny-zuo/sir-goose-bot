@@ -36,8 +36,8 @@ function buildSettingListEmbed(message) {
 }
 
 module.exports = {
-    name: 'settings',
-    description: 'List all of the server\'s settings or edit them',
+    name: 'config',
+    description: 'List the server\'s config and edit them',
     args: false,
     guildOnly: true,
     displayHelp: true,
