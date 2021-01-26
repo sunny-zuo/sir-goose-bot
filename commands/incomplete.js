@@ -1,16 +1,23 @@
 const Discord = require('discord.js');
 const mongo = require('../mongo.js');
 const settings = require('../settings');
+const upcoming = require('./upcoming');
 
 module.exports = {
     name: 'incomplete',
-    description: 'Mark a task as incomplete',
+    description: 'Mark a task as incomplete. Shows incompleted list if no ID given',
     aliases: ['incompleted', 'inc'],
-    usage: '(task ID)',
-    args: true,
+    usage: '[task ID]',
+    args: false,
     guildOnly: false,
     displayHelp: true,
     async execute(message, args) {
+        if (!args) {
+            const returnEmbed = await upcoming.createEmbed(message.author, 7, "incomplete");
+            message.channel.send(returnEmbed);
+            return;
+        }
+
         const taskIds = args.split(' ');
         let resultText = '';
         for (taskId of taskIds) {

@@ -20,24 +20,27 @@ module.exports = {
             message.channel.send(new Discord.MessageEmbed().setColor('#FF0000').setTitle('Error').setDescription('You did not provide a valid number of days to display.').setFooter('https://github.com/sunny-zuo/sir-goose-bot'));
             return;
         }
+        const outputEmbed = await this.createEmbed(message.author, daysToView, viewType);
+        message.channel.send(outputEmbed);
+    },
+    async createEmbed(author, daysToView = 7, viewType = "incomplete") {
         const fromDate = DateTime.local().setZone('America/Toronto');
         const midnightFrom = DateTime.local().setZone('America/Toronto').set({ hour: 0, minute: 0, second: 0, millisecond: 0 });
         const toDate = DateTime.local().setZone('America/Toronto').plus({ days: daysToView }).set({ hour: 24, minute: 0, second: 0, millisecond: 0 });
-        
+
         let events;
         let viewDescr;
         if (viewType === "all" || viewType === "everything") {
             events = await mongo.getDB().collection("tasks").find({ endTime: { $gte: fromDate.toJSDate(), $lte: toDate.toJSDate() } }).sort({ endTime: 1 }).toArray();
             viewDescr = "All Tasks"
         } else if (viewType === "incomplete") {
-            events = await mongo.getDB().collection("tasks").find({ endTime: { $gte: fromDate.toJSDate(), $lte: toDate.toJSDate() }, completed: { $not: { $eq: message.author.id }}}).sort({ endTime: 1 }).toArray();
-            viewDescr = `${message.author.username}'s Incomplete Tasks`
+            events = await mongo.getDB().collection("tasks").find({ endTime: { $gte: fromDate.toJSDate(), $lte: toDate.toJSDate() }, completed: { $not: { $eq: author.id } } }).sort({ endTime: 1 }).toArray();
+            viewDescr = `${author.username}'s Incomplete Tasks`
         } else if (viewType === "complete" || viewType === "completed") {
-            events = await mongo.getDB().collection("tasks").find({ endTime: { $gte: fromDate.toJSDate(), $lte: toDate.toJSDate() }, completed: message.author.id }).sort({ endTime: 1 }).toArray();
-            viewDescr = `${message.author.username}'s Completed Tasks`
+            events = await mongo.getDB().collection("tasks").find({ endTime: { $gte: fromDate.toJSDate(), $lte: toDate.toJSDate() }, completed: author.id }).sort({ endTime: 1 }).toArray();
+            viewDescr = `${author.username}'s Completed Tasks`
         } else {
-            message.channel.send(new Discord.MessageEmbed().setColor('#FF0000').setTitle('Error').setDescription('You did not provide a valid display type. Valid options: `all`, `incomplete`, `complete`').setFooter('https://github.com/sunny-zuo/sir-goose-bot'));
-            return;
+            return new Discord.MessageEmbed().setColor('#FF0000').setTitle('Error').setDescription('You did not provide a valid display type. Valid options: `all`, `incomplete`, `complete`').setFooter('https://github.com/sunny-zuo/sir-goose-bot');
         }
 
         const outputEmbed = new Discord.MessageEmbed()
@@ -69,12 +72,12 @@ module.exports = {
             if (startDt.equals(endDt)) {
                 outputEmbed.addField(`${currentEvent.type}: ${currentEvent.name} for ${currentEvent.class} (#${currentEvent.seqId})`, endDateFormat)
             } else {
-                outputEmbed.addField(`${currentEvent.type}: ${currentEvent.name} for ${currentEvent.class} (#${currentEvent.seqId})`, `Starts ${startDateFormat}\nDue ${endDateFormat}`) 
+                outputEmbed.addField(`${currentEvent.type}: ${currentEvent.name} for ${currentEvent.class} (#${currentEvent.seqId})`, `Starts ${startDateFormat}\nDue ${endDateFormat}`)
             }
-            
+
         }
 
-        message.channel.send(outputEmbed);
+        return outputEmbed;
     }
 }
 

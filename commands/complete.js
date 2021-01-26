@@ -1,16 +1,22 @@
 const Discord = require('discord.js');
 const mongo = require('../mongo.js');
 const settings = require('../settings');
+const upcoming = require('./upcoming');
 
 module.exports = {
     name: 'complete',
-    description: 'Mark a task as completed',
+    description: 'Mark a task as completed. Shows completed list if no ID given',
     aliases: ['completed', 'c'],
-    usage: '(task ID)',
-    args: true,
+    usage: '[task ID]',
+    args: false,
     guildOnly: false,
     displayHelp: true,
     async execute(message, args) {
+        if (!args) {
+            const returnEmbed = await upcoming.createEmbed(message.author, 7, "complete");
+            message.channel.send(returnEmbed);
+            return;
+        }
         const taskIds = args.split(' ');
         let resultText = '';
         for (taskId of taskIds) {
