@@ -29,7 +29,7 @@ module.exports = {
         let uwid = args.toLowerCase().replace(/[^a-z0-9.@-]/g, "");
 
         if (uwid.endsWith("@uwaterloo.ca")) {
-            uwid = requestID.slice(0, -13);
+            uwid = uwid.slice(0, -13);
         }
 
         // check if user already exists
