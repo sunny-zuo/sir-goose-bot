@@ -17,8 +17,11 @@ module.exports = {
         const daysToView = (argArray[0]) ? argArray[0] : (await userSettings.get(message.author.id)).todoDefaultDays;
         const viewType = (argArray[1]) ? argArray[1].toLowerCase() : "incomplete"
 
-        if (daysToView && isNaN(parseFloat(daysToView))) {
+        if (isNaN(parseFloat(daysToView))) {
             message.channel.send(new Discord.MessageEmbed().setColor('#FF0000').setTitle('Error').setDescription('You did not provide a valid number of days to display.').setFooter('https://github.com/sunny-zuo/sir-goose-bot'));
+            return;
+        } else if (daysToView > 365) {
+            message.channel.send(new Discord.MessageEmbed().setColor('#FF0000').setTitle('Error').setDescription('You can display a maximum of 365 days into the future. The Discord embed size limit will likely be reached earlier.').setFooter('https://github.com/sunny-zuo/sir-goose-bot'));
             return;
         }
         const outputEmbed = await this.createEmbed(message.author, daysToView, viewType);
@@ -32,13 +35,13 @@ module.exports = {
         let events;
         let viewDescr;
         if (viewType === "all" || viewType === "everything") {
-            events = await mongo.getDB().collection("tasks").find({ endTime: { $gte: fromDate.toJSDate(), $lte: toDate.toJSDate() } }).sort({ endTime: 1 }).toArray();
+            events = await mongo.getDB().collection("tasks").find({ endTime: { $gte: fromDate.toJSDate(), $lte: toDate.toJSDate() } }).sort({ endTime: 1 }).limit(20).toArray();
             viewDescr = "All Tasks"
         } else if (viewType === "incomplete") {
-            events = await mongo.getDB().collection("tasks").find({ endTime: { $gte: fromDate.toJSDate(), $lte: toDate.toJSDate() }, completed: { $not: { $eq: author.id } } }).sort({ endTime: 1 }).toArray();
+            events = await mongo.getDB().collection("tasks").find({ endTime: { $gte: fromDate.toJSDate(), $lte: toDate.toJSDate() }, completed: { $not: { $eq: author.id } } }).sort({ endTime: 1 }).limit(20).toArray();
             viewDescr = `${author.username}'s Incomplete Tasks`
         } else if (viewType === "complete" || viewType === "completed") {
-            events = await mongo.getDB().collection("tasks").find({ endTime: { $gte: fromDate.toJSDate(), $lte: toDate.toJSDate() }, completed: author.id }).sort({ endTime: 1 }).toArray();
+            events = await mongo.getDB().collection("tasks").find({ endTime: { $gte: fromDate.toJSDate(), $lte: toDate.toJSDate() }, completed: author.id }).sort({ endTime: 1 }).limit(20).toArray();
             viewDescr = `${author.username}'s Completed Tasks`
         } else {
             return new Discord.MessageEmbed().setColor('#FF0000').setTitle('Error').setDescription('You did not provide a valid display type. Valid options: `all`, `incomplete`, `complete`').setFooter('https://github.com/sunny-zuo/sir-goose-bot');
