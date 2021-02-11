@@ -18,10 +18,9 @@ module.exports = {
                     name: `${guildSettings.prefix}upcoming [days = 7] [viewType = incomplete]`, 
                     value: `View a list of tasks in the next number of days.
                         Example usages:
-                        \`${guildSettings.prefix}upcoming\` - View incomplete tasks due in the next 7 days
-                        \`${guildSettings.prefix}upcoming 7\` - View incomplete tasks due in the next 7 days
-                        \`${guildSettings.prefix}upcoming 7 all\` - View all tasks due in the next 7 days
-                        \`${guildSettings.prefix}upcoming 7 complete\` - View complete tasks in the next 7 days` 
+                        \`${guildSettings.prefix}upcoming\` - View incomplete tasks
+                        \`${guildSettings.prefix}upcoming all\` - View all tasks
+                        \`${guildSettings.prefix}upcoming cs138\` - View all tasks from the CS 138 class` 
                 },
                 { 
                     name: `${guildSettings.prefix}complete (id)`, 
