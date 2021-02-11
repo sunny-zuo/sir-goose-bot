@@ -13,8 +13,7 @@ module.exports = {
     displayHelp: true,
     async execute(message, args) {
         if (!args) {
-            const returnEmbed = await upcoming.createEmbed(message.author, 7, "complete");
-            message.channel.send(returnEmbed);
+            await upcoming.sendEmbed(message, "complete");
             return;
         }
         const taskIds = args.split(' ');

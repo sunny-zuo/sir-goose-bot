@@ -13,8 +13,7 @@ module.exports = {
     displayHelp: true,
     async execute(message, args) {
         if (!args) {
-            const returnEmbed = await upcoming.createEmbed(message.author, 7, "incomplete");
-            message.channel.send(returnEmbed);
+            await upcoming.sendEmbed(message, "incomplete");
             return;
         }
 

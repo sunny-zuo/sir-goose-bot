@@ -24,33 +24,66 @@ module.exports = {
             message.channel.send(new Discord.MessageEmbed().setColor('#FF0000').setTitle('Error').setDescription('You can display a maximum of 365 days into the future. The Discord embed size limit will likely be reached earlier.').setFooter('https://github.com/sunny-zuo/sir-goose-bot'));
             return;
         }
-        const outputEmbed = await this.createEmbed(message.author, daysToView, viewType);
-        message.channel.send(outputEmbed);
+        await this.sendEmbed(message, viewType);
     },
-    async createEmbed(author, daysToView = 7, viewType = "incomplete") {
+    async sendEmbed(message, viewType = "incomplete") {
+        let pageSize = 7;
+        let currentPage = 0;
+        let taskCount = 0;
+        if (viewType === "incomplete") { taskCount = await mongo.getDB().collection("tasks").countDocuments({ endTime: { $gte: new Date() }, completed: { $not: { $eq: message.author.id } } }) }
+        else if (viewType === "complete") { taskCount = await mongo.getDB().collection("tasks").countDocuments({ endTime: { $gte: new Date() }, completed: message.author.id }) }
+        else { taskCount = await mongo.getDB().collection("tasks").countDocuments({ endTime: { $gte: new Date() }}) };
+
+        const filter = (reaction, user) => {
+            return ['⬅️', '➡️'].includes(reaction.emoji.name) && user.id === message.author.id;
+        };
+
+        message.channel.send((await this.generateEmbed(message, viewType, pageSize, 0))).then(embedMessage => {
+            if (taskCount > pageSize) {
+                embedMessage.react('➡️');
+            }
+            const collector = embedMessage.createReactionCollector(filter, { time: 60000 });
+
+            collector.on('collect', reaction => {
+                embedMessage.reactions.removeAll().then(async () => {
+                    reaction.emoji.name === '➡️' ? currentPage += 1 : currentPage -= 1;
+
+                    embedMessage.edit((await this.generateEmbed(message, viewType, pageSize, currentPage)));
+
+                    if (currentPage !== 0) {
+                        await embedMessage.react('⬅️');
+                    }
+                    if ((currentPage + 1) * pageSize < taskCount) {
+                        await embedMessage.react('➡️');
+                    }
+                })
+            })
+        })
+    },
+    async generateEmbed(message, viewType = "incomplete", pageSize, currentPage) {
         const fromDate = DateTime.local().setZone('America/Toronto');
         const midnightFrom = DateTime.local().setZone('America/Toronto').set({ hour: 0, minute: 0, second: 0, millisecond: 0 });
-        const toDate = DateTime.local().setZone('America/Toronto').plus({ days: daysToView }).set({ hour: 24, minute: 0, second: 0, millisecond: 0 });
 
         let events;
         let viewDescr;
+
         if (viewType === "all" || viewType === "everything") {
-            events = await mongo.getDB().collection("tasks").find({ endTime: { $gte: fromDate.toJSDate(), $lte: toDate.toJSDate() } }).sort({ endTime: 1 }).limit(20).toArray();
-            viewDescr = "All Tasks"
+            events = await mongo.getDB().collection("tasks").find({ endTime: { $gte: fromDate.toJSDate() } }).sort({ endTime: 1 }).limit(pageSize).skip(currentPage * pageSize).toArray();
+            viewDescr = "All Tasks";
         } else if (viewType === "incomplete") {
-            events = await mongo.getDB().collection("tasks").find({ endTime: { $gte: fromDate.toJSDate(), $lte: toDate.toJSDate() }, completed: { $not: { $eq: author.id } } }).sort({ endTime: 1 }).limit(20).toArray();
-            viewDescr = `${author.username}'s Incomplete Tasks`
+            events = await mongo.getDB().collection("tasks").find({ endTime: { $gte: fromDate.toJSDate() }, completed: { $not: { $eq: message.author.id } } }).sort({ endTime: 1 }).limit(pageSize).skip(currentPage * pageSize).toArray();
+            viewDescr = `${message.author.username}'s Incomplete Tasks`;
         } else if (viewType === "complete" || viewType === "completed") {
-            events = await mongo.getDB().collection("tasks").find({ endTime: { $gte: fromDate.toJSDate(), $lte: toDate.toJSDate() }, completed: author.id }).sort({ endTime: 1 }).limit(20).toArray();
-            viewDescr = `${author.username}'s Completed Tasks`
+            events = await mongo.getDB().collection("tasks").find({ endTime: { $gte: fromDate.toJSDate() }, completed: message.author.id }).sort({ endTime: 1 }).limit(pageSize).skip(currentPage * pageSize).toArray();
+            viewDescr = `${message.author.username}'s Completed Tasks`;
         } else {
             return new Discord.MessageEmbed().setColor('#FF0000').setTitle('Error').setDescription('You did not provide a valid display type. Valid options: `all`, `incomplete`, `complete`').setFooter('https://github.com/sunny-zuo/sir-goose-bot');
         }
 
         const outputEmbed = new Discord.MessageEmbed()
             .setColor('#0099ff')
-            .setTitle(`Upcoming Dates for SE 25 - ${viewDescr}`)
-            .setDescription(`These are all upcoming quizzes, due dates, and other important dates in the next ${daysToView} days. Please contact <@${process.env.ADMIN_ID}> if there are any issues!\n${settings.get('global').upcomingMessage}`)
+            .setTitle(`Upcoming Dates for SE 25 - ${viewDescr} (Page ${currentPage + 1})`)
+            .setDescription(`Here are all upcoming quizzes, due dates, and other important dates. Please contact <@${process.env.ADMIN_ID}> if there are any issues!\n${settings.get('global').upcomingMessage}`)
             .setFooter('https://github.com/sunny-zuo/sir-goose-bot');
 
 
