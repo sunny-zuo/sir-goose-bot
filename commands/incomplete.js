@@ -6,7 +6,7 @@ const upcoming = require('./upcoming');
 module.exports = {
     name: 'incomplete',
     description: 'Mark a task as incomplete. Shows incompleted list if no ID given',
-    aliases: ['incompleted', 'inc'],
+    aliases: ['incompleted', 'inc', 'i'],
     usage: '[task ID]',
     args: false,
     guildOnly: false,

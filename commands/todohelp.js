@@ -15,11 +15,11 @@ module.exports = {
             .setTitle('Todo Help')
             .addFields(
                 { 
-                    name: `${guildSettings.prefix}upcoming [days = 7] [viewType = incomplete]`, 
+                    name: `${guildSettings.prefix}upcoming [view type] [class]`, 
                     value: `View a list of tasks in the next number of days.
                         Example usages:
                         \`${guildSettings.prefix}upcoming\` - View incomplete tasks
-                        \`${guildSettings.prefix}upcoming all\` - View all tasks
+                        \`${guildSettings.prefix}upcoming all \` - View all tasks
                         \`${guildSettings.prefix}upcoming cs138\` - View all tasks from the CS 138 class` 
                 },
                 { 

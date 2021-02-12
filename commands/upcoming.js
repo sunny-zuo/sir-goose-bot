@@ -23,6 +23,14 @@ module.exports = {
                 viewType = arg;
                 continue;
             }
+            if (arg === "completed" || "c" || "done") {
+                viewType = "complete";
+                continue;
+            }
+            if (arg === "everything") {
+                viewTpye = "all";
+                continue;
+            }
             
             for (let i = 0; i < possibleClasses.length; i++) {
                 if (arg.toLowerCase().replace(" ", "") === possibleClasses[i].toLowerCase().replace(" ", "")) {
@@ -57,7 +65,6 @@ module.exports = {
         };
 
         message.channel.send((await this.generateEmbed(message, query, pageSize, 0))).then(embedMessage => {
-            console.log(`Task count is ${taskCount} and page size is ${pageSize}`);
             if (taskCount > pageSize) {
                 embedMessage.react('➡️');
             }

@@ -6,7 +6,7 @@ const upcoming = require('./upcoming');
 module.exports = {
     name: 'complete',
     description: 'Mark a task as completed. Shows completed list if no ID given',
-    aliases: ['completed', 'c'],
+    aliases: ['completed', 'c', 'done'],
     usage: '[task ID]',
     args: false,
     guildOnly: false,
