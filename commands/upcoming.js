@@ -57,15 +57,20 @@ module.exports = {
         };
 
         message.channel.send((await this.generateEmbed(message, query, pageSize, 0))).then(embedMessage => {
+            console.log(`Task count is ${taskCount} and page size is ${pageSize}`);
             if (taskCount > pageSize) {
                 embedMessage.react('➡️');
             }
-            const collector = embedMessage.createReactionCollector(filter, { time: 60000 });
+            const collector = embedMessage.createReactionCollector(filter, { time: 300000 });
 
             collector.on('collect', reaction => {
                 embedMessage.reactions.removeAll().then(async () => {
                     reaction.emoji.name === '➡️' ? currentPage += 1 : currentPage -= 1;
-
+                    if (currentPage <= 0) {
+                        currentPage = 0;
+                    } else if ((currentPage + 1) * pageSize > taskCount + pageSize) {
+                        currentPage -= 1;
+                    }
                     embedMessage.edit((await this.generateEmbed(message, query, pageSize, currentPage)));
 
                     if (currentPage !== 0) {
