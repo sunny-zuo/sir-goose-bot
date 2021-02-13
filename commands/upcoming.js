@@ -23,7 +23,7 @@ module.exports = {
                 viewType = arg;
                 continue;
             }
-            if (arg === "completed" || "c" || "done") {
+            if (arg === "completed" || arg === "c" || arg === "done") {
                 viewType = "complete";
                 continue;
             }
