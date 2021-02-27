@@ -3,6 +3,7 @@ const { request, gql } = require("graphql-request");
 const { uwflowQuery, uwflowEndpoint } = require("../util/uwflow-constants");
 
 const courseMatcher = /([a-zA-Z]{2,}[ ]?\d+[a-zA-Z]?)/g;
+const disallowedMatches = /(least)/gi;
 
 module.exports = {
     name: "course",
@@ -32,6 +33,9 @@ module.exports = {
         }
 
         const replacer = (course) => {
+            if (disallowedMatches.test(course)) {
+                return course;
+            }
             return `**[${course}](https://uwflow.com/course/${course
                 .toLowerCase()
                 .replace(/\s/g, "")})**`;
