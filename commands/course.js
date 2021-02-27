@@ -13,7 +13,7 @@ module.exports = {
     displayHelp: true,
     usage: "(course)",
     async execute(message, args) {
-        const courseName = args.toLowerCase().replaceAll(/[^a-z0-9]/g, "");
+        const courseName = args.toLowerCase().replace(/[^a-z0-9]/g, "");
         const variables = {
             code: courseName,
             user_id: 0,
@@ -34,13 +34,13 @@ module.exports = {
         const replacer = (course) => {
             return `**[${course}](https://uwflow.com/course/${course
                 .toLowerCase()
-                .replaceAll(" ", "")})**`;
+                .replace(/\s/g, "")})**`;
         };
         const course = json.course[0];
         const prereqs =
-            course.prereqs?.replaceAll(courseMatcher, replacer) ?? "None";
+            course.prereqs?.replace(courseMatcher, replacer) ?? "None";
         const antireqs =
-            course.antireqs?.replaceAll(courseMatcher, replacer) ?? "None";
+            course.antireqs?.replace(courseMatcher, replacer) ?? "None";
 
         const responseEmbed = new Discord.MessageEmbed()
             .setColor("#9932cc")
