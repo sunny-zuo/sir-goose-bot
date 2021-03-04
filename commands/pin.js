@@ -12,11 +12,10 @@ module.exports = {
         var chnl = message.channel;
         if (message.reference) {
             var referencedMessageID = message.reference.messageID;
-            console.log(referencedMessageID);
             var referencedMessage;
-             await chnl.messages.fetch(referencedMessageID).then(foundMessage => referencedMessage=foundMessage).catch(console.error);
-             await referencedMessage.pin({ reason: 'goose bot pin command invoked' }).then(result => {
-                Log.success(`Pin request success for Message: ${referencedMessage.content}`);
+            await chnl.messages.fetch(referencedMessageID).then(foundMessage => referencedMessage = foundMessage).catch(console.error);
+            await referencedMessage.pin({ reason: 'goose bot pin command invoked' }).then(result => {
+                //console.log(`Pin request success for Message: ${referencedMessage.content}`);
             }).catch(console.error)
             return;
         } else {
