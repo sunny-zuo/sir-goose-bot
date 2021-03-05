@@ -8,7 +8,8 @@ const defaultSettings = {
     verificationProgram: "VPA/Software Engineering",
     verifiedRole: "SE",
     guestRole: "Non-SE",
-    autoGuest: true
+    autoGuest: true,
+    enablePins: false
 }
 
 const loadSettings = () => {
@@ -23,7 +24,7 @@ const loadSettings = () => {
 
 const get = (serverID) => {
     // return server data if exists, else default settings
-    return servers.get(serverID) || { ...defaultSettings, serverID: serverID };
+    return { ...defaultSettings, ...servers.get(serverID) } || { ...defaultSettings, serverID: serverID };
 }
 
 const set = async (serverID, settings) => {

@@ -7,7 +7,8 @@ const settingsInfo = {
     verificationProgram: 'The UW program to verify for, formatted the same way as shown on WatIAM. Example: `VPA/Software Engineering`',
     verifiedRole: 'The name of the role to assign if the user belongs to the specified verificationProgram',
     guestRole: 'The name of the role to assign if the user verifies as a UW student but is in a different program. Can be disabled by setting the autoGuest setting to false',
-    autoGuest: 'Set whether or not the bot should assign the specified guestRole to users who are in a different program. Either `true` or `false`'
+    autoGuest: 'Set whether or not the bot should assign the specified guestRole to users who are in a different program. Either `true` or `false`',
+    enablePins: 'Set whether or not users without the manage messages permissions should be allowed to pin messages using the pin command'
 }
 
 function buildSettingListEmbed(message) {
