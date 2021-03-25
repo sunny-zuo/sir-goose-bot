@@ -1,42 +1,23 @@
 const mongo = require('../mongo.js');
 const fetch = require('node-fetch');
+const Discord = require('discord.js');
 
 const settings = require('../settings.js');
 
 module.exports = {
     name: 'confirm',
     description: 'Confirm your UW identity using the code given',
-    args: true,
-    guildOnly: true,
+    args: false,
+    guildOnly: false,
     displayHelp: false,
     async execute(message, args) {
-        const guildSettings = settings.get(message.guild?.id);
-        if (!guildSettings.verificationEnabled) {
-            return message.reply('This server does not have verification enabled');
-        }
-
-        const user = await mongo.getDB().collection("users").findOne({ discordID: message.author.id });
-        
-        if (!user) {
-            return message.reply(`You need to ${guildSettings.prefix}verify first before you can confirm!`)
-        }
-
-        if (user.verified) {
-            return message.reply(`You're already verified!`);
-        }
-
-        if (parseInt(args) === user.token) {
-            await mongo.getDB().collection("users").updateOne( { discordID: message.author.id }, { $set : { verified: true }});
-            this.assignRole(message.member, user).then(result => {
-                message.channel.send(result);
-            }).catch(error => {
-                message.channel.send(error);
-            });
-            return;
-        } else {
-            return message.reply(`Invalid verification code. Please double check`);
-        }
+        message.channel.send(`${message.author}`, {
+            embed: new Discord.MessageEmbed().setColor("#ff0000")
+                .setTitle('Command No Longer Supported')
+                .setDescription(`We've migrated to OAuth verification, so all pending verifications have been deleted. Please verify again using \`${process.env.PREFIX}verify\``)
+        })
     },
+    // TODO: Migrate to dedicated role assignment config
     async assignRole(member, user) {
         return new Promise((resolve, reject) => {
             if (!member?.guild?.id) reject('Error: Roles cannot be given in DMs');
