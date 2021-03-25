@@ -11,6 +11,8 @@ function init(discordClient) {
 
 app.use(express.json());
 
+// A forwarding mechanism is used as we only have a single oauth endpoint.
+// See https://github.com/sunny-zuo/SE-bot/blob/main/server/server.js for non-forwarding setup
 app.post('/adduser', (req, res) => {
     if (!req.body.discordId) {
         res.sendStatus(400);
