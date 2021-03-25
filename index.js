@@ -1,5 +1,5 @@
 const dotenv = require('dotenv').config();
-const expressServer = require('./server/server');
+const authServer = require('./server/server');
 const fs = require('fs');
 const Discord = require('discord.js');
 const mongo = require('./mongo.js');
@@ -18,7 +18,7 @@ for (const file of commandFiles) {
 
 client.once('ready', async () => {
     console.log(`Logged in as ${client.user.tag}`);
-    expressServer.init(client);
+    authServer.init(client);
     client.user.setActivity("~help");
     const dbConnection = await mongo.connectDB();
     if (dbConnection.success) {
@@ -66,22 +66,15 @@ client.on('message', message => {
 });
 
 client.on('guildMemberAdd', async (member) => {
-    try {
-        const serverSettings = settings.get(member.guild.id);
-        if (serverSettings.verificationEnabled) {
-            const user = await mongo.getDB().collection("users").findOne({ discordID: member.id });
-            if (user) {
-                confirm.assignRole(member, user).then(response => {
-                    member.send(`Since you've verified with the bot in the past, you've been automatically verified in ${member.guild.name}. Welcome!`)
-                }).catch(error => {
-                    console.log(`Error with auto verification: ${error}`);
-                });
-            }
-        }
-    } catch (err) {
-        console.log(`Error with auto verification: ${err}`)
+    const serverSettings = settings.get(member.guild.id);
+    if (serverSettings.verificationEnabled) {
+        const user = await mongo.getDB().collection("users").findOne({ discordId: member.id });
+        if (user) {
+            authServer.assignRole(member.guild, serverSettings, member, user).then(() => {
+                member.send(`Since you've verified with the bot in the past, you've been automatically verified in ${member.guild.name}. Welcome!`);
+            }).catch(err => { console.log(`Error with auto verification: ${err}`) });
+        };
     }
-    
 });
 
 client.login(process.env.DISCORD_TOKEN);
