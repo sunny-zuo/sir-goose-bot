@@ -23,6 +23,7 @@
     "crypto-js": "^4.0.0",
     "discord.js": "^12.3.1",
     "dotenv": "^8.2.0",
+    "express": "^4.17.1",
     "graphql": "^15.5.0",
     "graphql-request": "^3.4.0",
     "luxon": "^1.25.0",

@@ -1,4 +1,5 @@
 const dotenv = require('dotenv').config();
+const expressServer = require('./server/server');
 const fs = require('fs');
 const Discord = require('discord.js');
 const mongo = require('./mongo.js');
@@ -17,6 +18,7 @@ for (const file of commandFiles) {
 
 client.once('ready', async () => {
     console.log(`Logged in as ${client.user.tag}`);
+    expressServer.init(client);
     client.user.setActivity("~help");
     const dbConnection = await mongo.connectDB();
     if (dbConnection.success) {
