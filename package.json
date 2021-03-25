@@ -20,6 +20,7 @@
   },
   "homepage": "https://github.com/sunny-zuo/sir-goose-bot#readme",
   "dependencies": {
+    "crypto-js": "^4.0.0",
     "discord.js": "^12.3.1",
     "dotenv": "^8.2.0",
     "graphql": "^15.5.0",
