@@ -44,7 +44,7 @@ module.exports = {
             if (!guildSettings) reject('Error: Could not get guild settings.');
             if (!user) reject('Error: Could not get user information');
 
-            if (user.program === guildSettings.verificationProgram) {
+            if (user.department === guildSettings.verificationProgram) {
                 const verifiedRole = member.guild.roles.cache.find(role => role.name === guildSettings.verifiedRole);
                 if (!verifiedRole) reject(`The verified role does not exist, or is not configured with the bot. Please contact a server Admin to fix.`);
 

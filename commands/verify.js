@@ -55,7 +55,7 @@ module.exports = {
         
         let user = {
             discordID: message.author.id,
-            program: '???',
+            department: '???',
             uwid: uwid,
             verified: false,
             token: Math.floor(Math.random() * 899999 + 100000)
