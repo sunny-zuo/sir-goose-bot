@@ -29,17 +29,7 @@ app.post('/adduser', (req, res) => {
                     const user = await guild.members.fetch(req.body.discordId);
                     if (!user) { continue; }
 
-                    if (req.body.department === guildSettings.verificationProgram) {
-                        const verifiedRole = guild.roles.cache.find(role => role.name === guildSettings.verifiedRole);
-                        if (!verifiedRole) { continue; }
-
-                        user.roles.add(verifiedRole, "Verified UW ID through bot");
-                    } else if (guildSettings.autoGuest) {
-                        const guestRole = guild.roles.cache.find(role => role.name === guildSettings.guestRole);
-                        if (!guestRole) { continue; }
-
-                        user.roles.add(guestRole, "Verified UW ID through bot (guest)");
-                    }
+                    await assignRole(guild, guildSettings, user, req.body).catch(e => { console.log('Failed to assign role: ', e) });
                 } catch (e) {
                     console.log(`Failed to add role to user in guild with id ${guildId}, likely due to permissions`);
                 }
@@ -59,4 +49,32 @@ app.listen(process.env.PORT, () => {
     console.log(`Express server running on port ${process.env.PORT}`);
 });
 
-module.exports = { init };
+async function assignRole(guild, guildSettings, user, userInfo) {
+    if (userInfo.department === guildSettings.verificationProgram) {
+        let verifiedRole = guild.roles.cache.find(role => role.name === guildSettings.verifiedRole);
+        if (!verifiedRole) {
+            await guild.roles.fetch();
+            verifiedRole = guild.roles.cache.find(role => role.name === guildSettings.verifiedRole);
+
+            if (!verifiedRole) {
+                return;
+            }
+        }
+
+        user.roles.add(verifiedRole, "Verified UW ID through bot");
+    } else if (guildSettings.autoGuest) {
+        let guestRole = guild.roles.cache.find(role => role.name === guildSettings.guestRole);
+        if (!guestRole) {
+            await guild.roles.fetch();
+            guestRole = guild.roles.cache.find(role => role.name === guildSettings.guestRole);
+
+            if (!guestRole) {
+                return;
+            }
+        }
+
+        user.roles.add(guestRole, "Verified UW ID through bot (guest)");
+    }
+}
+
+module.exports = { init, assignRole };
