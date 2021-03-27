@@ -19,7 +19,7 @@ for (const file of commandFiles) {
 client.once('ready', async () => {
     console.log(`Logged in as ${client.user.tag}`);
     authServer.init(client);
-    client.user.setActivity("~help");
+    client.user.setActivity("$help");
     const dbConnection = await mongo.connectDB();
     if (dbConnection.success) {
         console.log('Connected to database successfully');

@@ -2,7 +2,7 @@ const Discord = require('discord.js');
 const settings = require('../settings.js');
 
 const settingsInfo = {
-    prefix: 'The prefix that the bot responds to in the server. It is `~` by default.',
+    prefix: 'The prefix that the bot responds to in the server. It is `$` by default.',
     verificationEnabled: 'Set whether or not the bot should verify UW students and assign roles. Either `true` or `false`.',
     verificationProgram: 'The UW program to verify for, formatted the same way as shown on WatIAM. Example: `VPA/Software Engineering`',
     verifiedRole: 'The name of the role to assign if the user belongs to the specified verificationProgram',

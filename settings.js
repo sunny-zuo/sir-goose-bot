@@ -3,7 +3,7 @@ const mongo = require('./mongo.js');
 let servers = new Map();
 
 const defaultSettings = {
-    prefix: "~",
+    prefix: "$",
     verificationEnabled: false,
     verificationProgram: "VPA/Software Engineering",
     verifiedRole: "SE",
