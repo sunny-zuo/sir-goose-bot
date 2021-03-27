@@ -1,83 +1,69 @@
 # Sir Goose Bot
 
-Sir Goose Bot is a rewritten version of [shivam-sh's goose-bot](https://github.com/shivam-sh/goose-bot), built for improved scalability, usability, privacy and security. Its primary functionality is to integrate with UWaterloo's LDAP in order to verify the identity of new Discord members and assign their respective roles.
+Sir Goose Bot is a Discord bot built for UWaterloo Discord servers. Its main functionality is to allow Discord users to authenticate with their UWaterloo identity, and get roles assigned based on their program.
 
-This bot is currently ran on the UWaterloo SE 2025 and the UWaterloo Tron 2025 discord server. If you would like to invite this bot to your server, please message Dark#4321 on Discord!
+Sir Goose Bot is the **only**<sup>1</sup> bot that integrates with the UW's Office365 OAuth. This allows us to read program info, entrance year (for students entering in 2020 or later), and provides a smoother/simpler experience overall.
 
 ---
 
 ## Features
-- Link a Discord account with a UWaterloo identity and verify the connection via email confirmation
+- Link a Discord account with a UWaterloo identity and verify the connection via Office365 OAuth
 - Assign roles based on the UWaterloo program the user is in
 - Easily configurable settings on a per-server basis via bot commands
-- **Automatically verify users who have previously verified with the bot on a different discord server**
-- MongoDB integration for persisting data
+- Automatically verify users who have previously verified with the bot on a different Discord server
 
 ---
 ## Commands
 
-These commands assume the default prefix of `~` (tilde), which can change depending on the server's settings.
+These commands assume the default prefix of `$` (tilde), which can change depending on the server's settings.
 
 
 ### Verification Commands
 
-> **~verifyhelp**
+> **$verify**
 > 
-> Get a help message with all of the verification commands
+> Verify your Waterloo identity for server access. The bot will DM you a verification link where you can login with your UW account and get verified!
+> 
+> Example usage: `$verify`
 
-> **~verify [UWaterloo Email]**
-> 
-> Verify your Waterloo identity for server access.
-> 
-> Example usage: `~verify example@uwaterloo.ca`
-
-> **~confirm [TOKEN]**
-> 
-> Confirm your Waterloo identity, using the token sent via email.
-> 
-> Example usage: `~confirm 123456`
-
-> **~unverify**
-> 
-> Unlink your UW identity and delete all of your user data. This will remove any verified roles that you have.
 
 ### Server Configuration Commands
 
 Managing settings requires the user to have the MANAGE_GUILD or ADMINISTRATOR permissions.
 
-> **~settings**
+> **$config**
 > 
 > List all of the server's settings
 
-> **~settings (setting)**
+> **$config (setting)**
 > 
 > Get information about a specific setting
 > 
-> Example usage: `~settings verificationEnabled`
+> Example usage: `$settings verificationEnabled`
 
-> **~settings (setting) (new value)**
+> **$config (setting) (new value)**
 > 
 > Update the value of a specific setting
 > 
-> Example usage: `~settings verificationEnabled true`
+> Example usage: `$settings verificationEnabled true`
 
-> **~prefix [prefix]**
+> **$prefix [prefix]**
 > 
-> Update the prefix the bot will respond to. The default prefix is `~`
+> Update the prefix the bot will respond to. The default prefix is `$`
 > 
-> Example usage: `~prefix !`
+> Example usage: `$prefix !`
 
 ### Misc Commands
 
-> **~help**
+> **$help**
 > 
 > Get a help message with a list of all of the commands
 
-> **~help (command name)**
+> **$help (command name)**
 > 
 > Get specific information on a specific command
 
-> **~honk**
+> **$honk**
 > 
 > HONK
 
@@ -85,15 +71,17 @@ Managing settings requires the user to have the MANAGE_GUILD or ADMINISTRATOR pe
 
 ## Setup
 
-If you'd like to add this bot to your own server, you can message Dark#4321 on Discord to request a bot invite link for the version hosted by me. Currently, I'm using Heroku for bot hosting and MongoDB Atlas for the database.
+If you'd like to add this bot to your own server, you can message me (Dark#4321) on Discord for an invite link, or by email at bot@sunnyzuo.com
 
-You can also host the bot yourself. Rename the `.env.example` file to `.env` and set your own values for each environment variable. Run `node index.js` to start the bot.
+Self hosting is also possible, but you'll need to first get O365 app registration for OAuth access.
 
-Once started, you can configure the settings via bot commands to meet the needs of your server. These are the configurable settings: (default values in brackets)
-
-* **prefix**: The prefix that the bot responds to (`~`)
+* **prefix**: The prefix that the bot responds to (`$`)
 * **verificationEnabled**: Enable or disable verification (`false`)
 * **verificationProgram**: The UWaterloo program users must be in to get the verified role (`VPA/Software Engineering`)
 * **verifiedRole**: The name of the role that users part of the verificationProgram get assigned (`SE`)
 * **guestRole**: The role to assign guests, which are defined as users who have verified but are part of a different program (`Non-SE`)
 * **autoGuest**: Whether or not to automatically assign guest roles (`true`)
+
+---
+
+<sup>1</sup> As of time of writing, that I am aware of.
