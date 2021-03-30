@@ -28,8 +28,8 @@ const get = (serverID) => {
 }
 
 const set = async (serverID, settings) => {
-    servers.set(serverID, settings);
-    return mongo.getDB().collection("settings").replaceOne({ serverID: serverID }, settings, { upsert: true });
+    servers.set(serverID, { ...settings, serverID: serverID });
+    return mongo.getDB().collection("settings").replaceOne({ serverID: serverID }, { ...settings, serverID: serverID }, { upsert: true });
 }
 
 const getAll = () => {
