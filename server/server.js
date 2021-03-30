@@ -63,7 +63,7 @@ async function assignRole(guild, guildSettings, user, userInfo) {
             }
         }
 
-        user.roles.add(verifiedRole, "Verified UW ID through bot");
+        return user.roles.add(verifiedRole, "Verified UW ID through bot");
     } else if (guildSettings.autoGuest) {
         let guestRole = guild.roles.cache.find(role => role.name === guildSettings.guestRole);
         if (!guestRole) {
@@ -75,7 +75,7 @@ async function assignRole(guild, guildSettings, user, userInfo) {
             }
         }
 
-        user.roles.add(guestRole, "Verified UW ID through bot (guest)");
+        return user.roles.add(guestRole, "Verified UW ID through bot (guest)");
     }
 }
 
