@@ -17,6 +17,7 @@ module.exports = {
             return message.reply('This server does not have verification enabled');
         }
 
+        message.channel.send('Attempting to verify all users that can be auto-verified.');
         await message.guild.members.fetch();
         
         for (user of message.guild.members.cache.values()) {
@@ -25,5 +26,6 @@ module.exports = {
                 await assignRole(message.guild, guildSettings, user, userData);
             }
         }
+        message.channel.send('All users that could be auto-verified were verified!');
     }
 }
