@@ -3,10 +3,11 @@ const Discord = require('discord.js');
 
 module.exports = {
     name: 'verifyrules',
-    description: 'Set or see verification rules.',
+    description: 'Set or see verification rules. [Create a ruleset.](https://sebot.sunnyzuo.com/)',
     args: false,
+    usage: '[ruleset]',
     guildOnly: true,
-    displayHelp: false,
+    displayHelp: true,
     async execute(message, args) {
         if (args) {
             try {
@@ -43,13 +44,13 @@ module.exports = {
             settings.set(message.guild.id, serverSettings);
             message.channel.send(new Discord.MessageEmbed().setColor("#00ff00")
                 .setTitle('Verification Rules Updated Successfully')
-                .setDescription(`Verification is ${serverSettings.verificationEnabled ? 'enabled' : 'disabled'}.
+                .setDescription(`Verification is ${serverSettings.verificationEnabled ? 'enabled' : 'disabled'}. [Create a ruleset.](https://sebot.sunnyzuo.com/)
                 \`\`\`${JSON.stringify(serverSettings.verificationRules)}\`\`\``));
         } else {
             const serverSettings = settings.get(message.guild.id);
             message.channel.send(new Discord.MessageEmbed().setColor("0099ff")
                 .setTitle('Verification Rules')
-                .setDescription(`Verification is ${serverSettings.verificationEnabled ? 'enabled' : 'disabled'}.
+                .setDescription(`Verification is ${serverSettings.verificationEnabled ? 'enabled' : `disabled. Enable it in ${serverSettings.prefix}config`}. [Create a ruleset.](https://sebot.sunnyzuo.com/)
                 \`\`\`${JSON.stringify(serverSettings.verificationRules)}\`\`\``));
         }
     }

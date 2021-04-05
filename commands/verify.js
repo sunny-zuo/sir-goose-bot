@@ -9,7 +9,7 @@ module.exports = {
     description: 'Verify your UW identity for server access',
     args: false,
     guildOnly: false,
-    displayHelp: false,
+    displayHelp: true,
     async execute(message, args) {
         const guildSettings = settings.get(message.guild?.id);
         if (!guildSettings.verificationEnabled) {
