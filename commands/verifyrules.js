@@ -6,6 +6,7 @@ module.exports = {
     description: 'Set or see verification rules. [Create a ruleset.](https://sebot.sunnyzuo.com/)',
     args: false,
     usage: '[ruleset]',
+    permissions: ['MANAGE_GUILD'],
     guildOnly: true,
     displayHelp: true,
     async execute(message, args) {
