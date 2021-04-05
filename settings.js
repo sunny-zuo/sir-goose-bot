@@ -5,10 +5,7 @@ let servers = new Map();
 const defaultSettings = {
     prefix: "$",
     verificationEnabled: false,
-    verificationProgram: "VPA/Software Engineering",
-    verifiedRole: "SE",
-    guestRole: "Non-SE",
-    autoGuest: true,
+    verificationRules: {},
     enablePins: false
 }
 

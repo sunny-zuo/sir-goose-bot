@@ -15,17 +15,18 @@ function buildSettingListEmbed(message) {
     const serverSetting = { ...settings.get(message.guild.id) };
     const keys = Object.keys(serverSetting);
 
-    const blacklistedKeys = ["serverID", "_id"];
-    if (!serverSetting.verificationEnabled) {
-        blacklistedKeys.push('verificationProgram', 'verifiedRole', 'guestRole', 'autoGuest');
-    }
+    const blacklistedKeys = ["serverID", "_id", "verificationRules", "verificationProgram", "verifiedRole", "guestRole", "autoGuest" ];
 
     let settingsString = "";
     for (let key in keys) {
         if (!blacklistedKeys.includes(keys[key])) {
             settingsString += `**${keys[key]}**: ${serverSetting[keys[key]]}\n`;
+            if (keys[key] === "verificationEnabled") {
+                settingsString += `**verificationRules**: View and edit with ${serverSetting.prefix}verifyrules\n`;
+            }
         }
     }
+
 
     const settingListEmbed = new Discord.MessageEmbed()
         .setColor('#0099ff')

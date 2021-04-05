@@ -33,7 +33,7 @@ app.post('/adduser', (req, res) => {
 
                     await assignRole(guild, guildSettings, user, req.body).catch(e => { console.log('Failed to assign role: ', e) });
                 } catch (e) {
-                    console.log(`Failed to add role to user in guild with id ${guildId}, likely due to permissions`);
+                    console.log(`Failed to add role to user in guild with id ${guildId}, likely because the user (${req.body.discordId}) isn't in the guild`);
                 }
             }
         }
@@ -52,30 +52,62 @@ app.listen(process.env.PORT, () => {
 });
 
 async function assignRole(guild, guildSettings, user, userInfo) {
-    if (userInfo.department === guildSettings.verificationProgram) {
-        let verifiedRole = guild.roles.cache.find(role => role.name === guildSettings.verifiedRole);
-        if (!verifiedRole) {
-            await guild.roles.fetch();
-            verifiedRole = guild.roles.cache.find(role => role.name === guildSettings.verifiedRole);
+    const verificationRules = guildSettings.verificationRules?.rules;
+    const baseYear = guildSettings.verificationRules?.baseYear;
 
-            if (!verifiedRole) {
-                return;
+    if (!baseYear || !verificationRules) {
+        throw new Error(`Server ${guild.name}/${guild.id} has invalid verification rules set.`);
+        return;
+    }
+    const roles = [];
+
+    for (rule of verificationRules) {
+        if (checkDepartment(userInfo, rule.department, rule.match) && checkYear(userInfo, baseYear, rule.year)) {
+            console.log(`matched rule ${JSON.stringify(rule)}`);
+            for (roleName of rule.roles) {
+                if (guild.roles.cache.find(role => role.name === roleName)) {
+                    roles.push(guild.roles.cache.find(role => role.name === roleName));
+                } else {
+                    await guild.roles.fetch();
+                    if (guild.roles.cache.find(role => role.name === roleName)) {
+                        roles.push(guild.roles.cache.find(role => role.name === roleName));
+                    }
+                }
             }
+            break;
         }
+    }
 
-        return user.roles.add(verifiedRole, "Verified UW ID through bot");
-    } else if (guildSettings.autoGuest) {
-        let guestRole = guild.roles.cache.find(role => role.name === guildSettings.guestRole);
-        if (!guestRole) {
-            await guild.roles.fetch();
-            guestRole = guild.roles.cache.find(role => role.name === guildSettings.guestRole);
+    return user.roles.add(roles, "Verified UW ID through bot");
+}
 
-            if (!guestRole) {
-                return;
-            }
-        }
+function checkDepartment(userInfo, department, matchType) {
+    if (matchType === "anything") {
+        return true;
+    }
+    else if (matchType === "exact") {
+        return department.toLowerCase() === userInfo.department.toLowerCase();
+    }
+    else if (matchType === "begins") {
+        return userInfo.department.toLowerCase().startsWith(department.toLowerCase());
+    }
+    else if (matchType === "contains") {
+        return userInfo.department.toLowerCase().includes(department.toLowerCase());
+    } else {
+        return false;
+    }
+}
 
-        return user.roles.add(guestRole, "Verified UW ID through bot (guest)");
+function checkYear(userInfo, baseYear, checkType) {
+    if (checkType === "all") {
+        return true;
+    } else if (checkType === "equal") {
+        console.log(userInfo.o365CreatedDate.getFullYear());
+        return userInfo.o365CreatedDate.getFullYear() === baseYear;
+    } else if (checkType === "upper") {
+        return userInfo.o365CreatedDate.getFullYear() < baseYear;
+    } else if (checkType === "lower") {
+        return userInfo.o365CreatedDate.getFullYear() > baseYear;
     }
 }
 
