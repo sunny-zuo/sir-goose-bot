@@ -63,7 +63,6 @@ async function assignRole(guild, guildSettings, user, userInfo) {
 
     for (rule of verificationRules) {
         if (checkDepartment(userInfo, rule.department, rule.match) && checkYear(userInfo, baseYear, rule.year)) {
-            console.log(`matched rule ${JSON.stringify(rule)}`);
             for (roleName of rule.roles) {
                 if (guild.roles.cache.find(role => role.name === roleName)) {
                     roles.push(guild.roles.cache.find(role => role.name === roleName));
@@ -99,15 +98,15 @@ function checkDepartment(userInfo, department, matchType) {
 }
 
 function checkYear(userInfo, baseYear, checkType) {
+    const userYear = (new Date(userInfo.o365CreatedDate)).getFullYear();
     if (checkType === "all") {
         return true;
     } else if (checkType === "equal") {
-        console.log(userInfo.o365CreatedDate.getFullYear());
-        return userInfo.o365CreatedDate.getFullYear() === baseYear;
+        return userYear === baseYear;
     } else if (checkType === "upper") {
-        return userInfo.o365CreatedDate.getFullYear() < baseYear;
+        return userYear < baseYear;
     } else if (checkType === "lower") {
-        return userInfo.o365CreatedDate.getFullYear() > baseYear;
+        return userYear > baseYear;
     }
 }
 
