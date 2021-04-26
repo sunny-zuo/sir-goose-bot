@@ -40,15 +40,16 @@ module.exports = {
                 .toLowerCase()
                 .replace(/\s/g, "")})**`;
         };
+
+        const trimString = (str, max) => ((str && str.length > max) ? `${str.slice(0, max - 3).split(" ").slice(0, -1).join(" ")}...` : str);
         const course = json.course[0];
         const prereqs =
-            course.prereqs?.replace(courseMatcher, replacer) ?? "None";
+            trimString(course.prereqs?.replace(courseMatcher, replacer), 1024) ?? "None";
         const antireqs =
-            course.antireqs?.replace(courseMatcher, replacer) ?? "None";
+            trimString(course.antireqs?.replace(courseMatcher, replacer), 1024) ?? "None";
 
         const responseEmbed = new Discord.MessageEmbed()
-            .setColor("#9932cc")
-            .setTitle(`${course.code.toUpperCase()}: ${course.name}`)
+            .setColor("#9932cc").setTitle(`${course.code.toUpperCase()}: ${course.name}`)
             .setDescription(
                 `${course.description}\n **[View course on UWFlow](https://uwflow.com/course/${courseName})**`
             )
