@@ -44,7 +44,14 @@ client.on('message', message => {
     }
 
     if (command.args && args.length === 0) {
-        return message.reply(`The ${commandName} command requires arguments`);
+        const commandEmbed = new Discord.MessageEmbed()
+            .setColor('#0099ff')
+            .setTitle(`Command: \`${prefix}${command.name}\``)
+            .setDescription(command.description)
+            .addFields(
+                { name: 'Usage', value: `\`${prefix}${command.name}${command.usage ? ` ${command.usage}` : ''}\`` }
+            );
+        return message.reply(commandEmbed);
     }
 
     if (command.permissions) {
