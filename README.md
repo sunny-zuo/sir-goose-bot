@@ -8,7 +8,8 @@ Sir Goose Bot is the **only**<sup>1</sup> bot that integrates with the UW's Offi
 
 ## Features
 - Link a Discord account with a UWaterloo identity and verify the connection via Office365 OAuth
-- Assign roles based on the UWaterloo program the user is in
+- Very customizable role assignment: assign roles based on the UWaterloo program the user is in, and/or the user's year
+   - [Web interface](https://sebot.sunnyzuo.com/) for building role assignment rules
 - Easily configurable settings on a per-server basis via bot commands
 - Automatically verify users who have previously verified with the bot on a different Discord server
 
@@ -46,6 +47,13 @@ Managing settings requires the user to have the MANAGE_GUILD or ADMINISTRATOR pe
 > Update the value of a specific setting
 > 
 > Example usage: `$settings verificationEnabled true`
+
+
+> **$verifyrules (ruleset)**
+> 
+> Set the role assignment rules to use when assigning roles after a user verifies
+> 
+> Create rules [here.](https://sebot.sunnyzuo.com/)
 
 > **$prefix [prefix]**
 > 
