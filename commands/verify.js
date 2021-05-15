@@ -19,7 +19,7 @@ module.exports = {
         const encodedUID = CryptoJS.AES.encrypt(`${message.author.id}-sebot`, process.env.AES_PASSPHRASE).toString().replace(/\//g, '_').replace(/\+/g, '-');
 
         const existingUser = await mongo.getDB().collection("users").findOne({ discordId: message.author.id });
-        if (existingUser) {
+        if (existingUser && existingUser.givenName) {
             try {
                 assignRole(message.guild, guildSettings, message.member, existingUser);
                 message.channel.send(`${message.author}`, {
