@@ -28,7 +28,6 @@
     "graphql-request": "^3.4.0",
     "luxon": "^1.25.0",
     "mongodb": "^3.6.0",
-    "node-fetch": "^2.6.1",
-    "nodemailer": "^6.4.11"
+    "node-fetch": "^2.6.1"
   }
 }
