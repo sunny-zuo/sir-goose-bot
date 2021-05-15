@@ -1,12 +1,40 @@
+const fs = require('fs');
+const path = require('path');
+const CryptoJS = require('crypto-js');
 const express = require('express');
 const app = express();
 const mongo = require('../mongo.js');
 const settings = require('../settings');
 
+const hashes = new Map();
 let client;
 
 function init(discordClient) {
     client = discordClient;
+    buildHashMap();
+}
+
+/**
+ * Read all files containing uwid hashes to build a map for easier usage.
+ * Hash files should be named "se20XX.hash" and contain one hash per line
+ */
+async function buildHashMap() {
+    const emailHashFolder = './server/data/';
+    const files = fs.readdirSync(emailHashFolder);
+
+    for (fileName of files) {
+        if (fileName.endsWith('.hash')) {
+            const cohort = Number(fileName.replace('.hash', '').replace('se', ''));
+            const filePath = path.join(emailHashFolder, fileName);
+            const fileHashes = fs.readFileSync(filePath, 'utf8').split('\n');
+
+            for (hash of fileHashes) {
+                if (hash !== "") {
+                    hashes.set(hash, cohort);
+                }
+            }
+        }
+    };
 }
 
 app.use(express.json());
@@ -54,6 +82,12 @@ app.listen(process.env.PORT, () => {
 async function assignRole(guild, guildSettings, user, userInfo) {
     const verificationRules = guildSettings.verificationRules?.rules;
     const baseYear = guildSettings.verificationRules?.baseYear;
+
+    const userHash = CryptoJS.SHA256(userInfo.uwid).toString(CryptoJS.enc.Hex);
+    if (hashes.get(userHash)) {
+        userInfo.o365CreatedDate = new Date(hashes.get(userHash) - 5, 5);
+        console.log(userInfo);
+    }
 
     if (!baseYear || !verificationRules) {
         throw new Error(`Server ${guild.name}/${guild.id} has invalid verification rules set.`);
