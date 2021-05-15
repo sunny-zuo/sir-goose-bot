@@ -108,14 +108,17 @@ async function assignRole(guild, guildSettings, user, userInfo) {
             break;
         }
     }
+
     if (guildSettings.verificationRules?.renameFullName || guildSettings.verificationRules?.renameFirstName) {
-        if (!guild.me.hasPermission('MANAGE_NICKNAMES')) {
-            console.log(`Server ${guild.name}/${guild.id} has renaming enabled but has not granted the bot MANAGE_NICKNAMES permissions`);
-        } else if (guildSettings.verificationRules?.renameFullName && userInfo.givenName && userInfo.surname) {
-            user.setNickname(`${userInfo.givenName} ${userInfo.surname}`);
-        } else if (guildSettings.verificationRules?.renameFirstName && userInfo.givenName) {
-            user.setNickname(userInfo.givenName);
-        }
+        if (!user.nickname || guildSettings.verificationRules?.forceRename) {
+            if (!guild.me.hasPermission('MANAGE_NICKNAMES')) {
+                console.log(`Server ${guild.name}/${guild.id} has renaming enabled but has not granted the bot MANAGE_NICKNAMES permissions`);
+            } else if (guildSettings.verificationRules?.renameFullName && userInfo.givenName && userInfo.surname) {
+                user.setNickname(`${userInfo.givenName} ${userInfo.surname}`);
+            } else if (guildSettings.verificationRules?.renameFirstName && userInfo.givenName) {
+                user.setNickname(userInfo.givenName);
+            }
+        } 
     }
 
     return user.roles.add(roles, "Verified UW ID through bot");
