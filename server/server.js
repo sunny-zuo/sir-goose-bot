@@ -86,7 +86,6 @@ async function assignRole(guild, guildSettings, user, userInfo) {
     const userHash = CryptoJS.SHA256(userInfo.uwid).toString(CryptoJS.enc.Hex);
     if (hashes.get(userHash)) {
         userInfo.o365CreatedDate = new Date(hashes.get(userHash) - 5, 5);
-        console.log(userInfo);
     }
 
     if (!baseYear || !verificationRules) {
