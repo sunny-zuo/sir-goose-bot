@@ -30,8 +30,14 @@ function buildSettingListEmbed(message) {
 
     const settingListEmbed = new Discord.MessageEmbed()
         .setColor('#0099ff')
+        .setTitle(`${message.guild.name} Settings`)
+        .setDescription(
+            `View and manage the bot configuration for this server.
+                Use \`${serverSetting.prefix}config <setting>\` for a description of each setting
+                Use \`${serverSetting.prefix}config <setting> <new value>\` to modify values`
+        )
         .addFields(
-            { name: `__${message.guild.name} Settings__`, value: settingsString },
+            { name: `__Settings__`, value: settingsString },
         )
 
     return settingListEmbed;
