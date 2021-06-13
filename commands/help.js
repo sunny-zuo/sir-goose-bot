@@ -13,13 +13,22 @@ module.exports = {
         const { commands } = message.client;
 
         if (!args?.length) {
-            const commandList = commands.filter(command => command.displayHelp).map(command => `\`${command.name}\``).join(", ");
+            const allCommands = commands.filter(command => command.displayHelp).map(command => command.name);
+
+            const verificationCommands = ['verify', 'verifyall', 'verifyrules'];
+            const adminCommands = ['config', 'verifyrules', 'prefix', 'verifyall'];
+            const todoCommands = ['todohelp', 'upcoming', 'complete', 'incomplete', 'settings'];
+            const remainingCommands = allCommands.filter(command => !verificationCommands.concat(adminCommands, todoCommands).includes(command))
+
             const helpEmbed = new Discord.MessageEmbed()
                 .setColor('#0099ff')
                 .setTitle('Command Help')
                 .addFields(
                     { name: 'Prefix', value: `The prefix for ${message.guild?.name ? `${message.guild.name} ` : ` the bot by default `} is \`${prefix}\``},
-                    { name: 'Command List', value: commandList },
+                    { name: 'Verification Commands', value: verificationCommands.map(command => `\`${command}\``).join(", ") },
+                    { name: 'Server Management Commands', value: adminCommands.map(command => `\`${command}\``).join(", ") },
+                    { name: 'Todo List Commands', value: todoCommands.map(command => `\`${command}\``).join(", ") },
+                    { name: 'Other Commands', value: remainingCommands.map(command => `\`${command}\``).join(", ") },
                     { name: 'Detailed Command Help', value: `For help about a specific command, use \`${prefix}help [command]\`\n Example usage: \`${prefix}help prefix\``}
                 )
             return message.channel.send(helpEmbed);

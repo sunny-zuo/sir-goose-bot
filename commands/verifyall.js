@@ -9,7 +9,7 @@ module.exports = {
     description: 'Verify all existing users',
     args: false,
     guildOnly: true,
-    displayHelp: false,
+    displayHelp: true,
     permissions: ['MANAGE_GUILD'],
     async execute(message, args) {
         const guildSettings = settings.get(message.guild?.id);
