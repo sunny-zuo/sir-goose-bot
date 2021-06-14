@@ -6,7 +6,7 @@ const settings = require('../settings.js');
 
 module.exports = {
     name: 'verifyall',
-    description: 'Verify all existing users',
+    description: 'Verify all existing users. This will use your current ruleset and assign all roles that can be assigned without removing existing roles',
     args: false,
     guildOnly: true,
     displayHelp: true,

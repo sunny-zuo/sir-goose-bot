@@ -15,7 +15,7 @@ module.exports = {
         if (!args?.length) {
             const allCommands = commands.filter(command => command.displayHelp).map(command => command.name);
 
-            const verificationCommands = ['verify', 'verifyall', 'verifyrules'];
+            const verificationCommands = ['verify'];
             const adminCommands = ['config', 'verifyrules', 'prefix', 'verifyall'];
             const todoCommands = ['todohelp', 'upcoming', 'complete', 'incomplete', 'settings'];
             const remainingCommands = allCommands.filter(command => !verificationCommands.concat(adminCommands, todoCommands).includes(command))
