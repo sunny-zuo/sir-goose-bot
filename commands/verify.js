@@ -38,19 +38,14 @@ module.exports = {
                 .setTitle('Verification Prompt')
                 .setDescription(`[Click here to login using your UWaterloo account to verify.](${process.env.SERVER_URI}/verify/${encodedUID})
                 Authorization allows us to read your profile information to confirm that you are/were a UW student, and you can revoke this permission at any time.
-                If you run into issues, message <@!282326223521316866> for help!
-                
-                If you're an applicant, unfortunately you won't be unable to verify until June when your email is activated. Check if the server has alternate verification methods.`));
+                If you run into issues, message <@!282326223521316866> for help!`));
         } else {
             try {
                 message.author.send(new Discord.MessageEmbed().setColor("#00ff00")
                     .setTitle('Verification Prompt')
                     .setDescription(`[Click here to login using your UWaterloo account to verify.](${process.env.SERVER_URI}/verify/${encodedUID})
                 Authorization allows us to read your profile information to confirm that you are/were a UW student, and you can revoke this permission at any time.
-                If you run into issues, message <@!282326223521316866> for help!
-                
-
-                **For Applicants:** Unfortunately you won't be unable to verify until June when your email is activated. Check if the server has alternate verification methods.`));
+                If you run into issues, message <@!282326223521316866> for help!`));
                 message.channel.send(`${message.author}, we've DMed you a verification link. Please check your DMs!`);
             } catch (e) {
                 message.channel.send(`${message.author}`, {
