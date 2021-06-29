@@ -6,7 +6,8 @@ const app = express();
 const mongo = require('../mongo.js');
 const settings = require('../settings');
 
-const hashes = new Map();
+const customAttributesByHash = new Map();
+const customAttributesByUWID = new Map();
 let client;
 
 function init(discordClient) {
@@ -24,13 +25,27 @@ async function buildHashMap() {
 
     for (fileName of files) {
         if (fileName.endsWith('.hash')) {
-            const cohort = Number(fileName.replace('.hash', '').replace('se', ''));
+            const gradYear = Number(fileName.replace('.hash', '').replace('se', ''));
             const filePath = path.join(emailHashFolder, fileName);
             const fileHashes = fs.readFileSync(filePath, 'utf8').split('\n');
 
             for (hash of fileHashes) {
                 if (hash !== "") {
-                    hashes.set(hash, cohort);
+                    customAttributesByHash.set(hash, {
+                        o365CreatedDate: new Date(gradYear - 5, 5)
+                    });
+                }
+            }
+        }
+        else if (fileName.endsWith('.uwid')) {
+            if (fileName === 'bme26.uwid') {
+                const filePath = path.join(emailHashFolder, fileName);
+                const fileUWIDs = fs.readFileSync(filePath, 'utf8').split('\n');
+
+                for (uwid of fileUWIDs) {
+                    customAttributesByUWID.set(uwid, {
+                        department: 'CUSTOM/BME 26'
+                    });
                 }
             }
         }
@@ -84,8 +99,8 @@ async function assignRole(guild, guildSettings, user, userInfo) {
     const baseYear = guildSettings.verificationRules?.baseYear;
 
     const userHash = CryptoJS.SHA256(userInfo.uwid).toString(CryptoJS.enc.Hex);
-    if (hashes.get(userHash)) {
-        userInfo.o365CreatedDate = new Date(hashes.get(userHash) - 5, 5);
+    if (customAttributesByHash.get(userHash)?.o365CreatedDate) {
+        userInfo.o365CreatedDate = customAttributesByHash.get(userHash).o365CreatedDate;
     }
 
     if (!baseYear || !verificationRules) {
@@ -125,17 +140,28 @@ async function assignRole(guild, guildSettings, user, userInfo) {
 }
 
 function checkDepartment(userInfo, department, matchType) {
+    const userHash = CryptoJS.SHA256(userInfo.uwid).toString(CryptoJS.enc.Hex);
+    const userDepartments = [userInfo.department];
+
+    if (customAttributesByHash.get(userHash)?.department) {
+        userDepartments.push(customAttributesByHash.get(userHash).department);
+    }
+
+    if (customAttributesByUWID.get(userInfo.uwid)?.department) {
+        userDepartments.push(customAttributesByUWID.get(userInfo.uwid).department);
+    }
+
     if (matchType === "anything") {
         return true;
     }
     else if (matchType === "exact") {
-        return department.toLowerCase() === userInfo.department.toLowerCase();
+        return userDepartments.some(userDepartment => userDepartment.toLowerCase() === department.toLowerCase());
     }
     else if (matchType === "begins") {
-        return userInfo.department.toLowerCase().startsWith(department.toLowerCase());
+        return userDepartments.some(userDepartment => userDepartment.toLowerCase().startsWith(department.toLowerCase()));
     }
     else if (matchType === "contains") {
-        return userInfo.department.toLowerCase().includes(department.toLowerCase());
+        return userDepartments.some(userDepartment => userDepartment.toLowerCase().includes(department.toLowerCase()));
     } else {
         return false;
     }
@@ -143,6 +169,7 @@ function checkDepartment(userInfo, department, matchType) {
 
 function checkYear(userInfo, baseYear, checkType) {
     const userYear = (new Date(userInfo.o365CreatedDate)).getFullYear();
+
     if (checkType === "all") {
         return true;
     } else if (checkType === "equal") {
