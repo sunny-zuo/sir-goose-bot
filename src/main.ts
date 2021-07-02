@@ -17,7 +17,7 @@ intents.add(
 
 const client = new Client({ intents: intents });
 
-function init() {
+function init(): void {
     client.login(process.env.DISCORD_TOKEN);
 }
 
