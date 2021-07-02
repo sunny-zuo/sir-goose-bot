@@ -1,8 +1,8 @@
-import { EventHandler } from './event-handler';
+import { EventHandler } from './eventHandler';
 import Client from '../Client';
 
-export class ReadyHandler implements EventHandler {
-    eventName = 'ready';
+export class ReadyEventHandler implements EventHandler {
+    readonly eventName = 'ready';
     client: Client;
 
     constructor(client: Client) {

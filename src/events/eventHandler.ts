@@ -1,4 +1,4 @@
 export interface EventHandler {
-    eventName: string;
+    readonly eventName: string;
     execute(...args: any[]): Promise<void>;
 }

@@ -1,3 +1,3 @@
-import { ReadyHandler } from './ready-handler';
+import { ReadyEventHandler } from './readyEventHandler';
 
-export default [ReadyHandler];
+export default [ReadyEventHandler];
