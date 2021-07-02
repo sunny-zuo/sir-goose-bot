@@ -29,6 +29,7 @@
     "typescript": "^4.3.5"
   },
   "dependencies": {
+    "axios": "^0.21.1",
     "discord.js": "^13.0.0-dev.941cd86.1625141252"
   }
 }

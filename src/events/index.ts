@@ -1,3 +1,4 @@
 import { ReadyEventHandler } from './readyEventHandler';
+import { MessageEventHandler } from './messageEventHandler';
 
-export default [ReadyEventHandler];
+export default [ReadyEventHandler, MessageEventHandler];
