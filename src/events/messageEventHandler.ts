@@ -26,6 +26,11 @@ export class MessageEventHandler implements EventHandler {
         if (command.args && args.length === 0) return;
         if (!command.checkMessageCommandPermissions(message)) return;
 
+        client.log.command(
+            `${message.author.username} (${message.author.id}) ran command "${commandName}" ${
+                (args[0] && `with arguments "${args[0]}"`) || 'without arguments'
+            } in server ${message?.guild?.name || 'DMs'} (${message?.guild?.id || 'DMs'}) via message`
+        );
         command.execute(message, args[0]);
     }
 }

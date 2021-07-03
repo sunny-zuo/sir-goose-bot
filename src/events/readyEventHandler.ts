@@ -11,9 +11,10 @@ export class ReadyEventHandler implements EventHandler {
 
     async execute(...args: any[]) {
         const client = this.client;
+        client.log.info(`Client is now ready!`);
 
         // the user will never be null after the ready event is emitted
-        console.log(`Logged in as ${client.user!.tag}`);
+        client.log.info(`Logged in as ${client.user!.tag}`);
         client.user!.setActivity('$help');
     }
 }
