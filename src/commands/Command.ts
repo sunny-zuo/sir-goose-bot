@@ -1,6 +1,19 @@
-import { TextChannel, NewsChannel, GuildMember, Message, MessageEmbed, Permissions, ThreadChannel } from 'discord.js';
+import {
+    ThreadChannel,
+    Channel,
+    TextChannel,
+    NewsChannel,
+    GuildMember,
+    Message,
+    MessageEmbed,
+    Permissions,
+    CommandInteraction,
+    DMChannel,
+    PartialDMChannel,
+} from 'discord.js';
 import { CommandOptions } from '../types/CommandOptions';
 import Client from '../Client';
+import { TextBasedChannel } from '../types';
 
 const minimumClientPermissions = [Permissions.FLAGS.SEND_MESSAGES, Permissions.FLAGS.EMBED_LINKS];
 
@@ -29,7 +42,7 @@ export abstract class Command {
         this.description = options.description;
     }
 
-    abstract execute(message: Message, args: string): Promise<void>;
+    abstract execute(interaction: Message | CommandInteraction, args: string): Promise<void>;
 
     checkMessageCommandPermissions(message: Message) {
         if (message.channel.type === 'dm') return true;
@@ -87,5 +100,27 @@ export abstract class Command {
             .setTimestamp();
 
         channel.send({ embeds: [embed] });
+    }
+
+    getValidChannel(channel: TextBasedChannel | null): Promise<TextBasedChannel> {
+        return new Promise(async (resolve, reject) => {
+            if (channel !== null) {
+                if (channel instanceof DMChannel) {
+                    const dmChannel = channel as DMChannel;
+                    if (dmChannel.partial) {
+                        const fullChannel = await dmChannel.fetch();
+                        resolve(fullChannel);
+                    }
+                }
+
+                resolve(channel);
+            } else {
+                reject(
+                    new Error(
+                        `Command "${this.name}" failed to fetch valid channel - this is likely because a slash command was used without the bot user existing in a guild`
+                    )
+                );
+            }
+        });
     }
 }

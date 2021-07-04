@@ -1,6 +1,6 @@
 import { Command } from '../Command';
 import Client from '../../Client';
-import { Message, MessageEmbed } from 'discord.js';
+import { CommandInteraction, Message, MessageEmbed } from 'discord.js';
 import axios from 'axios';
 
 const randomGoose = 'https://source.unsplash.com/random?goose,geese';
@@ -13,14 +13,16 @@ export class Honk extends Command {
         });
     }
 
-    async execute(message: Message) {
+    async execute(interaction: Message | CommandInteraction) {
+        const channel = await this.getValidChannel(interaction.channel);
+
         if (Math.random() < 0.4) {
             const imageUrl = await axios.get(randomGoose).then((r) => r.request.res.responseUrl);
             const embed = new MessageEmbed().setColor('AQUA').setTitle('HONK HONK').setImage(imageUrl);
 
-            message.channel.send({ embeds: [embed] });
+            channel.send({ embeds: [embed] });
         } else {
-            message.channel.send({ content: 'HONK' });
+            channel.send({ content: 'HONK' });
         }
     }
 }

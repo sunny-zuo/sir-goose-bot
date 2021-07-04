@@ -1,5 +1,5 @@
 import dotenv from 'dotenv';
-import { Intents } from 'discord.js';
+import { Intents, PartialTypes } from 'discord.js';
 
 import Client from './Client';
 
@@ -15,7 +15,9 @@ intents.add(
     'DIRECT_MESSAGE_REACTIONS'
 );
 
-const client = new Client({ intents: intents });
+const partials: Array<PartialTypes> = ['CHANNEL'];
+
+const client = new Client({ intents: intents, partials: partials });
 
 function init(): void {
     client.login(process.env.DISCORD_TOKEN);
