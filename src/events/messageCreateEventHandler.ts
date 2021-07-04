@@ -2,8 +2,8 @@ import { Message } from 'discord.js';
 import Client from '../Client';
 import { EventHandler } from './eventHandler';
 
-export class MessageEventHandler implements EventHandler {
-    readonly eventName = 'message';
+export class MessageCreateEventHandler implements EventHandler {
+    readonly eventName = 'messageCreate';
     client: Client;
 
     constructor(client: Client) {
