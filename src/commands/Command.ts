@@ -1,19 +1,7 @@
-import {
-    ThreadChannel,
-    Channel,
-    TextChannel,
-    NewsChannel,
-    GuildMember,
-    Message,
-    MessageEmbed,
-    Permissions,
-    CommandInteraction,
-    DMChannel,
-    PartialDMChannel,
-} from 'discord.js';
+import { GuildMember, Message, MessageEmbed, Permissions, CommandInteraction, DMChannel } from 'discord.js';
 import { CommandOptions } from '../types/CommandOptions';
 import Client from '../Client';
-import { TextBasedChannel } from '../types';
+import { TextBasedChannel, GuildTextBasedChannel } from '../types';
 
 const minimumClientPermissions = [Permissions.FLAGS.SEND_MESSAGES, Permissions.FLAGS.EMBED_LINKS];
 
@@ -58,11 +46,7 @@ export abstract class Command {
         );
     }
 
-    checkMemberPermissions(
-        member: GuildMember | null,
-        channel: TextChannel | NewsChannel | ThreadChannel,
-        ownerOverride = true
-    ) {
+    checkMemberPermissions(member: GuildMember | null, channel: GuildTextBasedChannel, ownerOverride = true) {
         if (member === null) return false;
         if (!this.ownerOnly && !this.userPermissions.length) return true;
         if (ownerOverride && this.client.isOwner(member.user)) return true;
@@ -84,7 +68,7 @@ export abstract class Command {
         channel.send({ embeds: [embed] });
     }
 
-    checkClientPermissions(channel: TextChannel | NewsChannel | ThreadChannel) {
+    checkClientPermissions(channel: GuildTextBasedChannel) {
         if (channel.guild.me === null) return false;
         const missingPermissions = channel.permissionsFor(channel.guild.me).missing(this.clientPermissions);
 
