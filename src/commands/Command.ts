@@ -54,8 +54,8 @@ export abstract class Command {
 
         if (interaction.member && interaction.member instanceof GuildMember) {
             return (
-                this.checkClientPermissions(interaction.channel) &&
-                this.checkMemberPermissions(interaction.member, interaction.channel)
+                this.checkClientPermissions(interaction.channel, interaction) &&
+                this.checkMemberPermissions(interaction.member, interaction.channel, interaction)
             );
         } else {
             // this code would be ran if a bot user is not in the guild, and we would have an APIInteractionGuildMember
@@ -70,48 +70,54 @@ export abstract class Command {
         }
     }
 
-    checkMemberPermissions(member: GuildMember | null, channel: GuildTextBasedChannel, ownerOverride = true) {
+    checkMemberPermissions(
+        member: GuildMember | null,
+        channel: GuildTextBasedChannel,
+        interaction: Message | CommandInteraction | null = null,
+        ownerOverride = true
+    ) {
         if (member === null) return false;
         if (!this.ownerOnly && !this.userPermissions.length) return true;
         if (ownerOverride && this.client.isOwner(member.user)) return true;
-        if (this.ownerOnly && !this.client.isOwner(member.user)) return false;
+        if (this.ownerOnly && !this.client.isOwner(member.user)) {
+            if (interaction) {
+                this.sendErrorEmbed(
+                    interaction,
+                    'Missing Permissions',
+                    `This command can only be used by the bot owner.`
+                );
+            }
+            return false;
+        }
 
         const missingPermissions = channel.permissionsFor(member).missing(this.userPermissions);
 
         if (missingPermissions.length === 0) return true;
 
-        const embed = new MessageEmbed()
-            .setTitle('Missing Permissions')
-            .setColor('RED')
-            .setDescription(
+        if (interaction) {
+            this.sendErrorEmbed(
+                interaction,
+                'Missing Permissions',
                 `You must have the following permissions to use this command:
-                ${missingPermissions}`
-            )
-            .setTimestamp();
-
-        channel.send({ embeds: [embed] }).catch((error) => {
-            this.client.log.error(error);
-        });
+                ${missingPermissions.map((p) => `\`${p}\``).join(', ')}`
+            );
+        }
     }
 
-    checkClientPermissions(channel: GuildTextBasedChannel) {
+    checkClientPermissions(channel: GuildTextBasedChannel, interaction: Message | CommandInteraction | null = null) {
         if (channel.guild.me === null) return false;
         const missingPermissions = channel.permissionsFor(channel.guild.me).missing(this.clientPermissions);
 
         if (missingPermissions.length === 0) return true;
 
-        const embed = new MessageEmbed()
-            .setTitle('Bot Missing Permissions')
-            .setColor('RED')
-            .setDescription(
+        if (interaction) {
+            this.sendErrorEmbed(
+                interaction,
+                'Bot Missing Permissions',
                 `The bot requires the following permissions to run this command:
-                ${missingPermissions}`
-            )
-            .setTimestamp();
-
-        channel.send({ embeds: [embed] }).catch((error) => {
-            this.client.log.error(error);
-        });
+                ${missingPermissions.map((p) => `\`${p}\``).join(', ')}`
+            );
+        }
     }
 
     getValidChannel(channel: TextBasedChannel | null): Promise<TextBasedChannel> {
@@ -133,6 +139,14 @@ export abstract class Command {
                     )
                 );
             }
+        });
+    }
+
+    sendErrorEmbed(interaction: Message | CommandInteraction, title: string, description: string) {
+        const embed = new MessageEmbed().setTitle(title).setColor('RED').setDescription(description).setTimestamp();
+
+        return interaction.reply({ embeds: [embed] }).catch((error) => {
+            this.client.log.error(error);
         });
     }
 }
