@@ -23,6 +23,7 @@ export class MessageCreateEventHandler implements EventHandler {
         const command = client.commands.get(commandName) || client.aliases.get(commandName);
 
         if (!command || !command.enabled) return;
+        if (!command.isMessageCommand) return;
         if (command.args && args.length === 0) return;
         if (!command.checkMessageCommandPermissions(message)) return;
 
