@@ -17,6 +17,8 @@ export class CommandInteractionCreateEventHandler implements EventHandler {
         const command = client.commands.get(interaction.commandName);
 
         if (!command || !command.enabled) return;
+        if (!command.isSlashCommand) return;
+        if (!command.checkCommandPermissions(interaction)) return;
 
         client.log.command(
             `${interaction.user.username} (${interaction.user.id}) ran command "${interaction.commandName}" in server ${

@@ -42,18 +42,32 @@ export abstract class Command {
 
     abstract execute(interaction: Message | CommandInteraction, args: string): Promise<void>;
 
-    checkMessageCommandPermissions(message: Message) {
-        if (message.channel.type === 'dm') return true;
+    checkCommandPermissions(interaction: Message | CommandInteraction) {
+        if (!interaction.channel) return false;
+        if (interaction.channel.type === 'dm' || interaction.member === null) return true;
         if (
-            message.channel.guild.me &&
-            !message.channel.permissionsFor(message.channel.guild.me).has(minimumClientPermissions)
+            interaction.channel.guild.me &&
+            !interaction.channel.permissionsFor(interaction.channel.guild.me).has(minimumClientPermissions)
         ) {
             return false;
         }
 
-        return (
-            this.checkClientPermissions(message.channel) && this.checkMemberPermissions(message.member, message.channel)
-        );
+        if (interaction.member && interaction.member instanceof GuildMember) {
+            return (
+                this.checkClientPermissions(interaction.channel) &&
+                this.checkMemberPermissions(interaction.member, interaction.channel)
+            );
+        } else {
+            // this code would be ran if a bot user is not in the guild, and we would have an APIInteractionGuildMember
+            // https://discord.com/developers/docs/resources/guild#guild-member-object
+            // for now, we consider this behavior unsupported and return false
+            this.client.log.warn(
+                `Command was ran from guild ${interaction.guild!.name} (${
+                    interaction.guild!.id
+                }) where the bot user isn't present`
+            );
+            return false;
+        }
     }
 
     checkMemberPermissions(member: GuildMember | null, channel: GuildTextBasedChannel, ownerOverride = true) {
@@ -75,7 +89,9 @@ export abstract class Command {
             )
             .setTimestamp();
 
-        channel.send({ embeds: [embed] });
+        channel.send({ embeds: [embed] }).catch((error) => {
+            this.client.log.error(error);
+        });
     }
 
     checkClientPermissions(channel: GuildTextBasedChannel) {
@@ -93,7 +109,9 @@ export abstract class Command {
             )
             .setTimestamp();
 
-        channel.send({ embeds: [embed] });
+        channel.send({ embeds: [embed] }).catch((error) => {
+            this.client.log.error(error);
+        });
     }
 
     getValidChannel(channel: TextBasedChannel | null): Promise<TextBasedChannel> {

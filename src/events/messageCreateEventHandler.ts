@@ -25,7 +25,7 @@ export class MessageCreateEventHandler implements EventHandler {
         if (!command || !command.enabled) return;
         if (!command.isMessageCommand) return;
         if (command.args && args.length === 0) return;
-        if (!command.checkMessageCommandPermissions(message)) return;
+        if (!command.checkCommandPermissions(message)) return;
 
         client.log.command(
             `${message.author.username} (${message.author.id}) ran command "${commandName}" ${
