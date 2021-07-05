@@ -3,7 +3,7 @@ import Client from '../Client';
 
 export class ReadyEventHandler implements EventHandler {
     readonly eventName = 'ready';
-    client: Client;
+    readonly client: Client;
 
     constructor(client: Client) {
         this.client = client;

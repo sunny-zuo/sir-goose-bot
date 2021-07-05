@@ -4,7 +4,7 @@ import { EventHandler } from './eventHandler';
 
 export class MessageCreateEventHandler implements EventHandler {
     readonly eventName = 'messageCreate';
-    client: Client;
+    readonly client: Client;
 
     constructor(client: Client) {
         this.client = client;
