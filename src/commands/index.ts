@@ -1,4 +1,7 @@
 /* Fun Commands */
 import { Honk } from './fun/honk';
 
-export default [Honk];
+/* Owner Commands */
+import { Deploy } from './owner/deploy';
+
+export default [Honk, Deploy];

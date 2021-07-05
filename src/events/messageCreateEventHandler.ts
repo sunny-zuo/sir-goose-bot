@@ -32,6 +32,7 @@ export class MessageCreateEventHandler implements EventHandler {
                 (args[0] && `with arguments "${args[0]}"`) || 'without arguments'
             } in server ${message?.guild?.name || 'DMs'} (${message?.guild?.id || 'DMs'}) via message`
         );
+
         command.execute(message, args[0]).catch((error) => {
             client.log.error(error);
         });

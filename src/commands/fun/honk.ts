@@ -14,15 +14,13 @@ export class Honk extends Command {
     }
 
     async execute(interaction: Message | CommandInteraction) {
-        const channel = await this.getValidChannel(interaction.channel);
-
         if (Math.random() < 0.4) {
             const imageUrl = await axios.get(randomGoose).then((r) => r.request.res.responseUrl);
             const embed = new MessageEmbed().setColor('AQUA').setTitle('HONK HONK').setImage(imageUrl);
 
-            channel.send({ embeds: [embed] });
+            interaction.reply({ embeds: [embed] }).catch((e) => this.client.log.error(e));
         } else {
-            channel.send({ content: 'HONK' });
+            interaction.reply({ content: 'HONK' }).catch((e) => this.client.log.error(e));
         }
     }
 }
