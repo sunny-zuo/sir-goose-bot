@@ -1,4 +1,12 @@
-import { GuildMember, Message, MessageEmbed, Permissions, CommandInteraction, DMChannel } from 'discord.js';
+import {
+    GuildMember,
+    Message,
+    MessageEmbed,
+    Permissions,
+    CommandInteraction,
+    DMChannel,
+    ApplicationCommandOption,
+} from 'discord.js';
 import { CommandOptions } from '../types/CommandOptions';
 import Client from '../Client';
 import { TextBasedChannel, GuildTextBasedChannel } from '../types';
@@ -9,13 +17,15 @@ export abstract class Command {
     client: Client;
     name: string;
     description: string;
+    isSlashCommand: boolean = true;
+    isMessageCommand: boolean = true;
     aliases: Array<string> = [];
     args: boolean = false;
+    options: Array<ApplicationCommandOption> = [];
     guildOnly: boolean = false;
     ownerOnly: boolean = false;
     displayHelp: boolean = true;
     enabled: boolean = true;
-    usage: string = '';
     examples: string = '';
     clientPermissions: Array<bigint> = minimumClientPermissions;
     userPermissions: Array<bigint> = [];
