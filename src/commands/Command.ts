@@ -6,6 +6,8 @@ import {
     CommandInteraction,
     DMChannel,
     ApplicationCommandOption,
+    CommandInteractionOption,
+    Collection,
 } from 'discord.js';
 import { CommandOptions } from '../types/CommandOptions';
 import Client from '../Client';
@@ -20,7 +22,6 @@ export abstract class Command {
     isSlashCommand: boolean = true;
     isMessageCommand: boolean = true;
     aliases: Array<string> = [];
-    args: boolean = false;
     options: Array<ApplicationCommandOption> = [];
     guildOnly: boolean = false;
     ownerOnly: boolean = false;
@@ -40,8 +41,18 @@ export abstract class Command {
         this.description = options.description;
     }
 
-    abstract execute(interaction: Message | CommandInteraction, args: string): Promise<void>;
+    abstract execute(
+        interaction: Message | CommandInteraction,
+        args: Collection<string, CommandInteractionOption>
+    ): Promise<void>;
 
+    parseMessageArguments(args: string): Collection<string, CommandInteractionOption> {
+        const options = new Collection<string, CommandInteractionOption>();
+
+        // TODO: Write argument parser
+
+        return options;
+    }
     checkCommandPermissions(interaction: Message | CommandInteraction) {
         if (!interaction.channel) return false;
         if (interaction.channel.type === 'dm' || interaction.member === null) return true;

@@ -16,24 +16,27 @@ export class MessageCreateEventHandler implements EventHandler {
 
         const client = this.client;
 
-        const args = message.content.slice(prefix.length).trim().split(/ (.+)/);
-        const commandName = args.shift()?.toLowerCase();
+        const messageContent = message.content.slice(prefix.length).trim().split(/ (.+)/);
+        const commandName = messageContent.shift()?.toLowerCase();
         if (commandName === undefined) return;
 
         const command = client.commands.get(commandName) || client.aliases.get(commandName);
-
         if (!command || !command.enabled) return;
+
+        const args = command.parseMessageArguments(messageContent[0]);
+
         if (!command.isMessageCommand) return;
-        if (command.args && args.length === 0) return;
+        if (command.options.length > 0 && args.size === 0) return;
         if (!command.checkCommandPermissions(message)) return;
 
         client.log.command(
             `${message.author.username} (${message.author.id}) ran command "${commandName}" ${
-                (args[0] && `with arguments "${args[0]}"`) || 'without arguments'
+                (args.size > 0 && `with arguments "${JSON.stringify(Array.from(args.entries()))}"`) ||
+                'without arguments'
             } in server ${message?.guild?.name || 'DMs'} (${message?.guild?.id || 'DMs'}) via message`
         );
 
-        command.execute(message, args[0]).catch((error) => {
+        command.execute(message, args).catch((error) => {
             client.log.error(error);
         });
     }
