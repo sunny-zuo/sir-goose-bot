@@ -8,10 +8,15 @@ import {
     ApplicationCommandOption,
     CommandInteractionOption,
     Collection,
+    User,
+    Snowflake,
+    Role,
+    Channel,
+    GuildChannel,
 } from 'discord.js';
 import { CommandOptions } from '../types/CommandOptions';
 import Client from '../Client';
-import { TextBasedChannel, GuildTextBasedChannel } from '../types';
+import { TextBasedChannel, GuildTextBasedChannel, Result, InvalidCommandInteractionOption, ArgumentIssue } from '../types';
 
 const minimumClientPermissions = [Permissions.FLAGS.SEND_MESSAGES, Permissions.FLAGS.EMBED_LINKS];
 
@@ -41,18 +46,143 @@ export abstract class Command {
         this.description = options.description;
     }
 
-    abstract execute(
+    abstract execute(interaction: Message | CommandInteraction, args?: Collection<string, CommandInteractionOption>): Promise<void>;
+
+    async parseMessageArguments(
         interaction: Message | CommandInteraction,
-        args: Collection<string, CommandInteractionOption>
-    ): Promise<void>;
-
-    parseMessageArguments(args: string): Collection<string, CommandInteractionOption> {
+        args: string
+    ): Promise<Result<Collection<string, CommandInteractionOption>, InvalidCommandInteractionOption>> {
         const options = new Collection<string, CommandInteractionOption>();
+        const expectedOptions = this.options;
+        const stringArgs = args.trim().split(' ').values(); // TODO: handle arguments with spaces
 
-        // TODO: Write argument parser
+        for (const expectedOption of expectedOptions) {
+            const stringArg = stringArgs.next().value;
+            const commandInteractionOption: CommandInteractionOption = {
+                name: expectedOption.name,
+                type: expectedOption.type,
+            };
 
-        return options;
+            if (stringArg === undefined && expectedOption.required === true) {
+                return { success: false, error: this.parseMessageArgumentsError(commandInteractionOption, ArgumentIssue.MISSING) };
+            }
+
+            switch (expectedOption.type) {
+                case 'STRING':
+                    commandInteractionOption.value = stringArg;
+                    break;
+                case 'INTEGER':
+                    const val = Math.round(Number(stringArg));
+                    if (isNaN(val)) {
+                        return {
+                            success: false,
+                            error: this.parseMessageArgumentsError(commandInteractionOption, ArgumentIssue.INVALID_TYPE),
+                        };
+                    }
+
+                    commandInteractionOption.value = val;
+                    break;
+                case 'BOOLEAN':
+                    if (stringArg === 'true') commandInteractionOption.value = true;
+                    else if (stringArg === 'false') commandInteractionOption.value = false;
+                    else {
+                        return {
+                            success: false,
+                            error: this.parseMessageArgumentsError(commandInteractionOption, ArgumentIssue.INVALD_CHOICE),
+                        };
+                    }
+
+                    break;
+                case 'USER':
+                    const user = await this.getUserFromMention(interaction, stringArg);
+                    if (user === undefined) {
+                        return {
+                            success: false,
+                            error: this.parseMessageArgumentsError(commandInteractionOption, ArgumentIssue.INVALID_TYPE),
+                        };
+                    }
+
+                    commandInteractionOption.user = user;
+
+                    const member = await this.getMemberFromMention(interaction, stringArg);
+                    if (member) commandInteractionOption.member = member;
+
+                    break;
+                case 'CHANNEL':
+                    const channel = await this.getChannelFromMention(interaction, stringArg);
+                    if (!channel) {
+                        return {
+                            success: false,
+                            error: this.parseMessageArgumentsError(commandInteractionOption, ArgumentIssue.INVALID_TYPE),
+                        };
+                    }
+
+                    commandInteractionOption.channel = channel;
+                    break;
+                case 'ROLE':
+                    const role = await this.getRoleFromMention(interaction, stringArg);
+                    if (!role) {
+                        return {
+                            success: false,
+                            error: this.parseMessageArgumentsError(commandInteractionOption, ArgumentIssue.INVALID_TYPE),
+                        };
+                    }
+
+                    commandInteractionOption.role = role;
+                    break;
+                case 'MENTIONABLE':
+                case 'SUB_COMMAND':
+                case 'SUB_COMMAND_GROUP':
+                    throw new Error(`Option type ${expectedOption.type} is currently unsupported.`);
+            }
+
+            options.set(expectedOption.name, commandInteractionOption);
+        }
+
+        return { success: true, value: options };
     }
+
+    parseMessageArgumentsError(option: CommandInteractionOption, issue: ArgumentIssue): InvalidCommandInteractionOption {
+        const invalidOption = option as InvalidCommandInteractionOption;
+        invalidOption.issue = issue;
+
+        return invalidOption;
+    }
+
+    async getUserFromMention(interaction: Message | CommandInteraction, mention: string): Promise<User | undefined> {
+        const matches = mention.match(/^<@!?(\d+)>$/);
+        if (!matches) return undefined;
+        const id = matches[1] as Snowflake;
+        const user = await interaction.client.users.fetch(id);
+
+        return user;
+    }
+
+    async getMemberFromMention(interaction: Message | CommandInteraction, mention: string): Promise<GuildMember | undefined> {
+        const matches = mention.match(/^<@!?(\d+)>$/);
+        if (!matches) return undefined;
+        const id = matches[1] as Snowflake;
+        const user = await interaction.guild?.members.fetch(id);
+
+        return user;
+    }
+
+    async getRoleFromMention(interaction: Message | CommandInteraction, mention: string): Promise<Role | undefined | null> {
+        const matches = mention.match(/^<@&(\d+)>$/);
+        if (!matches) return undefined;
+        const id = matches[1] as Snowflake;
+        const role = await interaction.guild?.roles.fetch(id);
+        return role;
+    }
+
+    async getChannelFromMention(interaction: Message | CommandInteraction, mention: string): Promise<GuildChannel | undefined | null> {
+        const matches = mention.match(/^<#(\d+)>$/);
+        if (!matches) return undefined;
+        const id = matches[1] as Snowflake;
+        const channel = await interaction.guild?.channels.fetch(id);
+        return channel;
+    }
+
     checkCommandPermissions(interaction: Message | CommandInteraction) {
         if (!interaction.channel) return false;
         if (interaction.channel.type === 'dm' || interaction.member === null) return true;
@@ -73,9 +203,7 @@ export abstract class Command {
             // https://discord.com/developers/docs/resources/guild#guild-member-object
             // for now, we consider this behavior unsupported and return false
             this.client.log.warn(
-                `Command was ran from guild ${interaction.guild!.name} (${
-                    interaction.guild!.id
-                }) where the bot user isn't present`
+                `Command was ran from guild ${interaction.guild!.name} (${interaction.guild!.id}) where the bot user isn't present`
             );
             return false;
         }
@@ -92,11 +220,7 @@ export abstract class Command {
         if (ownerOverride && this.client.isOwner(member.user)) return true;
         if (this.ownerOnly && !this.client.isOwner(member.user)) {
             if (interaction) {
-                this.sendErrorEmbed(
-                    interaction,
-                    'Missing Permissions',
-                    `This command can only be used by the bot owner.`
-                );
+                this.sendErrorEmbed(interaction, 'Missing Permissions', `This command can only be used by the bot owner.`);
             }
             return false;
         }

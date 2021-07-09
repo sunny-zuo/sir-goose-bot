@@ -24,10 +24,7 @@ export class CommandInteractionCreateEventHandler implements EventHandler {
         client.log.command(
             `${interaction.user.username} (${interaction.user.id}) ran command "${interaction.commandName}" in server ${
                 interaction?.guild?.name || 'DMs'
-            } (${interaction?.guild?.id || 'DMs'}) ${
-                (args.size > 0 && `with arguments "${JSON.stringify(Array.from(args.entries()))}"`) ||
-                'without arguments'
-            } via slash command`
+            } (${interaction?.guild?.id || 'DMs'}) ${(args.size > 0 && `with arguments`) || 'without arguments'} via slash command`
         );
 
         // TODO: Build proper option/argument handling
