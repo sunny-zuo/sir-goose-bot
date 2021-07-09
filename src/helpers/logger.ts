@@ -6,9 +6,9 @@ export class Logger {
         console.log(blue(`[${this.timestamp()}] INFO ${content}`));
     }
 
-    error(content: string) {
-        console.log(bgRed(`[${this.timestamp()}] ERROR ${content}`));
-        console.error(`[${this.timestamp()}] ERROR ${content}`);
+    error(content: string, stack?: string) {
+        console.log(bgRed(`[${this.timestamp()}] ERROR ${content}`), stack);
+        console.error(`[${this.timestamp()}] ERROR ${content}`, stack);
     }
 
     debug(content: string) {

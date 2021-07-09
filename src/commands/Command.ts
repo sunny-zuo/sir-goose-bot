@@ -281,7 +281,7 @@ export abstract class Command {
         const embed = new MessageEmbed().setTitle(title).setColor('RED').setDescription(description).setTimestamp();
 
         return interaction.reply({ embeds: [embed] }).catch((error) => {
-            this.client.log.error(error);
+            this.client.log.error(error, error.stack);
         });
     }
 }

@@ -30,7 +30,7 @@ export default class Client extends Discord.Client {
                 // @ts-ignore
                 super.on(eventHandler.eventName, (...args) => eventHandler.execute(...args));
             } catch (e) {
-                this.log.error(`Unable to load event: ${e}`);
+                this.log.error(`Unable to load event: ${e}`, e.stack);
             }
         }
     }
@@ -44,7 +44,7 @@ export default class Client extends Discord.Client {
                 this.commands.set(command.name, command);
                 command.aliases.forEach((alias) => this.aliases.set(alias, command));
             } catch (e) {
-                this.log.error(`Unable to load command: ${e}`);
+                this.log.error(`Unable to load command: ${e}`, e.stack);
             }
         }
     }

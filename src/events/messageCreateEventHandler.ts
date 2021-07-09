@@ -59,8 +59,9 @@ export class MessageCreateEventHandler implements EventHandler {
                 } (${message?.guild?.id || 'DMs'}) via message`
             );
 
-        command.execute(message, args).catch((error) => {
-            client.log.error(error);
-        });
+            command.execute(message).catch((error) => {
+                client.log.error(error, error.stack);
+            });
+        }
     }
 }

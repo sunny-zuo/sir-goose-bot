@@ -29,7 +29,7 @@ export class CommandInteractionCreateEventHandler implements EventHandler {
 
         // TODO: Build proper option/argument handling
         command.execute(interaction, args).catch((error) => {
-            client.log.error(error);
+            client.log.error(error, error.stack);
         });
     }
 }
