@@ -7,8 +7,13 @@ export class Logger {
     }
 
     error(content: string, stack?: string) {
-        console.log(bgRed(`[${this.timestamp()}] ERROR ${content}`), stack);
-        console.error(`[${this.timestamp()}] ERROR ${content}`, stack);
+        if (stack) {
+            console.log(bgRed(`[${this.timestamp()}] ERROR ${content}`), stack);
+            console.error(`[${this.timestamp()}] ERROR ${content}`, stack);
+        } else {
+            console.log(bgRed(`[${this.timestamp()}] ERROR ${content}`));
+            console.error(`[${this.timestamp()}] ERROR ${content}`);
+        }
     }
 
     debug(content: string) {
