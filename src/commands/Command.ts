@@ -14,7 +14,7 @@ import {
     Channel,
     GuildChannel,
 } from 'discord.js';
-import { CommandOptions } from '../types/CommandOptions';
+import { CommandOptions } from '../types/Command';
 import Client from '../Client';
 import { TextBasedChannel, GuildTextBasedChannel, Result, InvalidCommandInteractionOption, ArgumentIssue } from '../types';
 
