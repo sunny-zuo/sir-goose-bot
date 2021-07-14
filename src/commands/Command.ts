@@ -63,8 +63,12 @@ export abstract class Command {
                 type: expectedOption.type,
             };
 
-            if (stringArg === undefined && expectedOption.required === true) {
-                return { success: false, error: this.parseMessageArgumentsError(commandInteractionOption, ArgumentIssue.MISSING) };
+            if (stringArg === undefined) {
+                if (expectedOption.required) {
+                    return { success: false, error: this.parseMessageArgumentsError(commandInteractionOption, ArgumentIssue.MISSING) };
+                } else {
+                    return { success: true, value: options };
+                }
             }
 
             switch (expectedOption.type) {

@@ -28,9 +28,22 @@ export class MessageCreateEventHandler implements EventHandler {
 
         if (command.options.length > 0) {
             if (messageContent[0] === undefined || messageContent[0].length === 0) {
-                // TODO: Send help message
-                command.sendErrorEmbed(message, 'Missing Command Arguments', 'This command requires arguments.');
-                return;
+                if (command.options[0].required) {
+                    // TODO: Send help message
+                    command.sendErrorEmbed(message, 'Missing Command Arguments', 'This command requires arguments.');
+                    return;
+                } else {
+                    client.log.command(
+                        `${message.author.username} (${message.author.id}) ran command "${commandName}" without arguments in server ${
+                            message?.guild?.name || 'DMs'
+                        } (${message?.guild?.id || 'DMs'}) via message`
+                    );
+
+                    command.execute(message).catch((error) => {
+                        client.log.error(error, error.stack);
+                    });
+                    return;
+                }
             }
 
             const argumentParser = await command.parseMessageArguments(message, messageContent[0]);
