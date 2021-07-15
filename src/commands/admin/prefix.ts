@@ -9,7 +9,7 @@ import {
 } from 'discord.js';
 import Client from '../../Client';
 import { Command } from '../Command';
-import Guild from '../../models/guild.model';
+import GuildConfigModel from '../../models/guildConfig.model';
 
 const options: ApplicationCommandOption[] = [
     {
@@ -36,7 +36,7 @@ export class Prefix extends Command {
         const newPrefix = args?.get('prefix')?.value as string;
 
         if (newPrefix) {
-            await Guild.findOneAndUpdate(
+            await GuildConfigModel.findOneAndUpdate(
                 { guildId: interaction.guild!.id },
                 {
                     $set: {
@@ -55,7 +55,7 @@ export class Prefix extends Command {
 
             interaction.reply({ embeds: [embed] });
         } else {
-            const guild = await Guild.findOne({ guildId: interaction.guild!.id });
+            const guild = await GuildConfigModel.findOne({ guildId: interaction.guild!.id });
             const embed = new MessageEmbed()
                 .setColor('BLUE')
                 .setTitle('Bot Prefix')

@@ -6,7 +6,7 @@ enum RenameType {
     FIRST_NAME = 'FIRST_NAME',
 }
 
-interface Guild {
+export interface GuildConfig {
     guildId: Snowflake;
     prefix: string;
     enableVerification: boolean;
@@ -32,7 +32,7 @@ interface Guild {
     enablePins: boolean;
 }
 
-const guildSchema = new Schema<Guild>(
+const guildConfigSchema = new Schema<GuildConfig>(
     {
         guildId: { type: String, required: true },
         prefix: { type: String, default: '$', trim: true },
@@ -63,6 +63,6 @@ const guildSchema = new Schema<Guild>(
     }
 );
 
-const GuildModel = model<Guild>('Guild', guildSchema);
+const GuildConfigModel = model<GuildConfig>('GuildConfig', guildConfigSchema);
 
-export default GuildModel;
+export default GuildConfigModel;
