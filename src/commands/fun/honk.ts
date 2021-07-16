@@ -10,6 +10,7 @@ export class Honk extends Command {
         super(client, {
             name: 'honk',
             description: 'HONK!',
+            category: 'Fun',
             ownerOnly: true,
         });
     }

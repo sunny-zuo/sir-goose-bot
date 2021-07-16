@@ -21,6 +21,7 @@ export class Course extends Command {
         super(client, {
             name: 'course',
             description: 'Get info about a UWaterloo course',
+            category: 'UWaterloo',
             aliases: ['class'],
             options: options,
             examples: `math135`,

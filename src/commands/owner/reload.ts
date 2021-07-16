@@ -9,6 +9,7 @@ export class Reload extends Command {
         super(client, {
             name: 'reload',
             description: 'Reloads all server configs and updates cache',
+            category: 'Owner',
             ownerOnly: true,
             displayHelp: false,
         });

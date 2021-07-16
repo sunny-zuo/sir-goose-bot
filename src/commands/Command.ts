@@ -11,10 +11,9 @@ import {
     User,
     Snowflake,
     Role,
-    Channel,
     GuildChannel,
 } from 'discord.js';
-import { CommandOptions } from '../types/Command';
+import { CommandOptions, Category } from '../types/Command';
 import Client from '../Client';
 import { TextBasedChannel, GuildTextBasedChannel, Result, InvalidCommandInteractionOption, ArgumentIssue } from '../types';
 
@@ -24,6 +23,7 @@ export abstract class Command {
     client: Client;
     name: string;
     description: string;
+    category: Category;
     isSlashCommand: boolean = true;
     isMessageCommand: boolean = true;
     aliases: Array<string> = [];
@@ -44,6 +44,7 @@ export abstract class Command {
 
         this.name = options.name;
         this.description = options.description;
+        this.category = options.category;
     }
 
     abstract execute(interaction: Message | CommandInteraction, args?: Collection<string, CommandInteractionOption>): Promise<void>;

@@ -7,6 +7,7 @@ export class Deploy extends Command {
         super(client, {
             name: 'deploy',
             description: 'Deploys slash commands in current guild, meant for testing',
+            category: 'Owner',
             isSlashCommand: false,
             isMessageCommand: true,
             guildOnly: true,

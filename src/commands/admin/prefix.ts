@@ -12,21 +12,22 @@ import { Command } from '../Command';
 import GuildConfigModel from '../../models/guildConfig.model';
 import { GuildConfigCache } from '../../helpers/guildConfigCache';
 
-const options: ApplicationCommandOption[] = [
-    {
-        name: 'prefix',
-        description: 'The new prefix that the bot will respond to',
-        type: 'STRING',
-        required: false,
-    },
-];
-
 export class Prefix extends Command {
+    private static options: ApplicationCommandOption[] = [
+        {
+            name: 'prefix',
+            description: 'The new prefix that the bot will respond to',
+            type: 'STRING',
+            required: false,
+        },
+    ];
+
     constructor(client: Client) {
         super(client, {
             name: 'prefix',
             description: 'View or set the prefix the bot will respond to for message commands',
-            options: options,
+            category: 'Admin',
+            options: Prefix.options,
             guildOnly: true,
             examples: '$',
             userPermissions: [Permissions.FLAGS.MANAGE_GUILD],

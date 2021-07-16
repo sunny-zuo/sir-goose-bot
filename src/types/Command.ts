@@ -3,6 +3,7 @@ import { ApplicationCommandOption } from 'discord.js';
 export interface CommandOptions {
     name: string; // name of command, used to trigger command
     description: string; // description of command shown in help message
+    category: Category; // category (used for help messages) used for command
     isSlashCommand?: boolean; // whether or not the command should be a slash command
     isMessageCommand?: boolean; // whether or not the command should be a message (old-fashioned) command
     aliases?: Array<string>; // alternative ways of triggering command
@@ -18,3 +19,5 @@ export interface CommandOptions {
 
     [key: string]: string | boolean | Array<string> | Array<bigint> | Array<ApplicationCommandOption> | undefined;
 }
+
+export type Category = 'Admin' | 'Info' | 'Fun' | 'UWaterloo' | 'Misc' | 'Owner';
