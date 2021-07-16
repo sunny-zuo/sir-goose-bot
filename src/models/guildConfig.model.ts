@@ -1,5 +1,6 @@
 import { Snowflake } from 'discord.js';
-import { Schema, model } from 'mongoose';
+import { Schema, model, FilterQuery, UpdateQuery, UpdateWithAggregationPipeline, QueryOptions } from 'mongoose';
+import { GuildConfigCache } from '../helpers/guildConfigCache';
 
 enum RenameType {
     FULL_NAME = 'FULL_NAME',
@@ -62,6 +63,10 @@ const guildConfigSchema = new Schema<GuildConfig>(
         timestamps: true,
     }
 );
+
+guildConfigSchema.post('save', function (guildConfig) {
+    GuildConfigCache.updateCache(guildConfig);
+});
 
 const GuildConfigModel = model<GuildConfig>('GuildConfig', guildConfigSchema);
 

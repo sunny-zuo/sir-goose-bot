@@ -10,6 +10,7 @@ import {
 import Client from '../../Client';
 import { Command } from '../Command';
 import GuildConfigModel from '../../models/guildConfig.model';
+import { GuildConfigCache } from '../../helpers/guildConfigCache';
 
 const options: ApplicationCommandOption[] = [
     {
@@ -36,7 +37,7 @@ export class Prefix extends Command {
         const newPrefix = args?.get('prefix')?.value as string;
 
         if (newPrefix) {
-            await GuildConfigModel.findOneAndUpdate(
+            const newConfig = await GuildConfigModel.findOneAndUpdate(
                 { guildId: interaction.guild!.id },
                 {
                     $set: {
@@ -44,8 +45,10 @@ export class Prefix extends Command {
                         prefix: newPrefix,
                     },
                 },
-                { upsert: true }
+                { upsert: true, new: true }
             );
+
+            GuildConfigCache.updateCache(newConfig);
 
             const embed = new MessageEmbed()
                 .setColor('GREEN')

@@ -2,6 +2,7 @@ import { Message } from 'discord.js';
 import Client from '../Client';
 import { InvalidCommandInteractionOption } from '../types';
 import { EventHandler } from './eventHandler';
+import { GuildConfigCache } from '../helpers/guildConfigCache';
 
 export class MessageCreateEventHandler implements EventHandler {
     readonly eventName = 'messageCreate';
@@ -12,7 +13,7 @@ export class MessageCreateEventHandler implements EventHandler {
     }
 
     async execute(message: Message) {
-        const prefix = '$'; // TODO: settings support for server specific prefixes
+        const prefix = (await GuildConfigCache.fetchConfig(message.guild?.id)).prefix;
         if (!message.content.startsWith(prefix) || message.author.bot) return;
 
         const client = this.client;
