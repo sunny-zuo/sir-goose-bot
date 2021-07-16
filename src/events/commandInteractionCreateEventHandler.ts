@@ -19,6 +19,15 @@ export class CommandInteractionCreateEventHandler implements EventHandler {
 
         if (!command || !command.enabled) return;
         if (!command.isSlashCommand) return;
+        if (interaction.guild && !interaction.guild.available) return;
+        if (command.guildOnly && !interaction.guild) {
+            command.sendErrorEmbed(
+                interaction,
+                'Command is Server Only',
+                'This command can only be used inside Discord servers and not DMs.'
+            );
+            return;
+        }
         if (!command.checkCommandPermissions(interaction)) return;
 
         client.log.command(

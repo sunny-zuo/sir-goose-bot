@@ -25,6 +25,11 @@ export class MessageCreateEventHandler implements EventHandler {
         const command = client.commands.get(commandName) || client.aliases.get(commandName);
         if (!command || !command.enabled) return;
         if (!command.isMessageCommand) return;
+        if (message.guild && !message.guild.available) return;
+        if (command.guildOnly && !message.guild) {
+            command.sendErrorEmbed(message, 'Command is Server Only', 'This command can only be used inside Discord servers and not DMs.');
+            return;
+        }
         if (!command.checkCommandPermissions(message)) return;
 
         if (command.options.length > 0) {
