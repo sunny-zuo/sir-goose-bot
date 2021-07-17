@@ -26,15 +26,15 @@ export abstract class Command {
     category: Category;
     isSlashCommand: boolean = true;
     isMessageCommand: boolean = true;
-    aliases: Array<string> = [];
-    options: Array<ApplicationCommandOption> = [];
+    aliases: string[] = [];
+    options: ApplicationCommandOption[] = [];
     guildOnly: boolean = false;
     ownerOnly: boolean = false;
     displayHelp: boolean = true;
     enabled: boolean = true;
     examples: string = '';
-    clientPermissions: Array<bigint> = minimumClientPermissions;
-    userPermissions: Array<bigint> = [];
+    clientPermissions: bigint[] = minimumClientPermissions;
+    userPermissions: bigint[] = [];
 
     constructor(client: Client, options: CommandOptions) {
         this.client = client;

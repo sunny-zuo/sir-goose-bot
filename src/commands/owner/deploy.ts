@@ -18,7 +18,7 @@ export class Deploy extends Command {
 
     async execute(interaction: Message | CommandInteraction): Promise<void> {
         const client = this.client;
-        const data: Array<ApplicationCommandData> = [];
+        const data: ApplicationCommandData[] = [];
 
         for (const [_, command] of client.commands) {
             if (command.isSlashCommand) {

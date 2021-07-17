@@ -4,7 +4,7 @@ import { Command } from '../Command';
 import { request } from 'graphql-request';
 import { uwflowQuery, uwflowEndpoint } from '../../helpers/uwflowConstants';
 
-const options: Array<ApplicationCommandOption> = [
+const options: ApplicationCommandOption[] = [
     {
         name: 'course',
         description: 'Enter a course code to learn more about, such as MATH 135',

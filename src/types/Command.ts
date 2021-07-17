@@ -6,18 +6,18 @@ export interface CommandOptions {
     category: Category; // category (used for help messages) used for command
     isSlashCommand?: boolean; // whether or not the command should be a slash command
     isMessageCommand?: boolean; // whether or not the command should be a message (old-fashioned) command
-    aliases?: Array<string>; // alternative ways of triggering command
+    aliases?: string[]; // alternative ways of triggering command
     args?: boolean; // whether or not arguments are required
-    options?: Array<ApplicationCommandOption>; // arguments for a command
+    options?: ApplicationCommandOption[]; // arguments for a command
     guildOnly?: boolean; // if the command can only be used in guilds
     ownerOnly?: boolean; // if the command can only be used by the bot owner
     displayHelp?: boolean; // if the command should be displayed in the help message
     enabled?: boolean; // if the command is enabled
     examples?: string; // examples of how to use the command used in help message
-    clientPermissions?: Array<bigint>; // bot permissions required to run command
-    userPermissions?: Array<bigint>; // user permissions required to run command
+    clientPermissions?: bigint[]; // bot permissions required to run command
+    userPermissions?: bigint[]; // user permissions required to run command
 
-    [key: string]: string | boolean | Array<string> | Array<bigint> | Array<ApplicationCommandOption> | undefined;
+    [key: string]: string | boolean | string[] | bigint[] | ApplicationCommandOption[] | undefined;
 }
 
 export type Category = 'Admin' | 'Info' | 'Fun' | 'UWaterloo' | 'Misc' | 'Owner';
