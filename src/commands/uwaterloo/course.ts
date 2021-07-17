@@ -21,7 +21,7 @@ export class Course extends Command {
             category: 'UWaterloo',
             aliases: ['class'],
             options: Course.options,
-            examples: `math135`,
+            examples: ['math135'],
         });
     }
 

@@ -29,7 +29,7 @@ export class Prefix extends Command {
             category: 'Admin',
             options: Prefix.options,
             guildOnly: true,
-            examples: '$',
+            examples: ['!'],
             userPermissions: [Permissions.FLAGS.MANAGE_GUILD],
         });
     }

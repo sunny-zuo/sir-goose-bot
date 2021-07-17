@@ -20,7 +20,7 @@ export class Help extends Command {
             description: 'List all commands or learn more about a specific command',
             category: 'Info',
             options: Help.options,
-            examples: 'course',
+            examples: ['course'],
         });
     }
 
@@ -49,7 +49,14 @@ export class Help extends Command {
                             .join(' '),
                         inline: true,
                     },
-                    { name: 'Example', value: `\`${`${prefix}${commandQuery.toLowerCase()} ${command.examples}`.trim()}\``, inline: true }
+                    {
+                        name: 'Examples',
+                        value:
+                            command.examples.length > 0
+                                ? command.examples.map((example) => `\`${prefix}${commandQuery.toLowerCase()} ${example}\``).join('\n')
+                                : `\`${prefix}${commandQuery.toLowerCase()}\``,
+                        inline: true,
+                    }
                 )
                 .setTimestamp();
 

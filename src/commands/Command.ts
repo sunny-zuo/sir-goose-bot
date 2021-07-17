@@ -32,7 +32,7 @@ export abstract class Command {
     ownerOnly: boolean = false;
     displayHelp: boolean = true;
     enabled: boolean = true;
-    examples: string = '';
+    examples: string[] = [];
     clientPermissions: bigint[] = minimumClientPermissions;
     userPermissions: bigint[] = [];
 

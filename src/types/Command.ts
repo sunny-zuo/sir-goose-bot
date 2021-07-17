@@ -13,7 +13,7 @@ export interface CommandOptions {
     ownerOnly?: boolean; // if the command can only be used by the bot owner
     displayHelp?: boolean; // if the command should be displayed in the help message
     enabled?: boolean; // if the command is enabled
-    examples?: string; // examples of how to use the command used in help message
+    examples?: string[]; // examples of how to use the command used in help message
     clientPermissions?: bigint[]; // bot permissions required to run command
     userPermissions?: bigint[]; // user permissions required to run command
 
