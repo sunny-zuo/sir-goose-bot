@@ -4,31 +4,31 @@ import { Command } from '../Command';
 import { request } from 'graphql-request';
 import { uwflowQuery, uwflowEndpoint } from '../../helpers/uwflowConstants';
 
-const options: ApplicationCommandOption[] = [
-    {
-        name: 'course',
-        description: 'Enter a course code to learn more about, such as MATH 135',
-        type: 'STRING',
-        required: true,
-    },
-];
-
-const courseMatcher = /([a-zA-Z]{2,}[ ]?\d+[a-zA-Z]?)/g;
-const disallowedMatches = /(least)|(4U)/gi;
-
 export class Course extends Command {
+    private static readonly options: ApplicationCommandOption[] = [
+        {
+            name: 'course',
+            description: 'Enter a course code to learn more about, such as MATH 135',
+            type: 'STRING',
+            required: true,
+        },
+    ];
+
     constructor(client: Client) {
         super(client, {
             name: 'course',
             description: 'Get info about a UWaterloo course',
             category: 'UWaterloo',
             aliases: ['class'],
-            options: options,
+            options: Course.options,
             examples: `math135`,
         });
     }
 
     async execute(interaction: Message | CommandInteraction, args: Collection<string, CommandInteractionOption>) {
+        const courseMatcher = /([a-zA-Z]{2,}[ ]?\d+[a-zA-Z]?)/g;
+        const disallowedMatches = /(least)|(4U)/gi;
+
         const courseName = args.get('course')!.value as string;
         const code = courseName.toLowerCase().replace(/[^a-z0-9]/g, '');
 

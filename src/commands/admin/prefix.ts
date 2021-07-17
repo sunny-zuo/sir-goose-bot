@@ -13,7 +13,7 @@ import GuildConfigModel from '../../models/guildConfig.model';
 import { GuildConfigCache } from '../../helpers/guildConfigCache';
 
 export class Prefix extends Command {
-    private static options: ApplicationCommandOption[] = [
+    private static readonly options: ApplicationCommandOption[] = [
         {
             name: 'prefix',
             description: 'The new prefix that the bot will respond to',

@@ -5,7 +5,7 @@ import { Category } from '../../types/Command';
 import { Command } from '../Command';
 
 export class Help extends Command {
-    private static options: ApplicationCommandOption[] = [
+    private static readonly options: ApplicationCommandOption[] = [
         {
             name: 'command',
             description: 'The name of the specific command you want to learn more about',
