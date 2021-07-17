@@ -37,7 +37,7 @@ export class Help extends Command {
             }
 
             const embed = new MessageEmbed()
-                .setTitle(`Command: \`${`${prefix}${commandQuery.toLowerCase()} ${this.listArguments(command)}`.trim()}\``)
+                .setTitle(`Command: \`${`${prefix}${commandQuery.toLowerCase()} ${Help.listArguments(command)}`.trim()}\``)
                 .setColor('AQUA')
                 .addFields(
                     { name: 'Description', value: command.description },
@@ -75,7 +75,7 @@ export class Help extends Command {
         }
     }
 
-    private listArguments(command: Command): string {
+    static listArguments(command: Command): string {
         let argString = '';
         for (const option of command.options) {
             let optionString = '';
@@ -83,19 +83,7 @@ export class Help extends Command {
             if (option.choices) {
                 optionString = option.choices.map((choice) => choice.value).join('|');
             } else {
-                switch (option.type) {
-                    case 'CHANNEL':
-                        optionString = 'channel';
-                        break;
-                    case 'ROLE':
-                        optionString = 'role';
-                        break;
-                    case 'USER':
-                        optionString = 'user';
-                        break;
-                    default:
-                        optionString = option.name;
-                }
+                optionString = option.name;
             }
 
             if (option.required) argString += `(${optionString})`;

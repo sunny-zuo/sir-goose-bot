@@ -36,7 +36,6 @@ export class CommandInteractionCreateEventHandler implements EventHandler {
             } (${interaction?.guild?.id || 'DMs'}) ${(args.size > 0 && `with arguments`) || 'without arguments'} via slash command`
         );
 
-        // TODO: Build proper option/argument handling
         command.execute(interaction, args).catch((error) => {
             client.log.error(error, error.stack);
         });

@@ -3,6 +3,7 @@ import Client from '../Client';
 import { InvalidCommandInteractionOption } from '../types';
 import { EventHandler } from './eventHandler';
 import { GuildConfigCache } from '../helpers/guildConfigCache';
+import { Help } from '../commands/info/help';
 
 export class MessageCreateEventHandler implements EventHandler {
     readonly eventName = 'messageCreate';
@@ -35,8 +36,14 @@ export class MessageCreateEventHandler implements EventHandler {
         if (command.options.length > 0) {
             if (messageContent[0] === undefined || messageContent[0].length === 0) {
                 if (command.options[0].required) {
-                    // TODO: Send help message
-                    command.sendErrorEmbed(message, 'Missing Command Arguments', 'This command requires arguments.');
+                    command.sendErrorEmbed(
+                        message,
+                        'Missing Command Arguments',
+                        `This command requires arguments.
+                        Usage: \`${`${prefix}${commandName} ${Help.listArguments(command)}`.trim()}\`
+                        
+                        Type \`${prefix}help ${commandName}\` for more info.`
+                    );
                     return;
                 } else {
                     client.log.command(
@@ -68,8 +75,15 @@ export class MessageCreateEventHandler implements EventHandler {
                 });
             } else {
                 const invalidOption: InvalidCommandInteractionOption = argumentParser.error;
-                // TODO: Give more descriptive error message & send help message
-                command.sendErrorEmbed(message, 'Invalid Arguments Provided', `You provided an invalid argument for ${invalidOption.name}`);
+                command.sendErrorEmbed(
+                    message,
+                    'Invalid Arguments Provided',
+                    `You provided an invalid argument for \`${
+                        invalidOption.name
+                    }\`, which needs to be a \`${invalidOption.type.toLowerCase()}\`.
+                    
+                    Command Usage: \`${`${prefix}${commandName} ${Help.listArguments(command)}`.trim()}\``
+                );
             }
         } else {
             client.log.command(
