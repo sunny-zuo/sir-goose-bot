@@ -13,5 +13,6 @@ import { Reload } from './owner/reload';
 
 /* UWaterloo Commands */
 import { Course } from './uwaterloo/course';
+import { Countdown } from './uwaterloo/countdown';
 
-export default [Prefix, Honk, Help, Deploy, Reload, Course];
+export default [Prefix, Honk, Help, Deploy, Reload, Course, Countdown];
