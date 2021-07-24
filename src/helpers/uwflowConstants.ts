@@ -1,4 +1,4 @@
-const { gql } = require('graphql-request');
+import { gql } from 'graphql-request';
 
 export const uwflowQuery = gql`
     query getCourse($code: String, $user_id: Int) {

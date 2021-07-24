@@ -15,7 +15,7 @@ export class Reload extends Command {
         });
     }
 
-    async execute(interaction: Message | CommandInteraction) {
+    async execute(interaction: Message | CommandInteraction): Promise<void> {
         const configs = await GuildConfigModel.find({});
 
         for (const config of configs) {

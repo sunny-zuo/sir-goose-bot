@@ -27,6 +27,7 @@ export default class Client extends Discord.Client {
                 const eventHandler = new Event(this);
                 this.log.info(`Loading event ${eventHandler.eventName}`);
 
+                // eslint-disable-next-line @typescript-eslint/ban-ts-comment
                 // @ts-ignore
                 super.on(eventHandler.eventName, (...args) => eventHandler.execute(...args));
             } catch (e) {

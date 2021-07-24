@@ -1,5 +1,5 @@
 import { Snowflake } from 'discord.js';
-import { Schema, model, FilterQuery, UpdateQuery, UpdateWithAggregationPipeline, QueryOptions } from 'mongoose';
+import { Schema, model } from 'mongoose';
 import { GuildConfigCache } from '../helpers/guildConfigCache';
 
 enum RenameType {
@@ -67,6 +67,27 @@ const guildConfigSchema = new Schema<GuildConfig>(
 guildConfigSchema.post('save', function (guildConfig) {
     GuildConfigCache.updateCache(guildConfig);
 });
+
+guildConfigSchema.statics.getDefaultConfig = function (guildId: Snowflake): GuildConfig {
+    return getDefaultConfig(guildId);
+};
+
+guildConfigSchema.statics.findOneByGuildIdOrCreate = async function (guildId: Snowflake): Promise<typeof GuildConfigModel> {
+    let guildConfig = await this.findOne({ guildId: guildId });
+    if (!guildConfig) {
+        guildConfig = await this.create(getDefaultConfig(guildId));
+    }
+    return guildConfig;
+};
+
+function getDefaultConfig(guildId: Snowflake): GuildConfig {
+    return {
+        guildId: guildId,
+        prefix: '$',
+        enableVerification: false,
+        enablePins: false,
+    };
+}
 
 const GuildConfigModel = model<GuildConfig>('GuildConfig', guildConfigSchema);
 

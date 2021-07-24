@@ -34,7 +34,7 @@ export class Prefix extends Command {
         });
     }
 
-    async execute(interaction: Message | CommandInteraction, args?: Collection<string, CommandInteractionOption>) {
+    async execute(interaction: Message | CommandInteraction, args?: Collection<string, CommandInteractionOption>): Promise<void> {
         const newPrefix = args?.get('prefix')?.value as string;
 
         if (newPrefix) {

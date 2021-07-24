@@ -24,14 +24,14 @@ export abstract class Command {
     name: string;
     description: string;
     category: Category;
-    isSlashCommand: boolean = true;
-    isMessageCommand: boolean = true;
+    isSlashCommand = true;
+    isMessageCommand = true;
     aliases: string[] = [];
     options: ApplicationCommandOption[] = [];
-    guildOnly: boolean = false;
-    ownerOnly: boolean = false;
-    displayHelp: boolean = true;
-    enabled: boolean = true;
+    guildOnly = false;
+    ownerOnly = false;
+    displayHelp = true;
+    enabled = true;
     examples: string[] = [];
     clientPermissions: bigint[] = minimumClientPermissions;
     userPermissions: bigint[] = [];
@@ -76,7 +76,7 @@ export abstract class Command {
                 case 'STRING':
                     commandInteractionOption.value = stringArg;
                     break;
-                case 'INTEGER':
+                case 'INTEGER': {
                     const val = Math.round(Number(stringArg));
                     if (isNaN(val)) {
                         return {
@@ -87,7 +87,8 @@ export abstract class Command {
 
                     commandInteractionOption.value = val;
                     break;
-                case 'BOOLEAN':
+                }
+                case 'BOOLEAN': {
                     if (stringArg === 'true') commandInteractionOption.value = true;
                     else if (stringArg === 'false') commandInteractionOption.value = false;
                     else {
@@ -98,7 +99,8 @@ export abstract class Command {
                     }
 
                     break;
-                case 'USER':
+                }
+                case 'USER': {
                     const user = await this.getUserFromMention(interaction, stringArg);
                     if (user === undefined) {
                         return {
@@ -113,7 +115,8 @@ export abstract class Command {
                     if (member) commandInteractionOption.member = member;
 
                     break;
-                case 'CHANNEL':
+                }
+                case 'CHANNEL': {
                     const channel = await this.getChannelFromMention(interaction, stringArg);
                     if (!channel) {
                         return {
@@ -124,7 +127,8 @@ export abstract class Command {
 
                     commandInteractionOption.channel = channel;
                     break;
-                case 'ROLE':
+                }
+                case 'ROLE': {
                     const role = await this.getRoleFromMention(interaction, stringArg);
                     if (!role) {
                         return {
@@ -135,6 +139,7 @@ export abstract class Command {
 
                     commandInteractionOption.role = role;
                     break;
+                }
                 case 'MENTIONABLE':
                 case 'SUB_COMMAND':
                 case 'SUB_COMMAND_GROUP':
@@ -188,7 +193,7 @@ export abstract class Command {
         return channel;
     }
 
-    checkCommandPermissions(interaction: Message | CommandInteraction) {
+    checkCommandPermissions(interaction: Message | CommandInteraction): boolean {
         if (!interaction.channel) return false;
         if (interaction.channel.type === 'dm' || interaction.member === null) return true;
         if (
@@ -219,7 +224,7 @@ export abstract class Command {
         channel: GuildTextBasedChannel,
         interaction: Message | CommandInteraction | null = null,
         ownerOverride = true
-    ) {
+    ): boolean {
         if (member === null) return false;
         if (!this.ownerOnly && !this.userPermissions.length) return true;
         if (ownerOverride && this.client.isOwner(member.user)) return true;
@@ -242,9 +247,11 @@ export abstract class Command {
                 ${missingPermissions.map((p) => `\`${p}\``).join(', ')}`
             );
         }
+
+        return false;
     }
 
-    checkClientPermissions(channel: GuildTextBasedChannel, interaction: Message | CommandInteraction | null = null) {
+    checkClientPermissions(channel: GuildTextBasedChannel, interaction: Message | CommandInteraction | null = null): boolean {
         if (channel.guild.me === null) return false;
         const missingPermissions = channel.permissionsFor(channel.guild.me).missing(this.clientPermissions);
 
@@ -258,16 +265,17 @@ export abstract class Command {
                 ${missingPermissions.map((p) => `\`${p}\``).join(', ')}`
             );
         }
+
+        return false;
     }
 
     getValidChannel(channel: TextBasedChannel | null): Promise<TextBasedChannel> {
-        return new Promise(async (resolve, reject) => {
+        return new Promise((resolve, reject) => {
             if (channel !== null) {
                 if (channel instanceof DMChannel) {
                     const dmChannel = channel as DMChannel;
                     if (dmChannel.partial) {
-                        const fullChannel = await dmChannel.fetch();
-                        resolve(fullChannel);
+                        resolve(dmChannel.fetch());
                     }
                 }
 
@@ -282,11 +290,13 @@ export abstract class Command {
         });
     }
 
-    sendErrorEmbed(interaction: Message | CommandInteraction, title: string, description: string) {
+    sendErrorEmbed(interaction: Message | CommandInteraction, title: string, description: string): void {
         const embed = new MessageEmbed().setTitle(title).setColor('RED').setDescription(description).setTimestamp();
 
-        return interaction.reply({ embeds: [embed] }).catch((error) => {
+        interaction.reply({ embeds: [embed] }).catch((error) => {
             this.client.log.error(error, error.stack);
         });
+
+        return;
     }
 }

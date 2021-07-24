@@ -13,7 +13,7 @@ export class Honk extends Command {
         });
     }
 
-    async execute(interaction: Message | CommandInteraction) {
+    async execute(interaction: Message | CommandInteraction): Promise<void> {
         if (Math.random() < 0.4) {
             const randomGoose = 'https://source.unsplash.com/random?goose,geese';
             const imageUrl = await axios.get(randomGoose).then((r) => r.request.res.responseUrl);

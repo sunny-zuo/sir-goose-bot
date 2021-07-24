@@ -24,7 +24,7 @@ export class Help extends Command {
         });
     }
 
-    async execute(interaction: Message | CommandInteraction, args: Collection<string, CommandInteractionOption>) {
+    async execute(interaction: Message | CommandInteraction, args: Collection<string, CommandInteractionOption>): Promise<void> {
         const client = this.client;
         const prefix = (await GuildConfigCache.fetchConfig(interaction?.guild?.id)).prefix;
 

@@ -10,7 +10,7 @@ export class CommandInteractionCreateEventHandler implements EventHandler {
         this.client = client;
     }
 
-    async execute(interaction: Interaction) {
+    async execute(interaction: Interaction): Promise<void> {
         if (!interaction.isCommand()) return;
 
         const client = this.client;

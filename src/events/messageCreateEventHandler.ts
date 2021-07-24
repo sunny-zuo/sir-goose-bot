@@ -13,7 +13,7 @@ export class MessageCreateEventHandler implements EventHandler {
         this.client = client;
     }
 
-    async execute(message: Message) {
+    async execute(message: Message): Promise<void> {
         const prefix = (await GuildConfigCache.fetchConfig(message.guild?.id)).prefix;
         if (!message.content.startsWith(prefix) || message.author.bot) return;
 

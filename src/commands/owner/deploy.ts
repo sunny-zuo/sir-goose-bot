@@ -20,7 +20,7 @@ export class Deploy extends Command {
         const client = this.client;
         const data: ApplicationCommandData[] = [];
 
-        for (const [_, command] of client.commands) {
+        for (const [, command] of client.commands) {
             if (command.isSlashCommand) {
                 data.push({
                     name: command.name,

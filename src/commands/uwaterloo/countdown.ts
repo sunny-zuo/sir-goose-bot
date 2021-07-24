@@ -16,7 +16,7 @@ export class Countdown extends Command {
         });
     }
 
-    async execute(interaction: Message | CommandInteraction) {
+    async execute(interaction: Message | CommandInteraction): Promise<void> {
         if (!this._examsEndDate || !this._termEndDate || DateTime.local() > this._termEndDate) {
             const currentTerm = await axios
                 .get('https://openapi.data.uwaterloo.ca/v3/Terms/current', {
@@ -37,6 +37,7 @@ export class Countdown extends Command {
                 .then((response) => response.data);
 
             const examEndEvent = importantDates.find(
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 (date: { name: string; details: any[] }) =>
                     date?.name === 'Final examinations end' && date?.details?.some((detail) => detail?.termName === currentTerm.name)
             );

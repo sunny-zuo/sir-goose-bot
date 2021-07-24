@@ -9,7 +9,7 @@ export class ReadyEventHandler implements EventHandler {
         this.client = client;
     }
 
-    async execute(...args: any[]) {
+    async execute(): Promise<void> {
         const client = this.client;
         client.log.info(`Client is now ready!`);
 
