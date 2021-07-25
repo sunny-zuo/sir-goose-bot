@@ -23,7 +23,7 @@ module.exports = {
 
         // get specified user's UWID
         const { uwid: userUWID } = await mongo.getDB().collection("users").findOne({ discordId: userID.id })
-        const altCounter = 0
+        let altCounter = 0
         // find all other discord accounts that share this UWID
         for await (const user of mongo.getDB().collection("users").find({ uwid: userUWID })) {
           // probably not very efficient for large servers, could just try/catch
