@@ -28,7 +28,7 @@ module.exports = {
         for await (const user of mongo.getDB().collection("users").find({ uwid: userUWID })) {
           // probably not very efficient for large servers, could just try/catch
           // errors if user doesn't exist instead
-          if (message.guild.members.cache.values().includes(user.discordId)) {
+          if (message.guild.members.cache.has(discordId)) {
             // ban user
             await message.guild.ban(user.discordId)
             altCounter++
