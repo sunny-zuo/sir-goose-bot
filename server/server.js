@@ -127,6 +127,10 @@ app.listen(process.env.PORT, () => {
 });
 
 async function assignRole(guild, guildSettings, user, userInfo) {
+    if (guildSettings.bans?.includes(userInfo.uwid)) {
+        user.send(`You have been permanantly banned in "${guild.name}" and thus will not receive any roles. Message a server admin if you have any concerns.`);
+        return;
+    }
     const verificationRules = guildSettings.verificationRules?.rules;
     const baseYear = guildSettings.verificationRules?.baseYear;
 
