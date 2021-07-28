@@ -49,6 +49,114 @@ export abstract class Command {
 
     abstract execute(interaction: Message | CommandInteraction, args?: Collection<string, CommandInteractionOption>): Promise<void>;
 
+    async parseMessageValue(
+        interaction: Message | CommandInteraction,
+        expectedOption: ApplicationCommandOption,
+        args: IterableIterator<string>
+    ): Promise<Result<CommandInteractionOption, InvalidCommandInteractionOption>> {
+        const stringArg = args.next().value;
+        const commandInteractionOption: CommandInteractionOption = {
+            name: expectedOption.name,
+            type: expectedOption.type,
+        };
+
+        if (stringArg === undefined) {
+            return { success: false, error: this.parseMessageArgumentsError(commandInteractionOption, ArgumentIssue.MISSING) };
+        }
+
+        switch (expectedOption.type) {
+            case 'STRING':
+                commandInteractionOption.value = stringArg;
+                break;
+            case 'INTEGER': {
+                const val = Math.round(Number(stringArg));
+                if (isNaN(val)) {
+                    return {
+                        success: false,
+                        error: this.parseMessageArgumentsError(commandInteractionOption, ArgumentIssue.INVALID_TYPE),
+                    };
+                }
+
+                commandInteractionOption.value = val;
+                break;
+            }
+            case 'BOOLEAN': {
+                if (stringArg === 'true') commandInteractionOption.value = true;
+                else if (stringArg === 'false') commandInteractionOption.value = false;
+                else {
+                    return {
+                        success: false,
+                        error: this.parseMessageArgumentsError(commandInteractionOption, ArgumentIssue.INVALD_CHOICE),
+                    };
+                }
+
+                break;
+            }
+            case 'USER': {
+                const user = await this.getUserFromMention(interaction, stringArg);
+                if (user === undefined) {
+                    return {
+                        success: false,
+                        error: this.parseMessageArgumentsError(commandInteractionOption, ArgumentIssue.INVALID_TYPE),
+                    };
+                }
+
+                commandInteractionOption.user = user;
+
+                const member = await this.getMemberFromMention(interaction, stringArg);
+                if (member) commandInteractionOption.member = member;
+
+                break;
+            }
+            case 'CHANNEL': {
+                const channel = await this.getChannelFromMention(interaction, stringArg);
+                if (!channel) {
+                    return {
+                        success: false,
+                        error: this.parseMessageArgumentsError(commandInteractionOption, ArgumentIssue.INVALID_TYPE),
+                    };
+                }
+
+                commandInteractionOption.channel = channel;
+                break;
+            }
+            case 'ROLE': {
+                const role = await this.getRoleFromMention(interaction, stringArg);
+                if (!role) {
+                    return {
+                        success: false,
+                        error: this.parseMessageArgumentsError(commandInteractionOption, ArgumentIssue.INVALID_TYPE),
+                    };
+                }
+
+                commandInteractionOption.role = role;
+                break;
+            }
+            case 'SUB_COMMAND':
+            case 'SUB_COMMAND_GROUP': {
+                const suboptions = new Collection<string, CommandInteractionOption>();
+
+                if (expectedOption.options === undefined) {
+                    commandInteractionOption.options = suboptions;
+                    return { success: true, value: commandInteractionOption };
+                }
+                for (const suboption of expectedOption.options) {
+                    const result = await this.parseMessageValue(interaction, suboption, args);
+                    if (!result.success) return result;
+                    suboptions.set(suboption.name, result.value);
+                }
+
+                commandInteractionOption.options = suboptions;
+                break;
+            }
+
+            case 'MENTIONABLE':
+                throw new Error(`Option type ${expectedOption.type} is currently unsupported.`);
+        }
+
+        return { success: true, value: commandInteractionOption };
+    }
+
     async parseMessageArguments(
         interaction: Message | CommandInteraction,
         args: string
@@ -58,95 +166,15 @@ export abstract class Command {
         const stringArgs = args.trim().split(' ').values(); // TODO: handle arguments with spaces
 
         for (const expectedOption of expectedOptions) {
-            const stringArg = stringArgs.next().value;
-            const commandInteractionOption: CommandInteractionOption = {
-                name: expectedOption.name,
-                type: expectedOption.type,
-            };
-
-            if (stringArg === undefined) {
+            const result = await this.parseMessageValue(interaction, expectedOption, stringArgs);
+            if (!result.success) {
                 if (expectedOption.required) {
-                    return { success: false, error: this.parseMessageArgumentsError(commandInteractionOption, ArgumentIssue.MISSING) };
+                    return { success: false, error: result.error };
                 } else {
                     return { success: true, value: options };
                 }
             }
-
-            switch (expectedOption.type) {
-                case 'STRING':
-                    commandInteractionOption.value = stringArg;
-                    break;
-                case 'INTEGER': {
-                    const val = Math.round(Number(stringArg));
-                    if (isNaN(val)) {
-                        return {
-                            success: false,
-                            error: this.parseMessageArgumentsError(commandInteractionOption, ArgumentIssue.INVALID_TYPE),
-                        };
-                    }
-
-                    commandInteractionOption.value = val;
-                    break;
-                }
-                case 'BOOLEAN': {
-                    if (stringArg === 'true') commandInteractionOption.value = true;
-                    else if (stringArg === 'false') commandInteractionOption.value = false;
-                    else {
-                        return {
-                            success: false,
-                            error: this.parseMessageArgumentsError(commandInteractionOption, ArgumentIssue.INVALD_CHOICE),
-                        };
-                    }
-
-                    break;
-                }
-                case 'USER': {
-                    const user = await this.getUserFromMention(interaction, stringArg);
-                    if (user === undefined) {
-                        return {
-                            success: false,
-                            error: this.parseMessageArgumentsError(commandInteractionOption, ArgumentIssue.INVALID_TYPE),
-                        };
-                    }
-
-                    commandInteractionOption.user = user;
-
-                    const member = await this.getMemberFromMention(interaction, stringArg);
-                    if (member) commandInteractionOption.member = member;
-
-                    break;
-                }
-                case 'CHANNEL': {
-                    const channel = await this.getChannelFromMention(interaction, stringArg);
-                    if (!channel) {
-                        return {
-                            success: false,
-                            error: this.parseMessageArgumentsError(commandInteractionOption, ArgumentIssue.INVALID_TYPE),
-                        };
-                    }
-
-                    commandInteractionOption.channel = channel;
-                    break;
-                }
-                case 'ROLE': {
-                    const role = await this.getRoleFromMention(interaction, stringArg);
-                    if (!role) {
-                        return {
-                            success: false,
-                            error: this.parseMessageArgumentsError(commandInteractionOption, ArgumentIssue.INVALID_TYPE),
-                        };
-                    }
-
-                    commandInteractionOption.role = role;
-                    break;
-                }
-                case 'MENTIONABLE':
-                case 'SUB_COMMAND':
-                case 'SUB_COMMAND_GROUP':
-                    throw new Error(`Option type ${expectedOption.type} is currently unsupported.`);
-            }
-
-            options.set(expectedOption.name, commandInteractionOption);
+            options.set(expectedOption.name, result.value);
         }
 
         return { success: true, value: options };
