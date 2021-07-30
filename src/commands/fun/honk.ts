@@ -9,7 +9,6 @@ export class Honk extends Command {
             name: 'honk',
             description: 'HONK!',
             category: 'Fun',
-            ownerOnly: true,
         });
     }
 
