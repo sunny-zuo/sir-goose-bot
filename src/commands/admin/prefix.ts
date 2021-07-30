@@ -38,18 +38,9 @@ export class Prefix extends Command {
         const newPrefix = args?.get('prefix')?.value as string;
 
         if (newPrefix) {
-            const newConfig = await GuildConfigModel.findOneAndUpdate(
-                { guildId: interaction.guild!.id },
-                {
-                    $set: {
-                        guildId: interaction.guild!.id,
-                        prefix: newPrefix,
-                    },
-                },
-                { upsert: true, new: true }
-            );
-
-            GuildConfigCache.updateCache(newConfig);
+            const guildConfig = await GuildConfigCache.fetchOrCreate(interaction.guild!.id);
+            guildConfig.prefix = newPrefix;
+            await guildConfig.save();
 
             const embed = new MessageEmbed()
                 .setColor('GREEN')

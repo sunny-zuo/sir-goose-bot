@@ -1,4 +1,5 @@
 import { Collection, Snowflake } from 'discord.js';
+import { Document } from 'mongoose';
 import GuildConfigModel, { GuildConfig } from '../models/guildConfig.model';
 
 export class GuildConfigCache {
@@ -12,10 +13,10 @@ export class GuildConfigCache {
             return this.getDefaultConfig(`${-1}`);
         }
 
-        const cachedConfig: GuildConfig | undefined = cache.get(guildId);
+        const cachedConfig = cache.get(guildId);
 
         if (bypassCache || cachedConfig === undefined) {
-            const guildConfig: GuildConfig | null = await GuildConfigModel.findOne({ guildId: guildId });
+            const guildConfig = await GuildConfigModel.findOne({ guildId: guildId });
 
             if (guildConfig === null) {
                 return this.getDefaultConfig(guildId);
@@ -24,8 +25,22 @@ export class GuildConfigCache {
             cache.set(guildId, guildConfig);
             return guildConfig;
         } else {
-            console.log('hit cache');
             return cachedConfig;
+        }
+    }
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    static async fetchOrCreate(guildId: Snowflake): Promise<GuildConfig & Document<any, any, GuildConfig>> {
+        const cache = this._cache;
+        const guildConfig = await GuildConfigModel.findOne({ guildId: guildId });
+
+        if (guildConfig) {
+            cache.set(guildId, guildConfig);
+            return guildConfig;
+        } else {
+            const newConfig = await GuildConfigModel.create(this.getDefaultConfig(guildId));
+            cache.set(guildId, newConfig);
+            return newConfig;
         }
     }
 

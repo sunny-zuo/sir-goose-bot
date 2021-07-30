@@ -44,7 +44,7 @@ const guildConfigSchema = new Schema<GuildConfig>(
         enablePins: { type: Boolean, default: false },
         enableVerification: { type: Boolean, default: false },
         verificationRules: {
-            baseYear: { type: Number, required: true },
+            baseYear: Number,
             renameType: String,
             forceRename: Boolean,
             rules: [
@@ -55,9 +55,9 @@ const guildConfigSchema = new Schema<GuildConfig>(
                             id: String,
                         },
                     ],
-                    department: { type: String, required: true },
-                    matchType: { type: String, required: true },
-                    yearMatch: { type: String, required: true },
+                    department: String,
+                    matchType: String,
+                    yearMatch: String,
                     year: Number,
                 },
             ],
