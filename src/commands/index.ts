@@ -1,4 +1,5 @@
 /* Admin Commands */
+import { Config } from './admin/config';
 import { Prefix } from './admin/prefix';
 
 /* Fun Commands */
@@ -15,4 +16,4 @@ import { Reload } from './owner/reload';
 import { Course } from './uwaterloo/course';
 import { Countdown } from './uwaterloo/countdown';
 
-export default [Prefix, Honk, Help, Deploy, Reload, Course, Countdown];
+export default [Config, Prefix, Honk, Help, Deploy, Reload, Course, Countdown];
