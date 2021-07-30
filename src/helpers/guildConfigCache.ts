@@ -38,6 +38,7 @@ export class GuildConfigCache {
         return {
             guildId: guildId,
             prefix: '$',
+            enableModlog: false,
             enableVerification: false,
             enablePins: false,
         };

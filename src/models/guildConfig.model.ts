@@ -10,6 +10,9 @@ enum RenameType {
 export interface GuildConfig {
     guildId: Snowflake;
     prefix: string;
+    enableModlog: boolean;
+    modlogChannelId?: Snowflake;
+    enablePins: boolean;
     enableVerification: boolean;
     verificationRules?: {
         baseYear: number;
@@ -30,13 +33,14 @@ export interface GuildConfig {
             }
         ];
     };
-    enablePins: boolean;
 }
 
 const guildConfigSchema = new Schema<GuildConfig>(
     {
         guildId: { type: String, required: true },
         prefix: { type: String, default: '$', trim: true },
+        enableModlog: { type: Boolean, default: false },
+        modlogChannelId: { type: String, trim: true },
         enablePins: { type: Boolean, default: false },
         enableVerification: { type: Boolean, default: false },
         verificationRules: {
@@ -67,27 +71,6 @@ const guildConfigSchema = new Schema<GuildConfig>(
 guildConfigSchema.post('save', function (guildConfig) {
     GuildConfigCache.updateCache(guildConfig);
 });
-
-guildConfigSchema.statics.getDefaultConfig = function (guildId: Snowflake): GuildConfig {
-    return getDefaultConfig(guildId);
-};
-
-guildConfigSchema.statics.findOneByGuildIdOrCreate = async function (guildId: Snowflake): Promise<typeof GuildConfigModel> {
-    let guildConfig = await this.findOne({ guildId: guildId });
-    if (!guildConfig) {
-        guildConfig = await this.create(getDefaultConfig(guildId));
-    }
-    return guildConfig;
-};
-
-function getDefaultConfig(guildId: Snowflake): GuildConfig {
-    return {
-        guildId: guildId,
-        prefix: '$',
-        enableVerification: false,
-        enablePins: false,
-    };
-}
 
 const GuildConfigModel = model<GuildConfig>('GuildConfig', guildConfigSchema);
 
