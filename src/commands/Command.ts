@@ -52,9 +52,9 @@ export abstract class Command {
     async parseMessageValue(
         interaction: Message | CommandInteraction,
         expectedOption: ApplicationCommandOption,
-        args: IterableIterator<string>
+        argArray: string[]
     ): Promise<Result<CommandInteractionOption, InvalidCommandInteractionOption>> {
-        const stringArg = args.next().value;
+        const stringArg = argArray.shift();
         const commandInteractionOption: CommandInteractionOption = {
             name: expectedOption.name,
             type: expectedOption.type,
@@ -134,19 +134,37 @@ export abstract class Command {
             }
             case 'SUB_COMMAND':
             case 'SUB_COMMAND_GROUP': {
-                const suboptions = new Collection<string, CommandInteractionOption>();
+                if (expectedOption.name === stringArg.toLowerCase()) {
+                    const suboptions = new Collection<string, CommandInteractionOption>();
 
-                if (expectedOption.options === undefined) {
+                    if (expectedOption.options === undefined) {
+                        commandInteractionOption.options = suboptions;
+                        return { success: true, value: commandInteractionOption };
+                    }
+                    for (const suboption of expectedOption.options) {
+                        const result = await this.parseMessageValue(interaction, suboption, argArray);
+                        if (!result.success) {
+                            if (result.error.issue === ArgumentIssue.MISSING) {
+                                if (expectedOption.required) {
+                                    return { success: false, error: result.error };
+                                } else if (expectedOption.type === 'SUB_COMMAND' || expectedOption.type === 'SUB_COMMAND_GROUP') {
+                                    continue;
+                                } else {
+                                    break;
+                                }
+                            } else {
+                                return { success: false, error: result.error };
+                            }
+                        }
+                        suboptions.set(suboption.name, result.value);
+                    }
+
                     commandInteractionOption.options = suboptions;
-                    return { success: true, value: commandInteractionOption };
-                }
-                for (const suboption of expectedOption.options) {
-                    const result = await this.parseMessageValue(interaction, suboption, args);
-                    if (!result.success) return result;
-                    suboptions.set(suboption.name, result.value);
+                } else {
+                    argArray.unshift(stringArg);
+                    return { success: false, error: this.parseMessageArgumentsError(commandInteractionOption, ArgumentIssue.MISSING) };
                 }
 
-                commandInteractionOption.options = suboptions;
                 break;
             }
 
@@ -163,15 +181,21 @@ export abstract class Command {
     ): Promise<Result<Collection<string, CommandInteractionOption>, InvalidCommandInteractionOption>> {
         const options = new Collection<string, CommandInteractionOption>();
         const expectedOptions = this.options;
-        const stringArgs = args.trim().split(' ').values(); // TODO: handle arguments with spaces
+        const argArray = args.trim().split(' '); // TODO: handle arguments with spaces
 
         for (const expectedOption of expectedOptions) {
-            const result = await this.parseMessageValue(interaction, expectedOption, stringArgs);
+            const result = await this.parseMessageValue(interaction, expectedOption, argArray);
             if (!result.success) {
-                if (expectedOption.required) {
-                    return { success: false, error: result.error };
+                if (result.error.issue === ArgumentIssue.MISSING) {
+                    if (expectedOption.required) {
+                        return { success: false, error: result.error };
+                    } else if (expectedOption.type === 'SUB_COMMAND' || expectedOption.type === 'SUB_COMMAND_GROUP') {
+                        continue;
+                    } else {
+                        return { success: true, value: options };
+                    }
                 } else {
-                    return { success: true, value: options };
+                    return { success: false, error: result.error };
                 }
             }
             options.set(expectedOption.name, result.value);
