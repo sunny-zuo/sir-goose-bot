@@ -2,7 +2,7 @@ import Client from '../../Client';
 import { Command } from '../Command';
 import { DateTime } from 'luxon';
 import axios from 'axios';
-import { CommandInteraction, Message, MessageEmbed } from 'discord.js';
+import { CommandInteraction, Message } from 'discord.js';
 
 export class Countdown extends Command {
     private _examsEndDate?: DateTime;
@@ -48,12 +48,6 @@ export class Countdown extends Command {
 
         const dayDiff = Math.floor(this._examsEndDate.diff(DateTime.local(), 'days').days);
 
-        const embed = new MessageEmbed()
-            .setTitle(`${dayDiff} Days Left!`)
-            .setDescription(`There are about ${dayDiff} more days until this term is over :)`)
-            .setColor('AQUA')
-            .setTimestamp();
-
-        interaction.reply({ embeds: [embed] });
+        this.sendNeutralEmbed(interaction, `${dayDiff} Days Left!`, `There are about ${dayDiff} more days until this term is over :)`);
     }
 }

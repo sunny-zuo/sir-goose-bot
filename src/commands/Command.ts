@@ -12,6 +12,7 @@ import {
     Snowflake,
     Role,
     GuildChannel,
+    ColorResolvable,
 } from 'discord.js';
 import { CommandOptions, Category } from '../types/Command';
 import Client from '../Client';
@@ -342,8 +343,20 @@ export abstract class Command {
         });
     }
 
+    sendSuccessEmbed(interaction: Message | CommandInteraction, title: string, description: string): void {
+        this.sendColorEmbed(interaction, 'GREEN', title, description);
+    }
+
+    sendNeutralEmbed(interaction: Message | CommandInteraction, title: string, description: string): void {
+        this.sendColorEmbed(interaction, 'BLUE', title, description);
+    }
+
     sendErrorEmbed(interaction: Message | CommandInteraction, title: string, description: string): void {
-        const embed = new MessageEmbed().setTitle(title).setColor('RED').setDescription(description).setTimestamp();
+        this.sendColorEmbed(interaction, 'RED', title, description);
+    }
+
+    sendColorEmbed(interaction: Message | CommandInteraction, color: ColorResolvable, title: string, description: string): void {
+        const embed = new MessageEmbed().setTitle(title).setColor(color).setDescription(description).setTimestamp();
 
         interaction.reply({ embeds: [embed] }).catch((error) => {
             this.client.log.error(error, error.stack);

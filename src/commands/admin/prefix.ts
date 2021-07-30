@@ -42,13 +42,7 @@ export class Prefix extends Command {
             guildConfig.prefix = newPrefix;
             await guildConfig.save();
 
-            const embed = new MessageEmbed()
-                .setColor('GREEN')
-                .setTitle('Prefix Updated')
-                .setDescription(`The prefix has been set to \`${newPrefix}\``)
-                .setTimestamp();
-
-            interaction.reply({ embeds: [embed] });
+            this.sendSuccessEmbed(interaction, 'Prefix Updated', `The prefix has been set to \`${newPrefix}\``);
         } else {
             const guild = await GuildConfigModel.findOne({ guildId: interaction.guild!.id });
             const embed = new MessageEmbed()
