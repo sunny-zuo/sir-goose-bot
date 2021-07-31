@@ -20,4 +20,4 @@ export interface CommandOptions {
     [key: string]: string | boolean | string[] | bigint[] | ApplicationCommandOption[] | undefined;
 }
 
-export type Category = 'Admin' | 'Info' | 'Fun' | 'UWaterloo' | 'Misc' | 'Owner';
+export type Category = 'Admin' | 'Info' | 'Fun' | 'UWaterloo' | 'Utility' | 'Misc' | 'Owner';

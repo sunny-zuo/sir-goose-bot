@@ -12,8 +12,11 @@ import { Help } from './info/help';
 import { Deploy } from './owner/deploy';
 import { Reload } from './owner/reload';
 
+/* Utility Commands */
+import { Pin } from './utility/pin';
+
 /* UWaterloo Commands */
 import { Course } from './uwaterloo/course';
 import { Countdown } from './uwaterloo/countdown';
 
-export default [Config, Prefix, Honk, Help, Deploy, Reload, Course, Countdown];
+export default [Config, Prefix, Honk, Help, Deploy, Reload, Pin, Course, Countdown];

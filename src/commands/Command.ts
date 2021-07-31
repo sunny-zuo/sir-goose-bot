@@ -364,4 +364,8 @@ export abstract class Command {
 
         return;
     }
+
+    isMessage(interaction: Message | CommandInteraction): interaction is Message {
+        return (interaction as Message).url !== undefined;
+    }
 }
