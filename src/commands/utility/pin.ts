@@ -2,6 +2,7 @@ import { Command } from '../Command';
 import Client from '../../Client';
 import {
     ApplicationCommandOption,
+    Channel,
     Collection,
     CommandInteraction,
     CommandInteractionOption,
@@ -42,20 +43,23 @@ export class Pin extends Command {
             return;
         }
 
-        if (interaction.channel === null) return;
-
+        let channel: Channel | undefined | null;
         let pinMessageId: Snowflake | undefined;
 
         if (this.isMessage(interaction)) {
             pinMessageId = (args?.get('message_id')?.value as Snowflake) || interaction.reference?.messageId;
+            channel = interaction.channel;
         } else {
             pinMessageId = args?.get('message_id')?.value as Snowflake;
+            channel = interaction.channel ?? (await interaction.guild?.channels.fetch(interaction?.channelId));
         }
+
+        if (!channel || !channel.isText()) return;
 
         let pinMessage: Message | undefined;
 
         try {
-            pinMessage = await interaction.channel.messages.fetch(pinMessageId);
+            pinMessage = await channel.messages.fetch(pinMessageId);
 
             if (!pinMessageId || !pinMessage) {
                 this.sendErrorEmbed(
