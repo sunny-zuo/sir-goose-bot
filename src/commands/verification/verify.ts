@@ -1,9 +1,9 @@
-import { CommandInteraction, Message, MessageActionRow, MessageButton, MessageEmbed } from 'discord.js';
-import { AES } from 'crypto-js';
+import { CommandInteraction, Message } from 'discord.js';
 import Client from '../../Client';
 import { Command } from '../Command';
 import { GuildConfigCache } from '../../helpers/guildConfigCache';
 import UserModel from '../../models/user.model';
+import { getVerificationResponse } from '../../helpers/verification';
 
 export class Verify extends Command {
     constructor(client: Client) {
@@ -21,16 +21,8 @@ export class Verify extends Command {
         }
 
         const discordUser = this.isMessage(interaction) ? interaction.author : interaction.user;
-
         if (!discordUser) return;
-        if (!process.env.AES_PASSPHRASE || !process.env.SERVER_URI) {
-            throw new Error('Verification URL settings are unset');
-        }
 
-        const encodedUserId = AES.encrypt(`${discordUser.id}-sebot`, process.env.AES_PASSPHRASE)
-            .toString()
-            .replace(/\//g, '_')
-            .replace(/\+/g, '-');
         const user = await UserModel.findOne({ discordId: discordUser.id });
 
         if (user?.verified) {
@@ -50,23 +42,11 @@ export class Verify extends Command {
                 });
             }
 
+            const verifyReply = getVerificationResponse(discordUser);
+
             try {
-                const button = new MessageActionRow().addComponents(
-                    new MessageButton().setLabel('Verify').setStyle('LINK').setURL(`${process.env.SERVER_URI}/verify/${encodedUserId}`)
-                );
-
-                const embed = new MessageEmbed()
-                    .setTitle('Verification Link')
-                    .setColor('BLUE')
-                    .setDescription(
-                        `Click the button below and login with your UWaterloo account to verify.
-                        
-                        Authorization allows us to read your profile information to confirm that you are/were a UW student, and you can revoke this permission at any time.
-                        If you run into issues, message ${process.env.OWNER_DISCORD_USERNAME} for help!`
-                    );
-
                 if (interaction.guild) {
-                    discordUser.send({ embeds: [embed], components: [button] });
+                    discordUser.send(verifyReply);
 
                     this.sendNeutralEmbed(
                         interaction,
@@ -74,7 +54,7 @@ export class Verify extends Command {
                         "We've sent you a verification link via direct message. Please check your DMs!"
                     );
                 } else {
-                    interaction.reply({ embeds: [embed], components: [button] });
+                    interaction.reply(verifyReply);
                 }
             } catch (err) {
                 this.sendErrorEmbed(
