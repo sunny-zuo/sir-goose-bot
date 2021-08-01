@@ -1,3 +1,4 @@
+import { Snowflake } from 'discord.js';
 import { Schema, model } from 'mongoose';
 
 interface User {
@@ -9,6 +10,8 @@ interface User {
     department: string;
     o365CreatedDate: Date;
     refreshToken: string;
+    verifyRequestedAt: Date;
+    verifyRequestedServerId: Snowflake;
     verifiedAt: Date;
     verifiedClickedAt: Date;
 }
@@ -23,6 +26,8 @@ const schema = new Schema<User>(
         department: String,
         o365CreatedDate: Date,
         refreshToken: String,
+        verifyRequestedAt: Date,
+        verifyRequestedServerId: String,
         verifiedAt: Date,
         verifiedClickedAt: Date,
     },

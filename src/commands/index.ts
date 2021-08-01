@@ -19,4 +19,6 @@ import { Pin } from './utility/pin';
 import { Course } from './uwaterloo/course';
 import { Countdown } from './uwaterloo/countdown';
 
-export default [Config, Prefix, Honk, Help, Deploy, Reload, Pin, Course, Countdown];
+import { Verify } from './verification/verify';
+
+export default [Config, Prefix, Honk, Help, Deploy, Reload, Pin, Course, Countdown, Verify];
