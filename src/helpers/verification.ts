@@ -1,5 +1,15 @@
 import { AES } from 'crypto-js';
-import { MessageActionRow, MessageButton, MessageEmbed, MessageOptions, User } from 'discord.js';
+import {
+    ButtonInteraction,
+    CommandInteraction,
+    Message,
+    MessageActionRow,
+    MessageButton,
+    MessageEmbed,
+    MessageOptions,
+    User,
+} from 'discord.js';
+import UserModel from '../models/user.model';
 
 export function getVerificationResponse(user: User): MessageOptions {
     if (!process.env.AES_PASSPHRASE || !process.env.SERVER_URI) {
@@ -22,4 +32,72 @@ export function getVerificationResponse(user: User): MessageOptions {
         );
 
     return { embeds: [embed], components: [button] };
+}
+
+export async function sendVerificationReplies(
+    interaction: Message | CommandInteraction | ButtonInteraction,
+    discordUser: User,
+    ephemeral = false
+): Promise<void> {
+    const user = await UserModel.findOne({ discordId: discordUser.id });
+
+    if (user?.verified) {
+        // TODO: Assign roles
+        const embed = new MessageEmbed()
+            .setTitle('Verified Successfully')
+            .setDescription("You've been sucessfully verified!")
+            .setColor('GREEN')
+            .setTimestamp();
+
+        isMessage(interaction) ? interaction.reply({ embeds: [embed] }) : interaction.reply({ embeds: [embed], ephemeral: ephemeral });
+    } else {
+        if (user) {
+            user.verifyRequestedAt = new Date();
+            user.verifyRequestedServerId = interaction.guild?.id ?? '-1';
+            user.save();
+        } else {
+            await UserModel.create({
+                discordId: discordUser.id,
+                verified: false,
+                verifyRequestedAt: new Date(),
+                verifyRequestedServerId: interaction.guild?.id ?? '-1',
+            });
+        }
+
+        const verifyReply = getVerificationResponse(discordUser);
+
+        try {
+            if (interaction.guild) {
+                await discordUser.send(verifyReply);
+
+                const embed = new MessageEmbed()
+                    .setTitle('Verification Link Sent')
+                    .setDescription("We've sent you a verification link via direct message. Please check your DMs!")
+                    .setColor('BLUE')
+                    .setTimestamp();
+
+                isMessage(interaction)
+                    ? interaction.reply({ embeds: [embed] })
+                    : interaction.reply({ embeds: [embed], ephemeral: ephemeral });
+            } else {
+                if (isMessage(interaction) || interaction.isCommand()) {
+                    interaction.reply(verifyReply);
+                }
+            }
+        } catch (err) {
+            const embed = new MessageEmbed()
+                .setTitle('Unable to Send Verification Link')
+                .setDescription(
+                    'We were unable to DM you a verification link. Please [temporarily change your privacy settings](https://cdn.discordapp.com/attachments/811741914340393000/820114337514651658/permissions.png) to allow direct messages from server members in order to verify.'
+                )
+                .setColor('RED')
+                .setTimestamp();
+
+            isMessage(interaction) ? interaction.reply({ embeds: [embed] }) : interaction.reply({ embeds: [embed], ephemeral: ephemeral });
+        }
+    }
+}
+
+function isMessage(interaction: Message | CommandInteraction | ButtonInteraction): interaction is Message {
+    return (interaction as Message).url !== undefined;
 }
