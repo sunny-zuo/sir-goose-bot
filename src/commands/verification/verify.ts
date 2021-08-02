@@ -22,6 +22,6 @@ export class Verify extends Command {
         const discordUser = this.isMessage(interaction) ? interaction.author : interaction.user;
         if (!discordUser) return;
 
-        sendVerificationReplies(interaction, discordUser);
+        sendVerificationReplies(this.client, interaction, discordUser);
     }
 }

@@ -10,6 +10,8 @@ import {
     User,
 } from 'discord.js';
 import UserModel from '../models/user.model';
+import Client from '../Client';
+import { RoleAssignmentService } from '../services/roleAssignmentService';
 
 export function getVerificationResponse(user: User): MessageOptions {
     if (!process.env.AES_PASSPHRASE || !process.env.SERVER_URI) {
@@ -35,14 +37,21 @@ export function getVerificationResponse(user: User): MessageOptions {
 }
 
 export async function sendVerificationReplies(
+    client: Client,
     interaction: Message | CommandInteraction | ButtonInteraction,
     discordUser: User,
     ephemeral = false
 ): Promise<void> {
     const user = await UserModel.findOne({ discordId: discordUser.id });
 
-    if (user?.verified) {
-        // TODO: Assign roles
+    if (user?.verified && user?.department && user?.o365CreatedDate) {
+        const roleAssign = new RoleAssignmentService(client, discordUser.id);
+        if (interaction.guild) {
+            await roleAssign.assignGuildRoles(interaction.guild);
+        } else {
+            await roleAssign.assignAllRoles();
+        }
+
         const embed = new MessageEmbed()
             .setTitle('Verified Successfully')
             .setDescription("You've been sucessfully verified!")

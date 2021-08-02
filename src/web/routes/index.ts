@@ -4,6 +4,8 @@ import path from 'path';
 import { AES, enc } from 'crypto-js';
 import { URLSearchParams } from 'url';
 import UserModel from '../../models/user.model';
+import { RoleAssignmentService } from '../../services/roleAssignmentService';
+import { Snowflake } from 'discord.js';
 
 const router = express.Router();
 
@@ -69,14 +71,15 @@ router.get('/authorize', async (req, res) => {
                     givenName: givenName,
                     surname: surname,
                     department: department,
-                    createdDateTime: new Date(createdDateTime),
+                    o365CreatedDate: new Date(createdDateTime),
                     refreshToken: refresh_token,
                 },
             },
             { upsert: true }
         );
 
-        // TODO: Assign roles
+        const roleAssignmentService = new RoleAssignmentService(req.client, discordId as Snowflake);
+        await roleAssignmentService.assignAllRoles();
 
         res.send("You've been verified successfully! You can close this window and return to Discord.");
     } catch (e) {

@@ -13,7 +13,7 @@ export class ButtonInteractionCreateEventHandler implements EventHandler {
         this.client = client;
 
         for (const InteractionHandler of ButtonInteractionHandlers) {
-            const interactionHandler = new InteractionHandler();
+            const interactionHandler = new InteractionHandler(client);
             this.buttonInteractionHandlers.set(interactionHandler.customId, interactionHandler);
         }
     }
