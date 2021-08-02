@@ -19,6 +19,7 @@
     },
     "homepage": "https://github.com/sunny-zuo/sir-goose-bot#readme",
     "devDependencies": {
+        "@types/express": "^4.17.13",
         "@types/node": "^15.14.0",
         "@typescript-eslint/eslint-plugin": "^4.28.1",
         "@typescript-eslint/parser": "^4.28.1",
@@ -36,6 +37,7 @@
         "chalk": "^4.1.1",
         "crypto-js": "^4.1.1",
         "discord.js": "^13.0.0-dev.a7c6678.1625427504",
+        "express": "^4.17.1",
         "graphql-request": "^3.4.0",
         "luxon": "^1.28.0",
         "mongoose": "^5.13.2"

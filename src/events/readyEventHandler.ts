@@ -13,6 +13,8 @@ export class ReadyEventHandler implements EventHandler {
         const client = this.client;
         client.log.info(`Client is now ready!`);
 
+        client.webApp.init();
+
         // the user will never be null after the ready event is emitted
         client.log.info(`Logged in as ${client.user!.tag}`);
         client.user!.setActivity('$help');

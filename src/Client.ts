@@ -3,15 +3,18 @@ import { Command } from './commands/Command';
 import { Logger } from './helpers/logger';
 import Events from './events';
 import Commands from './commands';
+import { WebApp } from './web/app';
 
 export default class Client extends Discord.Client {
     commands: Collection<string, Command>;
     aliases: Collection<string, Command>;
+    webApp: WebApp;
     log: Logger;
 
     constructor(options: ClientOptions) {
         super(options);
 
+        this.webApp = new WebApp(this);
         this.log = new Logger();
 
         this.commands = new Collection<string, Command>();
