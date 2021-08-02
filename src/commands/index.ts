@@ -21,5 +21,6 @@ import { Countdown } from './uwaterloo/countdown';
 
 import { Verify } from './verification/verify';
 import { VerifyButton } from './verification/verifybutton';
+import { VerifyRules } from './verification/verifyrules';
 
-export default [Config, Prefix, Honk, Help, Deploy, Reload, Pin, Course, Countdown, Verify, VerifyButton];
+export default [Config, Prefix, Honk, Help, Deploy, Reload, Pin, Course, Countdown, Verify, VerifyButton, VerifyRules];

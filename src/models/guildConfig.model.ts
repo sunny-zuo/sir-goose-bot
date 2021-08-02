@@ -1,11 +1,7 @@
 import { Snowflake } from 'discord.js';
 import { Schema, model } from 'mongoose';
 import { GuildConfigCache } from '../helpers/guildConfigCache';
-
-enum RenameType {
-    FULL_NAME = 'FULL_NAME',
-    FIRST_NAME = 'FIRST_NAME',
-}
+import { VerificationRules } from '../types/Verification';
 
 export interface GuildConfig {
     guildId: Snowflake;
@@ -14,25 +10,7 @@ export interface GuildConfig {
     modlogChannelId?: Snowflake;
     enablePins: boolean;
     enableVerification: boolean;
-    verificationRules?: {
-        baseYear: number;
-        renameType?: RenameType;
-        forceRename?: boolean;
-        rules: [
-            {
-                roles: [
-                    {
-                        name: string;
-                        id: Snowflake;
-                    }
-                ];
-                department: string;
-                matchType: string;
-                yearMatch: string;
-                year?: number;
-            }
-        ];
-    };
+    verificationRules?: VerificationRules;
 }
 
 const guildConfigSchema = new Schema<GuildConfig>(
