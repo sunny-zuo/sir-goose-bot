@@ -225,7 +225,7 @@ export abstract class Command {
         const matches = mention.match(/^<@!?(\d+)>$/);
         if (!matches) return undefined;
         const id = matches[1] as Snowflake;
-        const user = await interaction.guild?.members.fetch(id);
+        const user = await interaction.guild?.members.fetch(id).catch(() => undefined);
 
         return user;
     }
