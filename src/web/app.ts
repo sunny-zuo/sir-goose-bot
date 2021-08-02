@@ -1,9 +1,11 @@
 import express, { Express } from 'express';
 import Client from '../Client';
+import indexRouter from './routes/index';
+import verifyRouter from './routes/verify';
 
 declare module 'express-serve-static-core' {
     interface Request {
-        client?: Client;
+        client: Client;
     }
 }
 
@@ -23,6 +25,9 @@ export class WebApp {
             req.client = this.client;
             next();
         });
+
+        app.use('/', indexRouter);
+        app.use('/verify', verifyRouter);
 
         app.listen(process.env.PORT, () => {
             this.client.log.info(`Web app is listening on port ${process.env.PORT}`);

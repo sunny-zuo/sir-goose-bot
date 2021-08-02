@@ -1,0 +1,91 @@
+import express from 'express';
+import axios from 'axios';
+import { AES, enc } from 'crypto-js';
+import { URLSearchParams } from 'url';
+import UserModel from '../../models/user.model';
+
+const router = express.Router();
+
+router.get('/authorize', async (req, res) => {
+    const { code, state } = req.query;
+
+    if (!code || !state || typeof state !== 'string' || typeof code !== 'string') {
+        res.send('Error: The link you followed appears to be malformed. Try verifying again.');
+        return;
+    }
+    if (!process.env.AES_PASSPHRASE || !process.env.CLIENT_ID || !process.env.CLIENT_SECRET || !process.env.SERVER_URI) {
+        res.send(`The bot configuration was not setup correctly. Please notify ${process.env.OWNER_DISCORD_USERNAME} so they can fix it.`);
+        return;
+    }
+
+    const decodedUID = AES.decrypt(state.replace(/_/g, '/').replace(/-/g, '+'), process.env.AES_PASSPHRASE).toString(enc.Utf8);
+    if (!decodedUID.endsWith('-sebot')) {
+        res.send('Error: The link you followed appears to be malformed. Try verifying again.');
+        return;
+    }
+    const discordId = decodedUID.replace('-sebot', '');
+
+    const getTokenParams = new URLSearchParams();
+    getTokenParams.append('client_id', process.env.CLIENT_ID);
+    getTokenParams.append('scope', 'user.read offline_access');
+    getTokenParams.append('redirect_uri', `${process.env.SERVER_URI}/authorize`);
+    getTokenParams.append('grant_type', 'authorization_code');
+    getTokenParams.append('client_secret', process.env.CLIENT_SECRET);
+    getTokenParams.append('code', code);
+
+    try {
+        const getTokenRes = await axios.post(
+            `https://login.microsoftonline.com/${process.env.TENANT_ID}/oauth2/v2.0/token`,
+            getTokenParams
+        );
+
+        const { access_token, refresh_token } = getTokenRes.data;
+
+        const userDataReq = await axios.get(
+            `https://graph.microsoft.com/v1.0/me?$select=department,createdDateTime,userPrincipalName,givenName,surname`,
+            {
+                headers: {
+                    Authorization: `Bearer ${access_token}`,
+                },
+            }
+        );
+
+        const { userPrincipalName, givenName, surname, department, createdDateTime } = userDataReq.data;
+        const uwid = userPrincipalName.replace('@uwaterloo.ca', '');
+
+        await UserModel.updateOne(
+            { discordId: discordId },
+            {
+                $set: {
+                    discordId: discordId,
+                    verified: true,
+                    verifiedAt: new Date(),
+                    uwid: uwid,
+                    givenName: givenName,
+                    surname: surname,
+                    department: department,
+                    createdDateTime: new Date(createdDateTime),
+                    refreshToken: refresh_token,
+                },
+            },
+            { upsert: true }
+        );
+
+        // TODO: Assign roles
+
+        res.send("You've been verified successfully! You can close this window and return to Discord.");
+    } catch (e) {
+        if (e.response) {
+            req.client.log.error(
+                `Graph API responded with status code ${e.response.status} and error object ${e.response.data} for user ${discordId}.`
+            );
+        } else {
+            req.client.log.error(e);
+        }
+        res.send(
+            `We ran into an error verifying your account. Please try again later or message ${process.env.OWNER_DISCORD_USERNAME} on Discord for help.`
+        );
+    }
+});
+
+export default router;
