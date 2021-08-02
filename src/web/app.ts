@@ -1,4 +1,5 @@
 import express, { Express } from 'express';
+import path from 'path';
 import Client from '../Client';
 import indexRouter from './routes/index';
 import verifyRouter from './routes/verify';
@@ -25,6 +26,8 @@ export class WebApp {
             req.client = this.client;
             next();
         });
+
+        app.use(express.static(path.join(process.cwd(), 'src', 'web', 'public')));
 
         app.use('/', indexRouter);
         app.use('/verify', verifyRouter);

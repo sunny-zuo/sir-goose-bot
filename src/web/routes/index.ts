@@ -1,10 +1,15 @@
 import express from 'express';
 import axios from 'axios';
+import path from 'path';
 import { AES, enc } from 'crypto-js';
 import { URLSearchParams } from 'url';
 import UserModel from '../../models/user.model';
 
 const router = express.Router();
+
+router.get('/', (req, res) => {
+    res.sendFile(path.join(process.cwd(), 'src', 'web', 'public', 'index.html'));
+});
 
 router.get('/authorize', async (req, res) => {
     const { code, state } = req.query;
