@@ -1,4 +1,4 @@
-import { Guild, Role, Snowflake } from 'discord.js';
+import { Guild, Permissions, Role, Snowflake } from 'discord.js';
 import Client from '../Client';
 import { GuildConfigCache } from '../helpers/guildConfigCache';
 import UserModel from '../models/user.model';
@@ -36,13 +36,25 @@ export class RoleAssignmentService {
         }
 
         const member = await guild.members.fetch(this.userId).catch(() => undefined);
+        const user = await UserModel.findOne({ discordId: this.userId });
 
-        if (member) {
+        if (member && user) {
             const allRoles = await this.getMatchingRoles(guild);
             const missingRoles = allRoles.filter((role) => !member.roles.cache.has(role.id));
 
             if (missingRoles.length > 0) {
                 await member.roles.add(missingRoles, 'Verified via Sir Goose Bot');
+            }
+
+            if (guildModel.verificationRules.renameType === 'FULL_NAME' || guildModel.verificationRules.renameType === 'FIRST_NAME') {
+                const renameType = guildModel.verificationRules.renameType;
+                const newNickname = renameType === 'FIRST_NAME' ? `${user.givenName}` : `${user.givenName} ${user.surname}`;
+
+                if (!member.nickname || (member.nickname !== newNickname && guildModel.verificationRules.forceRename)) {
+                    if (member.manageable && guild.me?.permissions.has(Permissions.FLAGS.MANAGE_NICKNAMES)) {
+                        await member.setNickname(newNickname);
+                    }
+                }
             }
 
             this.client.log.info(`Assigned ${missingRoles.length} role(s) to ${member.user.tag} (${this.userId}) in "${guild.name}"`);
