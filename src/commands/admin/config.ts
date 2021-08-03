@@ -88,7 +88,7 @@ export class Config extends Command {
             options: Config.options,
             aliases: ['cfg', 'configuration'],
             guildOnly: true,
-            examples: ['config', 'config prefix $'],
+            examples: ['view', 'prefix $'],
             userPermissions: [Permissions.FLAGS.MANAGE_GUILD],
         });
     }

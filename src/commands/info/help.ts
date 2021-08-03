@@ -37,7 +37,7 @@ export class Help extends Command {
             }
 
             const embed = new MessageEmbed()
-                .setTitle(`Command: \`${`${prefix}${commandQuery.toLowerCase()} ${Help.listArguments(command)}`.trim()}\``)
+                .setTitle(`Command: \`${`${prefix}${commandQuery.toLowerCase()}${Help.listArguments(command)}`.trim()}\``)
                 .setColor('AQUA')
                 .addFields(
                     { name: 'Description', value: command.description },
@@ -93,8 +93,8 @@ export class Help extends Command {
                 optionString = option.name;
             }
 
-            if (option.required) argString += `(${optionString})`;
-            else argString += `[${optionString}]`;
+            if (option.required) argString += ` (${optionString})`;
+            else argString += ` [${optionString}]`;
         }
 
         return argString;
