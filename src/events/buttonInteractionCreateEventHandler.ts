@@ -21,6 +21,9 @@ export class ButtonInteractionCreateEventHandler implements EventHandler {
     async execute(interaction: Interaction): Promise<void> {
         if (!interaction.isButton()) return;
 
+        this.client.log.info(
+            `BUTTON ${interaction.user.tag} (${interaction.user.id}) pressed button with custom id ${interaction.customId}`
+        );
         this.buttonInteractionHandlers.get(interaction.customId)?.execute(interaction);
     }
 }
