@@ -1,6 +1,13 @@
-import { ReadyEventHandler } from './readyEventHandler';
-import { MessageCreateEventHandler } from './messageCreateEventHandler';
-import { CommandInteractionCreateEventHandler } from './commandInteractionCreateEventHandler';
 import { ButtonInteractionCreateEventHandler } from './buttonInteractionCreateEventHandler';
+import { CommandInteractionCreateEventHandler } from './commandInteractionCreateEventHandler';
+import { GuildMemberAddEventHandler } from './guildMemberAddEventHandler';
+import { MessageCreateEventHandler } from './messageCreateEventHandler';
+import { ReadyEventHandler } from './readyEventHandler';
 
-export default [ReadyEventHandler, MessageCreateEventHandler, CommandInteractionCreateEventHandler, ButtonInteractionCreateEventHandler];
+export default [
+    GuildMemberAddEventHandler,
+    ButtonInteractionCreateEventHandler,
+    CommandInteractionCreateEventHandler,
+    MessageCreateEventHandler,
+    ReadyEventHandler,
+];

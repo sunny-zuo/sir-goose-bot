@@ -3,6 +3,7 @@ import Client from '../Client';
 import { GuildConfigCache } from '../helpers/guildConfigCache';
 import UserModel from '../models/user.model';
 import GuildModel from '../models/guildConfig.model';
+import { Result } from '../types/';
 
 export class RoleAssignmentService {
     client: Client;
@@ -24,7 +25,7 @@ export class RoleAssignmentService {
         }
     }
 
-    async assignGuildRoles(guild: Guild): Promise<void> {
+    async assignGuildRoles(guild: Guild): Promise<Result<Role[], string>> {
         const guildModel = await GuildConfigCache.fetchConfig(guild.id);
         if (
             !guildModel ||
@@ -32,13 +33,13 @@ export class RoleAssignmentService {
             !guildModel.verificationRules ||
             guildModel.verificationRules.rules.length === 0
         ) {
-            return;
+            return { success: false, error: 'No verification rules set' };
         }
 
         const member = await guild.members.fetch(this.userId).catch(() => undefined);
         const user = await UserModel.findOne({ discordId: this.userId });
 
-        if (member && user) {
+        if (member && user && user.verified) {
             const allRoles = await this.getMatchingRoles(guild);
             const missingRoles = allRoles.filter((role) => !member.roles.cache.has(role.id));
 
@@ -58,7 +59,10 @@ export class RoleAssignmentService {
             }
 
             this.client.log.info(`Assigned ${missingRoles.length} role(s) to ${member.user.tag} (${this.userId}) in "${guild.name}"`);
+            return { success: true, value: missingRoles };
         }
+
+        return { success: false, error: 'User is not verified' };
     }
 
     private async getMatchingRoles(guild: Guild): Promise<Role[]> {
