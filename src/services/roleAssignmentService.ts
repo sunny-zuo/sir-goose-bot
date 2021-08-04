@@ -1,13 +1,58 @@
-import { Guild, Permissions, Role, Snowflake } from 'discord.js';
+import fs from 'fs';
+import path from 'path';
+import { SHA256 } from 'crypto-js';
+import { Collection, Guild, Permissions, Role, Snowflake } from 'discord.js';
 import Client from '../Client';
 import { GuildConfigCache } from '../helpers/guildConfigCache';
 import UserModel from '../models/user.model';
 import GuildModel from '../models/guildConfig.model';
 import { Result } from '../types/';
 
+type CustomFileImport = { type: 'hash' | 'uwid'; department: string | null; entranceYear: number | null; ids: string[] };
+type CustomValues = { departments: string[]; entranceYear: number | null };
+
 export class RoleAssignmentService {
+    static customImport: Collection<string, CustomValues> = new Collection<string, CustomValues>();
     client: Client;
     userId: Snowflake;
+
+    static parseCustomImports(client: Client): void {
+        const dirLocation = path.join(process.cwd(), 'src', 'data', 'verification');
+        const files = fs.readdirSync(dirLocation);
+
+        client.log.info(`Loading custom departments/entrance years from ${files.length} files`);
+
+        for (const file of files) {
+            if (!file.endsWith('.json')) {
+                continue;
+            }
+            try {
+                const customFile: CustomFileImport = JSON.parse(fs.readFileSync(path.join(dirLocation, file), 'utf8'));
+
+                for (const id of customFile.ids) {
+                    const idHash = customFile.type === 'hash' ? id : SHA256(id).toString();
+                    const userVals = this.customImport.get(idHash) ?? { departments: [], entranceYear: null };
+
+                    if (customFile.department !== null) {
+                        userVals.departments.push(customFile.department);
+                    }
+
+                    if (customFile.entranceYear !== null) {
+                        if (userVals.entranceYear !== null && userVals.entranceYear !== customFile.entranceYear) {
+                            client.log.warn(`User with id ${idHash} has been assigned a different entrance year multiple times`);
+                        }
+                        userVals.entranceYear = customFile.entranceYear;
+                    }
+
+                    this.customImport.set(idHash, userVals);
+                }
+            } catch (e) {
+                client.log.error(`Error parsing custom user data file "${file}": ${e}`);
+            }
+        }
+
+        client.log.info(`Loaded custom departments/entrance years!`);
+    }
 
     constructor(client: Client, userId: Snowflake) {
         this.client = client;
@@ -82,10 +127,14 @@ export class RoleAssignmentService {
             return [];
         }
 
+        const customValues = RoleAssignmentService.customImport.get(SHA256(user.uwid).toString());
         const matchingRoles: Role[] = [];
 
-        const departments: string[] = [user.department];
-        const entranceYear = user.o365CreatedDate.getFullYear();
+        let departments: string[] = [user.department];
+        const customDepartments = customValues?.departments ?? [];
+        departments = [...departments, ...customDepartments];
+
+        const entranceYear = customValues?.entranceYear ?? user.o365CreatedDate.getFullYear();
 
         for (const rule of config.verificationRules.rules) {
             if (

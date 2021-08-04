@@ -1,8 +1,8 @@
 import dotenv from 'dotenv';
 import mongoose from 'mongoose';
 import { Intents, PartialTypes } from 'discord.js';
-
 import Client from './Client';
+import { RoleAssignmentService } from './services/roleAssignmentService';
 
 dotenv.config();
 
@@ -27,6 +27,8 @@ async function init(): Promise<void> {
         .catch((e) => {
             client.log.error(`Failed to connect to MongoDB database: ${e}`);
         });
+
+    RoleAssignmentService.parseCustomImports(client);
 
     client.login(process.env.DISCORD_TOKEN);
 }
