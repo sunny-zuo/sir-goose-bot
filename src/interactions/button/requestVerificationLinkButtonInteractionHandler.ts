@@ -8,23 +8,23 @@ export class RequestVerificationLinkButtonInteractionHandler implements ButtonIn
     readonly client: Client;
     readonly customId = 'requestVerificationLink';
     readonly cooldown: Cooldown;
-    readonly cooldownDuration = 60;
 
     constructor(client: Client) {
         this.client = client;
-        this.cooldown = new Cooldown(this.cooldownDuration);
+        this.cooldown = new Cooldown(60);
     }
 
     async execute(interaction: ButtonInteraction): Promise<void> {
-        const throttleSeconds = this.cooldown.throttleSecondsRemaining(interaction.user.id);
-        if (throttleSeconds > 0) {
+        const userLimit = this.cooldown.checkLimit(interaction.user.id);
+
+        if (userLimit.blocked) {
             interaction.reply({
                 embeds: [
                     new MessageEmbed()
                         .setTitle('Rate Limited')
                         .setColor('RED')
                         .setDescription(
-                            `You can only request a verification link once every ${this.cooldownDuration} seconds. Please try again in ${throttleSeconds} seconds. You likely don't need to request another verification link - older ones remain valid. Please message an admin if you have any issues with verification.`
+                            `You can only request a verification link once every 60 seconds. Please try again in ${userLimit.secondsUntilReset} seconds. You likely don't need to request another verification link - older ones remain valid. Please message an admin if you have any issues with verification.`
                         ),
                 ],
                 ephemeral: true,
