@@ -7,6 +7,7 @@ import { GuildConfigCache } from '../helpers/guildConfigCache';
 import UserModel from '../models/user.model';
 import GuildModel from '../models/guildConfig.model';
 import { Result } from '../types/';
+import { Modlog } from '../helpers/modlog';
 
 type CustomFileImport = { type: 'hash' | 'uwid'; department: string | null; entranceYear: number | null; ids: string[] };
 type CustomValues = { departments: string[]; entranceYear: number | null };
@@ -90,6 +91,23 @@ export class RoleAssignmentService {
 
             if (missingRoles.length > 0) {
                 await member.roles.add(missingRoles, 'Verified via Sir Goose Bot');
+                await Modlog.logUserAction(
+                    this.client,
+                    guild,
+                    member.user,
+                    `${member} successfully verified and was assigned the ${missingRoles
+                        .map((role) => `\`${role.name}\``)
+                        .join(', ')} role(s).`,
+                    'GREEN'
+                );
+            } else if (user.verifyRequestedServerId === guild.id && allRoles.length === 0) {
+                await Modlog.logUserAction(
+                    this.client,
+                    guild,
+                    member.user,
+                    `${member} successfully verified but was not assigned any roles due to the server configuration.`,
+                    'BLUE'
+                );
             }
 
             if (guildModel.verificationRules.renameType === 'FULL_NAME' || guildModel.verificationRules.renameType === 'FIRST_NAME') {
@@ -149,7 +167,13 @@ export class RoleAssignmentService {
                     if (role && role.editable) {
                         matchingRoles.push(role);
                     } else {
-                        // TODO: notify modlog
+                        Modlog.logInfoMessage(
+                            this.client,
+                            guild,
+                            'Verification Role Assignment Error',
+                            `We attempted to assign the role "${roleData.name}" to <@${this.userId}>, but the role not found or could not be assigned due to hierarchy issues.`,
+                            'RED'
+                        );
                     }
                 }
 

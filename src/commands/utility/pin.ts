@@ -12,6 +12,7 @@ import {
     Snowflake,
 } from 'discord.js';
 import { GuildConfigCache } from '../../helpers/guildConfigCache';
+import { Modlog } from '../../helpers/modlog';
 
 export class Pin extends Command {
     private static readonly options: ApplicationCommandOption[] = [
@@ -88,5 +89,13 @@ export class Pin extends Command {
         if (!this.isMessage(interaction)) {
             interaction.reply({ embeds: [new MessageEmbed().setTitle('Message Successfully Pinned').setColor('GREEN')], ephemeral: true });
         }
+
+        await Modlog.logUserAction(
+            this.client,
+            interaction.guild,
+            this.isMessage(interaction) ? interaction.author : interaction.user,
+            `${interaction.member} pinned [a message](${pinMessage.url}) using the pin command in ${pinMessage.channel}.`,
+            'BLUE'
+        );
     }
 }

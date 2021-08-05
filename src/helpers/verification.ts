@@ -12,6 +12,7 @@ import {
 import UserModel from '../models/user.model';
 import Client from '../Client';
 import { RoleAssignmentService } from '../services/roleAssignmentService';
+import { Modlog } from './modlog';
 
 export function getVerificationResponse(user: User): MessageOptions {
     if (!process.env.AES_PASSPHRASE || !process.env.SERVER_URI) {
@@ -88,6 +89,8 @@ export async function sendVerificationReplies(
                 isMessage(interaction)
                     ? interaction.reply({ embeds: [embed] })
                     : interaction.reply({ embeds: [embed], ephemeral: ephemeral });
+
+                Modlog.logUserAction(client, interaction.guild, discordUser, `${user} requested a verification link.`, 'BLUE');
             } else {
                 if (isMessage(interaction) || interaction.isCommand()) {
                     interaction.reply(verifyReply);
