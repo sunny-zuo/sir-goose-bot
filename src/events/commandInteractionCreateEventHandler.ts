@@ -31,9 +31,9 @@ export class CommandInteractionCreateEventHandler implements EventHandler {
         if (!command.checkCommandPermissions(interaction)) return;
 
         client.log.command(
-            `${interaction.user.username} (${interaction.user.id}) ran command "${interaction.commandName}" in server ${
+            `${interaction.user.tag} (${interaction.user.id}) ran command "${interaction.commandName}" in server ${
                 interaction?.guild?.name || 'DMs'
-            } (${interaction?.guild?.id || 'DMs'}) ${(args.size > 0 && `with arguments`) || 'without arguments'} via slash command`
+            } (${interaction?.guild?.id || 'DMs'}) ${(args.data.length > 0 && `with arguments`) || 'without arguments'} via slash command`
         );
 
         command.execute(interaction, args).catch((error) => {

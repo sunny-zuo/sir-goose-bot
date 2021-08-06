@@ -5,8 +5,7 @@ import {
     MessageActionRow,
     MessageButton,
     ApplicationCommandOption,
-    Collection,
-    CommandInteractionOption,
+    CommandInteractionOptionResolver,
 } from 'discord.js';
 import { Command } from '../Command';
 import Client from '../../Client';
@@ -30,12 +29,12 @@ export class VerifyButton extends Command {
         });
     }
 
-    async execute(interaction: Message | CommandInteraction, args?: Collection<string, CommandInteractionOption>): Promise<void> {
+    async execute(interaction: Message | CommandInteraction, args?: CommandInteractionOptionResolver): Promise<void> {
         const button = new MessageActionRow().addComponents(
             new MessageButton().setCustomId('requestVerificationLink').setLabel('Request Verification Link').setStyle('PRIMARY')
         );
 
-        const content = (args?.get('message')?.value as string) ?? 'Click the button below to request a verification link!';
+        const content = args?.getString('message') ?? 'Click the button below to request a verification link!';
 
         if (this.isMessage(interaction)) {
             interaction.channel.send({ content: content, components: [button] });

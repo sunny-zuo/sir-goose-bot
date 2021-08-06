@@ -48,7 +48,7 @@ export class Modlog {
         if (config.enableModlog && config.modlogChannelId) {
             const channel = await guild.channels.fetch(config.modlogChannelId);
 
-            if (channel && channel.type === 'text') {
+            if (channel && channel.type === 'GUILD_TEXT') {
                 return channel;
             } else {
                 return null;

@@ -39,7 +39,7 @@
         "axios": "^0.21.1",
         "chalk": "^4.1.1",
         "crypto-js": "^4.1.1",
-        "discord.js": "^13.0.0-dev.a7c6678.1625427504",
+        "discord.js": "^13.0.0",
         "express": "^4.17.1",
         "graphql-request": "^3.4.0",
         "luxon": "^1.28.0",

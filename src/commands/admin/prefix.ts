@@ -1,8 +1,7 @@
 import {
     ApplicationCommandOption,
-    Collection,
     CommandInteraction,
-    CommandInteractionOption,
+    CommandInteractionOptionResolver,
     Message,
     MessageEmbed,
     Permissions,
@@ -34,8 +33,8 @@ export class Prefix extends Command {
         });
     }
 
-    async execute(interaction: Message | CommandInteraction, args?: Collection<string, CommandInteractionOption>): Promise<void> {
-        const newPrefix = args?.get('prefix')?.value as string;
+    async execute(interaction: Message | CommandInteraction, args?: CommandInteractionOptionResolver): Promise<void> {
+        const newPrefix = args?.getString('prefix');
 
         if (newPrefix) {
             const guildConfig = await GuildConfigCache.fetchOrCreate(interaction.guild!.id);

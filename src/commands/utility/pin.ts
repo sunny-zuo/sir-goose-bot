@@ -2,14 +2,13 @@ import { Command } from '../Command';
 import Client from '../../Client';
 import {
     ApplicationCommandOption,
-    Channel,
-    Collection,
     CommandInteraction,
-    CommandInteractionOption,
+    TextBasedChannels,
     Message,
     MessageEmbed,
     Permissions,
     Snowflake,
+    CommandInteractionOptionResolver,
 } from 'discord.js';
 import { GuildConfigCache } from '../../helpers/guildConfigCache';
 import { Modlog } from '../../helpers/modlog';
@@ -33,7 +32,7 @@ export class Pin extends Command {
         });
     }
 
-    async execute(interaction: Message | CommandInteraction, args?: Collection<string, CommandInteractionOption>): Promise<void> {
+    async execute(interaction: Message | CommandInteraction, args?: CommandInteractionOptionResolver): Promise<void> {
         const config = await GuildConfigCache.fetchConfig(interaction.guild!.id);
         if (!config.enablePins) {
             this.sendErrorEmbed(
@@ -44,18 +43,29 @@ export class Pin extends Command {
             return;
         }
 
-        let channel: Channel | undefined | null;
-        let pinMessageId: Snowflake | undefined;
+        let channel: TextBasedChannels | undefined;
+        let pinMessageId: Snowflake | undefined | null;
 
         if (this.isMessage(interaction)) {
-            pinMessageId = (args?.get('message_id')?.value as Snowflake) || interaction.reference?.messageId;
+            pinMessageId = (args?.getString('message_id') as Snowflake) || interaction.reference?.messageId;
             channel = interaction.channel;
         } else {
-            pinMessageId = args?.get('message_id')?.value as Snowflake;
-            channel = interaction.channel ?? (await interaction.guild?.channels.fetch(interaction?.channelId));
+            pinMessageId = args?.getString('message_id') as Snowflake;
+            const fetchedChannel = interaction.channel ?? (await interaction.guild?.channels.fetch(interaction?.channelId));
+            if (fetchedChannel?.type === 'GUILD_TEXT') {
+                channel = fetchedChannel;
+            }
         }
 
         if (!channel || !channel.isText()) return;
+        if (!pinMessageId) {
+            this.sendErrorEmbed(
+                interaction,
+                'Pin Error',
+                'You did not provide a message to pin. Either reply to the message you want to quote, or supply the message id and use the command in the same channel as the message you want to pin.'
+            );
+            return;
+        }
 
         let pinMessage: Message | undefined;
 

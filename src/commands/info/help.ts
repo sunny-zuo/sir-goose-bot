@@ -1,4 +1,4 @@
-import { ApplicationCommandOption, Collection, CommandInteraction, CommandInteractionOption, Message, MessageEmbed } from 'discord.js';
+import { ApplicationCommandOption, CommandInteraction, CommandInteractionOptionResolver, Message, MessageEmbed } from 'discord.js';
 import Client from '../../Client';
 import { GuildConfigCache } from '../../helpers/guildConfigCache';
 import { Category } from '../../types/Command';
@@ -24,12 +24,12 @@ export class Help extends Command {
         });
     }
 
-    async execute(interaction: Message | CommandInteraction, args: Collection<string, CommandInteractionOption>): Promise<void> {
+    async execute(interaction: Message | CommandInteraction, args?: CommandInteractionOptionResolver): Promise<void> {
         const client = this.client;
         const prefix = (await GuildConfigCache.fetchConfig(interaction?.guild?.id)).prefix;
 
-        if (args?.get('command')?.value !== undefined) {
-            const commandQuery = args?.get('command')?.value as string;
+        const commandQuery = args?.getString('command');
+        if (commandQuery) {
             const command = client.commands.get(commandQuery.toLowerCase()) || client.aliases.get(commandQuery.toLowerCase());
             if (!command) {
                 this.sendErrorEmbed(interaction, 'Command Not Found', `The command \`${commandQuery}\` was not found.`);

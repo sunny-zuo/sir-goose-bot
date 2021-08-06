@@ -1,4 +1,4 @@
-import { ApplicationCommandOption, Collection, CommandInteraction, CommandInteractionOption, MessageEmbed, Message } from 'discord.js';
+import { ApplicationCommandOption, CommandInteraction, MessageEmbed, Message, CommandInteractionOptionResolver } from 'discord.js';
 import Client from '../../Client';
 import { Command } from '../Command';
 import { request } from 'graphql-request';
@@ -25,11 +25,13 @@ export class Course extends Command {
         });
     }
 
-    async execute(interaction: Message | CommandInteraction, args: Collection<string, CommandInteractionOption>): Promise<void> {
+    async execute(interaction: Message | CommandInteraction, args: CommandInteractionOptionResolver): Promise<void> {
         const courseMatcher = /([a-zA-Z]{2,}[ ]?\d+[a-zA-Z]?)/g;
         const disallowedMatches = /(least)|(4U)/gi;
 
-        const courseName = args.get('course')!.value as string;
+        const courseName = args.getString('course');
+        if (!courseName) return;
+
         const code = courseName.toLowerCase().replace(/[^a-z0-9]/g, '');
 
         const variables = {

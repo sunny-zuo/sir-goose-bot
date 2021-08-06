@@ -4,8 +4,7 @@ import {
     Permissions,
     ApplicationCommandOption,
     MessageEmbed,
-    Collection,
-    CommandInteractionOption,
+    CommandInteractionOptionResolver,
 } from 'discord.js';
 import { Command } from '../Command';
 import Client from '../../Client';
@@ -43,12 +42,14 @@ export class VerifyRules extends Command {
         });
     }
 
-    async execute(interaction: Message | CommandInteraction, args?: Collection<string, CommandInteractionOption>): Promise<void> {
-        if (args?.get('rules')?.value) {
+    async execute(interaction: Message | CommandInteraction, args?: CommandInteractionOptionResolver): Promise<void> {
+        const ruleString = args?.getString('rules');
+
+        if (ruleString) {
             let importedJSON: VerificationImport;
 
             try {
-                importedJSON = JSON.parse(args.get('rules')!.value as string);
+                importedJSON = JSON.parse(ruleString);
             } catch (e) {
                 this.sendErrorEmbed(
                     interaction,

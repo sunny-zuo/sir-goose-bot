@@ -47,7 +47,7 @@ export class MessageCreateEventHandler implements EventHandler {
                     return;
                 } else {
                     client.log.command(
-                        `${message.author.username} (${message.author.id}) ran command "${commandName}" without arguments in server ${
+                        `${message.author.tag} (${message.author.id}) ran command "${commandName}" without arguments in server ${
                             message?.guild?.name || 'DMs'
                         } (${message?.guild?.id || 'DMs'}) via message`
                     );

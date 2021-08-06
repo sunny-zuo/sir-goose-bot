@@ -7,16 +7,17 @@ import {
     DMChannel,
     ApplicationCommandOption,
     CommandInteractionOption,
-    Collection,
     User,
     Snowflake,
     Role,
     GuildChannel,
     ColorResolvable,
+    CommandInteractionOptionResolver,
+    TextBasedChannels,
 } from 'discord.js';
 import { CommandOptions, Category } from '../types/Command';
 import Client from '../Client';
-import { TextBasedChannel, GuildTextBasedChannel, Result, InvalidCommandInteractionOption, ArgumentIssue } from '../types';
+import { GuildTextBasedChannel, Result, InvalidCommandInteractionOption, ArgumentIssue } from '../types';
 
 const minimumClientPermissions = [Permissions.FLAGS.SEND_MESSAGES, Permissions.FLAGS.EMBED_LINKS];
 
@@ -48,7 +49,7 @@ export abstract class Command {
         this.category = options.category;
     }
 
-    abstract execute(interaction: Message | CommandInteraction, args?: Collection<string, CommandInteractionOption>): Promise<void>;
+    abstract execute(interaction: Message | CommandInteraction, args?: CommandInteractionOptionResolver): Promise<void>;
 
     async parseMessageValue(
         interaction: Message | CommandInteraction,
@@ -136,7 +137,7 @@ export abstract class Command {
             case 'SUB_COMMAND':
             case 'SUB_COMMAND_GROUP': {
                 if (expectedOption.name === stringArg.toLowerCase()) {
-                    const suboptions = new Collection<string, CommandInteractionOption>();
+                    const suboptions: CommandInteractionOption[] = [];
 
                     if (expectedOption.options === undefined) {
                         commandInteractionOption.options = suboptions;
@@ -157,7 +158,7 @@ export abstract class Command {
                                 return { success: false, error: result.error };
                             }
                         }
-                        suboptions.set(suboption.name, result.value);
+                        suboptions.push(result.value);
                     }
 
                     commandInteractionOption.options = suboptions;
@@ -179,8 +180,8 @@ export abstract class Command {
     async parseMessageArguments(
         interaction: Message | CommandInteraction,
         args: string
-    ): Promise<Result<Collection<string, CommandInteractionOption>, InvalidCommandInteractionOption>> {
-        const options = new Collection<string, CommandInteractionOption>();
+    ): Promise<Result<CommandInteractionOptionResolver, InvalidCommandInteractionOption>> {
+        const options: CommandInteractionOption[] = [];
         const expectedOptions = this.options;
         const argArray = expectedOptions.length > 1 ? args.trim().split(' ') : [args.trim()]; // TODO: handle arguments with spaces
 
@@ -193,16 +194,16 @@ export abstract class Command {
                     } else if (expectedOption.type === 'SUB_COMMAND' || expectedOption.type === 'SUB_COMMAND_GROUP') {
                         continue;
                     } else {
-                        return { success: true, value: options };
+                        return { success: true, value: new CommandInteractionOptionResolver(interaction.client, options) };
                     }
                 } else {
                     return { success: false, error: result.error };
                 }
             }
-            options.set(expectedOption.name, result.value);
+            options.push(result.value);
         }
 
-        return { success: true, value: options };
+        return { success: true, value: new CommandInteractionOptionResolver(interaction.client, options) };
     }
 
     parseMessageArgumentsError(option: CommandInteractionOption, issue: ArgumentIssue): InvalidCommandInteractionOption {
@@ -248,7 +249,7 @@ export abstract class Command {
 
     checkCommandPermissions(interaction: Message | CommandInteraction): boolean {
         if (!interaction.channel) return false;
-        if (interaction.channel.type === 'dm' || interaction.member === null) return true;
+        if (interaction.channel.type === 'DM' || interaction.member === null) return true;
         if (
             interaction.channel.guild.me &&
             !interaction.channel.permissionsFor(interaction.channel.guild.me).has(minimumClientPermissions)
@@ -322,7 +323,7 @@ export abstract class Command {
         return false;
     }
 
-    getValidChannel(channel: TextBasedChannel | null): Promise<TextBasedChannel> {
+    getValidChannel(channel: TextBasedChannels | null): Promise<TextBasedChannels> {
         return new Promise((resolve, reject) => {
             if (channel !== null) {
                 if (channel instanceof DMChannel) {
