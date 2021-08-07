@@ -1,19 +1,19 @@
 import { Snowflake } from 'discord.js';
 import { Schema, model } from 'mongoose';
 
-interface User {
+export interface User {
     discordId: string;
     verified: boolean;
-    uwid: string;
-    givenName: string;
-    surname: string;
-    department: string;
-    o365CreatedDate: Date;
-    refreshToken: string;
-    verifyRequestedAt: Date;
-    verifyRequestedServerId: Snowflake;
-    verifiedAt: Date;
-    verifiedClickedAt: Date;
+    uwid?: string;
+    givenName?: string;
+    surname?: string;
+    department?: string;
+    o365CreatedDate?: Date;
+    refreshToken?: string;
+    verifyRequestedAt?: Date;
+    verifyRequestedServerId?: Snowflake;
+    verifiedAt?: Date;
+    verifiedClickedAt?: Date;
 }
 
 const schema = new Schema<User>(

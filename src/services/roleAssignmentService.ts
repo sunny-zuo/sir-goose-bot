@@ -4,10 +4,11 @@ import { SHA256 } from 'crypto-js';
 import { Collection, Guild, Permissions, Role, Snowflake } from 'discord.js';
 import Client from '../Client';
 import { GuildConfigCache } from '../helpers/guildConfigCache';
-import UserModel from '../models/user.model';
-import GuildModel from '../models/guildConfig.model';
+import UserModel, { User as UserInterface } from '../models/user.model';
+import GuildModel, { GuildConfig } from '../models/guildConfig.model';
 import { Result } from '../types/';
 import { Modlog } from '../helpers/modlog';
+import { RoleData } from '../types/Verification';
 
 type CustomFileImport = { type: 'hash' | 'uwid'; department: string | null; entranceYear: number | null; ids: string[] };
 type CustomValues = { departments: string[]; entranceYear: number | null };
@@ -132,8 +133,42 @@ export class RoleAssignmentService {
         const user = await UserModel.findOne({ discordId: this.userId });
         const config = await GuildConfigCache.fetchConfig(guild.id);
 
+        const roleData = RoleAssignmentService.getMatchingRoleData(user, config);
+
+        const validRoles = [];
+        const invalidRoles = [];
+
+        for (const roleDatum of roleData) {
+            const role = guild.roles.cache.get(roleDatum.id);
+
+            if (role && role.editable) {
+                validRoles.push(role);
+            } else {
+                invalidRoles.push(roleDatum);
+            }
+        }
+
+        if (invalidRoles.length > 0) {
+            Modlog.logInfoMessage(
+                this.client,
+                guild,
+                'Verification Role Assignment Error',
+                `We attempted to assign the role(s) "${invalidRoles.map((role) => `${role.name} (${role.id})`).join(', ')}" to <@${
+                    this.userId
+                }>, but the role not found or could not be assigned due to hierarchy issues.`,
+                'RED'
+            );
+        }
+        return validRoles;
+    }
+
+    static getMatchingRoleData(
+        user: Pick<UserInterface, 'verified' | 'department' | 'o365CreatedDate' | 'uwid'> | null,
+        config: Pick<GuildConfig, 'enableVerification' | 'verificationRules'> | null
+    ): RoleData[] {
         if (
             !user ||
+            !user.uwid ||
             !user.verified ||
             !user.department ||
             !user.o365CreatedDate ||
@@ -146,7 +181,6 @@ export class RoleAssignmentService {
         }
 
         const customValues = RoleAssignmentService.customImport.get(SHA256(user.uwid).toString());
-        const matchingRoles: Role[] = [];
 
         let departments: string[] = [user.department];
         const customDepartments = customValues?.departments ?? [];
@@ -156,35 +190,17 @@ export class RoleAssignmentService {
 
         for (const rule of config.verificationRules.rules) {
             if (
-                this.checkYearMatch(entranceYear, rule.year ?? config.verificationRules.baseYear, rule.yearMatch) &&
-                this.checkDepartmentMatch(departments, rule.department, rule.matchType)
+                this.isMatchingYear(entranceYear, rule.year ?? config.verificationRules.baseYear, rule.yearMatch) &&
+                this.isMatchingDepartment(departments, rule.department, rule.matchType)
             ) {
-                await guild.roles.fetch();
-
-                for (const roleData of rule.roles) {
-                    const role = guild.roles.cache.get(roleData.id);
-
-                    if (role && role.editable) {
-                        matchingRoles.push(role);
-                    } else {
-                        Modlog.logInfoMessage(
-                            this.client,
-                            guild,
-                            'Verification Role Assignment Error',
-                            `We attempted to assign the role "${roleData.name}" to <@${this.userId}>, but the role not found or could not be assigned due to hierarchy issues.`,
-                            'RED'
-                        );
-                    }
-                }
-
-                break;
+                return rule.roles;
             }
         }
 
-        return matchingRoles;
+        return [];
     }
 
-    private checkYearMatch(entranceYear: number, checkYear: number, checkType: string): boolean {
+    private static isMatchingYear(entranceYear: number, checkYear: number, checkType: string): boolean {
         if (checkType === 'all') {
             return true;
         } else if (checkType === 'equal') {
@@ -198,7 +214,7 @@ export class RoleAssignmentService {
         }
     }
 
-    private checkDepartmentMatch(departments: string[], departmentToMatch: string, matchType: string): boolean {
+    private static isMatchingDepartment(departments: string[], departmentToMatch: string, matchType: string): boolean {
         if (matchType === 'anything') {
             return true;
         } else if (matchType === 'exact') {
