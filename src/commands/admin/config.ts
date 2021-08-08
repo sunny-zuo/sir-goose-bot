@@ -128,20 +128,33 @@ export class Config extends Command {
                     if (providedChannel) {
                         const channel = await interaction.guild!.channels.fetch(providedChannel.id);
 
-                        if (channel && channel.isText()) {
-                            guildConfig.modlogChannelId = channel.id;
-                            await guildConfig.save();
+                        if (channel && channel.isText() && channel.viewable && interaction.guild?.me) {
+                            if (
+                                channel
+                                    .permissionsFor(interaction.guild.me)
+                                    .has([Permissions.FLAGS.SEND_MESSAGES, Permissions.FLAGS.EMBED_LINKS])
+                            ) {
+                                guildConfig.modlogChannelId = channel.id;
+                                await guildConfig.save();
 
-                            this.sendSuccessEmbed(
-                                interaction,
-                                'Modlog Channel',
-                                `The modlog channel has been set to ${channel}. Modlog is currently ${
-                                    guildConfig.enableModlog
-                                        ? 'enabled.'
-                                        : `disabled - use \`${guildConfig.prefix}config enable_modlog true\` to enable.`
-                                }`
-                            );
-                            return;
+                                this.sendSuccessEmbed(
+                                    interaction,
+                                    'Modlog Channel',
+                                    `The modlog channel has been set to ${channel}. Modlog is currently ${
+                                        guildConfig.enableModlog
+                                            ? 'enabled.'
+                                            : `disabled - use \`${guildConfig.prefix}config enable_modlog true\` to enable.`
+                                    }`
+                                );
+                                return;
+                            } else {
+                                this.sendErrorEmbed(
+                                    interaction,
+                                    'Invalid Modlog Channel',
+                                    'I do not have permission to send messages and embed links in the modlog channel you provided.'
+                                );
+                                return;
+                            }
                         } else {
                             this.sendErrorEmbed(
                                 interaction,
