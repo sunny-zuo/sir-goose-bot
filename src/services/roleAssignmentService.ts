@@ -72,7 +72,7 @@ export class RoleAssignmentService {
         }
     }
 
-    async assignGuildRoles(guild: Guild, log = true): Promise<Result<Role[], string>> {
+    async assignGuildRoles(guild: Guild, log = true, returnMissing = true): Promise<Result<Role[], string>> {
         const guildModel = await GuildConfigCache.fetchConfig(guild.id);
         if (
             !guildModel ||
@@ -97,7 +97,7 @@ export class RoleAssignmentService {
                         this.client,
                         guild,
                         member.user,
-                        `${member} successfully verified and was assigned the ${missingRoles
+                        `${member} successfully verified and was assigned the ${allRoles
                             .map((role) => `\`${role.name}\``)
                             .join(', ')} role(s).`,
                         'GREEN'
@@ -127,7 +127,7 @@ export class RoleAssignmentService {
             }
 
             this.client.log.info(`Assigned ${missingRoles.length} role(s) to ${member.user.tag} (${this.userId}) in "${guild.name}"`);
-            return { success: true, value: missingRoles };
+            return { success: true, value: returnMissing ? missingRoles : allRoles };
         }
 
         return { success: false, error: 'User is not verified' };

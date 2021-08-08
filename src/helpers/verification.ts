@@ -7,6 +7,7 @@ import {
     MessageButton,
     MessageEmbed,
     MessageOptions,
+    Role,
     User,
 } from 'discord.js';
 import UserModel from '../models/user.model';
@@ -46,16 +47,25 @@ export async function sendVerificationReplies(
     const user = await UserModel.findOne({ discordId: discordUser.id });
 
     if (user?.verified && user?.department && user?.o365CreatedDate) {
-        const roleAssign = new RoleAssignmentService(client, discordUser.id);
+        const service = new RoleAssignmentService(client, discordUser.id);
+        let assignedRoles: Role[] = [];
         if (interaction.guild) {
-            await roleAssign.assignGuildRoles(interaction.guild);
+            const roleAssign = await service.assignGuildRoles(interaction.guild, true, false);
+            if (roleAssign.success) {
+                assignedRoles = roleAssign.value;
+            }
         } else {
-            await roleAssign.assignAllRoles();
+            await service.assignAllRoles();
         }
+
+        const assignmentResult =
+            assignedRoles.length > 0
+                ? `You have received the ${assignedRoles.map((role) => `\`${role.name}\``).join(', ')} role(s).`
+                : 'However, the server has configured the bot to not assign any roles to you for various reasons (most likely due to only wanting to verify certain groups of people). If you think this is a mistake, please message a server admin.';
 
         const embed = new MessageEmbed()
             .setTitle('Verified Successfully')
-            .setDescription("You've been sucessfully verified!")
+            .setDescription(`You've been sucessfully verified! ${assignmentResult}`)
             .setColor('GREEN')
             .setTimestamp();
 
