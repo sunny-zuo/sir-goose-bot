@@ -20,6 +20,13 @@ export class CommandInteractionCreateEventHandler implements EventHandler {
         if (!command || !command.enabled) return;
         if (!command.isSlashCommand) return;
         if (interaction.guild && !interaction.guild.available) return;
+        if (command.isRateLimited(interaction.user.id)) {
+            interaction.reply({
+                content: `Slow down! You're using commands a bit too quickly; this command can only be used ${command.cooldownMaxUses} time(s) every ${command.cooldownDuration} seconds.`,
+                ephemeral: true,
+            });
+            return;
+        }
         if (command.guildOnly && !interaction.guild) {
             command.sendErrorEmbed(
                 interaction,

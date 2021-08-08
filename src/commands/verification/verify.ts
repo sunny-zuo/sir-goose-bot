@@ -10,6 +10,7 @@ export class Verify extends Command {
             name: 'verify',
             description: 'Verify your UW identity to receive roles',
             category: 'Verification',
+            cooldownDuration: 60,
         });
     }
 

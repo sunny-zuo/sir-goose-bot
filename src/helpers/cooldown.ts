@@ -37,7 +37,6 @@ export class Cooldown {
             userLimit.uses++;
 
             if (userLimit.uses >= this.maxUses) {
-                console.log('over max uses');
                 userLimit.uses = 0;
                 userLimit.blockedUntil = Date.now() + this.seconds * 1000;
 

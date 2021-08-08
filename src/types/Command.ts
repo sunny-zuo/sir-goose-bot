@@ -16,8 +16,10 @@ export interface CommandOptions {
     examples?: string[]; // examples of how to use the command used in help message
     clientPermissions?: bigint[]; // bot permissions required to run command
     userPermissions?: bigint[]; // user permissions required to run command
+    cooldownDuration?: number; // cooldown duration for command per user
+    cooldownMaxUses?: number; // maximum uses of the command per user until cooldown
 
-    [key: string]: string | boolean | string[] | bigint[] | ApplicationCommandOption[] | undefined;
+    [key: string]: string | boolean | number | string[] | bigint[] | ApplicationCommandOption[] | undefined;
 }
 
 export type Category = 'Admin' | 'Info' | 'Fun' | 'UWaterloo' | 'Utility' | 'Misc' | 'Owner' | 'Verification';

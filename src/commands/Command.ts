@@ -18,6 +18,7 @@ import {
 import { CommandOptions, Category } from '../types/Command';
 import Client from '../Client';
 import { GuildTextBasedChannel, Result, InvalidCommandInteractionOption, ArgumentIssue } from '../types';
+import { Cooldown } from '../helpers/cooldown';
 
 const minimumClientPermissions = [Permissions.FLAGS.SEND_MESSAGES, Permissions.FLAGS.EMBED_LINKS];
 
@@ -37,6 +38,9 @@ export abstract class Command {
     examples: string[] = [];
     clientPermissions: bigint[] = minimumClientPermissions;
     userPermissions: bigint[] = [];
+    cooldownDuration = 3;
+    cooldownMaxUses = 1;
+    cooldown: Cooldown;
 
     constructor(client: Client, options: CommandOptions) {
         this.client = client;
@@ -47,10 +51,15 @@ export abstract class Command {
         this.name = options.name;
         this.description = options.description;
         this.category = options.category;
+
+        this.cooldown = new Cooldown(this.cooldownDuration, this.cooldownMaxUses);
     }
 
     abstract execute(interaction: Message | CommandInteraction, args?: CommandInteractionOptionResolver): Promise<void>;
 
+    isRateLimited(userId: Snowflake): boolean {
+        return this.cooldown.checkLimit(userId).blocked;
+    }
     async parseMessageValue(
         interaction: Message | CommandInteraction,
         expectedOption: ApplicationCommandOption,

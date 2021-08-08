@@ -9,6 +9,8 @@ export class Honk extends Command {
             name: 'honk',
             description: 'HONK!',
             category: 'Fun',
+            cooldownDuration: 15,
+            cooldownMaxUses: 4,
         });
     }
 
