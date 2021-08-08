@@ -20,7 +20,8 @@ import { Course } from './uwaterloo/course';
 import { Countdown } from './uwaterloo/countdown';
 
 import { Verify } from './verification/verify';
+import { VerifyAll } from './verification/verifyall';
 import { VerifyButton } from './verification/verifybutton';
 import { VerifyRules } from './verification/verifyrules';
 
-export default [Config, Prefix, Honk, Help, Deploy, Reload, Pin, Course, Countdown, Verify, VerifyButton, VerifyRules];
+export default [Config, Prefix, Honk, Help, Deploy, Reload, Pin, Course, Countdown, Verify, VerifyAll, VerifyButton, VerifyRules];

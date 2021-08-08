@@ -38,6 +38,7 @@ export class VerifyRules extends Command {
             category: 'Verification',
             options: VerifyRules.options,
             guildOnly: true,
+            clientPermissions: [Permissions.FLAGS.MANAGE_ROLES],
             userPermissions: [Permissions.FLAGS.MANAGE_GUILD],
         });
     }

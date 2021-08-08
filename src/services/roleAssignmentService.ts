@@ -72,7 +72,7 @@ export class RoleAssignmentService {
         }
     }
 
-    async assignGuildRoles(guild: Guild): Promise<Result<Role[], string>> {
+    async assignGuildRoles(guild: Guild, log = true): Promise<Result<Role[], string>> {
         const guildModel = await GuildConfigCache.fetchConfig(guild.id);
         if (
             !guildModel ||
@@ -87,28 +87,32 @@ export class RoleAssignmentService {
         const user = await UserModel.findOne({ discordId: this.userId });
 
         if (member && user && user.verified) {
-            const allRoles = await this.getMatchingRoles(guild);
+            const allRoles = await this.getMatchingRoles(guild, log);
             const missingRoles = allRoles.filter((role) => !member.roles.cache.has(role.id));
 
             if (missingRoles.length > 0) {
                 await member.roles.add(missingRoles, 'Verified via Sir Goose Bot');
-                await Modlog.logUserAction(
-                    this.client,
-                    guild,
-                    member.user,
-                    `${member} successfully verified and was assigned the ${missingRoles
-                        .map((role) => `\`${role.name}\``)
-                        .join(', ')} role(s).`,
-                    'GREEN'
-                );
+                if (log) {
+                    await Modlog.logUserAction(
+                        this.client,
+                        guild,
+                        member.user,
+                        `${member} successfully verified and was assigned the ${missingRoles
+                            .map((role) => `\`${role.name}\``)
+                            .join(', ')} role(s).`,
+                        'GREEN'
+                    );
+                }
             } else if (user.verifyRequestedServerId === guild.id && allRoles.length === 0) {
-                await Modlog.logUserAction(
-                    this.client,
-                    guild,
-                    member.user,
-                    `${member} successfully verified but was not assigned any roles due to the server configuration.`,
-                    'BLUE'
-                );
+                if (log) {
+                    await Modlog.logUserAction(
+                        this.client,
+                        guild,
+                        member.user,
+                        `${member} successfully verified but was not assigned any roles due to the server configuration.`,
+                        'BLUE'
+                    );
+                }
             }
 
             if (guildModel.verificationRules.renameType === 'FULL_NAME' || guildModel.verificationRules.renameType === 'FIRST_NAME') {
@@ -129,7 +133,7 @@ export class RoleAssignmentService {
         return { success: false, error: 'User is not verified' };
     }
 
-    private async getMatchingRoles(guild: Guild): Promise<Role[]> {
+    private async getMatchingRoles(guild: Guild, log = true): Promise<Role[]> {
         const user = await UserModel.findOne({ discordId: this.userId });
         const config = await GuildConfigCache.fetchConfig(guild.id);
 
@@ -149,17 +153,39 @@ export class RoleAssignmentService {
         }
 
         if (invalidRoles.length > 0) {
-            Modlog.logInfoMessage(
-                this.client,
-                guild,
-                'Verification Role Assignment Error',
-                `We attempted to assign the role(s) "${invalidRoles.map((role) => `${role.name} (${role.id})`).join(', ')}" to <@${
-                    this.userId
-                }>, but the role not found or could not be assigned due to hierarchy issues.`,
-                'RED'
-            );
+            if (log) {
+                Modlog.logInfoMessage(
+                    this.client,
+                    guild,
+                    'Verification Role Assignment Error',
+                    `We attempted to assign the role(s) "${invalidRoles.map((role) => `${role.name} (${role.id})`).join(', ')}" to <@${
+                        this.userId
+                    }>, but the role not found or could not be assigned due to hierarchy or permissions issues. Make sure my role has the Manage Roles permission and is above all roles you want to assign.`,
+                    'RED'
+                );
+            }
         }
         return validRoles;
+    }
+
+    static async getInvalidRoles(guild: Guild): Promise<RoleData[]> {
+        const config = await GuildConfigCache.fetchConfig(guild.id);
+        if (!config?.verificationRules?.rules || config.verificationRules.rules.length === 0) return [];
+
+        await guild.roles.fetch();
+
+        const invalidRoles = [];
+
+        for (const rule of config.verificationRules.rules) {
+            for (const roleDatum of rule.roles) {
+                const role = guild.roles.cache.get(roleDatum.id);
+                if (!role || !role.editable) {
+                    invalidRoles.push(roleDatum);
+                }
+            }
+        }
+
+        return invalidRoles;
     }
 
     static getMatchingRoleData(
