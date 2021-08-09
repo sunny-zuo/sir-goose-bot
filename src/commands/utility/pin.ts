@@ -105,7 +105,7 @@ export class Pin extends Command {
         await Modlog.logUserAction(
             this.client,
             interaction.guild,
-            this.isMessage(interaction) ? interaction.author : interaction.user,
+            this.getUser(interaction),
             `${interaction.member} pinned [a message](${pinMessage.url}) using the pin command in ${pinMessage.channel}.`,
             'BLUE'
         );

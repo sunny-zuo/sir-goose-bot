@@ -378,4 +378,8 @@ export abstract class Command {
     isMessage(interaction: Message | CommandInteraction): interaction is Message {
         return (interaction as Message).url !== undefined;
     }
+
+    getUser(interaction: Message | CommandInteraction): User {
+        return this.isMessage(interaction) ? interaction.author : interaction.user;
+    }
 }

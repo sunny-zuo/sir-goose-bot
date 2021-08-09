@@ -20,8 +20,7 @@ export class Verify extends Command {
             return this.sendErrorEmbed(interaction, 'Verification Not Enabled', 'This server does not have verification enabled.');
         }
 
-        const discordUser = this.isMessage(interaction) ? interaction.author : interaction.user;
-        if (!discordUser) return;
+        const discordUser = this.getUser(interaction);
 
         sendVerificationReplies(this.client, interaction, discordUser);
     }
