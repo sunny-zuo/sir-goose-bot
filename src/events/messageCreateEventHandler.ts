@@ -30,7 +30,7 @@ export class MessageCreateEventHandler implements EventHandler {
         if (command.isRateLimited(message.author.id)) {
             message
                 .reply({
-                    content: `Slow down! You're using commands a bit too quickly; this command can only be used ${command.cooldownMaxUses} time(s) every ${command.cooldownDuration} seconds.`,
+                    content: `Slow down! You're using commands a bit too quickly; this command can only be used ${command.cooldownMaxUses} time(s) every ${command.cooldownSeconds} seconds.`,
                 })
                 .then((reply) => {
                     setTimeout(() => reply.delete(), 4000);

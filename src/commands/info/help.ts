@@ -21,7 +21,7 @@ export class Help extends Command {
             category: 'Info',
             options: Help.options,
             examples: ['course'],
-            cooldownDuration: 2,
+            cooldownSeconds: 2,
         });
     }
 

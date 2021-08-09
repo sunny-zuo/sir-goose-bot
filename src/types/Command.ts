@@ -7,7 +7,6 @@ export interface CommandOptions {
     isSlashCommand?: boolean; // whether or not the command should be a slash command
     isMessageCommand?: boolean; // whether or not the command should be a message (old-fashioned) command
     aliases?: string[]; // alternative ways of triggering command
-    args?: boolean; // whether or not arguments are required
     options?: ApplicationCommandOption[]; // arguments for a command
     guildOnly?: boolean; // if the command can only be used in guilds
     ownerOnly?: boolean; // if the command can only be used by the bot owner
@@ -16,7 +15,7 @@ export interface CommandOptions {
     examples?: string[]; // examples of how to use the command used in help message
     clientPermissions?: bigint[]; // bot permissions required to run command
     userPermissions?: bigint[]; // user permissions required to run command
-    cooldownDuration?: number; // cooldown duration for command per user
+    cooldownSeconds?: number; // cooldown duration for command per user
     cooldownMaxUses?: number; // maximum uses of the command per user until cooldown
 
     [key: string]: string | boolean | number | string[] | bigint[] | ApplicationCommandOption[] | undefined;

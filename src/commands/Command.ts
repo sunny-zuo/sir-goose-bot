@@ -38,7 +38,7 @@ export abstract class Command {
     examples: string[] = [];
     clientPermissions: bigint[] = minimumClientPermissions;
     userPermissions: bigint[] = [];
-    cooldownDuration = 3;
+    cooldownSeconds = 3;
     cooldownMaxUses = 1;
     cooldown: Cooldown;
 
@@ -52,7 +52,7 @@ export abstract class Command {
         this.description = options.description;
         this.category = options.category;
 
-        this.cooldown = new Cooldown(this.cooldownDuration, this.cooldownMaxUses);
+        this.cooldown = new Cooldown(this.cooldownSeconds, this.cooldownMaxUses);
     }
 
     abstract execute(interaction: Message | CommandInteraction, args?: CommandInteractionOptionResolver): Promise<void>;

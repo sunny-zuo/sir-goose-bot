@@ -29,7 +29,7 @@ export class Pin extends Command {
             options: Pin.options,
             guildOnly: true,
             clientPermissions: [Permissions.FLAGS.MANAGE_MESSAGES],
-            cooldownDuration: 60,
+            cooldownSeconds: 60,
             cooldownMaxUses: 2,
         });
     }

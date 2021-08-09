@@ -10,7 +10,7 @@ export class VerifyAll extends Command {
             name: 'verifyall',
             description: 'Verify all existing users in the server that would be verified',
             category: 'Verification',
-            cooldownDuration: 3600,
+            cooldownSeconds: 3600,
             cooldownMaxUses: 5,
             clientPermissions: [Permissions.FLAGS.MANAGE_ROLES],
         });

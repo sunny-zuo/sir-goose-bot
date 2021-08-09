@@ -22,7 +22,7 @@ export class Course extends Command {
             aliases: ['class'],
             options: Course.options,
             examples: ['math135'],
-            cooldownDuration: 10,
+            cooldownSeconds: 10,
             cooldownMaxUses: 2,
         });
     }
