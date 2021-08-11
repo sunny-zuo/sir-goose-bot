@@ -75,8 +75,11 @@ export class Help extends Command {
                 .setTimestamp();
 
             for (const category of categories) {
-                const categoryCommands = client.commands.filter((command) => command.category === category);
-                embed.addField(`${category} Commands`, categoryCommands.map((command) => `\`${command.name}\``).join(' '), true);
+                const categoryCommands = client.commands.filter((command) => command.category === category && command.displayHelp);
+
+                if (categoryCommands.size > 0) {
+                    embed.addField(`${category} Commands`, categoryCommands.map((command) => `\`${command.name}\``).join(' '), true);
+                }
             }
 
             interaction.reply({ embeds: [embed] });

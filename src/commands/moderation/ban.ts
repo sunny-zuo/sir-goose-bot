@@ -34,7 +34,7 @@ export class Ban extends Command {
         super(client, {
             name: 'ban',
             description: 'Ban a user and all known alt accounts using their Waterloo ID',
-            category: 'Admin',
+            category: 'Moderation',
             options: Ban.options,
             guildOnly: true,
             examples: ['@user', '@user reason'],

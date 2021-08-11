@@ -1,5 +1,4 @@
 /* Admin Commands */
-import { Ban } from './admin/ban';
 import { Config } from './admin/config';
 import { Prefix } from './admin/prefix';
 
@@ -8,6 +7,9 @@ import { Honk } from './fun/honk';
 
 /* Info Commands */
 import { Help } from './info/help';
+
+/* Moderation Commands */
+import { Ban } from './moderation/ban';
 
 /* Owner Commands */
 import { Deploy } from './owner/deploy';
@@ -20,9 +22,10 @@ import { Pin } from './utility/pin';
 import { Course } from './uwaterloo/course';
 import { Countdown } from './uwaterloo/countdown';
 
+/* Verification Commands */
 import { Verify } from './verification/verify';
 import { VerifyAll } from './verification/verifyall';
 import { VerifyButton } from './verification/verifybutton';
 import { VerifyRules } from './verification/verifyrules';
 
-export default [Ban, Config, Prefix, Honk, Help, Deploy, Reload, Pin, Course, Countdown, Verify, VerifyAll, VerifyButton, VerifyRules];
+export default [Config, Prefix, Honk, Help, Ban, Deploy, Reload, Pin, Course, Countdown, Verify, VerifyAll, VerifyButton, VerifyRules];
