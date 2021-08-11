@@ -6,6 +6,7 @@ import Client from '../Client';
 import { GuildConfigCache } from '../helpers/guildConfigCache';
 import UserModel, { User as UserInterface } from '../models/user.model';
 import GuildModel, { GuildConfig } from '../models/guildConfig.model';
+import BanModel from '../models/ban.model';
 import { Result } from '../types/';
 import { Modlog } from '../helpers/modlog';
 import { RoleData } from '../types/Verification';
@@ -87,6 +88,20 @@ export class RoleAssignmentService {
         const user = await UserModel.findOne({ discordId: this.userId });
 
         if (member && user && user.verified) {
+            if (await this.isBanned(guild.id, user.discordId)) {
+                this.client.log.info(`Assigned no role(s) to ${member.user.tag} (${this.userId}) in "${guild.name}" (Banned)`);
+
+                await Modlog.logUserAction(
+                    this.client,
+                    guild,
+                    member.user,
+                    `We attempted to verify ${member} but did not assign any roles as they are banned.`,
+                    'YELLOW'
+                );
+
+                return { success: false, error: 'User is banned' };
+            }
+
             const allRoles = await this.getMatchingRoles(guild, log);
             const missingRoles = allRoles.filter((role) => !member.roles.cache.has(role.id));
 
@@ -166,6 +181,17 @@ export class RoleAssignmentService {
             }
         }
         return validRoles;
+    }
+
+    private async isBanned(guildId: Snowflake, userId: Snowflake): Promise<boolean> {
+        const userBans = await BanModel.find({
+            guildId: guildId,
+            userId: userId,
+            unbanned: false,
+            $or: [{ expiry: { $gte: new Date() } }, { expiry: { $exists: false } }],
+        });
+
+        return userBans.length > 0;
     }
 
     static async getInvalidRoles(guild: Guild): Promise<RoleData[]> {

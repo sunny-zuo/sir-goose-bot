@@ -1,4 +1,5 @@
 /* Admin Commands */
+import { Ban } from './admin/ban';
 import { Config } from './admin/config';
 import { Prefix } from './admin/prefix';
 
@@ -24,4 +25,4 @@ import { VerifyAll } from './verification/verifyall';
 import { VerifyButton } from './verification/verifybutton';
 import { VerifyRules } from './verification/verifyrules';
 
-export default [Config, Prefix, Honk, Help, Deploy, Reload, Pin, Course, Countdown, Verify, VerifyAll, VerifyButton, VerifyRules];
+export default [Ban, Config, Prefix, Honk, Help, Deploy, Reload, Pin, Course, Countdown, Verify, VerifyAll, VerifyButton, VerifyRules];

@@ -53,6 +53,19 @@ export async function sendVerificationReplies(
             const roleAssign = await service.assignGuildRoles(interaction.guild, true, false);
             if (roleAssign.success) {
                 assignedRoles = roleAssign.value;
+            } else if (roleAssign.error === 'User is banned') {
+                const embed = new MessageEmbed()
+                    .setTitle('Banned')
+                    .setDescription(
+                        `You are banned from thie server, and thus cannot receive any roles. Please message a server admin if you think this is a mistake or wish to appeal your ban.`
+                    )
+                    .setColor('RED')
+                    .setTimestamp();
+
+                isMessage(interaction)
+                    ? interaction.reply({ embeds: [embed] })
+                    : interaction.reply({ embeds: [embed], ephemeral: ephemeral });
+                return;
             }
         } else {
             await service.assignAllRoles();
