@@ -6,7 +6,10 @@
     "scripts": {
         "test": "npx jest",
         "build": "rimraf ./dist && tsc",
-        "start": "npm run build && node dist/main.js"
+        "start": "npm run build && node dist/main.js",
+        "lint:eslint": "eslint --ext .ts src",
+        "lint:prettier": "prettier --check \"src/**/*.ts\"",
+        "format": "prettier --write \"src/**/*.ts\""
     },
     "repository": {
         "type": "git",
