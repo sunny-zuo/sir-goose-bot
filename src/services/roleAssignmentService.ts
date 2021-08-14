@@ -88,14 +88,23 @@ export class RoleAssignmentService {
         const user = await UserModel.findOne({ discordId: this.userId });
 
         if (member && user && user.verified) {
-            if (await this.isBanned(guild.id, user.discordId)) {
+            const userBan = await BanModel.findOne({
+                guildId: guild.id,
+                uwid: user.uwid,
+                unbanned: false,
+                $or: [{ expiry: { $gte: new Date() } }, { expiry: { $exists: false } }],
+            });
+
+            if (userBan) {
                 this.client.log.info(`Assigned no role(s) to ${member.user.tag} (${this.userId}) in "${guild.name}" (Banned)`);
 
                 await Modlog.logUserAction(
                     this.client,
                     guild,
                     member.user,
-                    `We attempted to verify ${member} but did not assign any roles as they are banned.`,
+                    `We attempted to verify ${member} but did not assign any roles as they are banned. ${
+                        userBan.userId !== member.id ? `(Alt of user id ${userBan.userId})` : ''
+                    }`,
                     'YELLOW'
                 );
 
@@ -181,17 +190,6 @@ export class RoleAssignmentService {
             }
         }
         return validRoles;
-    }
-
-    private async isBanned(guildId: Snowflake, userId: Snowflake): Promise<boolean> {
-        const userBans = await BanModel.find({
-            guildId: guildId,
-            userId: userId,
-            unbanned: false,
-            $or: [{ expiry: { $gte: new Date() } }, { expiry: { $exists: false } }],
-        });
-
-        return userBans.length > 0;
     }
 
     static async getInvalidRoles(guild: Guild): Promise<RoleData[]> {
