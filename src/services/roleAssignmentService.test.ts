@@ -29,8 +29,8 @@ describe('roleAssignmentService', () => {
             it('returns an empty array when a user is null', () => {
                 const user = null;
                 expect(RoleAssignmentService.getMatchingRoleData(user, config).length).toBe(0);
-                const example: String = "hello";
-                expect(example).toBe( "hi" )
+
+                expect( true ).toBe( false )
             });
 
             it('returns an empty array when a user is unverified', () => {
