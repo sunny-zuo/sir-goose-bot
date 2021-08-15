@@ -182,7 +182,7 @@ export class RoleAssignmentService {
                     this.client,
                     guild,
                     'Verification Role Assignment Error',
-                    `We attempted to assign the role(s) "${invalidRoles.map((role) => `${role.name} (${role.id})`).join(', ')}" to <@${
+                    `We attempted to assign the role(s) ${invalidRoles.map((role) => `"${role.name}" (${role.id})`).join(', ')} to <@${
                         this.userId
                     }>, but the role not found or could not be assigned due to hierarchy or permissions issues. Make sure my role has the Manage Roles permission and is above all roles you want to assign.`,
                     'RED'

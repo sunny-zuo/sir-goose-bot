@@ -3,6 +3,8 @@ import { CommandInteractionCreateEventHandler } from './commandInteractionCreate
 import { GuildMemberAddEventHandler } from './guildMemberAddEventHandler';
 import { MessageCreateEventHandler } from './messageCreateEventHandler';
 import { ReadyEventHandler } from './readyEventHandler';
+import { RoleDeleteEventHandler } from './roleDeleteEventHandler';
+import { RoleUpdateEventHandler } from './roleUpdateEventHandler';
 
 export default [
     GuildMemberAddEventHandler,
@@ -10,4 +12,6 @@ export default [
     CommandInteractionCreateEventHandler,
     MessageCreateEventHandler,
     ReadyEventHandler,
+    RoleDeleteEventHandler,
+    RoleUpdateEventHandler,
 ];

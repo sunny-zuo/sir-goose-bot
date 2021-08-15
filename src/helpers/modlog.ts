@@ -1,4 +1,4 @@
-import { ColorResolvable, Guild, MessageEmbed, Permissions, TextChannel, User, MessageOptions } from 'discord.js';
+import { ColorResolvable, Guild, MessageEmbed, Permissions, TextChannel, User, MessageOptions, Message } from 'discord.js';
 import Client from '../Client';
 import { GuildConfigCache } from './guildConfigCache';
 
@@ -9,14 +9,15 @@ export class Modlog {
         user: User,
         message: string,
         color: ColorResolvable = 'BLUE'
-    ): Promise<void> {
+    ): Promise<Message | void> {
         if (!guild || !guild.me) return;
 
         const channel = await this.fetchModlogChannel(guild);
 
         if (channel && channel.permissionsFor(guild.me).has([Permissions.FLAGS.SEND_MESSAGES, Permissions.FLAGS.EMBED_LINKS])) {
             const embed = this.getUserEmbed(user, message, color);
-            await channel.send({ embeds: [embed] }).catch((e) => client.log.error(e, e.stack));
+            const sentMessage = await channel.send({ embeds: [embed] }).catch((e) => client.log.error(e, e.stack));
+            return sentMessage;
         }
     }
 
@@ -26,24 +27,26 @@ export class Modlog {
         title: string,
         message: string,
         color: ColorResolvable = 'BLUE'
-    ): Promise<void> {
+    ): Promise<Message | void> {
         if (!guild || !guild.me) return;
 
         const channel = await this.fetchModlogChannel(guild);
 
         if (channel && channel.permissionsFor(guild.me).has([Permissions.FLAGS.SEND_MESSAGES, Permissions.FLAGS.EMBED_LINKS])) {
             const embed = new MessageEmbed().setTitle(title).setColor(color).setDescription(message).setTimestamp();
-            await channel.send({ embeds: [embed] }).catch((e) => client.log.error(e, e.stack));
+            const sentMessage = await channel.send({ embeds: [embed] }).catch((e) => client.log.error(e, e.stack));
+            return sentMessage;
         }
     }
 
-    static async logMessage(client: Client, guild: Guild | null, message: MessageOptions): Promise<void> {
+    static async logMessage(client: Client, guild: Guild | null, message: MessageOptions): Promise<Message | void> {
         if (!guild || !guild.me) return;
 
         const channel = await this.fetchModlogChannel(guild);
 
         if (channel) {
-            await channel.send(message).catch((e) => client.log.error(e, e.stack));
+            const sentMessage = await channel.send(message).catch((e) => client.log.error(e, e.stack));
+            return sentMessage;
         }
     }
 
