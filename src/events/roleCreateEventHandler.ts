@@ -2,61 +2,23 @@ import { EventHandler } from './eventHandler';
 import Client from '../Client';
 import { GuildMember, MessageActionRow, MessageButton, MessageComponentInteraction, MessageEmbed, Role } from 'discord.js';
 import { Modlog } from '../helpers/modlog';
-import GuildConfigModel from '../models/guildConfig.model';
 import { GuildConfigCache } from '../helpers/guildConfigCache';
 import { v4 as uuidv4 } from 'uuid';
+import GuildConfigModel from '../models/guildConfig.model';
 
-export class RoleUpdateEventHandler implements EventHandler {
-    readonly eventName = 'roleUpdate';
+export class RoleCreateEventHandler implements EventHandler {
+    readonly eventName = 'roleCreate';
     readonly client: Client;
 
     constructor(client: Client) {
         this.client = client;
     }
 
-    async execute(oldRole: Role, newRole: Role): Promise<void> {
-        this.updateVerificationRules(oldRole, newRole);
-        this.promptUpdateVerificationRules(oldRole, newRole);
+    async execute(newRole: Role): Promise<void> {
+        this.checkVerificationRules(newRole);
     }
 
-    async updateVerificationRules(oldRole: Role, newRole: Role): Promise<void> {
-        if (oldRole.name === newRole.name) {
-            return;
-        }
-
-        const guild = newRole.guild;
-        const config = await GuildConfigModel.findOne({ guildId: guild.id });
-
-        if (config && config.enableVerification && config.verificationRules?.rules && config.verificationRules.rules.length > 0) {
-            const verificationRules = config.verificationRules.rules;
-
-            let didRulesUpdate = false;
-            for (const rule of verificationRules) {
-                for (const role of rule.roles) {
-                    if (role.id === oldRole.id) {
-                        role.name = newRole.name;
-                        didRulesUpdate = true;
-                    }
-                }
-            }
-
-            if (didRulesUpdate) {
-                await config.save();
-                Modlog.logInfoMessage(
-                    this.client,
-                    guild,
-                    'Verification Role Updated',
-                    `The role \`${oldRole.name}\` is used for verification, and was renamed to \`${newRole.name}\`. The server's verification rules have automatically updated to reflect this change.`,
-                    'GREEN'
-                );
-            }
-        }
-    }
-
-    async promptUpdateVerificationRules(oldRole: Role, newRole: Role): Promise<void> {
-        // this check is in place so that this function will only be called for pseudo role creation events
-        if (oldRole.name !== 'new role' || newRole.name === 'new role') return;
-
+    async checkVerificationRules(newRole: Role): Promise<void> {
         const guild = newRole.guild;
         const config = await GuildConfigCache.fetchConfig(guild.id);
 
