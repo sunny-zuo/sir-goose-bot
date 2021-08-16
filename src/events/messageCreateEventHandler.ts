@@ -4,6 +4,7 @@ import { InvalidCommandInteractionOption } from '../types';
 import { EventHandler } from './eventHandler';
 import { GuildConfigCache } from '../helpers/guildConfigCache';
 import { Help } from '../commands/info/help';
+import { sendEphemeralReply } from '../helpers/message';
 
 export class MessageCreateEventHandler implements EventHandler {
     readonly eventName = 'messageCreate';
@@ -28,14 +29,13 @@ export class MessageCreateEventHandler implements EventHandler {
         if (!command.isMessageCommand) return;
         if (message.guild && !message.guild.available) return;
         if (command.isRateLimited(message.author.id)) {
-            message
-                .reply({
+            return sendEphemeralReply(
+                message,
+                {
                     content: `Slow down! You're using commands a bit too quickly; this command can only be used ${command.cooldownMaxUses} time(s) every ${command.cooldownSeconds} seconds.`,
-                })
-                .then((reply) => {
-                    setTimeout(() => reply.delete(), 4000);
-                });
-            return;
+                },
+                15
+            );
         }
         if (command.guildOnly && !message.guild) {
             command.sendErrorEmbed(message, 'Command is Server Only', 'This command can only be used inside Discord servers and not DMs.');

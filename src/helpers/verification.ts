@@ -14,6 +14,7 @@ import UserModel from '../models/user.model';
 import Client from '../Client';
 import { RoleAssignmentService } from '../services/roleAssignmentService';
 import { Modlog } from './modlog';
+import { sendEphemeralReply, sendReply } from './message';
 
 export function getVerificationResponse(user: User): MessageOptions {
     if (!process.env.AES_PASSPHRASE || !process.env.SERVER_URI) {
@@ -62,10 +63,7 @@ export async function sendVerificationReplies(
                     .setColor('RED')
                     .setTimestamp();
 
-                isMessage(interaction)
-                    ? interaction.reply({ embeds: [embed] })
-                    : interaction.reply({ embeds: [embed], ephemeral: ephemeral });
-                return;
+                ephemeral ? sendEphemeralReply(interaction, { embeds: [embed] }, 60) : sendReply(interaction, { embeds: [embed] });
             }
         } else {
             await service.assignAllRoles();
@@ -74,7 +72,7 @@ export async function sendVerificationReplies(
         const assignmentResult =
             assignedRoles.length > 0
                 ? `You have received the ${assignedRoles.map((role) => `\`${role.name}\``).join(', ')} role(s).`
-                : 'However, the server has configured the bot to not assign any roles to you for various reasons (most likely due to only wanting to verify certain groups of people). If you think this is a mistake, please message a server admin.';
+                : 'However, the server has configured the bot to not assign any roles to you (most likely due to only wanting to verify certain groups of people). If you think this is a mistake, please message a server admin.';
 
         const embed = new MessageEmbed()
             .setTitle('Verified Successfully')
@@ -82,7 +80,7 @@ export async function sendVerificationReplies(
             .setColor('GREEN')
             .setTimestamp();
 
-        isMessage(interaction) ? interaction.reply({ embeds: [embed] }) : interaction.reply({ embeds: [embed], ephemeral: ephemeral });
+        ephemeral ? sendEphemeralReply(interaction, { embeds: [embed] }, 60) : sendReply(interaction, { embeds: [embed] });
     } else {
         if (user) {
             user.verifyRequestedAt = new Date();
@@ -109,15 +107,11 @@ export async function sendVerificationReplies(
                     .setColor('BLUE')
                     .setTimestamp();
 
-                isMessage(interaction)
-                    ? interaction.reply({ embeds: [embed] })
-                    : interaction.reply({ embeds: [embed], ephemeral: ephemeral });
+                ephemeral ? sendEphemeralReply(interaction, { embeds: [embed] }, 60) : sendReply(interaction, { embeds: [embed] });
 
                 Modlog.logUserAction(client, interaction.guild, discordUser, `${user} requested a verification link.`, 'BLUE');
             } else {
-                if (isMessage(interaction) || interaction.isCommand()) {
-                    interaction.reply(verifyReply);
-                }
+                sendReply(interaction, verifyReply);
             }
         } catch (err) {
             const embed = new MessageEmbed()
@@ -128,11 +122,7 @@ export async function sendVerificationReplies(
                 .setColor('RED')
                 .setTimestamp();
 
-            isMessage(interaction) ? interaction.reply({ embeds: [embed] }) : interaction.reply({ embeds: [embed], ephemeral: ephemeral });
+            ephemeral ? sendEphemeralReply(interaction, { embeds: [embed] }, 60) : sendReply(interaction, { embeds: [embed] });
         }
     }
-}
-
-function isMessage(interaction: Message | CommandInteraction | ButtonInteraction): interaction is Message {
-    return (interaction as Message).url !== undefined;
 }
