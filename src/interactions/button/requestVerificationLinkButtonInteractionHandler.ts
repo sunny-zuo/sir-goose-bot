@@ -1,4 +1,4 @@
-import { ButtonInteraction, MessageEmbed } from 'discord.js';
+import { ButtonInteraction } from 'discord.js';
 import { ButtonInteractionHandler } from './buttonInteractionHandler';
 import { sendVerificationReplies } from '../../helpers/verification';
 import { Cooldown } from '../../helpers/cooldown';
@@ -8,6 +8,7 @@ export class RequestVerificationLinkButtonInteractionHandler implements ButtonIn
     readonly client: Client;
     readonly customId = 'requestVerificationLink';
     readonly cooldown: Cooldown;
+    readonly limitMessage = `You can only request a verification link once every 60 seconds. You likely don't need to request another verification link - older ones remain valid. Please message an admin if you have any issues with verification.`;
 
     constructor(client: Client) {
         this.client = client;
@@ -15,22 +16,6 @@ export class RequestVerificationLinkButtonInteractionHandler implements ButtonIn
     }
 
     async execute(interaction: ButtonInteraction): Promise<void> {
-        const userLimit = this.cooldown.checkLimit(interaction.user.id);
-
-        if (userLimit.blocked) {
-            interaction.reply({
-                embeds: [
-                    new MessageEmbed()
-                        .setTitle('Rate Limited')
-                        .setColor('RED')
-                        .setDescription(
-                            `You can only request a verification link once every 60 seconds. Please try again in ${userLimit.secondsUntilReset} seconds. You likely don't need to request another verification link - older ones remain valid. Please message an admin if you have any issues with verification.`
-                        ),
-                ],
-                ephemeral: true,
-            });
-        } else {
-            sendVerificationReplies(this.client, interaction, interaction.user, true);
-        }
+        sendVerificationReplies(this.client, interaction, interaction.user, true);
     }
 }

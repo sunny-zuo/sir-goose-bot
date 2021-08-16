@@ -1,3 +1,4 @@
+import { ButtonRoleButtonInteractionHandler } from './buttonRoleButtonInteractionHandler';
 import { RequestVerificationLinkButtonInteractionHandler } from './requestVerificationLinkButtonInteractionHandler';
 
-export default [RequestVerificationLinkButtonInteractionHandler];
+export default [ButtonRoleButtonInteractionHandler, RequestVerificationLinkButtonInteractionHandler];

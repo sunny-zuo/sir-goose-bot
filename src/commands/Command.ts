@@ -192,7 +192,10 @@ export abstract class Command {
     ): Promise<Result<CommandInteractionOptionResolver, InvalidCommandInteractionOption>> {
         const options: CommandInteractionOption[] = [];
         const expectedOptions = this.options;
-        const argArray = expectedOptions.length > 1 ? args.trim().split(' ') : [args.trim()]; // TODO: handle arguments with spaces
+        const argArray =
+            expectedOptions.length > 1 || expectedOptions[0].type === 'SUB_COMMAND' || expectedOptions[0].type === 'SUB_COMMAND_GROUP'
+                ? args.trim().split(' ')
+                : [args.trim()]; // TODO: handle arguments with spaces
 
         for (const expectedOption of expectedOptions) {
             const result = await this.parseMessageValue(interaction, expectedOption, argArray);

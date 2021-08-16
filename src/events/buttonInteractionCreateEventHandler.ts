@@ -1,4 +1,4 @@
-import { Collection, Interaction } from 'discord.js';
+import { Collection, Interaction, MessageEmbed } from 'discord.js';
 import { EventHandler } from './eventHandler';
 import ButtonInteractionHandlers from '../interactions/button';
 import { ButtonInteractionHandler } from '../interactions/button/buttonInteractionHandler';
@@ -24,6 +24,27 @@ export class ButtonInteractionCreateEventHandler implements EventHandler {
         this.client.log.info(
             `BUTTON ${interaction.user.tag} (${interaction.user.id}) pressed button with custom id ${interaction.customId}`
         );
-        this.buttonInteractionHandlers.get(interaction.customId)?.execute(interaction);
+
+        const [interactioName, args] = interaction.customId.split('|');
+
+        const handler = this.buttonInteractionHandlers.get(interactioName);
+
+        if (handler) {
+            const userLimit = handler.cooldown.checkLimit(interaction.user.id);
+            if (!userLimit.blocked) {
+                handler.execute(interaction, args);
+            } else {
+                const embed = new MessageEmbed()
+                    .setTitle('Rate Limited')
+                    .setColor('RED')
+                    .setDescription(
+                        handler.limitMessage ??
+                            `You can only interact with this button type ${handler.cooldown.maxUses} time(s) every ${handler.cooldown.seconds} seconds. Please try again in ${userLimit.secondsUntilReset} seconds.`
+                    )
+                    .setTimestamp();
+
+                interaction.reply({ embeds: [embed], ephemeral: true });
+            }
+        }
     }
 }

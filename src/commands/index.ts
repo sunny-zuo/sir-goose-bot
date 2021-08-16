@@ -16,6 +16,7 @@ import { Deploy } from './owner/deploy';
 import { Reload } from './owner/reload';
 
 /* Utility Commands */
+import { ButtonRole } from './utility/buttonrole';
 import { Pin } from './utility/pin';
 
 /* UWaterloo Commands */
@@ -28,4 +29,20 @@ import { VerifyAll } from './verification/verifyall';
 import { VerifyButton } from './verification/verifybutton';
 import { VerifyRules } from './verification/verifyrules';
 
-export default [Config, Prefix, Honk, Help, Ban, Deploy, Reload, Pin, Course, Countdown, Verify, VerifyAll, VerifyButton, VerifyRules];
+export default [
+    Config,
+    Prefix,
+    Honk,
+    Help,
+    Ban,
+    Deploy,
+    Reload,
+    ButtonRole,
+    Pin,
+    Course,
+    Countdown,
+    Verify,
+    VerifyAll,
+    VerifyButton,
+    VerifyRules,
+];
