@@ -33,7 +33,7 @@ export function getVerificationResponse(user: User): MessageOptions {
             `Click the button below and login with your UWaterloo account to verify.
                         
                 Authorization allows us to read your profile information to confirm that you are/were a UW student, and you can revoke this permission at any time.
-                If you run into issues, message ${process.env.OWNER_DISCORD_USERNAME} for help!`
+                If you run into issues, message the server admins or ${process.env.OWNER_DISCORD_USERNAME} for help!`
         );
 
     return { embeds: [embed], components: [button] };
@@ -109,7 +109,7 @@ export async function sendVerificationReplies(
 
                 ephemeral ? sendEphemeralReply(interaction, { embeds: [embed] }, 60) : sendReply(interaction, { embeds: [embed] });
 
-                Modlog.logUserAction(client, interaction.guild, discordUser, `${user} requested a verification link.`, 'BLUE');
+                Modlog.logUserAction(client, interaction.guild, discordUser, `${discordUser} requested a verification link.`, 'BLUE');
             } else {
                 sendReply(interaction, verifyReply);
             }
