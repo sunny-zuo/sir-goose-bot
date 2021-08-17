@@ -1,4 +1,4 @@
-import { ButtonInteraction, GuildMember, Snowflake } from 'discord.js';
+import { ButtonInteraction, GuildMember, MessageEmbed, Snowflake } from 'discord.js';
 import { ButtonInteractionHandler } from './buttonInteractionHandler';
 import { Cooldown } from '../../helpers/cooldown';
 import Client from '../../Client';
@@ -37,11 +37,13 @@ export class ButtonRoleButtonInteractionHandler implements ButtonInteractionHand
             if (role.editable) {
                 const member = interaction.member as GuildMember;
                 if (member.roles.cache.has(role.id)) {
+                    const embed = new MessageEmbed().setDescription(`The role ${role.name} was successfully removed.`).setColor('YELLOW');
                     await member.roles.remove(role);
-                    interaction.reply({ content: `The role ${role.name} was successfully removed.`, ephemeral: true });
+                    interaction.reply({ embeds: [embed], ephemeral: true });
                 } else {
+                    const embed = new MessageEmbed().setDescription(`The role ${role.name} was successfully added.`).setColor('GREEN');
                     await member.roles.add(role);
-                    interaction.reply({ content: `The role ${role.name} was successfully added.`, ephemeral: true });
+                    interaction.reply({ embeds: [embed], ephemeral: true });
                 }
             } else {
                 interaction.reply({
@@ -51,7 +53,7 @@ export class ButtonRoleButtonInteractionHandler implements ButtonInteractionHand
             }
         } else {
             interaction.reply({
-                content: `The role you tried to assign does not exist. The server owner will need to recreate the button role prompt to fix this.`,
+                content: `The role you tried to assign does not exist. Server admins will need to recreate the button role prompt to fix this.`,
                 ephemeral: true,
             });
         }
