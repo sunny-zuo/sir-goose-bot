@@ -3,8 +3,10 @@ import Client from '../Client';
 import { GuildMember, MessageActionRow, MessageButton, MessageComponentInteraction, MessageEmbed, Role } from 'discord.js';
 import { Modlog } from '../helpers/modlog';
 import GuildConfigModel from '../models/guildConfig.model';
+import ButtonRoleModel from '../models/buttonRole.model';
 import { GuildConfigCache } from '../helpers/guildConfigCache';
 import { v4 as uuidv4 } from 'uuid';
+import { chunk } from '../helpers/array';
 
 export class RoleUpdateEventHandler implements EventHandler {
     readonly eventName = 'roleUpdate';
@@ -17,6 +19,7 @@ export class RoleUpdateEventHandler implements EventHandler {
     async execute(oldRole: Role, newRole: Role): Promise<void> {
         this.updateVerificationRules(oldRole, newRole);
         this.promptUpdateVerificationRules(oldRole, newRole);
+        this.updateButtonRolePrompts(oldRole, newRole);
     }
 
     async updateVerificationRules(oldRole: Role, newRole: Role): Promise<void> {
@@ -170,6 +173,46 @@ export class RoleUpdateEventHandler implements EventHandler {
                     await message.edit({ embeds: [embed], components: [] });
                 }
             });
+        }
+    }
+
+    async updateButtonRolePrompts(oldRole: Role, newRole: Role): Promise<void> {
+        if (oldRole.name === newRole.name) return;
+        const guild = newRole.guild;
+
+        const prompts = await ButtonRoleModel.find({ guildId: guild.id, 'roles.name': oldRole.name });
+        if (!prompts || !prompts.length) return;
+
+        for (const prompt of prompts) {
+            prompt.roles.find((r) => r.name === oldRole.name)!.name = newRole.name;
+            await prompt.save();
+
+            const promptChannel = await guild.channels.fetch(prompt.channelId);
+            if (!promptChannel || !promptChannel.isText()) {
+                await prompt.delete();
+                continue;
+            }
+
+            const promptMessage = await promptChannel.messages.fetch(prompt.messageId).catch(async () => {
+                await prompt.delete();
+            });
+            if (!promptMessage) continue;
+
+            const components: MessageActionRow[] = [];
+            for (const roleChunk of chunk(prompt.roles, 5)) {
+                const row = new MessageActionRow();
+                for (const role of roleChunk) {
+                    row.addComponents(
+                        new MessageButton()
+                            .setCustomId(`buttonRole|{"roleId":"${role.id}","_id":"${prompt._id}"}`)
+                            .setLabel(role.name)
+                            .setStyle('PRIMARY')
+                    );
+                }
+                components.push(row);
+            }
+
+            await promptMessage.edit({ components });
         }
     }
 }

@@ -2,6 +2,7 @@ import { ButtonInteraction, GuildMember, MessageEmbed, Snowflake } from 'discord
 import { ButtonInteractionHandler } from './buttonInteractionHandler';
 import { Cooldown } from '../../helpers/cooldown';
 import Client from '../../Client';
+import { inlineCode } from '@discordjs/builders';
 
 type InteractionData = {
     roleId: Snowflake;
@@ -37,17 +38,23 @@ export class ButtonRoleButtonInteractionHandler implements ButtonInteractionHand
             if (role.editable) {
                 const member = interaction.member as GuildMember;
                 if (member.roles.cache.has(role.id)) {
-                    const embed = new MessageEmbed().setDescription(`The role ${role.name} was successfully removed.`).setColor('YELLOW');
+                    const embed = new MessageEmbed()
+                        .setDescription(`The role ${inlineCode(role.name)} was successfully removed.`)
+                        .setColor('YELLOW');
                     await member.roles.remove(role);
                     interaction.reply({ embeds: [embed], ephemeral: true });
                 } else {
-                    const embed = new MessageEmbed().setDescription(`The role ${role.name} was successfully added.`).setColor('GREEN');
+                    const embed = new MessageEmbed()
+                        .setDescription(`The role ${inlineCode(role.name)} was successfully added.`)
+                        .setColor('GREEN');
                     await member.roles.add(role);
                     interaction.reply({ embeds: [embed], ephemeral: true });
                 }
             } else {
                 interaction.reply({
-                    content: `I do not have permission to assign the role ${role.name}. Please message a server admin to get this fixed!`,
+                    content: `I do not have permission to assign the role ${inlineCode(
+                        role.name
+                    )}. Please message a server admin to get this fixed!`,
                     ephemeral: true,
                 });
             }

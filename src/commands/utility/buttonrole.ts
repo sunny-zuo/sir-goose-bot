@@ -15,6 +15,8 @@ import { chunk } from '../../helpers/array';
 import { inlineCode } from '@discordjs/builders';
 import ButtonRoleModel from '../../models/buttonRole.model';
 
+const BUTTON_ROLE_GUILD_LIMIT = 15;
+
 export class ButtonRole extends Command {
     private static readonly options: ApplicationCommandOption[] = [
         {
@@ -47,6 +49,7 @@ export class ButtonRole extends Command {
     }
 
     async execute(interaction: Message | CommandInteraction, args?: CommandInteractionOptionResolver): Promise<void> {
+        if (!interaction.guildId) return;
         const roles: Role[] = [];
         const invalidRoles: Role[] = [];
 
@@ -73,10 +76,20 @@ export class ButtonRole extends Command {
             return this.sendErrorEmbed(interaction, 'Invalid Roles', 'No valid roles to assign were specified.');
         }
 
+        const existingButtonRoles = await ButtonRoleModel.countDocuments({ guildId: interaction.guildId });
+        if (existingButtonRoles > BUTTON_ROLE_GUILD_LIMIT) {
+            return this.sendErrorEmbed(
+                interaction,
+                'Too Many Button Role Prompts',
+                `You cannot have more than ${BUTTON_ROLE_GUILD_LIMIT} button roles prompts. Please message ${process.env.OWNER_DISCORD_USERNAME} if you have a good reason to get this limit increased.`
+            );
+        }
+
         const buttonRoleDoc = await ButtonRoleModel.create({
             guildId: interaction.guildId,
+            channelId: interaction.channelId,
             messageId: '-1',
-            roleIds: roles.map((r) => r.id),
+            roles: roles.map((r) => ({ name: r.name, id: r.id })),
         });
 
         const components: MessageActionRow[] = [];
