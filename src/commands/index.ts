@@ -3,6 +3,7 @@ import { Config } from './admin/config';
 import { Prefix } from './admin/prefix';
 
 /* Fun Commands */
+import { Coinflip } from './fun/coinflip';
 import { Honk } from './fun/honk';
 
 /* Info Commands */
@@ -32,6 +33,7 @@ import { VerifyRules } from './verification/verifyrules';
 export default [
     Config,
     Prefix,
+    Coinflip,
     Honk,
     Help,
     Ban,
