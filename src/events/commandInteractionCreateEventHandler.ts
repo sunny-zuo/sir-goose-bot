@@ -21,6 +21,12 @@ export class CommandInteractionCreateEventHandler implements EventHandler {
         if (!command.isSlashCommand) return;
         if (interaction.guild && !interaction.guild.available) return;
         if (command.isRateLimited(interaction.user.id)) {
+            this.client.log.info(
+                `${interaction.user.tag} tried to use ${command.name} in ${interaction.guild?.name ?? 'DMs'} (${
+                    interaction.guild?.id ?? 'none'
+                }) but was rate limited.`
+            );
+
             interaction.reply({
                 content: `Slow down! You're using commands a bit too quickly; this command can only be used ${command.cooldownMaxUses} time(s) every ${command.cooldownSeconds} seconds.`,
                 ephemeral: true,
@@ -44,7 +50,14 @@ export class CommandInteractionCreateEventHandler implements EventHandler {
         );
 
         command.execute(interaction, args).catch((error) => {
-            client.log.error(error, error.stack);
+            client.log.error(
+                `
+                Command: ${command.name}
+                Arguments: ${JSON.stringify(args.data)}
+                Error: ${error}
+                `,
+                error.stack
+            );
         });
     }
 }

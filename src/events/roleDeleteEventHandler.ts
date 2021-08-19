@@ -34,6 +34,9 @@ export class RoleDeleteEventHandler implements EventHandler {
                             'RED'
                         );
 
+                        this.client.log.info(
+                            `A role named ${deletedRole.name} that was used for verification was deleted in ${guild.name} (${guild.id}).`
+                        );
                         return;
                     }
                 }

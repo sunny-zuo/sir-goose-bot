@@ -205,5 +205,9 @@ export class Ban extends Command {
         for (const embeds of chunk(modlogEmbeds, 10)) {
             await Modlog.logMessage(this.client, interaction.guild, { embeds });
         }
+
+        this.client.log.info(
+            `User ${this.getUser(interaction).tag} banned ${memberToBan?.user.tag ?? providedUserId} in sever ${guild.name} (${guild.id}).`
+        );
     }
 }

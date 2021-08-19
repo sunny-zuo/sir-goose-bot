@@ -101,6 +101,9 @@ export class RoleCreateEventHandler implements EventHandler {
                             .setTimestamp();
 
                         await i.update({ embeds: [updatedEmbed], components: [] });
+                        this.client.log.info(
+                            `Newly created role ${newRole.name} matching verification rules was automatically updated by ${i.user.tag} in ${guild.name} (${guild.id}).`
+                        );
                         validInteractionReceived = true;
                         collector.stop();
                     }
@@ -114,6 +117,9 @@ export class RoleCreateEventHandler implements EventHandler {
                         .setTimestamp();
 
                     await i.update({ embeds: [updatedEmbed], components: [] });
+                    this.client.log.info(
+                        `Newly created role ${newRole.name} matching verification rules was set to not automatically update by ${i.user.tag} in ${guild.name} (${guild.id}).`
+                    );
                     validInteractionReceived = true;
                     collector.stop();
                 }
@@ -130,6 +136,10 @@ export class RoleCreateEventHandler implements EventHandler {
                         .setTimestamp();
 
                     await message.edit({ embeds: [embed], components: [] });
+
+                    this.client.log.info(
+                        `Prompt to update newly created role ${newRole.name} matching verification rules was ignored in ${guild.name} (${guild.id}).`
+                    );
                 }
             });
         }

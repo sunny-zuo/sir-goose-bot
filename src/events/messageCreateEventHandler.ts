@@ -33,6 +33,12 @@ export class MessageCreateEventHandler implements EventHandler {
         if (!command.isMessageCommand) return;
         if (message.guild && !message.guild.available) return;
         if (command.isRateLimited(message.author.id)) {
+            this.client.log.info(
+                `${message.author.tag} tried to use ${command.name} in ${message.guild?.name ?? 'DMs'} (${
+                    message.guild?.id ?? 'none'
+                }) but was rate limited.`
+            );
+
             return sendEphemeralReply(
                 message,
                 {
@@ -67,7 +73,14 @@ export class MessageCreateEventHandler implements EventHandler {
                     );
 
                     command.execute(message).catch((error) => {
-                        client.log.error(error, error.stack);
+                        client.log.error(
+                            `
+                            Command: ${command.name}
+                            Arguments: None
+                            Error: ${error}
+                            `,
+                            error.stack
+                        );
                     });
                     return;
                 }
@@ -85,7 +98,14 @@ export class MessageCreateEventHandler implements EventHandler {
                 );
 
                 command.execute(message, args).catch((error) => {
-                    client.log.error(error, error.stack);
+                    client.log.error(
+                        `
+                        Command: ${command.name}
+                        Arguments: ${JSON.stringify(args.data)}
+                        Error: ${error}
+                        `,
+                        error.stack
+                    );
                 });
             } else {
                 const invalidOption: InvalidCommandInteractionOption = argumentParser.error;
@@ -107,7 +127,14 @@ export class MessageCreateEventHandler implements EventHandler {
             );
 
             command.execute(message).catch((error) => {
-                client.log.error(error, error.stack);
+                client.log.error(
+                    `
+                    Command: ${command.name}
+                    Arguments: None
+                    Error: ${error}
+                    `,
+                    error.stack
+                );
             });
         }
     }

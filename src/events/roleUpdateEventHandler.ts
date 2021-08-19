@@ -52,6 +52,9 @@ export class RoleUpdateEventHandler implements EventHandler {
                     `The role \`${oldRole.name}\` is used for verification, and was renamed to \`${newRole.name}\`. The server's verification rules have automatically updated to reflect this change.`,
                     'GREEN'
                 );
+                this.client.log.info(
+                    `Role ${oldRole.name} was renamed to ${newRole.name} in ${guild.name} (${guild.id}) and was automatically updated in verification rules.`
+                );
             }
         }
     }
@@ -142,6 +145,9 @@ export class RoleUpdateEventHandler implements EventHandler {
                             .setTimestamp();
 
                         await i.update({ embeds: [updatedEmbed], components: [] });
+                        this.client.log.info(
+                            `Newly created role ${newRole.name} matching verification rules was automatically updated by ${i.user.tag} in ${guild.name} (${guild.id}).`
+                        );
                         validInteractionReceived = true;
                         collector.stop();
                     }
@@ -155,6 +161,9 @@ export class RoleUpdateEventHandler implements EventHandler {
                         .setTimestamp();
 
                     await i.update({ embeds: [updatedEmbed], components: [] });
+                    this.client.log.info(
+                        `Newly created role ${newRole.name} matching verification rules was set to not automatically update by ${i.user.tag} in ${guild.name} (${guild.id}).`
+                    );
                     validInteractionReceived = true;
                     collector.stop();
                 }
@@ -171,6 +180,9 @@ export class RoleUpdateEventHandler implements EventHandler {
                         .setTimestamp();
 
                     await message.edit({ embeds: [embed], components: [] });
+                    this.client.log.info(
+                        `Prompt to update newly created role ${newRole.name} matching verification rules was ignored in ${guild.name} (${guild.id}).`
+                    );
                 }
             });
         }

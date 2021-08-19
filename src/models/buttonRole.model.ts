@@ -13,17 +13,22 @@ export interface ButtonRole {
     roles: RoleData[];
 }
 
-const schema = new Schema<ButtonRole>({
-    guildId: { type: String, required: true },
-    channelId: { type: String, required: true },
-    messageId: { type: String, required: true },
-    roles: [
-        {
-            name: { type: String, required: true },
-            id: { type: String, required: true },
-        },
-    ],
-});
+const schema = new Schema<ButtonRole>(
+    {
+        guildId: { type: String, required: true },
+        channelId: { type: String, required: true },
+        messageId: { type: String, required: true },
+        roles: [
+            {
+                name: { type: String, required: true },
+                id: { type: String, required: true },
+            },
+        ],
+    },
+    {
+        timestamps: true,
+    }
+);
 
 const ButtonRoleModel = model<ButtonRole>('ButtonRole', schema);
 

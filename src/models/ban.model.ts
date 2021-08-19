@@ -11,15 +11,20 @@ export interface Ban {
     unbanned: boolean;
 }
 
-const schema = new Schema<Ban>({
-    guildId: { type: String, required: true },
-    userId: { type: String, required: true },
-    uwid: { type: String, required: true },
-    expiry: Date,
-    reason: String,
-    bannedBy: { type: String, required: true },
-    unbanned: { type: Boolean, default: false },
-});
+const schema = new Schema<Ban>(
+    {
+        guildId: { type: String, required: true },
+        userId: { type: String, required: true },
+        uwid: { type: String, required: true },
+        expiry: Date,
+        reason: String,
+        bannedBy: { type: String, required: true },
+        unbanned: { type: Boolean, default: false },
+    },
+    {
+        timestamps: true,
+    }
+);
 
 const BanModel = model<Ban>('Ban', schema);
 

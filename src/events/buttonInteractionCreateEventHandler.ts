@@ -44,6 +44,12 @@ export class ButtonInteractionCreateEventHandler implements EventHandler {
                     .setTimestamp();
 
                 interaction.reply({ embeds: [embed], ephemeral: true });
+
+                this.client.log.info(
+                    `${interaction.user.tag} tried to use interact with button ${handler.customId} in ${
+                        interaction.guild?.name ?? 'DMs'
+                    } (${interaction.guild?.id ?? 'none'}) but was rate limited.`
+                );
             }
         }
     }

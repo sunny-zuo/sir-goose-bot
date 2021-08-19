@@ -109,5 +109,11 @@ export class Pin extends Command {
             `${interaction.member} pinned [a message](${pinMessage.url}) using the pin command in ${pinMessage.channel}.`,
             'BLUE'
         );
+
+        this.client.log.info(
+            `${this.getUser(interaction).tag} pinned message with id ${pinMessageId} in server ${interaction.guild} (${
+                interaction.guildId
+            }) using the pin command in channel ${pinMessage.channel.id}.`
+        );
     }
 }
