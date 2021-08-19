@@ -16,13 +16,21 @@ export class MessageDeleteBulkEventHandler implements EventHandler {
     }
 
     async cleanupButtonRoles(messages: Collection<Snowflake, Message>): Promise<void> {
-        for (const message of messages.values()) {
-            if (message.author !== this.client.user || message.components.length === 0) return;
+        const messagesToCheck: Message[] = [];
 
-            const buttonRoleDoc = await ButtonRoleModel.findOne({ messageId: message.id });
-            if (buttonRoleDoc) {
-                await buttonRoleDoc.delete();
+        for (const message of messages.values()) {
+            if (message.partial) {
+                messagesToCheck.push(message);
+            } else {
+                if (message.author !== this.client.user || message.components.length === 0) continue;
+                messagesToCheck.push(message);
             }
+        }
+
+        const messageIds = messagesToCheck.map((message) => message.id);
+        const deleteResult = await ButtonRoleModel.deleteMany({ messageId: { $in: messageIds } });
+        if (deleteResult.ok && deleteResult.deletedCount) {
+            this.client.log.info(`Deleted ${deleteResult.deletedCount} button role documents from bulk message delete.`);
         }
     }
 }

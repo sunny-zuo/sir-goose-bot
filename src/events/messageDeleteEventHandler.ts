@@ -16,11 +16,11 @@ export class MessageDeleteEventHandler implements EventHandler {
     }
 
     async cleanupButtonRoles(message: Message): Promise<void> {
-        if (message.author !== this.client.user || message.components.length === 0) return;
+        if (!message.partial && (message.author !== this.client.user || message.components.length === 0)) return;
 
-        const buttonRoleDoc = await ButtonRoleModel.findOne({ messageId: message.id });
-        if (buttonRoleDoc) {
-            await buttonRoleDoc.delete();
+        const deleteResult = await ButtonRoleModel.deleteOne({ messageId: message.id });
+        if (deleteResult.ok && deleteResult.deletedCount) {
+            this.client.log.info(`Deleted button role with message id ${message.id}.`);
         }
     }
 }
