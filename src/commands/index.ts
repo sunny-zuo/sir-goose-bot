@@ -8,6 +8,7 @@ import { Honk } from './fun/honk';
 
 /* Info Commands */
 import { Help } from './info/help';
+import { Ping } from './info/ping';
 
 /* Moderation Commands */
 import { Ban } from './moderation/ban';
@@ -36,6 +37,7 @@ export default [
     Coinflip,
     Honk,
     Help,
+    Ping,
     Ban,
     Deploy,
     Reload,
