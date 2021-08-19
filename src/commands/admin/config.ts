@@ -259,7 +259,7 @@ export class Config extends Command {
                         .setDescription(
                             `Use \`${guildConfig.prefix}config <option_name>\` to learn more about an option.
                             Use \`${guildConfig.prefix}config <option_name> <new_value>\` to update the guild config.
-                            For example, \`${guildConfig.prefix}verification_enabled true\` would turn on verification.`
+                            For example, \`${guildConfig.prefix}config verification_enabled true\` would turn on verification.`
                         )
                         .addFields(
                             {

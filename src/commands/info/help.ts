@@ -88,10 +88,14 @@ export class Help extends Command {
 
     static listArguments(command: Command): string {
         let argString = '';
+
         for (const option of command.options) {
             let optionString = '';
 
-            if (option.choices) {
+            if (option.type === 'SUB_COMMAND' || option.type === 'SUB_COMMAND_GROUP') {
+                // TODO: refactor help command to display subcommands properly
+                return '';
+            } else if (option.choices) {
                 optionString = option.choices.map((choice) => choice.value).join('|');
             } else {
                 optionString = option.name;
