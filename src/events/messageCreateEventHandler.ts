@@ -1,4 +1,4 @@
-import { Message } from 'discord.js';
+import { Message, Permissions } from 'discord.js';
 import Client from '../Client';
 import { InvalidCommandInteractionOption } from '../types';
 import { EventHandler } from './eventHandler';
@@ -51,7 +51,28 @@ export class MessageCreateEventHandler implements EventHandler {
             command.sendErrorEmbed(message, 'Command is Server Only', 'This command can only be used inside Discord servers and not DMs.');
             return;
         }
-        if (!command.checkCommandPermissions(message)) return;
+        if (!command.checkCommandPermissions(message)) {
+            if (
+                message.channel.type === 'GUILD_TEXT' &&
+                message.channel.guild.me &&
+                message.channel
+                    .permissionsFor(message.channel.guild.me)
+                    .missing([Permissions.FLAGS.SEND_MESSAGES, Permissions.FLAGS.EMBED_LINKS])
+            ) {
+                await message.author
+                    .send({
+                        content:
+                            'I tried to respond to your command, but I do not have permission to send messages & embed links in the channel the command was triggered in.',
+                    })
+                    .catch(() =>
+                        client.log.info(
+                            `${message.author.tag} has DMs closed and triggered a command in a channel (${message.channelId} in ${message.guildId}) I can't respond in.`
+                        )
+                    );
+            }
+
+            return;
+        }
 
         if (command.options.length > 0) {
             if (messageContent[0] === undefined || messageContent[0].length === 0) {
