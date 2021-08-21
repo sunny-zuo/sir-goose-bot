@@ -30,6 +30,7 @@ import { Verify } from './verification/verify';
 import { VerifyAll } from './verification/verifyall';
 import { VerifyButton } from './verification/verifybutton';
 import { VerifyRules } from './verification/verifyrules';
+import { VerifyStats } from './verification/verifystats';
 
 export default [
     Config,
@@ -49,4 +50,5 @@ export default [
     VerifyAll,
     VerifyButton,
     VerifyRules,
+    VerifyStats,
 ];

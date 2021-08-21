@@ -113,7 +113,7 @@ export class MessageCreateEventHandler implements EventHandler {
                 const args = argumentParser.value;
 
                 client.log.command(
-                    `${message.author.username} (${message.author.id}) ran command "${commandName}" with arguments in server ${
+                    `${message.author.tag} (${message.author.id}) ran command "${commandName}" with arguments in server ${
                         message?.guild?.name || 'DMs'
                     } (${message?.guild?.id || 'DMs'}) via message`
                 );
@@ -142,7 +142,7 @@ export class MessageCreateEventHandler implements EventHandler {
             }
         } else {
             client.log.command(
-                `${message.author.username} (${message.author.id}) ran command "${commandName}" without arguments in server ${
+                `${message.author.tag} (${message.author.id}) ran command "${commandName}" without arguments in server ${
                     message?.guild?.name || 'DMs'
                 } (${message?.guild?.id || 'DMs'}) via message`
             );
