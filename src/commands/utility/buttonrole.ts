@@ -136,7 +136,6 @@ export class ButtonRole extends Command {
                 name: `role${i}`,
                 description: `Role ${i}`,
                 type: 'ROLE',
-                required: i === 1,
             });
         }
 
