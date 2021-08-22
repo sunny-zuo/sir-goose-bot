@@ -71,7 +71,7 @@ export async function sendVerificationReplies(
 
         const assignmentResult =
             assignedRoles.length > 0
-                ? `You have received the ${assignedRoles.map((role) => `\`${role.name}\``).join(', ')} role(s).`
+                ? `You have received the ${assignedRoles.map((role) => `\`${role.name}\``).join(', ')} role${assignedRoles.length>1?'s':''}.`
                 : 'However, the server has configured the bot to not assign any roles to you (most likely due to only wanting to verify certain groups of people). If you think this is a mistake, please message a server admin.';
 
         const embed = new MessageEmbed()
