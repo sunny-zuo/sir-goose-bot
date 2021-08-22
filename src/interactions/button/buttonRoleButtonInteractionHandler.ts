@@ -3,6 +3,7 @@ import { ButtonInteractionHandler } from './buttonInteractionHandler';
 import { Cooldown } from '../../helpers/cooldown';
 import Client from '../../Client';
 import { inlineCode } from '@discordjs/builders';
+import ButtonRoleModel from '../../models/buttonRole.model';
 
 type InteractionData = {
     roleId: Snowflake;
@@ -27,10 +28,24 @@ export class ButtonRoleButtonInteractionHandler implements ButtonInteractionHand
         try {
             argData = JSON.parse(args);
         } catch (e) {
-            return this.client.log.warn(`Received invalid data from button role button interaction: ${args}`);
+            interaction.reply({
+                content: `This button role prompt is no longer valid.`,
+                ephemeral: true,
+            });
+            return this.client.log.warn(`Received invalid JSON from button role button interaction: ${args}`);
         }
 
         if (!argData || !argData._id || !argData.roleId) return;
+
+        const buttonRoleInfo = await ButtonRoleModel.findById(argData._id);
+
+        if (!buttonRoleInfo || buttonRoleInfo.roles.every((roleData) => roleData.id !== argData.roleId)) {
+            interaction.reply({
+                content: `This button role prompt is no longer valid.`,
+                ephemeral: true,
+            });
+            return this.client.log.warn(`Button role button interaction had invalid data: ${args}`);
+        }
 
         const role = await interaction.guild.roles.fetch(argData.roleId);
 
