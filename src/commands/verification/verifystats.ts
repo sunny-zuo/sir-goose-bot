@@ -11,7 +11,7 @@ export class VerifyStats extends Command {
             name: 'verifystats',
             description: "Shows stats relating to verification in the guild you're in.",
             category: 'Verification',
-            aliases: ['verificationstats', 'serverstats'],
+            aliases: ['verificationstats', 'serverstats', 'vs'],
             guildOnly: true,
             cooldownSeconds: 60,
         });

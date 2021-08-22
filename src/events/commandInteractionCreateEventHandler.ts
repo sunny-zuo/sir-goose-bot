@@ -1,4 +1,4 @@
-import { Interaction } from 'discord.js';
+import { Interaction, Permissions } from 'discord.js';
 import { EventHandler } from './eventHandler';
 import Client from '../Client';
 
@@ -41,7 +41,29 @@ export class CommandInteractionCreateEventHandler implements EventHandler {
             );
             return;
         }
-        if (!command.checkCommandPermissions(interaction)) return;
+        if (!command.checkCommandPermissions(interaction)) {
+            if (
+                interaction.channel &&
+                interaction.channel.type === 'GUILD_TEXT' &&
+                interaction.channel.guild.me &&
+                !interaction.channel
+                    .permissionsFor(interaction.channel.guild.me)
+                    .has([Permissions.FLAGS.SEND_MESSAGES, Permissions.FLAGS.EMBED_LINKS])
+            ) {
+                await interaction.user
+                    .send({
+                        content:
+                            'I tried to respond to your command, but I do not have permission to send messages & embed links in the channel the command was triggered in.',
+                    })
+                    .catch(() =>
+                        client.log.info(
+                            `${interaction.user.tag} has DMs closed and triggered a command in a channel (${interaction.channelId} in ${interaction.guildId}) I can't respond in.`
+                        )
+                    );
+            }
+
+            return;
+        }
 
         client.log.command(
             `${interaction.user.tag} (${interaction.user.id}) ran command "${interaction.commandName}" in server ${
