@@ -1,13 +1,32 @@
-import { ApplicationCommandData, CommandInteraction, Message } from 'discord.js';
+import {
+    ApplicationCommandData,
+    ApplicationCommandOption,
+    CommandInteraction,
+    CommandInteractionOptionResolver,
+    Message,
+} from 'discord.js';
 import Client from '../../Client';
 import { Command } from '../Command';
 
 export class Deploy extends Command {
+    private static options: ApplicationCommandOption[] = [
+        {
+            name: 'guild',
+            description: 'Deploy all commands in the current guild',
+            type: 'SUB_COMMAND',
+        },
+        {
+            name: 'global',
+            description: 'Deploy all commands globally',
+            type: 'SUB_COMMAND',
+        },
+    ];
     constructor(client: Client) {
         super(client, {
             name: 'deploy',
             description: 'Deploys slash commands in current guild, meant for testing',
             category: 'Owner',
+            options: Deploy.options,
             isSlashCommand: false,
             isMessageCommand: true,
             guildOnly: true,
@@ -16,7 +35,7 @@ export class Deploy extends Command {
         });
     }
 
-    async execute(interaction: Message | CommandInteraction): Promise<void> {
+    async execute(interaction: Message | CommandInteraction, args?: CommandInteractionOptionResolver): Promise<void> {
         const client = this.client;
         const data: ApplicationCommandData[] = [];
 
@@ -30,8 +49,17 @@ export class Deploy extends Command {
             }
         }
 
-        await interaction.guild!.commands.set(data);
-        client.log.info(`Loaded slash commands in guild ${interaction.guild!.name}`);
-        interaction.reply('Slash commands have been loaded in this guild!').catch((e) => this.client.log.error(e));
+        if (args?.getSubcommand() === 'global') {
+            const application = await client.application!.fetch();
+            await application.commands.set(data);
+
+            client.log.info(`Loaded slash commands globally`);
+            interaction.reply('Slash commands have been loaded globally!');
+        } else {
+            await interaction.guild!.commands.set(data);
+
+            client.log.info(`Loaded slash commands in guild ${interaction.guild!.name}`);
+            interaction.reply('Slash commands have been loaded in this guild!');
+        }
     }
 }
