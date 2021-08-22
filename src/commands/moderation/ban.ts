@@ -207,7 +207,7 @@ export class Ban extends Command {
         }
 
         this.client.log.info(
-            `User ${this.getUser(interaction).tag} banned ${memberToBan?.user.tag ?? providedUserId} in sever ${guild.name} (${guild.id}).`
+            `User ${this.getUser(interaction).tag} banned ${memberToBan?.user.tag ?? providedUserId} in server ${guild.name} (${guild.id}).`
         );
     }
 }

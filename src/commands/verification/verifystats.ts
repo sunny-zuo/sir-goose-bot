@@ -64,9 +64,10 @@ export class VerifyStats extends Command {
                 ${this.formatLabel('Total Members', maxInfoLabelLength)} ${allMembers.size} (${userMembers.size} users, ${
                     botMembers.size
                 } bots)
-                ${this.formatLabel('Verified Members', maxInfoLabelLength)} ${verifiedUserCount}/${userMembers.size} (${
-                    (verifiedUserCount / userMembers.size) * 100
-                }%)
+                ${this.formatLabel('Verified Members', maxInfoLabelLength)} ${verifiedUserCount}/${userMembers.size} (${(
+                    (verifiedUserCount / userMembers.size) *
+                    100
+                ).toFixed(2)}%)
                 `
             )
             .addField(

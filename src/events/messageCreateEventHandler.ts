@@ -55,9 +55,9 @@ export class MessageCreateEventHandler implements EventHandler {
             if (
                 message.channel.type === 'GUILD_TEXT' &&
                 message.channel.guild.me &&
-                message.channel
+                !message.channel
                     .permissionsFor(message.channel.guild.me)
-                    .missing([Permissions.FLAGS.SEND_MESSAGES, Permissions.FLAGS.EMBED_LINKS])
+                    .has([Permissions.FLAGS.SEND_MESSAGES, Permissions.FLAGS.EMBED_LINKS])
             ) {
                 await message.author
                     .send({

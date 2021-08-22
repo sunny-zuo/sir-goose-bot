@@ -188,7 +188,7 @@ export class Config extends Command {
                                 enable
                                     ? `enabled, and the modlog channel is ${
                                           guildConfig.modlogChannelId ? `set to <#${guildConfig.modlogChannelId}>` : 'unset'
-                                      }.\nUse \`${guildConfig.prefix}config <modlog_channel> <new_channel>\` to set a channel.`
+                                      }.\nUse \`${guildConfig.prefix}config modlog_channel <new_channel>\` to set a channel.`
                                     : 'disabled.'
                             }`
                         );
