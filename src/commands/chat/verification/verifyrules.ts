@@ -6,10 +6,10 @@ import {
     MessageEmbed,
     CommandInteractionOptionResolver,
 } from 'discord.js';
-import { Command } from '../Command';
-import Client from '../../Client';
-import { GuildConfigCache } from '../../helpers/guildConfigCache';
-import { VerificationRule, RoleData, VerificationRules } from '../../types/Verification';
+import { Command } from '../../Command';
+import Client from '../../../Client';
+import { GuildConfigCache } from '../../../helpers/guildConfigCache';
+import { VerificationRule, RoleData, VerificationRules } from '../../../types/Verification';
 
 interface VerificationRuleImport {
     roles: string[];

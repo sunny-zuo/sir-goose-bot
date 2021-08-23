@@ -3,7 +3,7 @@ import Client from '../Client';
 import { InvalidCommandInteractionOption } from '../types';
 import { EventHandler } from './eventHandler';
 import { GuildConfigCache } from '../helpers/guildConfigCache';
-import { Help } from '../commands/info/help';
+import { Help } from '../commands/chat/info/help';
 import { sendEphemeralReply } from '../helpers/message';
 
 export class MessageCreateEventHandler implements EventHandler {

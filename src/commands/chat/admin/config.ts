@@ -6,9 +6,9 @@ import {
     MessageEmbed,
     Permissions,
 } from 'discord.js';
-import Client from '../../Client';
-import { GuildConfigCache } from '../../helpers/guildConfigCache';
-import { Command } from '../Command';
+import Client from '../../../Client';
+import { GuildConfigCache } from '../../../helpers/guildConfigCache';
+import { Command } from '../../Command';
 
 export class Config extends Command {
     private static readonly options: ApplicationCommandOption[] = [

@@ -1,8 +1,8 @@
 import { ApplicationCommandOption, CommandInteraction, CommandInteractionOptionResolver, Message, MessageEmbed } from 'discord.js';
-import Client from '../../Client';
-import { GuildConfigCache } from '../../helpers/guildConfigCache';
-import { Category } from '../../types/Command';
-import { Command } from '../Command';
+import Client from '../../../Client';
+import { GuildConfigCache } from '../../../helpers/guildConfigCache';
+import { Category } from '../../../types/Command';
+import { Command } from '../../Command';
 
 export class Help extends Command {
     private static readonly options: ApplicationCommandOption[] = [
@@ -95,7 +95,7 @@ export class Help extends Command {
             if (option.type === 'SUB_COMMAND' || option.type === 'SUB_COMMAND_GROUP') {
                 // TODO: refactor help command to display subcommands properly
                 return '';
-            } else if (option.choices) {
+            } else if ((option.type === 'STRING' || option.type === 'INTEGER' || option.type === 'NUMBER') && option.choices) {
                 optionString = option.choices.map((choice) => choice.value).join('|');
             } else {
                 optionString = option.name;

@@ -1,9 +1,9 @@
-import { Command } from '../Command';
-import Client from '../../Client';
+import { Command } from '../../Command';
+import Client from '../../../Client';
 import { Message, CommandInteraction, MessageEmbed, Snowflake, Role } from 'discord.js';
 import { inlineCode } from '@discordjs/builders';
-import { GuildConfigCache } from '../../helpers/guildConfigCache';
-import UserModel from '../../models/user.model';
+import { GuildConfigCache } from '../../../helpers/guildConfigCache';
+import UserModel from '../../../models/user.model';
 
 export class VerifyStats extends Command {
     constructor(client: Client) {

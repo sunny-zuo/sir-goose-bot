@@ -2,7 +2,7 @@ import Discord, { ClientOptions, Collection, User } from 'discord.js';
 import { Command } from './commands/Command';
 import { Logger } from './helpers/logger';
 import Events from './events';
-import Commands from './commands';
+import ChatCommands from './commands/chat';
 import { WebApp } from './web/app';
 
 export default class Client extends Discord.Client {
@@ -40,10 +40,10 @@ export default class Client extends Discord.Client {
     }
 
     loadCommands(): void {
-        for (const Command of Commands) {
+        for (const ChatCommand of ChatCommands) {
             try {
-                const command = new Command(this);
-                this.log.info(`Loading command ${command.name}`);
+                const command = new ChatCommand(this);
+                this.log.info(`Loading chat command ${command.name}`);
 
                 this.commands.set(command.name, command);
                 command.aliases.forEach((alias) => this.aliases.set(alias, command));

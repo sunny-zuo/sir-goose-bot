@@ -1,5 +1,5 @@
-import { Command } from '../Command';
-import Client from '../../Client';
+import { Command } from '../../Command';
+import Client from '../../../Client';
 import { Message, CommandInteraction, MessageEmbed, MessageActionRow, MessageButton } from 'discord.js';
 
 export class Invite extends Command {

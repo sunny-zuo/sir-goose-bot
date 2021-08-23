@@ -1,5 +1,5 @@
-import Client from '../../Client';
-import { Command } from '../Command';
+import Client from '../../../Client';
+import { Command } from '../../Command';
 import { DateTime } from 'luxon';
 import axios from 'axios';
 import { CommandInteraction, Message } from 'discord.js';

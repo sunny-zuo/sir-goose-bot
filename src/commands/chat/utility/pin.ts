@@ -1,5 +1,5 @@
-import { Command } from '../Command';
-import Client from '../../Client';
+import { Command } from '../../Command';
+import Client from '../../../Client';
 import {
     ApplicationCommandOption,
     CommandInteraction,
@@ -10,8 +10,8 @@ import {
     Snowflake,
     CommandInteractionOptionResolver,
 } from 'discord.js';
-import { GuildConfigCache } from '../../helpers/guildConfigCache';
-import { Modlog } from '../../helpers/modlog';
+import { GuildConfigCache } from '../../../helpers/guildConfigCache';
+import { Modlog } from '../../../helpers/modlog';
 
 export class Pin extends Command {
     private static readonly options: ApplicationCommandOption[] = [

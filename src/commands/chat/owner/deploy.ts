@@ -5,8 +5,8 @@ import {
     CommandInteractionOptionResolver,
     Message,
 } from 'discord.js';
-import Client from '../../Client';
-import { Command } from '../Command';
+import Client from '../../../Client';
+import { Command } from '../../Command';
 
 export class Deploy extends Command {
     private static options: ApplicationCommandOption[] = [
@@ -45,6 +45,7 @@ export class Deploy extends Command {
                     name: command.name,
                     description: command.description,
                     options: command.options,
+                    type: 'CHAT_INPUT',
                 });
             }
         }

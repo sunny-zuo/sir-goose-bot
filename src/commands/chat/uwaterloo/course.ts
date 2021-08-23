@@ -1,8 +1,8 @@
 import { ApplicationCommandOption, CommandInteraction, MessageEmbed, Message, CommandInteractionOptionResolver } from 'discord.js';
-import Client from '../../Client';
-import { Command } from '../Command';
+import Client from '../../../Client';
+import { Command } from '../../Command';
 import { request } from 'graphql-request';
-import { uwflowQuery, uwflowEndpoint } from '../../helpers/uwflowConstants';
+import { uwflowQuery, uwflowEndpoint } from '../../../helpers/uwflowConstants';
 
 export class Course extends Command {
     private static readonly options: ApplicationCommandOption[] = [

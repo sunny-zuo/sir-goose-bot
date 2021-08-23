@@ -1,5 +1,5 @@
-import { Command } from '../Command';
-import Client from '../../Client';
+import { Command } from '../../Command';
+import Client from '../../../Client';
 import { Message, CommandInteraction, MessageEmbed } from 'discord.js';
 import { inlineCode } from '@discordjs/builders';
 

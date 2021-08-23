@@ -1,8 +1,8 @@
 import { CommandInteraction, Message, MessageEmbed, Permissions } from 'discord.js';
-import Client from '../../Client';
-import { Command } from '../Command';
-import { GuildConfigCache } from '../../helpers/guildConfigCache';
-import { RoleAssignmentService } from '../../services/roleAssignmentService';
+import Client from '../../../Client';
+import { Command } from '../../Command';
+import { GuildConfigCache } from '../../../helpers/guildConfigCache';
+import { RoleAssignmentService } from '../../../services/roleAssignmentService';
 
 export class VerifyAll extends Command {
     constructor(client: Client) {

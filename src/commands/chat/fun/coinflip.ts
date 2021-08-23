@@ -1,5 +1,5 @@
-import { Command } from '../Command';
-import Client from '../../Client';
+import { Command } from '../../Command';
+import Client from '../../../Client';
 import { CommandInteraction, Message, MessageEmbed } from 'discord.js';
 
 export class Coinflip extends Command {

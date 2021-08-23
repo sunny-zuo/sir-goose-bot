@@ -1,7 +1,8 @@
-import { Command } from '../Command';
-import Client from '../../Client';
+import { Command } from '../../Command';
+import Client from '../../../Client';
 import {
     ApplicationCommandOption,
+    ApplicationCommandNonOptionsData,
     CommandInteraction,
     CommandInteractionOptionResolver,
     Message,
@@ -11,9 +12,9 @@ import {
     Permissions,
     Role,
 } from 'discord.js';
-import { chunk } from '../../helpers/array';
+import { chunk } from '../../../helpers/array';
 import { inlineCode } from '@discordjs/builders';
-import ButtonRoleModel from '../../models/buttonRole.model';
+import ButtonRoleModel from '../../../models/buttonRole.model';
 
 const BUTTON_ROLE_GUILD_LIMIT = 15;
 
@@ -23,14 +24,7 @@ export class ButtonRole extends Command {
             name: 'create',
             description: 'Create a button role prompt',
             type: 'SUB_COMMAND',
-            options: [
-                ...ButtonRole.createRoleOptions(10),
-                {
-                    name: 'message',
-                    description: 'Message to send with the prompt',
-                    type: 'STRING',
-                },
-            ],
+            options: ButtonRole.createRoleOptions(10),
         },
     ];
 
@@ -129,8 +123,8 @@ export class ButtonRole extends Command {
         buttonRoleDoc.save();
     }
 
-    private static createRoleOptions(count: number) {
-        const options: ApplicationCommandOption[] = [];
+    private static createRoleOptions(count: number): ApplicationCommandNonOptionsData[] & ApplicationCommandOption[] {
+        const options: ApplicationCommandNonOptionsData[] & ApplicationCommandOption[] = [];
         for (let i = 1; i <= count; i++) {
             options.push({
                 name: `role${i}`,
