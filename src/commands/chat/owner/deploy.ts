@@ -29,7 +29,6 @@ export class Deploy extends Command {
             options: Deploy.options,
             isSlashCommand: false,
             isMessageCommand: true,
-            guildOnly: true,
             ownerOnly: true,
             displayHelp: false,
         });
@@ -56,11 +55,13 @@ export class Deploy extends Command {
 
             client.log.info(`Loaded slash commands globally`);
             interaction.reply('Slash commands have been loaded globally!');
-        } else {
-            await interaction.guild!.commands.set(data);
+        } else if (interaction.guild) {
+            await interaction.guild.commands.set(data);
 
-            client.log.info(`Loaded slash commands in guild ${interaction.guild!.name}`);
+            client.log.info(`Loaded slash commands in guild ${interaction.guild.name}`);
             interaction.reply('Slash commands have been loaded in this guild!');
+        } else {
+            interaction.reply("Can't deploy guild commands in DMs! Did you mean to deploy commands globally?");
         }
     }
 }
