@@ -76,7 +76,7 @@ export class VerifyStats extends Command {
             )
             .setTimestamp();
 
-        const guildIconURL = guild.iconURL();
+        const guildIconURL = guild.iconURL({ dynamic: true });
         guildIconURL ? embed.setThumbnail(guildIconURL) : null;
 
         interaction.reply({ embeds: [embed] });
