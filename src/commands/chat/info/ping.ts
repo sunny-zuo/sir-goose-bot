@@ -23,7 +23,7 @@ export class Ping extends Command {
 
         const embed = new MessageEmbed()
             .setDescription(
-                `Pong! Sir Goose's roundtrip latency is ${`${inlineCode(ping.toString())}ms`}. The websocket heartbeat is ${inlineCode(
+                `Pong! Sir Goose's roundtrip latency is ${`${inlineCode(`${ping.toString()}ms`)}`}. The websocket heartbeat is ${inlineCode(
                     `${heartbeat.toString()}ms`
                 )}.`
             )
