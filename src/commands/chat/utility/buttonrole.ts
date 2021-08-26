@@ -35,10 +35,11 @@ export class ButtonRole extends Command {
             category: 'Utility',
             options: ButtonRole.options,
             guildOnly: true,
+            examples: ['@role1 @role2 @role3'],
             clientPermissions: [Permissions.FLAGS.MANAGE_ROLES],
             userPermissions: [Permissions.FLAGS.MANAGE_ROLES, Permissions.FLAGS.MANAGE_GUILD],
-            cooldownSeconds: 300,
-            cooldownMaxUses: 5,
+            cooldownSeconds: 600,
+            cooldownMaxUses: 12,
         });
     }
 
@@ -67,7 +68,11 @@ export class ButtonRole extends Command {
             );
         }
         if (roles.length === 0) {
-            return this.sendErrorEmbed(interaction, 'Invalid Roles', 'No valid roles to assign were specified.');
+            return this.sendErrorEmbed(
+                interaction,
+                'Invalid Roles',
+                'No valid roles to assign were specified. Make sure the role is mentioned (or use slash commands) for role selection.'
+            );
         }
 
         const existingButtonRoles = await ButtonRoleModel.countDocuments({ guildId: interaction.guildId });
