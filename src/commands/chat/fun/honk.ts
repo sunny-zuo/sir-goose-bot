@@ -1,9 +1,9 @@
-import { Command } from '../../Command';
+import { ChatCommand } from '../ChatCommand';
 import Client from '../../../Client';
 import { CommandInteraction, Message, MessageEmbed } from 'discord.js';
 import axios from 'axios';
 
-export class Honk extends Command {
+export class Honk extends ChatCommand {
     constructor(client: Client) {
         super(client, {
             name: 'honk',

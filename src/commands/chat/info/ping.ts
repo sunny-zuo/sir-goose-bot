@@ -1,9 +1,9 @@
-import { Command } from '../../Command';
+import { ChatCommand } from '../ChatCommand';
 import Client from '../../../Client';
 import { Message, CommandInteraction, MessageEmbed } from 'discord.js';
 import { inlineCode } from '@discordjs/builders';
 
-export class Ping extends Command {
+export class Ping extends ChatCommand {
     constructor(client: Client) {
         super(client, {
             name: 'ping',

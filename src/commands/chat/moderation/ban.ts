@@ -8,14 +8,14 @@ import {
     Permissions,
 } from 'discord.js';
 import Client from '../../../Client';
-import { Command } from '../../Command';
+import { ChatCommand } from '../ChatCommand';
 import BanModel from '../../../models/ban.model';
 import UserModel from '../../../models/user.model';
 import { Modlog } from '../../../helpers/modlog';
 import { chunk } from '../../../helpers/array';
 import { GuildConfigCache } from '../../../helpers/guildConfigCache';
 
-export class Ban extends Command {
+export class Ban extends ChatCommand {
     private static readonly options: ApplicationCommandOption[] = [
         {
             name: 'user',

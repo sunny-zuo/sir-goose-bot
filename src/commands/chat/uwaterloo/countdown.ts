@@ -1,10 +1,10 @@
 import Client from '../../../Client';
-import { Command } from '../../Command';
+import { ChatCommand } from '../ChatCommand';
 import { DateTime } from 'luxon';
 import axios from 'axios';
 import { CommandInteraction, Message } from 'discord.js';
 
-export class Countdown extends Command {
+export class Countdown extends ChatCommand {
     private _examsEndDate?: DateTime;
     private _termEndDate?: DateTime;
     constructor(client: Client) {

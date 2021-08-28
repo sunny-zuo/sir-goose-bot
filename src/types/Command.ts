@@ -5,7 +5,8 @@ export interface CommandOptions {
     description: string; // description of command shown in help message
     category: Category; // category (used for help messages) used for command
     isSlashCommand?: boolean; // whether or not the command should be a slash command
-    isMessageCommand?: boolean; // whether or not the command should be a message (old-fashioned) command
+    isTextCommand?: boolean; // whether or not the command should be a message (old-fashioned) command
+    isMessageCommand?: boolean; // whether or not the command should be a message (context menu) command
     aliases?: string[]; // alternative ways of triggering command
     options?: ApplicationCommandOption[]; // arguments for a command
     guildOnly?: boolean; // if the command can only be used in guilds
@@ -21,4 +22,15 @@ export interface CommandOptions {
     [key: string]: string | boolean | number | string[] | bigint[] | ApplicationCommandOption[] | undefined;
 }
 
-export type Category = 'Admin' | 'Fun' | 'General' | 'Info' | 'Moderation' | 'Owner' | 'Utility' | 'UWaterloo' | 'Verification';
+export type Category =
+    | 'Admin'
+    | 'Fun'
+    | 'General'
+    | 'Info'
+    | 'Message'
+    | 'Moderation'
+    | 'Owner'
+    | 'User'
+    | 'Utility'
+    | 'UWaterloo'
+    | 'Verification';

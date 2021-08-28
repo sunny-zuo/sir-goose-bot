@@ -6,7 +6,7 @@ import {
     MessageEmbed,
     CommandInteractionOptionResolver,
 } from 'discord.js';
-import { Command } from '../../Command';
+import { ChatCommand } from '../ChatCommand';
 import Client from '../../../Client';
 import { GuildConfigCache } from '../../../helpers/guildConfigCache';
 import { VerificationRule, RoleData, VerificationRules } from '../../../types/Verification';
@@ -23,7 +23,7 @@ interface VerificationImport {
     rules: VerificationRuleImport[];
 }
 
-export class VerifyRules extends Command {
+export class VerifyRules extends ChatCommand {
     private static readonly options: ApplicationCommandOption[] = [
         {
             name: 'rules',

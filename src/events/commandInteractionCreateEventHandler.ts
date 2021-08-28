@@ -14,7 +14,7 @@ export class CommandInteractionCreateEventHandler implements EventHandler {
         if (!interaction.isCommand()) return;
 
         const client = this.client;
-        const command = client.commands.get(interaction.commandName);
+        const command = client.chatCommands.get(interaction.commandName);
         const args = interaction.options;
 
         if (!command || !command.enabled) return;

@@ -1,4 +1,4 @@
-import { Command } from '../../Command';
+import { ChatCommand } from '../ChatCommand';
 import Client from '../../../Client';
 import {
     ApplicationCommandOption,
@@ -13,7 +13,7 @@ import {
 import { GuildConfigCache } from '../../../helpers/guildConfigCache';
 import { Modlog } from '../../../helpers/modlog';
 
-export class Pin extends Command {
+export class Pin extends ChatCommand {
     private static readonly options: ApplicationCommandOption[] = [
         {
             name: 'message_id',

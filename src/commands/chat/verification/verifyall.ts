@@ -1,10 +1,10 @@
 import { CommandInteraction, Message, MessageEmbed, Permissions } from 'discord.js';
 import Client from '../../../Client';
-import { Command } from '../../Command';
+import { ChatCommand } from '../ChatCommand';
 import { GuildConfigCache } from '../../../helpers/guildConfigCache';
 import { RoleAssignmentService } from '../../../services/roleAssignmentService';
 
-export class VerifyAll extends Command {
+export class VerifyAll extends ChatCommand {
     constructor(client: Client) {
         super(client, {
             name: 'verifyall',

@@ -28,7 +28,8 @@ export abstract class Command {
     description: string;
     category: Category;
     isSlashCommand = true;
-    isMessageCommand = true;
+    isTextCommand = true;
+    isMessageCommand = false;
     aliases: string[] = [];
     options: ApplicationCommandOption[] = [];
     guildOnly = false;
@@ -54,8 +55,6 @@ export abstract class Command {
 
         this.cooldown = new Cooldown(this.cooldownSeconds, this.cooldownMaxUses);
     }
-
-    abstract execute(interaction: Message | CommandInteraction, args?: CommandInteractionOptionResolver): Promise<void>;
 
     isRateLimited(userId: Snowflake): boolean {
         return this.cooldown.checkLimit(userId).blocked;

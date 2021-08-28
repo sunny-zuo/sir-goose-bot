@@ -7,11 +7,11 @@ import {
     Permissions,
 } from 'discord.js';
 import Client from '../../../Client';
-import { Command } from '../../Command';
+import { ChatCommand } from '../ChatCommand';
 import GuildConfigModel from '../../../models/guildConfig.model';
 import { GuildConfigCache } from '../../../helpers/guildConfigCache';
 
-export class Prefix extends Command {
+export class Prefix extends ChatCommand {
     private static readonly options: ApplicationCommandOption[] = [
         {
             name: 'prefix',

@@ -1,4 +1,4 @@
-import { Command } from '../../Command';
+import { ChatCommand } from '../ChatCommand';
 import Client from '../../../Client';
 import {
     ApplicationCommandOption,
@@ -18,7 +18,7 @@ import ButtonRoleModel from '../../../models/buttonRole.model';
 
 const BUTTON_ROLE_GUILD_LIMIT = 15;
 
-export class ButtonRole extends Command {
+export class ButtonRole extends ChatCommand {
     private static readonly options: ApplicationCommandOption[] = [
         {
             name: 'create',

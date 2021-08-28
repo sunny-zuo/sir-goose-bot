@@ -1,11 +1,11 @@
-import { Command } from '../../Command';
+import { ChatCommand } from '../ChatCommand';
 import Client from '../../../Client';
 import { Message, CommandInteraction, MessageEmbed, Snowflake, Role } from 'discord.js';
 import { inlineCode } from '@discordjs/builders';
 import { GuildConfigCache } from '../../../helpers/guildConfigCache';
 import UserModel from '../../../models/user.model';
 
-export class VerifyStats extends Command {
+export class VerifyStats extends ChatCommand {
     constructor(client: Client) {
         super(client, {
             name: 'verifystats',

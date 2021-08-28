@@ -1,8 +1,8 @@
-import { Command } from '../../Command';
+import { ChatCommand } from '../ChatCommand';
 import Client from '../../../Client';
 import { Message, CommandInteraction, MessageEmbed, MessageActionRow, MessageButton } from 'discord.js';
 
-export class Invite extends Command {
+export class Invite extends ChatCommand {
     constructor(client: Client) {
         super(client, {
             name: 'invite',

@@ -6,9 +6,9 @@ import {
     Message,
 } from 'discord.js';
 import Client from '../../../Client';
-import { Command } from '../../Command';
+import { ChatCommand } from '../ChatCommand';
 
-export class Deploy extends Command {
+export class Deploy extends ChatCommand {
     private static options: ApplicationCommandOption[] = [
         {
             name: 'guild',
@@ -28,7 +28,7 @@ export class Deploy extends Command {
             category: 'Owner',
             options: Deploy.options,
             isSlashCommand: false,
-            isMessageCommand: true,
+            isTextCommand: true,
             ownerOnly: true,
             displayHelp: false,
         });
@@ -38,7 +38,7 @@ export class Deploy extends Command {
         const client = this.client;
         const data: ApplicationCommandData[] = [];
 
-        for (const [, command] of client.commands) {
+        for (const [, command] of client.chatCommands) {
             if (command.isSlashCommand) {
                 data.push({
                     name: command.name,

@@ -2,9 +2,9 @@ import { ApplicationCommandOption, CommandInteraction, CommandInteractionOptionR
 import Client from '../../../Client';
 import { GuildConfigCache } from '../../../helpers/guildConfigCache';
 import { Category } from '../../../types/Command';
-import { Command } from '../../Command';
+import { ChatCommand } from '../ChatCommand';
 
-export class Help extends Command {
+export class Help extends ChatCommand {
     private static readonly options: ApplicationCommandOption[] = [
         {
             name: 'command',
@@ -31,7 +31,7 @@ export class Help extends Command {
 
         const commandQuery = args?.getString('command');
         if (commandQuery) {
-            const command = client.commands.get(commandQuery.toLowerCase()) || client.aliases.get(commandQuery.toLowerCase());
+            const command = client.chatCommands.get(commandQuery.toLowerCase()) || client.chatAliases.get(commandQuery.toLowerCase());
             if (!command) {
                 this.sendErrorEmbed(interaction, 'Command Not Found', `The command \`${commandQuery}\` was not found.`);
                 return;
@@ -63,7 +63,7 @@ export class Help extends Command {
 
             interaction.reply({ embeds: [embed] });
         } else {
-            const categories: Category[] = [...new Set(client.commands.map((command) => command.category))].sort();
+            const categories: Category[] = [...new Set(client.chatCommands.map((command) => command.category))].sort();
 
             const embed = new MessageEmbed()
                 .setTitle('Command Help')
@@ -75,7 +75,7 @@ export class Help extends Command {
                 .setTimestamp();
 
             for (const category of categories) {
-                const categoryCommands = client.commands.filter((command) => command.category === category && command.displayHelp);
+                const categoryCommands = client.chatCommands.filter((command) => command.category === category && command.displayHelp);
 
                 if (categoryCommands.size > 0) {
                     embed.addField(`${category} Commands`, categoryCommands.map((command) => `\`${command.name}\``).join(' '), true);
@@ -86,7 +86,7 @@ export class Help extends Command {
         }
     }
 
-    static listArguments(command: Command): string {
+    static listArguments(command: ChatCommand): string {
         let argString = '';
 
         for (const option of command.options) {

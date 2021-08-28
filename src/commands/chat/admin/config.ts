@@ -8,9 +8,9 @@ import {
 } from 'discord.js';
 import Client from '../../../Client';
 import { GuildConfigCache } from '../../../helpers/guildConfigCache';
-import { Command } from '../../Command';
+import { ChatCommand } from '../ChatCommand';
 
-export class Config extends Command {
+export class Config extends ChatCommand {
     private static readonly options: ApplicationCommandOption[] = [
         {
             name: 'prefix',

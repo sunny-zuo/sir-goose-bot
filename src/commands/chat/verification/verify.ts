@@ -1,10 +1,10 @@
 import { CommandInteraction, Message } from 'discord.js';
 import Client from '../../../Client';
-import { Command } from '../../Command';
+import { ChatCommand } from '../ChatCommand';
 import { GuildConfigCache } from '../../../helpers/guildConfigCache';
 import { sendVerificationReplies } from '../../../helpers/verification';
 
-export class Verify extends Command {
+export class Verify extends ChatCommand {
     constructor(client: Client) {
         super(client, {
             name: 'verify',

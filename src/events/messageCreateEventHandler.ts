@@ -28,9 +28,9 @@ export class MessageCreateEventHandler implements EventHandler {
         const commandName = messageContent.shift()?.toLowerCase();
         if (commandName === undefined) return;
 
-        const command = client.commands.get(commandName) || client.aliases.get(commandName);
+        const command = client.chatCommands.get(commandName) || client.chatAliases.get(commandName);
         if (!command || !command.enabled) return;
-        if (!command.isMessageCommand) return;
+        if (!command.isTextCommand) return;
         if (message.guild && !message.guild.available) return;
         if (command.isRateLimited(message.author.id)) {
             this.client.log.info(

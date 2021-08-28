@@ -1,10 +1,10 @@
 import Client from '../../../Client';
-import { Command } from '../../Command';
+import { ChatCommand } from '../ChatCommand';
 import GuildConfigModel from '../../../models/guildConfig.model';
 import { GuildConfigCache } from '../../../helpers/guildConfigCache';
 import { Message, CommandInteraction } from 'discord.js';
 
-export class Reload extends Command {
+export class Reload extends ChatCommand {
     constructor(client: Client) {
         super(client, {
             name: 'reload',

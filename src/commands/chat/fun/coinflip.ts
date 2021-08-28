@@ -1,8 +1,8 @@
-import { Command } from '../../Command';
+import { ChatCommand } from '../ChatCommand';
 import Client from '../../../Client';
 import { CommandInteraction, Message, MessageEmbed } from 'discord.js';
 
-export class Coinflip extends Command {
+export class Coinflip extends ChatCommand {
     constructor(client: Client) {
         super(client, {
             name: 'coinflip',
