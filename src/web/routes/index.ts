@@ -85,7 +85,9 @@ router.get('/authorize', async (req, res) => {
     } catch (e) {
         if (e.response) {
             req.client.log.error(
-                `Graph API responded with status code ${e.response.status} and error object ${e.response.data} for user ${discordId}.`
+                `Graph API responded with status code ${
+                    e.response.status
+                } and error object ${e.response.data.toString()} for user ${discordId}.`
             );
         } else {
             req.client.log.error(e);
