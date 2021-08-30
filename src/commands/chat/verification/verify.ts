@@ -22,6 +22,6 @@ export class Verify extends ChatCommand {
 
         const discordUser = this.getUser(interaction);
 
-        sendVerificationReplies(this.client, interaction, discordUser);
+        await sendVerificationReplies(this.client, interaction, discordUser);
     }
 }
