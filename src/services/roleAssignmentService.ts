@@ -67,9 +67,12 @@ export class RoleAssignmentService {
 
         this.client.log.info(`Assigning roles to user with id ${this.userId} in all possible guilds`);
         for (const guildModel of guildModels) {
-            const guild = await this.client.guilds.fetch(guildModel.guildId);
-
-            await this.assignGuildRoles(guild);
+            try {
+                const guild = await this.client.guilds.fetch(guildModel.guildId);
+                await this.assignGuildRoles(guild);
+            } catch (e) {
+                this.client.log.error(`Error assigning roles to user with id ${this.userId} in guild ${guildModel.guildId}: ${e}`);
+            }
         }
     }
 
