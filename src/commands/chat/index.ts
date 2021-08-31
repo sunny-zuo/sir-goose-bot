@@ -7,6 +7,7 @@ import { Coinflip } from './fun/coinflip';
 import { Honk } from './fun/honk';
 
 /* Info Commands */
+import { BotStats } from './info/botstats';
 import { Help } from './info/help';
 import { Invite } from './info/invite';
 import { Ping } from './info/ping';
@@ -38,6 +39,7 @@ export default [
     Prefix,
     Coinflip,
     Honk,
+    BotStats,
     Help,
     Invite,
     Ping,
