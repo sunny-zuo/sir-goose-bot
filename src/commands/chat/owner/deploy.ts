@@ -39,7 +39,7 @@ export class Deploy extends ChatCommand {
         const data: ApplicationCommandData[] = [];
 
         for (const [, command] of client.chatCommands) {
-            if (command.isSlashCommand) {
+            if (command.isSlashCommand && !command.ownerOnly) {
                 data.push({
                     name: command.name,
                     description: command.description,
