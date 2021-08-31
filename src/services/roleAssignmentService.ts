@@ -23,7 +23,7 @@ export class RoleAssignmentService {
         const dirLocation = path.join(process.cwd(), 'src', 'data', 'verification');
         const files = fs.readdirSync(dirLocation);
 
-        client.log.info(`Loading custom departments/entrance years from ${files.length} files`);
+        client.log.info(`Loading custom departments/entrance years from ${files.filter((file) => file.endsWith('.json')).length} files`);
 
         for (const file of files) {
             if (!file.endsWith('.json')) {

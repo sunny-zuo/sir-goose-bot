@@ -24,7 +24,10 @@ function execute() {
 function processFile(filePath: string) {
     if (filePath) {
         const file = fs.readFileSync(filePath, 'utf8');
-        const lines = file.split('\n').filter((line) => line.length > 0);
+        const lines = file
+            .split('\n')
+            .filter((line) => line.length > 0)
+            .map((line) => line.replace('@uwaterloo.ca', '').trim());
 
         const output = {
             type: 'hash | uwid',
