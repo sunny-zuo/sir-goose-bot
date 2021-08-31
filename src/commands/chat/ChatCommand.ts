@@ -1,11 +1,20 @@
 import { Message, CommandInteraction, CommandInteractionOptionResolver } from 'discord.js';
 import Client from '../../Client';
-import { CommandOptions } from '../../types/Command';
+import { Category, ChatCommandOptions } from '../../types/Command';
 import { Command } from '../Command';
 
 export abstract class ChatCommand extends Command {
-    constructor(client: Client, options: CommandOptions) {
-        super(client, { ...options, isMessageCommand: false });
+    description: string;
+    category: Category;
+    isTextCommand = true;
+    isSlashCommand = true;
+    isContextMenuCommand = false;
+
+    constructor(client: Client, options: ChatCommandOptions) {
+        super(client, { ...options });
+
+        this.description = options.description;
+        this.category = options.category;
     }
 
     abstract execute(interaction: Message | CommandInteraction, args?: CommandInteractionOptionResolver): Promise<void>;

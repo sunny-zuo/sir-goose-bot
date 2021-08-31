@@ -22,7 +22,9 @@ export class ButtonInteractionCreateEventHandler implements EventHandler {
         if (!interaction.isButton()) return;
 
         this.client.log.info(
-            `BUTTON ${interaction.user.tag} (${interaction.user.id}) pressed button with custom id ${interaction.customId}`
+            `BUTTON ${interaction.user.tag} (${interaction.user.id}) pressed button with custom id ${interaction.customId} in ${
+                interaction.guild?.name ?? 'DMs'
+            } (${interaction.guild?.id ?? 'none'})`
         );
 
         const [interactioName, args] = interaction.customId.split('|');

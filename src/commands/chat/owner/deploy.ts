@@ -24,7 +24,7 @@ export class Deploy extends ChatCommand {
     constructor(client: Client) {
         super(client, {
             name: 'deploy',
-            description: 'Deploys slash commands in current guild, meant for testing',
+            description: 'Deploys application commands in current guild or globally',
             category: 'Owner',
             options: Deploy.options,
             isSlashCommand: false,
@@ -49,17 +49,24 @@ export class Deploy extends ChatCommand {
             }
         }
 
+        for (const [, command] of client.contextMenuCommands) {
+            data.push({
+                name: command.name,
+                type: 'MESSAGE',
+            });
+        }
+
         if (args?.getSubcommand() === 'global') {
             const application = await client.application!.fetch();
             await application.commands.set(data);
 
-            client.log.info(`Loaded slash commands globally`);
-            interaction.reply('Slash commands have been loaded globally!');
+            client.log.info(`Loaded application commands globally`);
+            interaction.reply('Application commands have been loaded globally!');
         } else if (interaction.guild) {
             await interaction.guild.commands.set(data);
 
-            client.log.info(`Loaded slash commands in guild ${interaction.guild.name}`);
-            interaction.reply('Slash commands have been loaded in this guild!');
+            client.log.info(`Loaded application commands in guild ${interaction.guild.name}`);
+            interaction.reply('Application commands have been loaded in this guild!');
         } else {
             interaction.reply("Can't deploy guild commands in DMs! Did you mean to deploy commands globally?");
         }

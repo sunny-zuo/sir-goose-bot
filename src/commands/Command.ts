@@ -19,17 +19,18 @@ import { CommandOptions, Category } from '../types/Command';
 import Client from '../Client';
 import { GuildTextBasedChannel, Result, InvalidCommandInteractionOption, ArgumentIssue } from '../types';
 import { Cooldown } from '../helpers/cooldown';
+import { sendEphemeralReply } from '../helpers/message';
 
 const minimumClientPermissions = [Permissions.FLAGS.SEND_MESSAGES, Permissions.FLAGS.EMBED_LINKS];
 
 export abstract class Command {
     client: Client;
     name: string;
-    description: string;
-    category: Category;
-    isSlashCommand = true;
-    isTextCommand = true;
-    isMessageCommand = false;
+    description?: string;
+    category?: Category;
+    isSlashCommand?: boolean;
+    isTextCommand?: boolean;
+    isContextMenuCommand?: boolean;
     aliases: string[] = [];
     options: ApplicationCommandOption[] = [];
     guildOnly = false;
@@ -50,9 +51,6 @@ export abstract class Command {
         Object.assign(this, options);
 
         this.name = options.name;
-        this.description = options.description;
-        this.category = options.category;
-
         this.cooldown = new Cooldown(this.cooldownSeconds, this.cooldownMaxUses);
     }
 
@@ -355,24 +353,51 @@ export abstract class Command {
         });
     }
 
-    sendSuccessEmbed(interaction: Message | CommandInteraction, title: string, description: string): void {
-        this.sendColorEmbed(interaction, 'GREEN', title, description);
+    sendSuccessEmbed(
+        interaction: Message | CommandInteraction,
+        title: string,
+        description: string,
+        ephemeral = false,
+        deletionSeconds = 30
+    ): void {
+        this.sendColorEmbed(interaction, 'GREEN', title, description, ephemeral, deletionSeconds);
     }
 
-    sendNeutralEmbed(interaction: Message | CommandInteraction, title: string, description: string): void {
-        this.sendColorEmbed(interaction, 'BLUE', title, description);
+    sendNeutralEmbed(
+        interaction: Message | CommandInteraction,
+        title: string,
+        description: string,
+        ephemeral = false,
+        deletionSeconds = 30
+    ): void {
+        this.sendColorEmbed(interaction, 'BLUE', title, description, ephemeral, deletionSeconds);
     }
 
-    sendErrorEmbed(interaction: Message | CommandInteraction, title: string, description: string): void {
-        this.sendColorEmbed(interaction, 'RED', title, description);
+    sendErrorEmbed(
+        interaction: Message | CommandInteraction,
+        title: string,
+        description: string,
+        ephemeral = false,
+        deletionSeconds = 30
+    ): void {
+        this.sendColorEmbed(interaction, 'RED', title, description, ephemeral, deletionSeconds);
     }
 
-    sendColorEmbed(interaction: Message | CommandInteraction, color: ColorResolvable, title: string, description: string): void {
+    sendColorEmbed(
+        interaction: Message | CommandInteraction,
+        color: ColorResolvable,
+        title: string,
+        description: string,
+        ephemeral = false,
+        deletionSeconds = 30
+    ): void {
         const embed = new MessageEmbed().setTitle(title).setColor(color).setDescription(description).setTimestamp();
 
-        interaction.reply({ embeds: [embed] }).catch((error) => {
-            this.client.log.error(error, error.stack);
-        });
+        if (ephemeral) {
+            sendEphemeralReply(interaction, { embeds: [embed] }, deletionSeconds);
+        } else {
+            interaction.reply({ embeds: [embed] });
+        }
 
         return;
     }
