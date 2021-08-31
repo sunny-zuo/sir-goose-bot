@@ -21,7 +21,7 @@ import { GuildTextBasedChannel, Result, InvalidCommandInteractionOption, Argumen
 import { Cooldown } from '../helpers/cooldown';
 import { sendEphemeralReply } from '../helpers/message';
 
-const minimumClientPermissions = [Permissions.FLAGS.SEND_MESSAGES, Permissions.FLAGS.EMBED_LINKS];
+const minimumClientPermissions = [Permissions.FLAGS.VIEW_CHANNEL, Permissions.FLAGS.SEND_MESSAGES, Permissions.FLAGS.EMBED_LINKS];
 
 export abstract class Command {
     client: Client;

@@ -62,7 +62,7 @@ export class MessageCreateEventHandler implements EventHandler {
                 await message.author
                     .send({
                         content:
-                            'I tried to respond to your command, but I do not have permission to send messages & embed links in the channel the command was triggered in.',
+                            'I tried to respond to your command, but I do not have permission to view the channel, send messages and/or embed links in the channel the command was triggered in.',
                     })
                     .catch(() =>
                         client.log.info(
