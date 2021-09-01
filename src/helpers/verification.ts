@@ -23,7 +23,8 @@ export function getVerificationResponse(user: User): MessageOptions {
 
     const encodedUserId = AES.encrypt(`${user.id}-sebot`, process.env.AES_PASSPHRASE).toString().replace(/\//g, '_').replace(/\+/g, '-');
     const button = new MessageActionRow().addComponents(
-        new MessageButton().setLabel('Verify').setStyle('LINK').setURL(`${process.env.SERVER_URI}/verify/${encodedUserId}`)
+        new MessageButton().setLabel('Verify').setStyle('LINK').setURL(`${process.env.SERVER_URI}/verify/${encodedUserId}`),
+        new MessageButton().setCustomId('verificationLearnMore').setLabel('Learn More').setStyle('SECONDARY')
     );
 
     const embed = new MessageEmbed()

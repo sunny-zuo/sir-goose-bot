@@ -4,7 +4,7 @@ import { sendVerificationReplies } from '../../helpers/verification';
 import { Cooldown } from '../../helpers/cooldown';
 import Client from '../../Client';
 
-export class RequestVerificationLinkButtonInteractionHandler implements ButtonInteractionHandler {
+export class RequestVerificationLink implements ButtonInteractionHandler {
     readonly client: Client;
     readonly customId = 'requestVerificationLink';
     readonly cooldown: Cooldown;
@@ -16,6 +16,6 @@ export class RequestVerificationLinkButtonInteractionHandler implements ButtonIn
     }
 
     async execute(interaction: ButtonInteraction): Promise<void> {
-        sendVerificationReplies(this.client, interaction, interaction.user, true);
+        await sendVerificationReplies(this.client, interaction, interaction.user, true);
     }
 }

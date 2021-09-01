@@ -17,6 +17,11 @@ export class VerifyButton extends ChatCommand {
             description: 'The message to include with the verification button',
             type: 'STRING',
         },
+        {
+            name: 'show_learn_more',
+            description: 'Whether or not to show a learn more button',
+            type: 'BOOLEAN',
+        },
     ];
     constructor(client: Client) {
         super(client, {
@@ -30,19 +35,23 @@ export class VerifyButton extends ChatCommand {
     }
 
     async execute(interaction: Message | CommandInteraction, args?: CommandInteractionOptionResolver): Promise<void> {
-        const button = new MessageActionRow().addComponents(
+        const components = new MessageActionRow().addComponents(
             new MessageButton().setCustomId('requestVerificationLink').setLabel('Request Verification Link').setStyle('PRIMARY')
         );
+
+        if (args?.getBoolean('show_learn_more')) {
+            components.addComponents(new MessageButton().setCustomId('verificationLearnMore').setLabel('Learn More').setStyle('SECONDARY'));
+        }
 
         const content = args?.getString('message') ?? 'Click the button below to request a verification link!';
 
         if (this.isMessage(interaction)) {
-            interaction.channel.send({ content: content, components: [button] });
+            interaction.channel.send({ content: content, components: [components] });
         } else {
             const channel = interaction.channel ?? (await interaction.guild?.channels.fetch(interaction.channelId));
             if (!channel?.isText()) return;
 
-            channel.send({ content: content, components: [button] });
+            channel.send({ content: content, components: [components] });
             interaction.reply({ content: 'Verification button successfully created!', ephemeral: true });
         }
     }

@@ -10,7 +10,7 @@ type InteractionData = {
     _id: string;
 };
 
-export class ButtonRoleButtonInteractionHandler implements ButtonInteractionHandler {
+export class ButtonRole implements ButtonInteractionHandler {
     readonly client: Client;
     readonly customId = 'buttonRole';
     readonly cooldown: Cooldown;
