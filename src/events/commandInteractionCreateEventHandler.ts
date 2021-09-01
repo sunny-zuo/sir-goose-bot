@@ -75,7 +75,7 @@ export class CommandInteractionCreateEventHandler implements EventHandler {
             client.log.error(
                 `
                 Command: ${command.name}
-                Arguments: ${JSON.stringify(args.data)}
+                Arguments: ${JSON.stringify(args.data, (key, value) => (typeof value === 'bigint' ? value.toString() : value))}
                 Error: ${error}
                 `,
                 error.stack
