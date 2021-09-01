@@ -92,7 +92,7 @@ export class RoleAssignmentService {
         const member = await guild.members.fetch(this.userId).catch(() => undefined);
         const user = await UserModel.findOne({ discordId: this.userId });
 
-        if (member && user && user.verified) {
+        if (member && user && user.verified && user.department && user.o365CreatedDate) {
             const userBan = await BanModel.findOne({
                 guildId: guild.id,
                 uwid: user.uwid,
