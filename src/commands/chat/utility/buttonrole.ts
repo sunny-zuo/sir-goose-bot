@@ -17,6 +17,7 @@ import { inlineCode } from '@discordjs/builders';
 import ButtonRoleModel from '../../../models/buttonRole.model';
 
 const BUTTON_ROLE_GUILD_LIMIT = 15;
+const BUTTON_ROLE_ROLE_LIMIT = 15;
 
 export class ButtonRole extends ChatCommand {
     private static readonly options: ApplicationCommandOption[] = [
@@ -30,7 +31,7 @@ export class ButtonRole extends ChatCommand {
                     description: 'Message to send with the prompt',
                     type: 'STRING',
                 },
-                ...ButtonRole.createRoleOptions(15),
+                ...ButtonRole.createRoleOptions(BUTTON_ROLE_ROLE_LIMIT),
             ],
         },
     ];
@@ -55,7 +56,7 @@ export class ButtonRole extends ChatCommand {
         const roles: Role[] = [];
         const invalidRoles: Role[] = [];
 
-        for (let i = 1; i <= 10; i++) {
+        for (let i = 1; i <= BUTTON_ROLE_ROLE_LIMIT; i++) {
             const role = args?.getRole(`role${i}`);
             if (role && role.id !== interaction.guild!.roles.everyone.id && !roles.some((r) => r.id === role.id)) {
                 const fullRole = role as Role;
