@@ -12,7 +12,6 @@ import {
     Permissions,
     Role,
 } from 'discord.js';
-import { chunk } from '../../../helpers/array';
 import { inlineCode } from '@discordjs/builders';
 import ButtonRoleModel from '../../../models/buttonRole.model';
 
@@ -53,15 +52,15 @@ export class ButtonRole extends ChatCommand {
 
     async execute(interaction: Message | CommandInteraction, args?: CommandInteractionOptionResolver): Promise<void> {
         if (!interaction.guildId) return;
-        const roles: Role[] = [];
+        const roles: Role[][] = [[], [], []]; // 3 rows of up to 5 roles each
         const invalidRoles: Role[] = [];
 
         for (let i = 1; i <= BUTTON_ROLE_ROLE_LIMIT; i++) {
             const role = args?.getRole(`role${i}`);
-            if (role && role.id !== interaction.guild!.roles.everyone.id && !roles.some((r) => r.id === role.id)) {
+            if (role && role.id !== interaction.guild!.roles.everyone.id && !roles.flat().some((r) => r.id === role.id)) {
                 const fullRole = role as Role;
                 if (fullRole.editable) {
-                    roles.push(fullRole);
+                    roles[Math.ceil(i / 5) - 1].push(fullRole);
                 } else {
                     invalidRoles.push(fullRole);
                 }
@@ -96,21 +95,24 @@ export class ButtonRole extends ChatCommand {
             guildId: interaction.guildId,
             channelId: interaction.channelId,
             messageId: '-1',
-            roles: roles.map((r) => ({ name: r.name, id: r.id })),
+            roles: roles.flat().map((r) => ({ name: r.name, id: r.id })),
         });
 
         const components: MessageActionRow[] = [];
-        for (const roleChunk of chunk(roles, 5)) {
-            const row = new MessageActionRow();
-            for (const role of roleChunk) {
-                row.addComponents(
+        for (const roleRow of roles) {
+            const componentRow = new MessageActionRow();
+            for (const role of roleRow) {
+                componentRow.addComponents(
                     new MessageButton()
                         .setCustomId(`buttonRole|{"roleId":"${role.id}","_id":"${buttonRoleDoc._id}"}`)
                         .setLabel(role.name)
                         .setStyle('PRIMARY')
                 );
             }
-            components.push(row);
+
+            if (componentRow.components.length > 0) {
+                components.push(componentRow);
+            }
         }
 
         const embed = new MessageEmbed()
@@ -141,7 +143,7 @@ export class ButtonRole extends ChatCommand {
         for (let i = 1; i <= count; i++) {
             options.push({
                 name: `role${i}`,
-                description: `Role ${i}`,
+                description: `Role ${i} (Row ${Math.ceil(i / 5)})`,
                 type: 'ROLE',
             });
         }
