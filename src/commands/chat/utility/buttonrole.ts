@@ -25,12 +25,12 @@ export class ButtonRole extends ChatCommand {
             description: 'Create a button role prompt',
             type: 'SUB_COMMAND',
             options: [
-                ...ButtonRole.createRoleOptions(10),
                 {
                     name: 'message',
                     description: 'Message to send with the prompt',
                     type: 'STRING',
                 },
+                ...ButtonRole.createRoleOptions(15),
             ],
         },
     ];
