@@ -6,7 +6,6 @@ import GuildConfigModel from '../models/guildConfig.model';
 import ButtonRoleModel from '../models/buttonRole.model';
 import { GuildConfigCache } from '../helpers/guildConfigCache';
 import { v4 as uuidv4 } from 'uuid';
-import { chunk } from '../helpers/array';
 
 export class RoleUpdateEventHandler implements EventHandler {
     readonly eventName = 'roleUpdate';
@@ -210,19 +209,24 @@ export class RoleUpdateEventHandler implements EventHandler {
             });
             if (!promptMessage) continue;
 
-            const components: MessageActionRow[] = [];
-            for (const roleChunk of chunk(prompt.roles, 5)) {
-                const row = new MessageActionRow();
-                for (const role of roleChunk) {
-                    row.addComponents(
-                        new MessageButton()
-                            .setCustomId(`buttonRole|{"roleId":"${role.id}","_id":"${prompt._id}"}`)
-                            .setLabel(role.name)
-                            .setStyle('PRIMARY')
-                    );
-                }
-                components.push(row);
-            }
+            const components = promptMessage.components;
+
+            const row = components.find((row) =>
+                row.components.some((component) => component.type === 'BUTTON' && component.label === oldRole.name)
+            );
+            if (!row) continue;
+
+            const updateIndex = row.components.findIndex((component) => component.type === 'BUTTON' && component.label === oldRole.name);
+            if (updateIndex === -1) continue;
+
+            row.spliceComponents(
+                updateIndex,
+                1,
+                new MessageButton()
+                    .setLabel(newRole.name)
+                    .setStyle('PRIMARY')
+                    .setCustomId(`buttonRole|{"roleId":"${newRole.id}","_id":"${prompt._id}"}`)
+            );
 
             await promptMessage.edit({ components });
         }
