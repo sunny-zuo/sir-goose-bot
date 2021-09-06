@@ -36,8 +36,12 @@ export default class Client extends Discord.Client {
 
                 // @ts-expect-error - since events have varying parameters, we just trust that the event handler has the correct types
                 super.on(eventHandler.eventName, (...args) => eventHandler.execute(...args));
-            } catch (e) {
-                this.log.error(`Unable to load event: ${e}`, e.stack);
+            } catch (e: unknown) {
+                if (e instanceof Error) {
+                    this.log.error(`Unable to load event: ${e}`, e.stack);
+                } else {
+                    this.log.error(`Unable to load event: ${e}`);
+                }
             }
         }
     }
@@ -50,8 +54,12 @@ export default class Client extends Discord.Client {
 
                 this.chatCommands.set(command.name, command);
                 command.aliases.forEach((alias) => this.chatAliases.set(alias, command));
-            } catch (e) {
-                this.log.error(`Unable to load command: ${e}`, e.stack);
+            } catch (e: unknown) {
+                if (e instanceof Error) {
+                    this.log.error(`Unable to load command: ${e}`, e.stack);
+                } else {
+                    this.log.error(`Unable to load command: ${e}`);
+                }
             }
         }
 
@@ -61,8 +69,12 @@ export default class Client extends Discord.Client {
                 this.log.info(`Loading message command ${command.name}`);
 
                 this.contextMenuCommands.set(command.name, command);
-            } catch (e) {
-                this.log.error(`Unable to load command: ${e}`, e.stack);
+            } catch (e: unknown) {
+                if (e instanceof Error) {
+                    this.log.error(`Unable to load command: ${e}`, e.stack);
+                } else {
+                    this.log.error(`Unable to load command: ${e}`);
+                }
             }
         }
     }

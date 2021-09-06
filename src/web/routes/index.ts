@@ -82,16 +82,17 @@ router.get('/authorize', async (req, res) => {
         await roleAssignmentService.assignAllRoles();
 
         res.send("You've been verified successfully! You can close this window and return to Discord.");
-    } catch (e) {
-        if (e.response) {
+    } catch (e: unknown) {
+        if (axios.isAxiosError(e)) {
             req.client.log.error(
-                `Graph API responded with status code ${e.response.status} and error object ${JSON.stringify(
-                    e.response.data
+                `Axios Error: Graph API responded with status code ${e.response?.status} and error object ${JSON.stringify(
+                    e.response?.data
                 )} for user ${discordId}.`
             );
-        } else {
-            req.client.log.error(e);
+        } else if (e instanceof Error) {
+            req.client.log.error(e.message, e.stack);
         }
+
         res.send(
             `We ran into an error verifying your account. Please try again later or message ${process.env.OWNER_DISCORD_USERNAME} on Discord for help.`
         );
