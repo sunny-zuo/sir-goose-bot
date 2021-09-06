@@ -13,6 +13,7 @@ export class VerifyAll extends ChatCommand {
             cooldownSeconds: 3600,
             cooldownMaxUses: 5,
             clientPermissions: [Permissions.FLAGS.MANAGE_ROLES],
+            userPermissions: [Permissions.FLAGS.MANAGE_GUILD]
         });
     }
 
