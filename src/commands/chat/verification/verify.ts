@@ -10,7 +10,8 @@ export class Verify extends ChatCommand {
             name: 'verify',
             description: 'Verify your UW identity to receive roles',
             category: 'Verification',
-            cooldownSeconds: 60,
+            cooldownSeconds: 600,
+            cooldownMaxUses: 5,
         });
     }
 
