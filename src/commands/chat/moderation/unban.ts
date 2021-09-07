@@ -115,7 +115,7 @@ export class Unban extends ChatCommand {
                     bannedUser.user,
                     `
                     **User**: ${bannedUser}
-                    **Action**: Ban
+                    **Action**: Unban
                     **Reason**: ${unbanReason}
                     **Moderator**: ${interaction.member}
                     `,
@@ -129,8 +129,16 @@ export class Unban extends ChatCommand {
                 embeds: [
                     new MessageEmbed()
                         .setDescription(
-                            `**User ID ${providedUserId} and and ${modlogEmbeds.length - 1} alt accounts were unbanned |** ${unbanReason}`
+                            `**User ID ${providedUserId} and ${modlogEmbeds.length - 1} alt accounts were unbanned |** ${unbanReason}`
                         )
+                        .setColor('GREEN'),
+                ],
+            });
+        } else if (possibleAlts.length) {
+            await interaction.reply({
+                embeds: [
+                    new MessageEmbed()
+                        .setDescription(`**User ID ${providedUserId}'s ${modlogEmbeds.length - 1} alt accounts were unbanned |** ${unbanReason}`)
                         .setColor('GREEN'),
                 ],
             });
