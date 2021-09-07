@@ -115,7 +115,7 @@ export class Unban extends ChatCommand {
                     bannedUser.user,
                     `
                     **User**: ${bannedUser}
-                    **Action**: Ban
+                    **Action**: Unban
                     **Reason**: ${unbanReason}
                     **Moderator**: ${interaction.member}
                     `,
