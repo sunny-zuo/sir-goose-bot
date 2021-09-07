@@ -14,6 +14,7 @@ import { Ping } from './info/ping';
 
 /* Moderation Commands */
 import { Ban } from './moderation/ban';
+import { Unban } from './moderation/unban';
 
 /* Owner Commands */
 import { Deploy } from './owner/deploy';
@@ -44,6 +45,7 @@ export default [
     Invite,
     Ping,
     Ban,
+    Unban,
     Deploy,
     Reload,
     ButtonRole,
