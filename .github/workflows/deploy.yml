@@ -23,10 +23,11 @@ jobs:
 
             - name: Run Tests
               run: npm run test
-              
+
     deploy:
         name: Deploy to Azure
         runs-on: ubuntu-latest
+        needs: test
         steps:
             - name: Update Azure Instance
                 uses: appleboy/ssh-action@master
