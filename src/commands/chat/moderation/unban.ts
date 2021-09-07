@@ -138,7 +138,9 @@ export class Unban extends ChatCommand {
             await interaction.reply({
                 embeds: [
                     new MessageEmbed()
-                        .setDescription(`**User ID ${providedUserId}'s ${modlogEmbeds.length - 1} alt accounts were unbanned |** ${unbanReason}`)
+                        .setDescription(
+                            `**User ID ${providedUserId}'s ${modlogEmbeds.length - 1} alt accounts were unbanned |** ${unbanReason}`
+                        )
                         .setColor('GREEN'),
                 ],
             });
