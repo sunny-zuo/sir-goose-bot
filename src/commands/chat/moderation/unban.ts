@@ -109,21 +109,23 @@ export class Unban extends ChatCommand {
             }
         }
 
-        if (bannedUser) {
-            modlogEmbeds.unshift(
-                Modlog.getUserEmbed(
-                    bannedUser.user,
-                    `
-                    **User**: ${bannedUser}
-                    **Action**: Unban
-                    **Reason**: ${unbanReason}
-                    **Moderator**: ${interaction.member}
-                    `,
-                    'GREEN'
-                )
-            );
+        if (bannedUser || possibleAlts.length) {
+            if (bannedUser) {
+                modlogEmbeds.unshift(
+                    Modlog.getUserEmbed(
+                        bannedUser.user,
+                        `
+                        **User**: ${bannedUser}
+                        **Action**: Unban
+                        **Reason**: ${unbanReason}
+                        **Moderator**: ${interaction.member}
+                        `,
+                        'GREEN'
+                    )
+                );
 
-            await guild.bans.remove(providedUserId, `Unbanned by ${this.getUser(interaction).tag} | ${unbanReason}`);
+                await guild.bans.remove(providedUserId, `Unbanned by ${this.getUser(interaction).tag} | ${unbanReason}`);
+            }
 
             await interaction.reply({
                 embeds: [
@@ -134,21 +136,11 @@ export class Unban extends ChatCommand {
                         .setColor('GREEN'),
                 ],
             });
-        } else if (possibleAlts.length) {
-            await interaction.reply({
-                embeds: [
-                    new MessageEmbed()
-                        .setDescription(
-                            `**User ID ${providedUserId}'s ${modlogEmbeds.length - 1} alt accounts were unbanned |** ${unbanReason}`
-                        )
-                        .setColor('GREEN'),
-                ],
-            });
         } else {
             await interaction.reply({
                 embeds: [
                     new MessageEmbed()
-                        .setDescription(`Unable to ban user ID ${providedUserId} - they are not verified or are not banned.`)
+                        .setDescription(`Unable to unban user ID ${providedUserId} - they are not verified or are not banned.`)
                         .setColor('YELLOW'),
                 ],
             });
