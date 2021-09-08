@@ -146,12 +146,18 @@ export class RoleAssignmentService {
 
             if (guildModel.verificationRules.renameType === 'FULL_NAME' || guildModel.verificationRules.renameType === 'FIRST_NAME') {
                 const renameType = guildModel.verificationRules.renameType;
-                const newNickname = renameType === 'FIRST_NAME' ? `${user.givenName}` : `${user.givenName} ${user.surname}`;
+                const newNickname = renameType === 'FIRST_NAME' ? `${user.givenName?.split(' ')[0]}` : `${user.givenName} ${user.surname}`;
 
-                if (!member.nickname || (member.nickname !== newNickname && guildModel.verificationRules.forceRename)) {
-                    if (member.manageable && guild.me?.permissions.has(Permissions.FLAGS.MANAGE_NICKNAMES)) {
-                        await member.setNickname(newNickname);
+                if (newNickname !== undefined) {
+                    if (!member.nickname || (member.nickname !== newNickname && guildModel.verificationRules.forceRename)) {
+                        if (member.manageable && guild.me?.permissions.has(Permissions.FLAGS.MANAGE_NICKNAMES)) {
+                            await member.setNickname(newNickname);
+                        }
                     }
+                } else {
+                    this.client.log.warn(
+                        `Role assignment service was used on user ${member.user.tag} (${member.id}) who had an undefined name.`
+                    );
                 }
             }
 
