@@ -256,7 +256,7 @@ export abstract class Command {
         return channel;
     }
 
-    checkCommandPermissions(interaction: Message | CommandInteraction): boolean {
+    async checkCommandPermissions(interaction: Message | CommandInteraction): Promise<boolean> {
         if (!interaction.channel) return false;
         if (interaction.channel.type === 'DM' || interaction.member === null) return true;
         if (
@@ -268,8 +268,8 @@ export abstract class Command {
 
         if (interaction.member && interaction.member instanceof GuildMember) {
             return (
-                this.checkClientPermissions(interaction.channel, interaction) &&
-                this.checkMemberPermissions(interaction.member, interaction.channel, interaction)
+                (await this.checkClientPermissions(interaction.channel, interaction)) &&
+                (await this.checkMemberPermissions(interaction.member, interaction.channel, interaction))
             );
         } else {
             // this code would be ran if a bot user is not in the guild, and we would have an APIInteractionGuildMember
@@ -282,18 +282,18 @@ export abstract class Command {
         }
     }
 
-    checkMemberPermissions(
+    async checkMemberPermissions(
         member: GuildMember | null,
         channel: GuildTextBasedChannel,
         interaction: Message | CommandInteraction | null = null,
         ownerOverride = true
-    ): boolean {
+    ): Promise<boolean> {
         if (member === null) return false;
         if (!this.ownerOnly && !this.userPermissions.length) return true;
         if (ownerOverride && this.client.isOwner(member.user)) return true;
         if (this.ownerOnly && !this.client.isOwner(member.user)) {
             if (interaction) {
-                this.sendErrorEmbed(interaction, 'Missing Permissions', `This command can only be used by the bot owner.`);
+                await this.sendErrorEmbed(interaction, 'Missing Permissions', `This command can only be used by the bot owner.`);
             }
             return false;
         }
@@ -303,7 +303,7 @@ export abstract class Command {
         if (missingPermissions.length === 0) return true;
 
         if (interaction) {
-            this.sendErrorEmbed(
+            await this.sendErrorEmbed(
                 interaction,
                 'Missing Permissions',
                 `You must have the following permissions to use this command:
@@ -314,14 +314,17 @@ export abstract class Command {
         return false;
     }
 
-    checkClientPermissions(channel: GuildTextBasedChannel, interaction: Message | CommandInteraction | null = null): boolean {
+    async checkClientPermissions(
+        channel: GuildTextBasedChannel,
+        interaction: Message | CommandInteraction | null = null
+    ): Promise<boolean> {
         if (channel.guild.me === null) return false;
         const missingPermissions = channel.permissionsFor(channel.guild.me).missing(this.clientPermissions);
 
         if (missingPermissions.length === 0) return true;
 
         if (interaction) {
-            this.sendErrorEmbed(
+            await this.sendErrorEmbed(
                 interaction,
                 'Bot Missing Permissions',
                 `The bot requires the following permissions to run this command:
@@ -359,8 +362,8 @@ export abstract class Command {
         description: string,
         ephemeral = false,
         deletionSeconds = 30
-    ): void {
-        this.sendColorEmbed(interaction, 'GREEN', title, description, ephemeral, deletionSeconds);
+    ): Promise<void | Message> {
+        return this.sendColorEmbed(interaction, 'GREEN', title, description, ephemeral, deletionSeconds);
     }
 
     sendNeutralEmbed(
@@ -369,8 +372,8 @@ export abstract class Command {
         description: string,
         ephemeral = false,
         deletionSeconds = 30
-    ): void {
-        this.sendColorEmbed(interaction, 'BLUE', title, description, ephemeral, deletionSeconds);
+    ): Promise<void | Message> {
+        return this.sendColorEmbed(interaction, 'BLUE', title, description, ephemeral, deletionSeconds);
     }
 
     sendErrorEmbed(
@@ -379,8 +382,8 @@ export abstract class Command {
         description: string,
         ephemeral = false,
         deletionSeconds = 30
-    ): void {
-        this.sendColorEmbed(interaction, 'RED', title, description, ephemeral, deletionSeconds);
+    ): Promise<void | Message> {
+        return this.sendColorEmbed(interaction, 'RED', title, description, ephemeral, deletionSeconds);
     }
 
     sendColorEmbed(
@@ -390,16 +393,14 @@ export abstract class Command {
         description: string,
         ephemeral = false,
         deletionSeconds = 30
-    ): void {
+    ): Promise<void | Message> {
         const embed = new MessageEmbed().setTitle(title).setColor(color).setDescription(description).setTimestamp();
 
         if (ephemeral) {
-            sendEphemeralReply(interaction, { embeds: [embed] }, deletionSeconds);
+            return sendEphemeralReply(interaction, { embeds: [embed] }, deletionSeconds);
         } else {
-            interaction.reply({ embeds: [embed] });
+            return interaction.reply({ embeds: [embed] });
         }
-
-        return;
     }
 
     isMessage(interaction: Message | CommandInteraction): interaction is Message {

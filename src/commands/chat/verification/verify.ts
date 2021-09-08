@@ -18,7 +18,8 @@ export class Verify extends ChatCommand {
     async execute(interaction: Message | CommandInteraction): Promise<void> {
         const config = await GuildConfigCache.fetchConfig(interaction.guild?.id);
         if (interaction.guild && config.enableVerification === false) {
-            return this.sendErrorEmbed(interaction, 'Verification Not Enabled', 'This server does not have verification enabled.');
+            await this.sendErrorEmbed(interaction, 'Verification Not Enabled', 'This server does not have verification enabled.');
+            return;
         }
 
         const discordUser = this.getUser(interaction);

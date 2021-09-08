@@ -108,7 +108,8 @@ export class RoleUpdateEventHandler implements EventHandler {
                         .setColor('RED')
                         .setDescription('You must have the `Manage Server` permission to interact with this button.');
 
-                    return i.reply({ embeds: [embed] });
+                    await i.reply({ embeds: [embed] });
+                    return;
                 }
 
                 if (i.customId === updateId) {

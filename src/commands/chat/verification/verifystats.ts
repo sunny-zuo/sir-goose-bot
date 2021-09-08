@@ -28,7 +28,7 @@ export class VerifyStats extends ChatCommand {
                 .setDescription("Verification is not enabled on this server, so I can't display any stats.")
                 .setColor('YELLOW')
                 .setTimestamp();
-            interaction.reply({ embeds: [embed] });
+            await interaction.reply({ embeds: [embed] });
             return;
         }
 
@@ -79,7 +79,7 @@ export class VerifyStats extends ChatCommand {
         const guildIconURL = guild.iconURL({ dynamic: true });
         guildIconURL ? embed.setThumbnail(guildIconURL) : null;
 
-        interaction.reply({ embeds: [embed] });
+        await interaction.reply({ embeds: [embed] });
     }
 
     formatLabel(label: string, length: number): string {

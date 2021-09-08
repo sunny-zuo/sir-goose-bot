@@ -33,7 +33,7 @@ export class Help extends ChatCommand {
         if (commandQuery) {
             const command = client.chatCommands.get(commandQuery.toLowerCase()) || client.chatAliases.get(commandQuery.toLowerCase());
             if (!command) {
-                this.sendErrorEmbed(interaction, 'Command Not Found', `The command \`${commandQuery}\` was not found.`);
+                await this.sendErrorEmbed(interaction, 'Command Not Found', `The command \`${commandQuery}\` was not found.`);
                 return;
             }
 
@@ -61,7 +61,7 @@ export class Help extends ChatCommand {
                 )
                 .setTimestamp();
 
-            interaction.reply({ embeds: [embed] });
+            await interaction.reply({ embeds: [embed] });
         } else {
             const categories: Category[] = [...new Set(client.chatCommands.map((command) => command.category))].sort();
 
@@ -82,7 +82,7 @@ export class Help extends ChatCommand {
                 }
             }
 
-            interaction.reply({ embeds: [embed] });
+            await interaction.reply({ embeds: [embed] });
         }
     }
 

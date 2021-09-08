@@ -48,10 +48,14 @@ export class MessageCreateEventHandler implements EventHandler {
             );
         }
         if (command.guildOnly && !message.guild) {
-            command.sendErrorEmbed(message, 'Command is Server Only', 'This command can only be used inside Discord servers and not DMs.');
+            await command.sendErrorEmbed(
+                message,
+                'Command is Server Only',
+                'This command can only be used inside Discord servers and not DMs.'
+            );
             return;
         }
-        if (!command.checkCommandPermissions(message)) {
+        if (!(await command.checkCommandPermissions(message))) {
             if (
                 message.channel.type === 'GUILD_TEXT' &&
                 message.channel.guild.me &&
@@ -77,7 +81,7 @@ export class MessageCreateEventHandler implements EventHandler {
         if (command.options.length > 0) {
             if (messageContent[0] === undefined || messageContent[0].length === 0) {
                 if (command.options[0].required) {
-                    command.sendErrorEmbed(
+                    await command.sendErrorEmbed(
                         message,
                         'Missing Command Arguments',
                         `This command requires arguments.
@@ -130,7 +134,7 @@ export class MessageCreateEventHandler implements EventHandler {
                 });
             } else {
                 const invalidOption: InvalidCommandInteractionOption = argumentParser.error;
-                command.sendErrorEmbed(
+                await command.sendErrorEmbed(
                     message,
                     'Invalid Arguments Provided',
                     `You provided an invalid argument for \`${

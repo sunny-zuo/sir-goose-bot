@@ -41,7 +41,7 @@ export class Prefix extends ChatCommand {
             guildConfig.prefix = newPrefix;
             await guildConfig.save();
 
-            this.sendSuccessEmbed(interaction, 'Prefix Updated', `The prefix has been set to \`${newPrefix}\``);
+            await this.sendSuccessEmbed(interaction, 'Prefix Updated', `The prefix has been set to \`${newPrefix}\``);
         } else {
             const guild = await GuildConfigModel.findOne({ guildId: interaction.guild!.id });
             const embed = new MessageEmbed()
@@ -50,7 +50,7 @@ export class Prefix extends ChatCommand {
                 .setDescription(`The current prefix is \`${guild?.prefix || '$'}\`. You can also use Discord slash commands!`)
                 .setTimestamp();
 
-            interaction.reply({ embeds: [embed] });
+            await interaction.reply({ embeds: [embed] });
         }
     }
 }

@@ -37,7 +37,7 @@ export class Pin extends ChatCommand {
     async execute(interaction: Message | CommandInteraction, args?: CommandInteractionOptionResolver): Promise<void> {
         const config = await GuildConfigCache.fetchConfig(interaction.guild!.id);
         if (!config.enablePins) {
-            this.sendErrorEmbed(
+            await this.sendErrorEmbed(
                 interaction,
                 'Pinning Disabled',
                 `The pin command is not enabled on a server. If you have server moderation permissions, use \`${config.prefix}config enable_pins true\` to enable pins.`
@@ -61,7 +61,7 @@ export class Pin extends ChatCommand {
 
         if (!channel || !channel.isText()) return;
         if (!pinMessageId) {
-            this.sendErrorEmbed(
+            await this.sendErrorEmbed(
                 interaction,
                 'Pin Error',
                 'You did not provide a message to pin. Either reply to the message you want to quote, or supply the message id and use the command in the same channel as the message you want to pin.'
@@ -75,7 +75,7 @@ export class Pin extends ChatCommand {
             pinMessage = await channel.messages.fetch(pinMessageId);
 
             if (!pinMessageId || !pinMessage) {
-                this.sendErrorEmbed(
+                await this.sendErrorEmbed(
                     interaction,
                     'Pin Error',
                     'You did not provide a message to pin. Either reply to the message you want to quote, or supply the message id and use the command in the same channel as the message you want to pin.'
@@ -83,7 +83,7 @@ export class Pin extends ChatCommand {
                 return;
             }
         } catch (e) {
-            this.sendErrorEmbed(
+            await this.sendErrorEmbed(
                 interaction,
                 'Pin Error',
                 'You did not provide a message to pin. Either reply to the message you want to quote, or supply the message id and use the command in the same channel as the message you want to pin.'
@@ -92,14 +92,17 @@ export class Pin extends ChatCommand {
         }
 
         if (pinMessage.pinned) {
-            this.sendErrorEmbed(interaction, 'Pin Error', 'This message is already pinned.');
+            await this.sendErrorEmbed(interaction, 'Pin Error', 'This message is already pinned.');
             return;
         }
 
         await pinMessage.pin();
 
         if (!this.isMessage(interaction)) {
-            interaction.reply({ embeds: [new MessageEmbed().setTitle('Message Successfully Pinned').setColor('GREEN')], ephemeral: true });
+            await interaction.reply({
+                embeds: [new MessageEmbed().setTitle('Message Successfully Pinned').setColor('GREEN')],
+                ephemeral: true,
+            });
         }
 
         await Modlog.logUserAction(

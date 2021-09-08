@@ -75,7 +75,7 @@ export class Ban extends ChatCommand {
         const guildConfig = await GuildConfigCache.fetchConfig(interaction.guild!.id);
         // TODO: Refactor once help message supports subcommands
         if (args === undefined || !args?.data || args.data.length === 0) {
-            return this.sendErrorEmbed(
+            await this.sendErrorEmbed(
                 interaction,
                 'Usage:',
                 `
@@ -83,6 +83,7 @@ export class Ban extends ChatCommand {
                 Ban by Discord user: \`${guildConfig.prefix}ban user @user reason\`
                 `
             );
+            return;
         }
 
         const guild = interaction.guild;
@@ -101,17 +102,19 @@ export class Ban extends ChatCommand {
                 : [];
 
         if (memberToBan && !memberToBan.bannable) {
-            return this.sendErrorEmbed(interaction, 'Unable To Ban', `I do not have permission to ban ${memberToBan}.`);
+            await this.sendErrorEmbed(interaction, 'Unable To Ban', `I do not have permission to ban ${memberToBan}.`);
+            return;
         }
 
         for (const alt of possibleAlts) {
             const altMember = guild.members.cache.get(alt.discordId);
             if (altMember && !altMember.bannable) {
-                return this.sendErrorEmbed(
+                await this.sendErrorEmbed(
                     interaction,
                     'Unable To Ban',
                     `I do not have permission to ban ${altMember}. (alt of the member you wanted to ban)`
                 );
+                return;
             }
         }
 

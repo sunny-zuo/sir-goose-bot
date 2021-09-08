@@ -62,7 +62,7 @@ export class BotStats extends ChatCommand {
         embed.addField('Commit', this.formatValue(this.latestCommit, fieldMaxLength), true);
         embed.addField('Uptime', this.formatValue(`${uptimeDays}d ${uptimeHours}h`, fieldMaxLength), true);
 
-        interaction.reply({ embeds: [embed] });
+        await interaction.reply({ embeds: [embed] });
     }
 
     formatValue(value: string, length: number): string {

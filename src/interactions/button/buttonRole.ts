@@ -28,7 +28,7 @@ export class ButtonRole implements ButtonInteractionHandler {
         try {
             argData = JSON.parse(args);
         } catch (e) {
-            interaction.reply({
+            await interaction.reply({
                 content: `This button role prompt is no longer valid.`,
                 ephemeral: true,
             });
@@ -40,7 +40,7 @@ export class ButtonRole implements ButtonInteractionHandler {
         const buttonRoleInfo = await ButtonRoleModel.findById(argData._id);
 
         if (!buttonRoleInfo || buttonRoleInfo.roles.every((roleData) => roleData.id !== argData.roleId)) {
-            interaction.reply({
+            await interaction.reply({
                 content: `This button role prompt is no longer valid.`,
                 ephemeral: true,
             });
@@ -57,16 +57,16 @@ export class ButtonRole implements ButtonInteractionHandler {
                         .setDescription(`The role ${inlineCode(role.name)} was successfully removed.`)
                         .setColor('YELLOW');
                     await member.roles.remove(role);
-                    interaction.reply({ embeds: [embed], ephemeral: true });
+                    await interaction.reply({ embeds: [embed], ephemeral: true });
                 } else {
                     const embed = new MessageEmbed()
                         .setDescription(`The role ${inlineCode(role.name)} was successfully added.`)
                         .setColor('GREEN');
                     await member.roles.add(role);
-                    interaction.reply({ embeds: [embed], ephemeral: true });
+                    await interaction.reply({ embeds: [embed], ephemeral: true });
                 }
             } else {
-                interaction.reply({
+                await interaction.reply({
                     content: `I do not have permission to assign the role ${inlineCode(
                         role.name
                     )}. Please message a server admin to get this fixed!`,
@@ -74,7 +74,7 @@ export class ButtonRole implements ButtonInteractionHandler {
                 });
             }
         } else {
-            interaction.reply({
+            await interaction.reply({
                 content: `The role you tried to assign does not exist. Server admins will need to recreate the button role prompt to fix this.`,
                 ephemeral: true,
             });

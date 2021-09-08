@@ -24,16 +24,17 @@ export class PinMessage extends ContextMenuCommand {
         const config = await GuildConfigCache.fetchConfig(interaction.guild!.id);
 
         if (!config.enablePins) {
-            return this.sendErrorEmbed(
+            await this.sendErrorEmbed(
                 interaction,
                 'Pinning Disabled',
                 `The pin command is not enabled on a server. If you have server moderation permissions, use \`${config.prefix}config enable_pins true\` to enable pins.`,
                 true
             );
+            return;
         }
 
         if (message.pinned) {
-            this.sendErrorEmbed(interaction, 'Pin Error', 'This message is already pinned.', true);
+            await this.sendErrorEmbed(interaction, 'Pin Error', 'This message is already pinned.', true);
             return;
         }
 

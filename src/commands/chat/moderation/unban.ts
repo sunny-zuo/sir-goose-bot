@@ -55,11 +55,12 @@ export class Unban extends ChatCommand {
         const guildConfig = await GuildConfigCache.fetchConfig(interaction.guild!.id);
         // TODO: Refactor once help message supports subcommands
         if (args === undefined || !args?.data || args.data.length === 0) {
-            return this.sendErrorEmbed(
+            await this.sendErrorEmbed(
                 interaction,
                 'Usage:',
                 `Unban by Discord ID: \`${guildConfig.prefix}unban id 123456789012345678 reason\``
             );
+            return;
         }
 
         const guild = interaction.guild;
@@ -72,7 +73,7 @@ export class Unban extends ChatCommand {
         const bannedUser = guild.bans.cache.get(providedUserId);
 
         if (!bannedUser) {
-            this.sendErrorEmbed(interaction, 'User Not Banned', `Unable to ban user ID ${providedUserId} - they are not banned.`);
+            await this.sendErrorEmbed(interaction, 'User Not Banned', `Unable to ban user ID ${providedUserId} - they are not banned.`);
         }
 
         const unbanUserInfo = await UserModel.findOne({ discordId: providedUserId });

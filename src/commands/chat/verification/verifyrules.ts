@@ -52,7 +52,7 @@ export class VerifyRules extends ChatCommand {
             try {
                 importedJSON = JSON.parse(ruleString);
             } catch (e) {
-                this.sendErrorEmbed(
+                await this.sendErrorEmbed(
                     interaction,
                     'Import Error',
                     'You provided an invalid rule import. Please make sure you copy and pasted correctly from the [rule creation tool.](https://sebot.sunnyzuo.com/).'
@@ -61,7 +61,7 @@ export class VerifyRules extends ChatCommand {
             }
 
             if (!importedJSON.rules || importedJSON.rules.length === 0 || isNaN(importedJSON.baseYear)) {
-                this.sendErrorEmbed(
+                await this.sendErrorEmbed(
                     interaction,
                     'Import Error',
                     'You provided an invalid or empty rule import. Please make sure you copy and pasted correctly from the [rule creation tool.](https://sebot.sunnyzuo.com/).'
@@ -81,10 +81,14 @@ export class VerifyRules extends ChatCommand {
                         const role = await interaction.guild?.roles.cache.find((role) => role.name === roleName);
 
                         if (!role) {
-                            this.sendErrorEmbed(interaction, 'Invalid Role', `The role "${roleName}" could not be found on this server.`);
+                            await this.sendErrorEmbed(
+                                interaction,
+                                'Invalid Role',
+                                `The role "${roleName}" could not be found on this server.`
+                            );
                             return;
                         } else if (!role.editable) {
-                            this.sendErrorEmbed(
+                            await this.sendErrorEmbed(
                                 interaction,
                                 'Unable to Assign Role',
                                 `I do not have permission to assign the "${roleName}" role. Make sure I have the \`Manage Roles\` permission and that my role is placed above all roles that you want to assign.`
@@ -120,7 +124,7 @@ export class VerifyRules extends ChatCommand {
             }. [Create a ruleset.](https://sebot.sunnyzuo.com/)
                 \`\`\`${this.serializeVerificationRules(config.verificationRules)}\`\`\``);
 
-            interaction.reply({ embeds: [embed] });
+            await interaction.reply({ embeds: [embed] });
         } else {
             const config = await GuildConfigCache.fetchConfig(interaction.guild!.id);
 
@@ -129,7 +133,7 @@ export class VerifyRules extends ChatCommand {
             }. [Create a ruleset.](https://sebot.sunnyzuo.com/)
                 \`\`\`${this.serializeVerificationRules(config.verificationRules)}\`\`\``);
 
-            interaction.reply({ embeds: [embed] });
+            await interaction.reply({ embeds: [embed] });
         }
     }
 

@@ -50,7 +50,7 @@ export class Course extends ChatCommand {
                 .setDescription(`No course with the name '${courseName}' was found.`)
                 .setTimestamp();
 
-            interaction.reply({ embeds: [embed] });
+            await interaction.reply({ embeds: [embed] });
             return;
         }
 
@@ -106,6 +106,6 @@ export class Course extends ChatCommand {
             )
             .setTimestamp();
 
-        interaction.reply({ embeds: [embed] });
+        await interaction.reply({ embeds: [embed] });
     }
 }

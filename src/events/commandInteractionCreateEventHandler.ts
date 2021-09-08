@@ -27,21 +27,21 @@ export class CommandInteractionCreateEventHandler implements EventHandler {
                 }) but was rate limited.`
             );
 
-            interaction.reply({
+            await interaction.reply({
                 content: `Slow down! You're using commands a bit too quickly; this command can only be used ${command.cooldownMaxUses} time(s) every ${command.cooldownSeconds} seconds.`,
                 ephemeral: true,
             });
             return;
         }
         if (command.guildOnly && !interaction.guild) {
-            command.sendErrorEmbed(
+            await command.sendErrorEmbed(
                 interaction,
                 'Command is Server Only',
                 'This command can only be used inside Discord servers and not DMs.'
             );
             return;
         }
-        if (!command.checkCommandPermissions(interaction)) {
+        if (!(await command.checkCommandPermissions(interaction))) {
             if (
                 interaction.channel &&
                 interaction.channel.type === 'GUILD_TEXT' &&
