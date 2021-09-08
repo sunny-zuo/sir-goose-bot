@@ -55,7 +55,7 @@ export class MessageCreateEventHandler implements EventHandler {
             );
             return;
         }
-        if (!command.checkCommandPermissions(message)) {
+        if (!(await command.checkCommandPermissions(message))) {
             if (
                 message.channel.type === 'GUILD_TEXT' &&
                 message.channel.guild.me &&

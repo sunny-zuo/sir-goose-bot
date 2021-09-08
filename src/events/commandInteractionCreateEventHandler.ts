@@ -41,7 +41,7 @@ export class CommandInteractionCreateEventHandler implements EventHandler {
             );
             return;
         }
-        if (!command.checkCommandPermissions(interaction)) {
+        if (!(await command.checkCommandPermissions(interaction))) {
             if (
                 interaction.channel &&
                 interaction.channel.type === 'GUILD_TEXT' &&
