@@ -61,14 +61,14 @@ export class Deploy extends ChatCommand {
             await application.commands.set(data);
 
             client.log.info(`Loaded application commands globally`);
-            interaction.reply('Application commands have been loaded globally!');
+            await interaction.reply('Application commands have been loaded globally!');
         } else if (interaction.guild) {
             await interaction.guild.commands.set(data);
 
             client.log.info(`Loaded application commands in guild ${interaction.guild.name}`);
-            interaction.reply('Application commands have been loaded in this guild!');
+            await interaction.reply('Application commands have been loaded in this guild!');
         } else {
-            interaction.reply("Can't deploy guild commands in DMs! Did you mean to deploy commands globally?");
+            await interaction.reply("Can't deploy guild commands in DMs! Did you mean to deploy commands globally?");
         }
     }
 }

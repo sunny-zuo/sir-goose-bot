@@ -20,9 +20,9 @@ export class Honk extends ChatCommand {
             const imageUrl = await axios.get(randomGoose).then((r) => r.request.res.responseUrl);
             const embed = new MessageEmbed().setColor('AQUA').setTitle('HONK HONK').setImage(imageUrl);
 
-            interaction.reply({ embeds: [embed] });
+            await interaction.reply({ embeds: [embed] });
         } else {
-            interaction.reply({ content: 'HONK' });
+            await interaction.reply({ content: 'HONK' });
         }
     }
 }

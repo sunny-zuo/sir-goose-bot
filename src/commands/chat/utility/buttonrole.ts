@@ -96,17 +96,18 @@ export class ButtonRole extends ChatCommand {
     async execute(interaction: Message | CommandInteraction, args?: CommandInteractionOptionResolver): Promise<void> {
         const config = await GuildConfigCache.fetchConfig(interaction.guild?.id);
         if (!args) {
-            return this.sendErrorEmbed(
+            await this.sendErrorEmbed(
                 interaction,
                 'Option Missing',
                 `No option was specified. Use slash commands or ${inlineCode(`${config.prefix}help buttonrole`)} for usage information.`
             );
+            return;
         }
 
         if (args.getSubcommand() === 'create') {
-            return this.create(interaction, args);
+            await this.create(interaction, args);
         } else if (args.getSubcommand() === 'edit') {
-            return this.edit(interaction, args);
+            await this.edit(interaction, args);
         }
     }
 
@@ -129,27 +130,30 @@ export class ButtonRole extends ChatCommand {
         }
 
         if (invalidRoles.length > 0) {
-            return this.sendErrorEmbed(
+            await this.sendErrorEmbed(
                 interaction,
                 'Invalid Roles',
                 `I do not have permission to assign the following roles: ${invalidRoles.map((r) => inlineCode(r.name)).join(', ')}`
             );
+            return;
         }
         if (roles.length === 0) {
-            return this.sendErrorEmbed(
+            await this.sendErrorEmbed(
                 interaction,
                 'Invalid Roles',
                 'No valid roles to assign were specified. Make sure the role is mentioned (or use slash commands) for role selection.'
             );
+            return;
         }
 
         const existingButtonRoles = await ButtonRoleModel.countDocuments({ guildId: interaction.guildId });
         if (existingButtonRoles > BUTTON_ROLE_GUILD_LIMIT) {
-            return this.sendErrorEmbed(
+            await this.sendErrorEmbed(
                 interaction,
                 'Too Many Button Role Prompts',
                 `You cannot have more than ${BUTTON_ROLE_GUILD_LIMIT} button roles prompts. Please message ${process.env.OWNER_DISCORD_USERNAME} if you have a good reason to get this limit increased.`
             );
+            return;
         }
 
         const buttonRoleDoc = await ButtonRoleModel.create({
@@ -192,7 +196,7 @@ export class ButtonRole extends ChatCommand {
             if (!channel?.isText()) return;
 
             message = await channel.send({ embeds: [embed], components });
-            interaction.reply({ content: 'Button role prompt successfully created!', ephemeral: true });
+            await interaction.reply({ content: 'Button role prompt successfully created!', ephemeral: true });
         }
 
         buttonRoleDoc.messageId = message.id;
@@ -204,51 +208,56 @@ export class ButtonRole extends ChatCommand {
 
         const buttonRole = await ButtonRoleModel.findOne({ guildId: interaction.guildId, messageId: args.getString('message_id', true) });
         if (!buttonRole) {
-            return this.sendErrorEmbed(
+            await this.sendErrorEmbed(
                 interaction,
                 'Button Role Prompt Not Found',
                 'The specified button role prompt could not be found. Please check that the provided message id is a button role prompt sent by Sir Goose.',
                 true
             );
+            return;
         }
 
         const channel = await interaction.guild?.channels.fetch(buttonRole.channelId);
         if (!channel?.isText()) {
-            return this.sendErrorEmbed(
+            await this.sendErrorEmbed(
                 interaction,
                 'Invalid Channel',
                 'The channel associated with this button role prompt could not be found, or is invalid. Please check that the provided message id is correct and that the bot has access to the channel where the message is.',
                 true
             );
+            return;
         }
         const message = await channel.messages.fetch(buttonRole.messageId);
         if (!message || message.author.id !== this.client.user?.id) {
-            return this.sendErrorEmbed(
+            await this.sendErrorEmbed(
                 interaction,
                 'Invalid Message',
                 'The message associated with this button role prompt could not be found, or is invalid. Please check that the provided message id is correct and that the bot has access to the channel where the message is.',
                 true
             );
+            return;
         }
 
         const role = args.getRole('role', true) as Role;
         if (role.id === interaction.guild!.roles.everyone.id) {
-            return this.sendErrorEmbed(
+            await this.sendErrorEmbed(
                 interaction,
                 'Invalid Role',
                 `The role you specified is the ${inlineCode('@everyone')} role. Please specify a valid role.`,
                 true
             );
+            return;
         }
 
         if (args.getString('action', true) === 'add') {
             if (buttonRole.roles.some((r) => r.id === role.id)) {
-                return this.sendErrorEmbed(
+                await this.sendErrorEmbed(
                     interaction,
                     'Role Already Added',
                     `The role ${inlineCode(role.name)} is already added to this button role prompt.`,
                     true
                 );
+                return;
             }
 
             const lowestUnfilledIndex = message.components.findIndex((c) => c.components.length < 5);
@@ -262,7 +271,8 @@ export class ButtonRole extends ChatCommand {
             else if (message.components[selectedRow]?.components.length >= 5) errorMessage = 'You cannot add more than 5 roles per row.';
 
             if (errorMessage) {
-                return this.sendErrorEmbed(interaction, 'Button Role Update Error', errorMessage, true);
+                await this.sendErrorEmbed(interaction, 'Button Role Update Error', errorMessage, true);
+                return;
             }
 
             const button = new MessageButton()
@@ -279,7 +289,7 @@ export class ButtonRole extends ChatCommand {
             await message.edit({ components: message.components });
             await sendEphemeralReply(interaction, { content: 'Button role prompt updated successfully!' }, 20);
         } else if (args.getString('action', true) === 'remove') {
-            this.sendErrorEmbed(
+            await this.sendErrorEmbed(
                 interaction,
                 'Not Implemented',
                 'Removing a role from a button prompt is currently not implemented, but is expected to be added very soon.',

@@ -20,7 +20,7 @@ export class GuildMemberAddEventHandler implements EventHandler {
             const assignedRoles = roleAssignmentResult.value;
 
             if (assignedRoles.length > 0) {
-                member.send({
+                await member.send({
                     embeds: [
                         new MessageEmbed()
                             .setTitle(`Welcome to ${member.guild.name}!`)
@@ -33,7 +33,7 @@ export class GuildMemberAddEventHandler implements EventHandler {
                     ],
                 });
             } else if ((await GuildConfigCache.fetchConfig(member.guild.id)).enableVerification) {
-                member.send({
+                await member.send({
                     embeds: [
                         new MessageEmbed()
                             .setTitle(`Welcome to ${member.guild.name}!`)

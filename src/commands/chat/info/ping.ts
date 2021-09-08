@@ -29,6 +29,6 @@ export class Ping extends ChatCommand {
             )
             .setColor('BLUE');
 
-        message.edit({ embeds: [embed] });
+        await message.edit({ embeds: [embed] });
     }
 }

@@ -46,13 +46,13 @@ export class VerifyButton extends ChatCommand {
         const content = args?.getString('message') ?? 'Click the button below to request a verification link!';
 
         if (this.isMessage(interaction)) {
-            interaction.channel.send({ content: content, components: [components] });
+            await interaction.channel.send({ content: content, components: [components] });
         } else {
             const channel = interaction.channel ?? (await interaction.guild?.channels.fetch(interaction.channelId));
             if (!channel?.isText()) return;
 
-            channel.send({ content: content, components: [components] });
-            interaction.reply({ content: 'Verification button successfully created!', ephemeral: true });
+            await channel.send({ content: content, components: [components] });
+            await interaction.reply({ content: 'Verification button successfully created!', ephemeral: true });
         }
     }
 }

@@ -104,17 +104,17 @@ export class Config extends ChatCommand {
 
                     if (prefix) {
                         if (prefix.length > 5) {
-                            this.sendErrorEmbed(interaction, 'Invalid Prefix', 'Prefix must be between 1 and 5 characters long.');
+                            await this.sendErrorEmbed(interaction, 'Invalid Prefix', 'Prefix must be between 1 and 5 characters long.');
                             return;
                         }
 
                         guildConfig.prefix = prefix;
                         await guildConfig.save();
 
-                        this.sendSuccessEmbed(interaction, 'Prefix Updated', `The prefix has been set to \`${prefix}\``);
+                        await this.sendSuccessEmbed(interaction, 'Prefix Updated', `The prefix has been set to \`${prefix}\``);
                         return;
                     } else {
-                        this.sendNeutralEmbed(
+                        await this.sendNeutralEmbed(
                             interaction,
                             'Prefix',
                             `The prefix the bot will respond to is currently \`${guildConfig.prefix}\`. You can also use Discord slash commands!`
@@ -137,7 +137,7 @@ export class Config extends ChatCommand {
                                 guildConfig.modlogChannelId = channel.id;
                                 await guildConfig.save();
 
-                                this.sendSuccessEmbed(
+                                await this.sendSuccessEmbed(
                                     interaction,
                                     'Modlog Channel',
                                     `The modlog channel has been set to ${channel}. Modlog is currently ${
@@ -148,7 +148,7 @@ export class Config extends ChatCommand {
                                 );
                                 return;
                             } else {
-                                this.sendErrorEmbed(
+                                await this.sendErrorEmbed(
                                     interaction,
                                     'Invalid Modlog Channel',
                                     'I do not have permission to send messages and embed links in the modlog channel you provided.'
@@ -156,7 +156,7 @@ export class Config extends ChatCommand {
                                 return;
                             }
                         } else {
-                            this.sendErrorEmbed(
+                            await this.sendErrorEmbed(
                                 interaction,
                                 'Invalid Modlog Channel',
                                 'The modlog channel was not found, or was not a text channel.'
@@ -164,7 +164,7 @@ export class Config extends ChatCommand {
                             return;
                         }
                     } else {
-                        this.sendNeutralEmbed(
+                        await this.sendNeutralEmbed(
                             interaction,
                             'Modlog Channel',
                             `The modlog channel is the channel that modlog messages get sent to, and is currently ${
@@ -181,7 +181,7 @@ export class Config extends ChatCommand {
                         guildConfig.enableModlog = enable;
                         await guildConfig.save();
 
-                        this.sendSuccessEmbed(
+                        await this.sendSuccessEmbed(
                             interaction,
                             `${guildConfig.enableModlog ? 'Modlog Enabled' : 'Modlog Disabled'}`,
                             `Modlog is now ${
@@ -194,7 +194,7 @@ export class Config extends ChatCommand {
                         );
                         return;
                     } else {
-                        this.sendNeutralEmbed(
+                        await this.sendNeutralEmbed(
                             interaction,
                             'Modlog Status',
                             `Modlog is currently ${
@@ -211,14 +211,14 @@ export class Config extends ChatCommand {
                         guildConfig.enableVerification = enable;
                         await guildConfig.save();
 
-                        this.sendSuccessEmbed(
+                        await this.sendSuccessEmbed(
                             interaction,
                             `Verification ${enable ? 'Enabled' : 'Disabled'}`,
                             `Verification is now ${enable ? 'enabled' : 'disabled'}.`
                         );
                         return;
                     } else {
-                        this.sendNeutralEmbed(
+                        await this.sendNeutralEmbed(
                             interaction,
                             'Verification Status',
                             `Verification is currently **${
@@ -235,14 +235,14 @@ export class Config extends ChatCommand {
                         guildConfig.enablePins = enable;
                         await guildConfig.save();
 
-                        this.sendSuccessEmbed(
+                        await this.sendSuccessEmbed(
                             interaction,
                             `Pins ${enable ? 'Enabled' : 'Disabled'}`,
                             `Pinning is now ${enable ? 'enabled' : 'disabled'}.`
                         );
                         return;
                     } else {
-                        this.sendNeutralEmbed(
+                        await this.sendNeutralEmbed(
                             interaction,
                             'Pin Status',
                             `Pinning is currently ${
@@ -295,11 +295,11 @@ export class Config extends ChatCommand {
                         )
                         .setTimestamp();
 
-                    interaction.reply({ embeds: [embed] });
+                    await interaction.reply({ embeds: [embed] });
                 }
             }
         } else {
-            this.sendErrorEmbed(
+            await this.sendErrorEmbed(
                 interaction,
                 'No valid arguments provided.',
                 `Use \`${guildConfig.prefix}config view\` to view the server config and learn how to edit the server's configuration.`

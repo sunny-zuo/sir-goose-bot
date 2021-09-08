@@ -48,6 +48,6 @@ export class Countdown extends ChatCommand {
 
         const dayDiff = Math.floor(this._examsEndDate.diff(DateTime.local(), 'days').days);
 
-        this.sendNeutralEmbed(interaction, `${dayDiff} Days Left!`, `There are about ${dayDiff} more days until this term is over :)`);
+        await this.sendNeutralEmbed(interaction, `${dayDiff} Days Left!`, `There are about ${dayDiff} more days until this term is over.`);
     }
 }

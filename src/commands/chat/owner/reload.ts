@@ -22,6 +22,6 @@ export class Reload extends ChatCommand {
             GuildConfigCache.updateCache(config);
         }
 
-        interaction.reply({ content: 'All guild settings have been successfully reloaded!' });
+        await interaction.reply({ content: 'All guild settings have been successfully reloaded!' });
     }
 }

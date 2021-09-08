@@ -22,7 +22,8 @@ export class VerifyAll extends ChatCommand {
 
         const config = await GuildConfigCache.fetchConfig(interaction.guild.id);
         if (interaction.guild && config.enableVerification === false) {
-            return this.sendErrorEmbed(interaction, 'Verification Not Enabled', 'This server does not have verification enabled.');
+            await this.sendErrorEmbed(interaction, 'Verification Not Enabled', 'This server does not have verification enabled.');
+            return;
         }
 
         const invalidRoles = await RoleAssignmentService.getInvalidRoles(interaction.guild);
@@ -30,7 +31,7 @@ export class VerifyAll extends ChatCommand {
         if (invalidRoles.length > 0) {
             const invalidRoleText = invalidRoles.map((role) => `• \`${role.name}\` (id: ${role.id})`).join('\n');
 
-            return this.sendErrorEmbed(
+            await this.sendErrorEmbed(
                 interaction,
                 'Invalid Roles',
                 `The following roles in the ruleset either do not exist or can't be assigned by the bot:
@@ -40,6 +41,7 @@ export class VerifyAll extends ChatCommand {
                 Make sure that the bot has the Manage Roles permission, is placed correctly in the role hierarchy and that all roles exist.
                 `
             );
+            return;
         }
 
         await interaction.guild.roles.fetch();
@@ -54,7 +56,7 @@ export class VerifyAll extends ChatCommand {
         const message = (await interaction.reply({ embeds: [embed], fetchReply: true })) as Message;
 
         const updateInterval = setInterval(async () => {
-            message.edit({ embeds: [this.generateProgressEmbed(progress, total)] });
+            await message.edit({ embeds: [this.generateProgressEmbed(progress, total)] });
         }, 8000);
 
         try {
@@ -70,7 +72,7 @@ export class VerifyAll extends ChatCommand {
         } catch (e) {
             clearInterval(updateInterval);
             this.client.log.error(`Unknown error when trying to verify all: ${e}`);
-            message.edit({
+            await message.edit({
                 embeds: [
                     new MessageEmbed().setTitle('Unknown Error').setDescription(`
                             We ran into an unknown error trying to verify all users.
@@ -84,7 +86,7 @@ export class VerifyAll extends ChatCommand {
         }
 
         clearInterval(updateInterval);
-        message.edit({ embeds: [this.generateProgressEmbed(progress, total)] });
+        await message.edit({ embeds: [this.generateProgressEmbed(progress, total)] });
     }
 
     private generateProgressEmbed(progress: number, total: number): MessageEmbed {

@@ -45,7 +45,7 @@ export class ButtonInteractionCreateEventHandler implements EventHandler {
                     )
                     .setTimestamp();
 
-                interaction.reply({ embeds: [embed], ephemeral: true });
+                await interaction.reply({ embeds: [embed], ephemeral: true });
 
                 this.client.log.info(
                     `${interaction.user.tag} tried to use interact with button ${handler.customId} in ${

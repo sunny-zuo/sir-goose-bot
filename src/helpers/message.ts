@@ -3,12 +3,12 @@ import { Message, CommandInteraction, InteractionReplyOptions, ReplyMessageOptio
 export function sendReply(
     interaction: Message | CommandInteraction | ButtonInteraction,
     message: InteractionReplyOptions | ReplyMessageOptions
-): void {
+): Promise<void | Message> {
     // this is dumb but it fixes a typescript error when replying to any of 3 interaction types ¯\_(ツ)_/¯
     if (isMessage(interaction)) {
-        interaction.reply(message);
+        return interaction.reply(message);
     } else {
-        interaction.reply(message);
+        return interaction.reply(message);
     }
 }
 
@@ -16,13 +16,16 @@ export function sendEphemeralReply(
     interaction: Message | CommandInteraction | ButtonInteraction,
     message: InteractionReplyOptions | ReplyMessageOptions,
     deletionSeconds = 30
-): void {
+): Promise<void> {
     if (isMessage(interaction)) {
-        interaction.reply(message).then((sentMessage) => {
-            setTimeout(() => sentMessage.delete(), deletionSeconds * 1000);
+        return interaction.reply(message).then((sentMessage) => {
+            setTimeout(async () => {
+                // we ignore the delete error as it isn't something we can feasibly handle
+                await sentMessage.delete().catch();
+            }, deletionSeconds * 1000);
         });
     } else {
-        interaction.reply({ ...message, ephemeral: true });
+        return interaction.reply({ ...message, ephemeral: true });
     }
 }
 
