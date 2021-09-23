@@ -50,7 +50,7 @@
         "graphql": "~15.5.1",
         "graphql-request": "~3.4.0",
         "luxon": "~1.28.0",
-        "mongoose": "~5.13.2",
+        "mongoose": "~5.13.9",
         "uuid": "~8.3.2"
     }
 }
