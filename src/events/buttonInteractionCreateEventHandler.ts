@@ -27,14 +27,23 @@ export class ButtonInteractionCreateEventHandler implements EventHandler {
             } (${interaction.guild?.id ?? 'none'})`
         );
 
-        const [interactioName, args] = interaction.customId.split('|');
+        const [interactionName, args] = interaction.customId.split('|');
 
-        const handler = this.buttonInteractionHandlers.get(interactioName);
+        const handler = this.buttonInteractionHandlers.get(interactionName);
 
         if (handler) {
             const userLimit = handler.cooldown.checkLimit(interaction.user.id);
             if (!userLimit.blocked) {
-                handler.execute(interaction, args);
+                handler.execute(interaction, args).catch((e) => {
+                    this.client.log.error(
+                        `
+                        Button ID: ${interaction.customId}
+                        User ID: ${interaction.user.id}
+                        Error: ${e}
+                        `,
+                        e.stack
+                    );
+                });
             } else {
                 const embed = new MessageEmbed()
                     .setTitle('Rate Limited')
