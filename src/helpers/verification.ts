@@ -64,7 +64,9 @@ export async function sendVerificationReplies(
                     .setColor('RED')
                     .setTimestamp();
 
-                ephemeral ? sendEphemeralReply(interaction, { embeds: [embed] }, 60) : sendReply(interaction, { embeds: [embed] });
+                ephemeral
+                    ? await sendEphemeralReply(interaction, { embeds: [embed] }, 60)
+                    : await sendReply(interaction, { embeds: [embed] });
             }
         } else {
             await service.assignAllRoles();
@@ -81,7 +83,7 @@ export async function sendVerificationReplies(
             .setColor('GREEN')
             .setTimestamp();
 
-        ephemeral ? sendEphemeralReply(interaction, { embeds: [embed] }, 60) : sendReply(interaction, { embeds: [embed] });
+        ephemeral ? await sendEphemeralReply(interaction, { embeds: [embed] }, 60) : await sendReply(interaction, { embeds: [embed] });
     } else {
         if (user) {
             user.verifyRequestedAt = new Date();
@@ -108,11 +110,13 @@ export async function sendVerificationReplies(
                     .setColor('BLUE')
                     .setTimestamp();
 
-                ephemeral ? sendEphemeralReply(interaction, { embeds: [embed] }, 60) : sendReply(interaction, { embeds: [embed] });
+                ephemeral
+                    ? await sendEphemeralReply(interaction, { embeds: [embed] }, 60)
+                    : await sendReply(interaction, { embeds: [embed] });
 
                 Modlog.logUserAction(client, interaction.guild, discordUser, `${discordUser} requested a verification link.`, 'BLUE');
             } else {
-                sendReply(interaction, verifyReply);
+                await sendReply(interaction, verifyReply);
             }
         } catch (err) {
             const embed = new MessageEmbed()
@@ -123,7 +127,7 @@ export async function sendVerificationReplies(
                 .setColor('RED')
                 .setTimestamp();
 
-            ephemeral ? sendEphemeralReply(interaction, { embeds: [embed] }, 60) : sendReply(interaction, { embeds: [embed] });
+            ephemeral ? await sendEphemeralReply(interaction, { embeds: [embed] }, 60) : await sendReply(interaction, { embeds: [embed] });
         }
     }
 }
