@@ -22,8 +22,8 @@ export class Course extends ChatCommand {
             aliases: ['class'],
             options: Course.options,
             examples: ['math135'],
-            cooldownSeconds: 10,
-            cooldownMaxUses: 2,
+            cooldownSeconds: 30,
+            cooldownMaxUses: 8,
         });
     }
 
