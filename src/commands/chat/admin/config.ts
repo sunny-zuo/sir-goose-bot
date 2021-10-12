@@ -33,6 +33,7 @@ export class Config extends ChatCommand {
                     name: 'channel',
                     description: 'Set the text channel the bot will send modlogs to.',
                     type: 'CHANNEL',
+                    channelTypes: ['GUILD_TEXT'],
                 },
             ],
         },
@@ -128,7 +129,7 @@ export class Config extends ChatCommand {
                     if (providedChannel) {
                         const channel = await interaction.guild!.channels.fetch(providedChannel.id);
 
-                        if (channel && channel.isText() && channel.viewable && interaction.guild?.me) {
+                        if (channel && channel.viewable && interaction.guild?.me) {
                             if (
                                 channel
                                     .permissionsFor(interaction.guild.me)
@@ -159,7 +160,7 @@ export class Config extends ChatCommand {
                             await this.sendErrorEmbed(
                                 interaction,
                                 'Invalid Modlog Channel',
-                                'The modlog channel was not found, or was not a text channel.'
+                                'The modlog channel was not found. Make sure that I have access to view the channel you selected.'
                             );
                             return;
                         }
