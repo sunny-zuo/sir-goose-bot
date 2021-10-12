@@ -1,6 +1,7 @@
 import {
     ApplicationCommandData,
     ApplicationCommandOption,
+    ApplicationCommandOptionData,
     CommandInteraction,
     CommandInteractionOptionResolver,
     Message,
@@ -43,7 +44,11 @@ export class Deploy extends ChatCommand {
                 data.push({
                     name: command.name,
                     description: command.description,
-                    options: command.options,
+                    /*
+                        Type assertion here is not optimal, but ApplicationCommandOption is very similar to ApplicationCommandOptionData
+                        and it's more convenient to use the former in the rest of the code at the moment
+                    */
+                    options: command.options as ApplicationCommandOptionData[],
                     type: 'CHAT_INPUT',
                 });
             }
