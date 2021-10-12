@@ -203,6 +203,7 @@ export abstract class Command {
                     } else if (expectedOption.type === 'SUB_COMMAND' || expectedOption.type === 'SUB_COMMAND_GROUP') {
                         continue;
                     } else {
+                        // @ts-expect-error - we rely on creating our own CommandInteractionOptionResolver to easily support text and slash commands
                         return { success: true, value: new CommandInteractionOptionResolver(interaction.client, options) };
                     }
                 } else {
@@ -211,7 +212,7 @@ export abstract class Command {
             }
             options.push(result.value);
         }
-
+        // @ts-expect-error - we rely on creating our own CommandInteractionOptionResolver to easily support text and slash commands
         return { success: true, value: new CommandInteractionOptionResolver(interaction.client, options) };
     }
 
