@@ -134,6 +134,20 @@ describe('cooldown', () => {
 
                 expect(cooldown.checkLimit(user1)).toEqual({ blocked: false });
             });
+
+            it('expires uses that did not lead to being blocked after the cooldown has passed', () => {
+                // consume 1 less than max uses to avoid going into a blocked state
+                for (let i = 0; i < maxUses - 1; i++) {
+                    expect(cooldown.checkLimit(user1)).toEqual({ blocked: false });
+                }
+
+                Date.now = jest.fn(() => 1628130000000 + cooldownSeconds * 1000);
+
+                for (let i = 0; i < maxUses; i++) {
+                    expect(cooldown.checkLimit(user1)).toEqual({ blocked: false });
+                }
+                expect(cooldown.checkLimit(user1)).toEqual({ blocked: true, secondsUntilReset: cooldownSeconds });
+            });
         });
     });
 });
