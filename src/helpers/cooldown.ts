@@ -2,6 +2,7 @@ import { Collection, Snowflake } from 'discord.js';
 
 type UserLimit = {
     uses: number;
+    lastUsage: number;
     blockedUntil: number;
 };
 
@@ -26,7 +27,7 @@ export class Cooldown {
     }
 
     checkLimit(userId: Snowflake): RateLimited | NotRateLimited {
-        const userLimit = this.cooldowns.get(userId) ?? { uses: 0, blockedUntil: 0 };
+        const userLimit = this.cooldowns.get(userId) ?? { uses: 0, lastUsage: 0, blockedUntil: 0 };
 
         if (userLimit.blockedUntil > Date.now()) {
             return {
@@ -34,7 +35,13 @@ export class Cooldown {
                 secondsUntilReset: Math.floor((userLimit.blockedUntil - Date.now()) / 1000),
             };
         } else {
-            userLimit.uses++;
+            if (userLimit.lastUsage <= Date.now() - this.seconds * 1000) {
+                userLimit.uses = 1;
+            } else {
+                userLimit.uses++;
+            }
+
+            userLimit.lastUsage = Date.now();
 
             if (userLimit.uses >= this.maxUses) {
                 userLimit.uses = 0;
