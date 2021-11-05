@@ -4,6 +4,7 @@ import { Prefix } from './admin/prefix';
 
 /* Fun Commands */
 import { Coinflip } from './fun/coinflip';
+import { Goose } from './fun/goose';
 import { Honk } from './fun/honk';
 
 /* Info Commands */
@@ -39,6 +40,7 @@ export default [
     Config,
     Prefix,
     Coinflip,
+    Goose,
     Honk,
     BotStats,
     Help,
