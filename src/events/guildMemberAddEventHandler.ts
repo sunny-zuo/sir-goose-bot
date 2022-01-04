@@ -17,7 +17,7 @@ export class GuildMemberAddEventHandler implements EventHandler {
         const roleAssignmentResult = await roleAssignmentService.assignGuildRoles(member.guild);
 
         if (roleAssignmentResult.success) {
-            const assignedRoles = roleAssignmentResult.value;
+            const { assignedRoles } = roleAssignmentResult.value;
 
             if (assignedRoles.length > 0) {
                 await member
