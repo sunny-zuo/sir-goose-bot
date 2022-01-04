@@ -54,7 +54,7 @@ export async function sendVerificationReplies(
         if (interaction.guild) {
             const roleAssign = await service.assignGuildRoles(interaction.guild, true, false);
             if (roleAssign.success) {
-                assignedRoles = roleAssign.value;
+                ({ assignedRoles } = roleAssign.value);
             } else if (roleAssign.error === 'User is banned') {
                 const embed = new MessageEmbed()
                     .setTitle('Banned')

@@ -1,7 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import { SHA256 } from 'crypto-js';
-import { Collection, Guild, Permissions, Role, Snowflake } from 'discord.js';
+import { Collection, Guild, GuildMember, Permissions, Role, Snowflake } from 'discord.js';
 import Client from '../Client';
 import { GuildConfigCache } from '../helpers/guildConfigCache';
 import UserModel, { User as UserInterface } from '../models/user.model';
@@ -13,6 +13,7 @@ import { RoleData } from '../types/Verification';
 
 type CustomFileImport = { type: 'hash' | 'uwid'; department: string | null; entranceYear: number | null; ids: string[] };
 type CustomValues = { departments: string[]; entranceYear: number | null };
+export type RoleAssignmentResult = { assignedRoles: Role[]; updatedName?: string };
 
 export class RoleAssignmentService {
     static customImport: Collection<string, CustomValues> = new Collection<string, CustomValues>();
@@ -78,7 +79,7 @@ export class RoleAssignmentService {
         }
     }
 
-    async assignGuildRoles(guild: Guild, log = true, returnMissing = true): Promise<Result<Role[], string>> {
+    async assignGuildRoles(guild: Guild, log = true, returnMissing = true): Promise<Result<RoleAssignmentResult, string>> {
         const guildModel = await GuildConfigCache.fetchConfig(guild.id);
         if (
             !guildModel ||
@@ -144,28 +145,57 @@ export class RoleAssignmentService {
                 }
             }
 
-            if (guildModel.verificationRules.renameType === 'FULL_NAME' || guildModel.verificationRules.renameType === 'FIRST_NAME') {
-                const renameType = guildModel.verificationRules.renameType;
-                const newNickname = renameType === 'FIRST_NAME' ? `${user.givenName?.split(' ')[0]}` : `${user.givenName} ${user.surname}`;
-
-                if (newNickname !== undefined) {
-                    if (!member.nickname || (member.nickname !== newNickname && guildModel.verificationRules.forceRename)) {
-                        if (member.manageable && guild.me?.permissions.has(Permissions.FLAGS.MANAGE_NICKNAMES)) {
-                            await member.setNickname(newNickname);
-                        }
-                    }
-                } else {
-                    this.client.log.warn(
-                        `Role assignment service was used on user ${member.user.tag} (${member.id}) who had an undefined name.`
-                    );
-                }
-            }
+            const newNickname = await this.updateNickname(
+                member,
+                user,
+                guildModel.verificationRules?.renameType,
+                guildModel.verificationRules?.forceRename
+            );
 
             this.client.log.info(`Assigned ${missingRoles.length} role(s) to ${member.user.tag} (${this.userId}) in "${guild.name}"`);
-            return { success: true, value: returnMissing ? missingRoles : allRoles };
+            return {
+                success: true,
+                value: {
+                    assignedRoles: returnMissing ? missingRoles : allRoles,
+                    updatedName: newNickname,
+                },
+            };
         }
 
         return { success: false, error: 'User is not verified' };
+    }
+
+    private async updateNickname(
+        member: GuildMember,
+        user: Pick<UserInterface, 'givenName' | 'surname'>,
+        renameType?: string,
+        forceRename?: boolean
+    ): Promise<string | undefined> {
+        if (renameType === 'FULL_NAME' || renameType === 'FIRST_NAME') {
+            const newNickname = renameType === 'FIRST_NAME' ? `${user.givenName?.split(' ')[0]}` : `${user.givenName} ${user.surname}`;
+
+            if (newNickname !== undefined) {
+                if (!member.nickname || (member.nickname !== newNickname && forceRename)) {
+                    if (member.manageable && member.guild.me?.permissions.has(Permissions.FLAGS.MANAGE_NICKNAMES)) {
+                        await member.setNickname(newNickname);
+                        this.client.log.info(
+                            `Renamed user ${member.user.tag} (${member.id}) to ${newNickname} in "${member.guild.name}" (${member.guild.id})`
+                        );
+                        return newNickname;
+                    } else {
+                        this.client.log.info(
+                            `Attempted to rename ${member.user.tag} (${member.id}) in "${member.guild.name}" (${member.guild.id}) but was missing permissions`
+                        );
+                    }
+                }
+            } else {
+                this.client.log.warn(
+                    `Role assignment service was used on user ${member.user.tag} (${member.id}) in "${member.guild.name}" (${member.guild.id}) who had an undefined name.`
+                );
+            }
+        }
+
+        return undefined;
     }
 
     private async getMatchingRoles(guild: Guild, log = true): Promise<Role[]> {
