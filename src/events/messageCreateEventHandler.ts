@@ -1,4 +1,4 @@
-import { Message, Permissions } from 'discord.js';
+import { Message, MessageActionRow, MessageButton, MessageEmbed, Permissions } from 'discord.js';
 import Client from '#src/Client';
 import { InvalidCommandInteractionOption } from '../types';
 import { EventHandler } from './eventHandler';
@@ -30,7 +30,27 @@ export class MessageCreateEventHandler implements EventHandler {
 
         const command = client.chatCommands.get(commandName) || client.chatAliases.get(commandName);
         if (!command || !command.enabled) return;
-        if (!command.isTextCommand) return;
+        if (!command.isTextCommand) {
+            if (command.isSlashCommand) {
+                const embed = new MessageEmbed()
+                    .setTitle('Command Unavailable as Text Command')
+                    .setColor('RED')
+                    .setDescription(
+                        `This command can only be used as a slash command (\`/${command.name}\`). If the slash command does not appear, you may need to grant the bot permissions to create slash commands.`
+                    )
+                    .setTimestamp();
+
+                const button = new MessageActionRow().addComponents(
+                    new MessageButton()
+                        .setLabel('Grant Slash Command Permission')
+                        .setStyle('LINK')
+                        .setURL('https://discord.com/api/oauth2/authorize?client_id=740653704683716699&scope=applications.commands')
+                );
+
+                await message.reply({ embeds: [embed], components: [button] });
+            }
+            return;
+        }
         if (message.guild && message.guild.available === false) return;
         if (command.isRateLimited(message.author.id)) {
             this.client.log.info(
