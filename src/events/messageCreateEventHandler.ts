@@ -31,7 +31,7 @@ export class MessageCreateEventHandler implements EventHandler {
         const command = client.chatCommands.get(commandName) || client.chatAliases.get(commandName);
         if (!command || !command.enabled) return;
         if (!command.isTextCommand) return;
-        if (message.guild && !message.guild.available) return;
+        if (message.guild && message.guild.available === false) return;
         if (command.isRateLimited(message.author.id)) {
             this.client.log.info(
                 `${message.author.tag} tried to use ${command.name} in ${message.guild?.name ?? 'DMs'} (${

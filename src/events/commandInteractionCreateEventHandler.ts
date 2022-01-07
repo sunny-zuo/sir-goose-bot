@@ -19,7 +19,7 @@ export class CommandInteractionCreateEventHandler implements EventHandler {
 
         if (!command || !command.enabled) return;
         if (!command.isSlashCommand) return;
-        if (interaction.guild && !interaction.guild.available) return;
+        if (interaction.guild && interaction.guild.available === false) return;
         if (command.isRateLimited(interaction.user.id)) {
             this.client.log.info(
                 `${interaction.user.tag} tried to use ${command.name} in ${interaction.guild?.name ?? 'DMs'} (${
