@@ -17,5 +17,8 @@ export abstract class ChatCommand extends Command {
         this.category = options.category;
     }
 
-    abstract execute(interaction: Message | CommandInteraction, args?: CommandInteractionOptionResolver): Promise<void>;
+    abstract execute(
+        interaction: Message | CommandInteraction,
+        args?: Omit<CommandInteractionOptionResolver, 'getMessage' | 'getFocused'>
+    ): Promise<void>;
 }

@@ -1,4 +1,11 @@
-import { Message, CommandInteraction, InteractionReplyOptions, ReplyMessageOptions, ButtonInteraction } from 'discord.js';
+import {
+    Message,
+    CommandInteraction,
+    InteractionReplyOptions,
+    ReplyMessageOptions,
+    ButtonInteraction,
+    ContextMenuInteraction,
+} from 'discord.js';
 
 export function sendReply(
     interaction: Message | CommandInteraction | ButtonInteraction,
@@ -13,7 +20,7 @@ export function sendReply(
 }
 
 export function sendEphemeralReply(
-    interaction: Message | CommandInteraction | ButtonInteraction,
+    interaction: Message | CommandInteraction | ButtonInteraction | ContextMenuInteraction,
     message: InteractionReplyOptions | ReplyMessageOptions,
     deletionSeconds = 30
 ): Promise<void> {
@@ -29,6 +36,6 @@ export function sendEphemeralReply(
     }
 }
 
-function isMessage(interaction: Message | CommandInteraction | ButtonInteraction): interaction is Message {
+function isMessage(interaction: Message | CommandInteraction | ButtonInteraction | ContextMenuInteraction): interaction is Message {
     return (interaction as Message).url !== undefined;
 }

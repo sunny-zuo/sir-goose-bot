@@ -34,7 +34,10 @@ export class VerifyButton extends ChatCommand {
         });
     }
 
-    async execute(interaction: Message | CommandInteraction, args?: CommandInteractionOptionResolver): Promise<void> {
+    async execute(
+        interaction: Message | CommandInteraction,
+        args?: Omit<CommandInteractionOptionResolver, 'getMessage' | 'getFocused'>
+    ): Promise<void> {
         const components = new MessageActionRow().addComponents(
             new MessageButton().setCustomId('requestVerificationLink').setLabel('Request Verification Link').setStyle('PRIMARY')
         );

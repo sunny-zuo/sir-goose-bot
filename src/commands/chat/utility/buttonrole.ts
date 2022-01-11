@@ -93,7 +93,10 @@ export class ButtonRole extends ChatCommand {
         });
     }
 
-    async execute(interaction: Message | CommandInteraction, args?: CommandInteractionOptionResolver): Promise<void> {
+    async execute(
+        interaction: Message | CommandInteraction,
+        args?: Omit<CommandInteractionOptionResolver, 'getMessage' | 'getFocused'>
+    ): Promise<void> {
         const config = await GuildConfigCache.fetchConfig(interaction.guild?.id);
         if (!args) {
             await this.sendErrorEmbed(
@@ -111,7 +114,10 @@ export class ButtonRole extends ChatCommand {
         }
     }
 
-    async create(interaction: Message | CommandInteraction, args: CommandInteractionOptionResolver): Promise<void> {
+    async create(
+        interaction: Message | CommandInteraction,
+        args: Omit<CommandInteractionOptionResolver, 'getMessage' | 'getFocused'>
+    ): Promise<void> {
         if (!interaction.guildId) return;
 
         const roles: Role[][] = [[], [], [], [], []]; // 3 rows of up to 5 roles each
@@ -203,7 +209,10 @@ export class ButtonRole extends ChatCommand {
         buttonRoleDoc.save();
     }
 
-    async edit(interaction: Message | CommandInteraction, args: CommandInteractionOptionResolver): Promise<void> {
+    async edit(
+        interaction: Message | CommandInteraction,
+        args: Omit<CommandInteractionOptionResolver, 'getMessage' | 'getFocused'>
+    ): Promise<void> {
         if (!interaction.guildId) return;
 
         const buttonRole = await ButtonRoleModel.findOne({ guildId: interaction.guildId, messageId: args.getString('message_id', true) });

@@ -93,7 +93,10 @@ export class Config extends ChatCommand {
         });
     }
 
-    async execute(interaction: CommandInteraction | Message, args?: CommandInteractionOptionResolver): Promise<void> {
+    async execute(
+        interaction: CommandInteraction | Message,
+        args?: Omit<CommandInteractionOptionResolver, 'getMessage' | 'getFocused'>
+    ): Promise<void> {
         const guildConfig = await GuildConfigCache.fetchOrCreate(interaction.guild!.id);
 
         const subcommand = args?.getSubcommand(false);

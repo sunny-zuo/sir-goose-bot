@@ -80,7 +80,11 @@ export class MessageCreateEventHandler implements EventHandler {
 
         if (command.options.length > 0) {
             if (messageContent[0] === undefined || messageContent[0].length === 0) {
-                if (command.options[0].required) {
+                if (
+                    command.options[0].type === 'SUB_COMMAND' ||
+                    command.options[0].type === 'SUB_COMMAND_GROUP' ||
+                    command.options[0].required
+                ) {
                     await command.sendErrorEmbed(
                         message,
                         'Missing Command Arguments',

@@ -27,7 +27,10 @@ export class Course extends ChatCommand {
         });
     }
 
-    async execute(interaction: Message | CommandInteraction, args: CommandInteractionOptionResolver): Promise<void> {
+    async execute(
+        interaction: Message | CommandInteraction,
+        args: Omit<CommandInteractionOptionResolver, 'getMessage' | 'getFocused'>
+    ): Promise<void> {
         const courseMatcher = /([a-zA-Z]{2,}[ ]?\d+[a-zA-Z]?)/g;
         const disallowedMatches = /(least)|(4U)/gi;
 

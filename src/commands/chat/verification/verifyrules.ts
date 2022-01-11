@@ -43,7 +43,10 @@ export class VerifyRules extends ChatCommand {
         });
     }
 
-    async execute(interaction: Message | CommandInteraction, args?: CommandInteractionOptionResolver): Promise<void> {
+    async execute(
+        interaction: Message | CommandInteraction,
+        args?: Omit<CommandInteractionOptionResolver, 'getMessage' | 'getFocused'>
+    ): Promise<void> {
         const ruleString = args?.getString('rules');
 
         if (ruleString) {
