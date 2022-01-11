@@ -7,12 +7,12 @@ import {
     MessageEmbed,
     MessageSelectMenu,
 } from 'discord.js';
-import { GuildConfigCache } from '../../../../helpers/guildConfigCache';
+import { GuildConfigCache } from '#util/guildConfigCache';
 import { PrefixView } from './prefixView';
 import { PinsView } from './pinsView';
 import { ModlogView } from './modlogView';
 import { VerificationView } from './verificationView';
-import Client from '../../../../Client';
+import Client from '#src/Client';
 
 export class OverviewView {
     static readonly optionSelectMenu = new MessageActionRow().addComponents(
@@ -52,10 +52,10 @@ export class OverviewView {
     );
 
     static async render(interaction: MessageComponentInteraction, filter: (i: MessageComponentInteraction) => boolean): Promise<void> {
-        await interaction.deferUpdate();
-        await interaction.editReply({
+        await interaction.update({
             embeds: [await this.generateConfigViewEmbed(interaction.guild!)],
             components: [this.optionSelectMenu],
+            fetchReply: true,
         });
 
         await this.listenForViewSelect(interaction.message as Message, filter);
