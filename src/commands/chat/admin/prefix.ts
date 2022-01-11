@@ -33,7 +33,10 @@ export class Prefix extends ChatCommand {
         });
     }
 
-    async execute(interaction: Message | CommandInteraction, args?: CommandInteractionOptionResolver): Promise<void> {
+    async execute(
+        interaction: Message | CommandInteraction,
+        args?: Omit<CommandInteractionOptionResolver, 'getMessage' | 'getFocused'>
+    ): Promise<void> {
         const newPrefix = args?.getString('prefix');
 
         if (newPrefix) {

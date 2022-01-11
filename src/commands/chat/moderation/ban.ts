@@ -71,7 +71,10 @@ export class Ban extends ChatCommand {
         });
     }
 
-    async execute(interaction: Message | CommandInteraction, args?: CommandInteractionOptionResolver): Promise<void> {
+    async execute(
+        interaction: Message | CommandInteraction,
+        args?: Omit<CommandInteractionOptionResolver, 'getMessage' | 'getFocused'>
+    ): Promise<void> {
         const guildConfig = await GuildConfigCache.fetchConfig(interaction.guild!.id);
         // TODO: Refactor once help message supports subcommands
         if (args === undefined || !args?.data || args.data.length === 0) {

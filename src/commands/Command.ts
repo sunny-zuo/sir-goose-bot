@@ -4,16 +4,16 @@ import {
     MessageEmbed,
     Permissions,
     CommandInteraction,
-    DMChannel,
     ApplicationCommandOption,
     CommandInteractionOption,
     User,
     Snowflake,
     Role,
-    GuildChannel,
     ColorResolvable,
     CommandInteractionOptionResolver,
-    TextBasedChannels,
+    ContextMenuInteraction,
+    TextBasedChannel,
+    GuildBasedChannel,
 } from 'discord.js';
 import { CommandOptions, Category } from '../types/Command';
 import Client from '../Client';
@@ -153,9 +153,7 @@ export abstract class Command {
                         const result = await this.parseMessageValue(interaction, suboption, argArray);
                         if (!result.success) {
                             if (result.error.issue === ArgumentIssue.MISSING) {
-                                if (expectedOption.required) {
-                                    return { success: false, error: result.error };
-                                } else if (expectedOption.type === 'SUB_COMMAND' || expectedOption.type === 'SUB_COMMAND_GROUP') {
+                                if (expectedOption.type === 'SUB_COMMAND' || expectedOption.type === 'SUB_COMMAND_GROUP') {
                                     continue;
                                 } else {
                                     break;
@@ -198,10 +196,10 @@ export abstract class Command {
             const result = await this.parseMessageValue(interaction, expectedOption, argArray);
             if (!result.success) {
                 if (result.error.issue === ArgumentIssue.MISSING) {
-                    if (expectedOption.required) {
-                        return { success: false, error: result.error };
-                    } else if (expectedOption.type === 'SUB_COMMAND' || expectedOption.type === 'SUB_COMMAND_GROUP') {
+                    if (expectedOption.type === 'SUB_COMMAND' || expectedOption.type === 'SUB_COMMAND_GROUP') {
                         continue;
+                    } else if (expectedOption.required) {
+                        return { success: false, error: result.error };
                     } else {
                         // @ts-expect-error - we rely on creating our own CommandInteractionOptionResolver to easily support text and slash commands
                         return { success: true, value: new CommandInteractionOptionResolver(interaction.client, options) };
@@ -249,7 +247,7 @@ export abstract class Command {
         return role;
     }
 
-    async getChannelFromMention(interaction: Message | CommandInteraction, mention: string): Promise<GuildChannel | undefined | null> {
+    async getChannelFromMention(interaction: Message | CommandInteraction, mention: string): Promise<GuildBasedChannel | undefined | null> {
         const matches = mention.match(/^<#(\d+)>$/);
         if (!matches) return undefined;
         const id = matches[1] as Snowflake;
@@ -257,7 +255,7 @@ export abstract class Command {
         return channel;
     }
 
-    async checkCommandPermissions(interaction: Message | CommandInteraction): Promise<boolean> {
+    async checkCommandPermissions(interaction: Message | CommandInteraction | ContextMenuInteraction): Promise<boolean> {
         if (!interaction.channel) return false;
         if (interaction.channel.type === 'DM' || interaction.member === null) return true;
         if (
@@ -286,7 +284,7 @@ export abstract class Command {
     async checkMemberPermissions(
         member: GuildMember | null,
         channel: GuildTextBasedChannel,
-        interaction: Message | CommandInteraction | null = null,
+        interaction: Message | CommandInteraction | ContextMenuInteraction | null = null,
         ownerOverride = true
     ): Promise<boolean> {
         if (member === null) return false;
@@ -317,7 +315,7 @@ export abstract class Command {
 
     async checkClientPermissions(
         channel: GuildTextBasedChannel,
-        interaction: Message | CommandInteraction | null = null
+        interaction: Message | CommandInteraction | ContextMenuInteraction | null = null
     ): Promise<boolean> {
         if (channel.guild.me === null) return false;
         const missingPermissions = channel.permissionsFor(channel.guild.me).missing(this.clientPermissions);
@@ -336,11 +334,11 @@ export abstract class Command {
         return false;
     }
 
-    getValidChannel(channel: TextBasedChannels | null): Promise<TextBasedChannels> {
+    getValidChannel(channel: TextBasedChannel | null): Promise<TextBasedChannel> {
         return new Promise((resolve, reject) => {
             if (channel !== null) {
-                if (channel instanceof DMChannel) {
-                    const dmChannel = channel as DMChannel;
+                if (channel.type === 'DM') {
+                    const dmChannel = channel;
                     if (dmChannel.partial) {
                         resolve(dmChannel.fetch());
                     }
@@ -358,7 +356,7 @@ export abstract class Command {
     }
 
     sendSuccessEmbed(
-        interaction: Message | CommandInteraction,
+        interaction: Message | CommandInteraction | ContextMenuInteraction,
         title: string,
         description: string,
         ephemeral = false,
@@ -368,7 +366,7 @@ export abstract class Command {
     }
 
     sendNeutralEmbed(
-        interaction: Message | CommandInteraction,
+        interaction: Message | CommandInteraction | ContextMenuInteraction,
         title: string,
         description: string,
         ephemeral = false,
@@ -378,7 +376,7 @@ export abstract class Command {
     }
 
     sendErrorEmbed(
-        interaction: Message | CommandInteraction,
+        interaction: Message | CommandInteraction | ContextMenuInteraction,
         title: string,
         description: string,
         ephemeral = false,
@@ -388,7 +386,7 @@ export abstract class Command {
     }
 
     sendColorEmbed(
-        interaction: Message | CommandInteraction,
+        interaction: Message | CommandInteraction | ContextMenuInteraction,
         color: ColorResolvable,
         title: string,
         description: string,
@@ -404,11 +402,11 @@ export abstract class Command {
         }
     }
 
-    isMessage(interaction: Message | CommandInteraction): interaction is Message {
+    isMessage(interaction: Message | CommandInteraction | ContextMenuInteraction): interaction is Message {
         return (interaction as Message).url !== undefined;
     }
 
-    getUser(interaction: Message | CommandInteraction): User {
+    getUser(interaction: Message | CommandInteraction | ContextMenuInteraction): User {
         return this.isMessage(interaction) ? interaction.author : interaction.user;
     }
 }

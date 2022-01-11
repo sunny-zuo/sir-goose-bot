@@ -25,7 +25,10 @@ export class Help extends ChatCommand {
         });
     }
 
-    async execute(interaction: Message | CommandInteraction, args?: CommandInteractionOptionResolver): Promise<void> {
+    async execute(
+        interaction: Message | CommandInteraction,
+        args?: Omit<CommandInteractionOptionResolver, 'getMessage' | 'getFocused'>
+    ): Promise<void> {
         const client = this.client;
         const prefix = (await GuildConfigCache.fetchConfig(interaction?.guild?.id)).prefix;
 
