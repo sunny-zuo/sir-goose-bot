@@ -125,7 +125,7 @@ export class VerifyRules extends ChatCommand {
                 .setDescription(`Verification is ${
                 config.enableVerification ? 'enabled' : `disabled. Enable it using \`${config.prefix}config enable_verification true\``
             }. [Create a ruleset.](https://sebot.sunnyzuo.com/)
-                \`\`\`${this.serializeVerificationRules(config.verificationRules)}\`\`\``);
+                \`\`\`${VerifyRules.serializeVerificationRules(config.verificationRules)}\`\`\``);
 
             await interaction.reply({ embeds: [embed] });
         } else {
@@ -134,13 +134,13 @@ export class VerifyRules extends ChatCommand {
             const embed = new MessageEmbed().setColor('GREEN').setTitle('Verification Rules').setDescription(`Verification is ${
                 config.enableVerification ? 'enabled' : `disabled. Enable it using \`${config.prefix}config enable_verification true\``
             }. [Create a ruleset.](https://sebot.sunnyzuo.com/)
-                \`\`\`${this.serializeVerificationRules(config.verificationRules)}\`\`\``);
+                \`\`\`${VerifyRules.serializeVerificationRules(config.verificationRules)}\`\`\``);
 
             await interaction.reply({ embeds: [embed] });
         }
     }
 
-    private serializeVerificationRules(verificationRules: VerificationRules | undefined): string {
+    static serializeVerificationRules(verificationRules: VerificationRules | undefined): string {
         if (!verificationRules) {
             return '';
         }
