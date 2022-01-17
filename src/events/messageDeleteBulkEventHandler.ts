@@ -29,7 +29,7 @@ export class MessageDeleteBulkEventHandler implements EventHandler {
 
         const messageIds = messagesToCheck.map((message) => message.id);
         const deleteResult = await ButtonRoleModel.deleteMany({ messageId: { $in: messageIds } });
-        if (deleteResult.ok && deleteResult.deletedCount) {
+        if (deleteResult.acknowledged && deleteResult.deletedCount) {
             this.client.log.info(`Deleted ${deleteResult.deletedCount} button role documents from bulk message delete.`);
         }
     }
