@@ -18,14 +18,20 @@ export class Coinflip extends ChatCommand {
             const embed = new MessageEmbed()
                 .setColor('BLUE')
                 .setImage('https://i.imgur.com/3YvGn4c.png')
-                .setFooter(`Requested by ${this.getUser(interaction).tag}`, this.getUser(interaction).displayAvatarURL());
+                .setFooter({
+                    text: `Requested by ${this.getUser(interaction).tag}`,
+                    iconURL: this.getUser(interaction).displayAvatarURL(),
+                });
 
             await interaction.reply({ content: `Coin flipped: It's heads!`, embeds: [embed] });
         } else {
             const embed = new MessageEmbed()
                 .setColor('BLUE')
                 .setImage('https://i.imgur.com/pzSSgHA.png')
-                .setFooter(`Requested by ${this.getUser(interaction).tag}`, this.getUser(interaction).displayAvatarURL());
+                .setFooter({
+                    text: `Requested by ${this.getUser(interaction).tag}`,
+                    iconURL: this.getUser(interaction).displayAvatarURL(),
+                });
 
             await interaction.reply({ content: `Coin flipped: It's tails!`, embeds: [embed] });
         }

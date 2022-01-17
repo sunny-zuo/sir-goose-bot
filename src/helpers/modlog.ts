@@ -52,10 +52,10 @@ export class Modlog {
 
     static getUserEmbed(user: User, message: string, color: ColorResolvable = 'BLUE'): MessageEmbed {
         const embed = new MessageEmbed()
-            .setAuthor(`${user.tag}`, user.displayAvatarURL())
+            .setAuthor({ name: user.tag, iconURL: user.displayAvatarURL() })
             .setColor(color)
             .setDescription(message)
-            .setFooter(`ID: ${user.id}`)
+            .setFooter({ text: `ID: ${user.id}` })
             .setTimestamp();
 
         return embed;
