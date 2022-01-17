@@ -59,7 +59,7 @@ export async function sendVerificationReplies(
                 const embed = new MessageEmbed()
                     .setTitle('Banned')
                     .setDescription(
-                        `You are banned from thie server, and thus cannot receive any roles. Please message a server admin if you think this is a mistake or wish to appeal your ban.`
+                        `You are banned from this server, and thus cannot receive any roles. Please message a server admin if you think this is a mistake or wish to appeal your ban.`
                     )
                     .setColor('RED')
                     .setTimestamp();
@@ -67,6 +67,8 @@ export async function sendVerificationReplies(
                 ephemeral
                     ? await sendEphemeralReply(interaction, { embeds: [embed] }, 60)
                     : await sendReply(interaction, { embeds: [embed] });
+
+                return;
             }
         } else {
             await service.assignAllRoles();
