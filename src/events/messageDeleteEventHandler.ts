@@ -19,7 +19,7 @@ export class MessageDeleteEventHandler implements EventHandler {
         if (!message.partial && (message.author !== this.client.user || message.components.length === 0)) return;
 
         const deleteResult = await ButtonRoleModel.deleteOne({ messageId: message.id });
-        if (deleteResult.ok && deleteResult.deletedCount) {
+        if (deleteResult.acknowledged && deleteResult.deletedCount) {
             this.client.log.info(`Deleted button role with message id ${message.id}.`);
         }
     }

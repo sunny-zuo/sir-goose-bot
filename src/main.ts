@@ -15,12 +15,7 @@ const client = new Client({ intents: intents, partials: partials });
 
 async function init(): Promise<void> {
     await mongoose
-        .connect(`${process.env.MONGO_URI}`, {
-            useNewUrlParser: true,
-            useFindAndModify: false,
-            useCreateIndex: true,
-            useUnifiedTopology: true,
-        })
+        .connect(`${process.env.MONGO_URI}`)
         .then(() => {
             client.log.info('Successfully connected to MongoDB database');
         })
@@ -30,7 +25,7 @@ async function init(): Promise<void> {
 
     RoleAssignmentService.parseCustomImports(client);
 
-    client.login(process.env.DISCORD_TOKEN);
+    await client.login(process.env.DISCORD_TOKEN);
 }
 
 init();

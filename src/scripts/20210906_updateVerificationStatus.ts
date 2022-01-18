@@ -6,5 +6,5 @@ export async function updateVerificationStatus(): Promise<void> {
         { verified: false }
     );
 
-    console.log(`Updated ${update.nModified} documents.`);
+    console.log(`Updated ${update.modifiedCount} documents.`);
 }
