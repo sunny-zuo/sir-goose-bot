@@ -15,6 +15,7 @@ import { bold } from '@discordjs/builders';
 
 export class ModlogView {
     static async render(interaction: MessageComponentInteraction, filter: (i: MessageComponentInteraction) => boolean): Promise<void> {
+        await interaction.deferUpdate();
         const config = await GuildConfigCache.fetchOrCreate(interaction.guildId!);
 
         const embed = new MessageEmbed()
@@ -34,7 +35,7 @@ export class ModlogView {
             new MessageButton().setCustomId('configModlogBack').setStyle('SECONDARY').setLabel('Back')
         );
 
-        interaction.update({ embeds: [embed], components: [buttons] });
+        interaction.editReply({ embeds: [embed], components: [buttons] });
 
         const message = interaction.message as Message;
         await message
@@ -68,13 +69,14 @@ export class ModlogView {
         interaction: MessageComponentInteraction,
         filter: (i: MessageComponentInteraction) => boolean
     ): Promise<void> {
+        await interaction.deferUpdate();
         const embed = new MessageEmbed().setDescription('What would you like the modlog channel to be?').setColor('ORANGE');
 
         const button = new MessageActionRow().addComponents(
             new MessageButton().setCustomId('configModlogChangeChannelCancel').setStyle('DANGER').setLabel('Cancel Modlog Channel Change')
         );
 
-        await interaction.update({ embeds: [embed], components: [button] });
+        await interaction.editReply({ embeds: [embed], components: [button] });
 
         const message = interaction.message as Message;
 

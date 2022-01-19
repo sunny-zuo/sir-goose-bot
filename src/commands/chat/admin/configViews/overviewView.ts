@@ -52,10 +52,10 @@ export class OverviewView {
     );
 
     static async render(interaction: MessageComponentInteraction, filter: (i: MessageComponentInteraction) => boolean): Promise<void> {
-        await interaction.update({
+        await interaction.deferUpdate();
+        await interaction.editReply({
             embeds: [await this.generateConfigViewEmbed(interaction.guild!)],
             components: [this.optionSelectMenu],
-            fetchReply: true,
         });
 
         await this.listenForViewSelect(interaction.message as Message, filter);
