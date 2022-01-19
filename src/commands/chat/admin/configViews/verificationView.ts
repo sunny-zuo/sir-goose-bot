@@ -6,6 +6,7 @@ import { bold } from '@discordjs/builders';
 
 export class VerificationView {
     static async render(interaction: MessageComponentInteraction, filter: (i: MessageComponentInteraction) => boolean): Promise<void> {
+        await interaction.deferUpdate();
         const config = await GuildConfigCache.fetchOrCreate(interaction.guildId!);
 
         const embed = new MessageEmbed()
@@ -40,7 +41,7 @@ export class VerificationView {
             new MessageButton().setCustomId('configVerificationBack').setStyle('SECONDARY').setLabel('Back')
         );
 
-        await interaction.update({ embeds: [embed], components: [buttons] });
+        await interaction.editReply({ embeds: [embed], components: [buttons] });
 
         const message = interaction.message as Message;
 
