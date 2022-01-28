@@ -6,6 +6,7 @@ import { MessageCreateEventHandler } from './messageCreateEventHandler';
 import { MessageDeleteBulkEventHandler } from './messageDeleteBulkEventHandler';
 import { MessageDeleteEventHandler } from './messageDeleteEventHandler';
 import { ReadyEventHandler } from './readyEventHandler';
+import { SelectMenuInteractionCreateEventHandler } from './selectMenuInteractionCreateEventHandler';
 import { RoleCreateEventHandler } from './roleCreateEventHandler';
 import { RoleDeleteEventHandler } from './roleDeleteEventHandler';
 import { RoleUpdateEventHandler } from './roleUpdateEventHandler';
@@ -19,6 +20,7 @@ export default [
     MessageDeleteBulkEventHandler,
     MessageDeleteEventHandler,
     ReadyEventHandler,
+    SelectMenuInteractionCreateEventHandler,
     RoleCreateEventHandler,
     RoleDeleteEventHandler,
     RoleUpdateEventHandler,
