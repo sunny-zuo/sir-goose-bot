@@ -1,7 +1,7 @@
-import Client from '../Client';
+import Client from '#src/Client';
 import { EventHandler } from './eventHandler';
 import { Message } from 'discord.js';
-import ButtonRoleModel from '../models/buttonRole.model';
+import ButtonRoleModel from '#models/buttonRole.model';
 
 export class MessageDeleteEventHandler implements EventHandler {
     readonly eventName = 'messageDelete';

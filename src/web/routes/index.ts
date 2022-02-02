@@ -3,7 +3,7 @@ import axios from 'axios';
 import path from 'path';
 import { AES, enc } from 'crypto-js';
 import { URLSearchParams } from 'url';
-import UserModel from '../../models/user.model';
+import UserModel from '#models/user.model';
 import { RoleAssignmentService } from '../../services/roleAssignmentService';
 import { Snowflake } from 'discord.js';
 

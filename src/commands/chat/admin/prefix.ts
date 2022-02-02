@@ -6,10 +6,10 @@ import {
     MessageEmbed,
     Permissions,
 } from 'discord.js';
-import Client from '../../../Client';
+import Client from '#src/Client';
 import { ChatCommand } from '../ChatCommand';
-import GuildConfigModel from '../../../models/guildConfig.model';
-import { GuildConfigCache } from '../../../helpers/guildConfigCache';
+import GuildConfigModel from '#models/guildConfig.model';
+import { GuildConfigCache } from '#util/guildConfigCache';
 
 export class Prefix extends ChatCommand {
     private static readonly options: ApplicationCommandOption[] = [

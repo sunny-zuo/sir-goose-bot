@@ -1,5 +1,5 @@
 import { ChatCommand } from '../ChatCommand';
-import Client from '../../../Client';
+import Client from '#src/Client';
 import { CommandInteraction, Message, MessageEmbed } from 'discord.js';
 import { hyperlink, codeBlock } from '@discordjs/builders';
 import { Duration } from 'luxon';

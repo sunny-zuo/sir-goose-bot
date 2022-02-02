@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import path from 'path';
 import fs from 'fs';
-import UserModel from '../models/user.model';
+import UserModel from '#models/user.model';
 
 export async function importUsers(): Promise<void> {
     const importLocation = path.join(process.cwd(), 'src', 'data', 'scripts', '20210821_users.json');

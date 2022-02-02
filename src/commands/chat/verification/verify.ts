@@ -1,8 +1,8 @@
 import { CommandInteraction, Message } from 'discord.js';
-import Client from '../../../Client';
+import Client from '#src/Client';
 import { ChatCommand } from '../ChatCommand';
-import { GuildConfigCache } from '../../../helpers/guildConfigCache';
-import { sendVerificationReplies } from '../../../helpers/verification';
+import { GuildConfigCache } from '#util/guildConfigCache';
+import { sendVerificationReplies } from '#util/verification';
 
 export class Verify extends ChatCommand {
     constructor(client: Client) {

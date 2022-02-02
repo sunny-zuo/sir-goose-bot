@@ -1,5 +1,5 @@
 import { EventHandler } from './eventHandler';
-import Client from '../Client';
+import Client from '#src/Client';
 
 export class ReadyEventHandler implements EventHandler {
     readonly eventName = 'ready';

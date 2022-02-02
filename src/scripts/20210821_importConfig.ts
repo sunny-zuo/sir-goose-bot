@@ -1,6 +1,6 @@
 import path from 'path';
 import fs from 'fs';
-import GuildConfigModel from '../models/guildConfig.model';
+import GuildConfigModel from '#models/guildConfig.model';
 
 export async function importConfig(): Promise<void> {
     const importLocation = path.join(process.cwd(), 'src', 'data', 'scripts', '20210821_configs.json');

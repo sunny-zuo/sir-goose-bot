@@ -1,6 +1,6 @@
 import { Message, CommandInteraction, CommandInteractionOptionResolver } from 'discord.js';
-import Client from '../../Client';
-import { Category, ChatCommandOptions } from '../../types/Command';
+import Client from '#src/Client';
+import { Category, ChatCommandOptions } from '#types/Command';
 import { Command } from '../Command';
 
 export abstract class ChatCommand extends Command {

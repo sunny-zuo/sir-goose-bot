@@ -1,4 +1,4 @@
-import UserModel from '../models/user.model';
+import UserModel from '#models/user.model';
 
 export async function updateVerificationStatus(): Promise<void> {
     const update = await UserModel.updateMany(

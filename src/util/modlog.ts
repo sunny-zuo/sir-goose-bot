@@ -1,5 +1,5 @@
 import { ColorResolvable, Guild, MessageEmbed, Permissions, TextChannel, User, MessageOptions, Message } from 'discord.js';
-import Client from '../Client';
+import Client from '#src/Client';
 import { GuildConfigCache } from './guildConfigCache';
 
 export class Modlog {

@@ -1,6 +1,6 @@
 import { Collection, Snowflake } from 'discord.js';
 import { Document } from 'mongoose';
-import GuildConfigModel, { GuildConfig } from '../models/guildConfig.model';
+import GuildConfigModel, { GuildConfig } from '#models/guildConfig.model';
 
 export class GuildConfigCache {
     private static _cache = new Collection<Snowflake, GuildConfig>();

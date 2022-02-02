@@ -1,7 +1,7 @@
 import { CommandInteraction, Message, MessageEmbed, Permissions } from 'discord.js';
-import Client from '../../../Client';
+import Client from '#src/Client';
 import { ChatCommand } from '../ChatCommand';
-import { GuildConfigCache } from '../../../helpers/guildConfigCache';
+import { GuildConfigCache } from '#util/guildConfigCache';
 import { RoleAssignmentService } from '../../../services/roleAssignmentService';
 
 export class VerifyAll extends ChatCommand {

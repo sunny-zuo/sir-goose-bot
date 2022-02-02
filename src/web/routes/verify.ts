@@ -1,6 +1,6 @@
 import { AES, enc } from 'crypto-js';
 import express from 'express';
-import UserModel from '../../models/user.model';
+import UserModel from '#models/user.model';
 
 const router = express.Router();
 

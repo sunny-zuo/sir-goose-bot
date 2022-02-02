@@ -6,7 +6,7 @@ import {
     CommandInteractionOptionResolver,
     Message,
 } from 'discord.js';
-import Client from '../../../Client';
+import Client from '#src/Client';
 import { ChatCommand } from '../ChatCommand';
 
 export class Deploy extends ChatCommand {

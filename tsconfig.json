@@ -5,12 +5,20 @@
         "lib": ["es2020"],
         "outDir": "dist",
         "rootDir": "src",
+        "baseUrl": ".",
         "strict": true,
         "noImplicitAny": true,
         "esModuleInterop": true,
         "resolveJsonModule": true,
         "skipLibCheck": true,
         "forceConsistentCasingInFileNames": true,
-        "useUnknownInCatchVariables": false
+        "useUnknownInCatchVariables": false,
+        "paths": {
+            "#root/*": ["*"],
+            "#src/*": ["src/*"],
+            "#models/*": ["src/models/*"],
+            "#types/*": ["src/types/*"],
+            "#util/*": ["src/util/*"]
+        }
     }
 }

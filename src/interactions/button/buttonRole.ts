@@ -1,9 +1,9 @@
 import { ButtonInteraction, GuildMember, MessageEmbed, Snowflake } from 'discord.js';
 import { ButtonInteractionHandler } from './buttonInteractionHandler';
-import { Cooldown } from '../../helpers/cooldown';
-import Client from '../../Client';
+import { Cooldown } from '#util/cooldown';
+import Client from '#src/Client';
 import { inlineCode } from '@discordjs/builders';
-import ButtonRoleModel from '../../models/buttonRole.model';
+import ButtonRoleModel from '#models/buttonRole.model';
 
 type InteractionData = {
     roleId: Snowflake;

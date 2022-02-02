@@ -1,4 +1,4 @@
-import Client from '../../../Client';
+import Client from '#src/Client';
 import { ChatCommand } from '../ChatCommand';
 import { DateTime } from 'luxon';
 import axios from 'axios';

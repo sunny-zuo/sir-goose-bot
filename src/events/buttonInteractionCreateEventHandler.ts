@@ -2,7 +2,7 @@ import { Collection, Interaction, MessageEmbed } from 'discord.js';
 import { EventHandler } from './eventHandler';
 import ButtonInteractionHandlers from '../interactions/button';
 import { ButtonInteractionHandler } from '../interactions/button/buttonInteractionHandler';
-import Client from '../Client';
+import Client from '#src/Client';
 
 export class ButtonInteractionCreateEventHandler implements EventHandler {
     readonly eventName = 'interactionCreate';

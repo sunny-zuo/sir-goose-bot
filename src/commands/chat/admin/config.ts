@@ -6,8 +6,8 @@ import {
     MessageEmbed,
     Permissions,
 } from 'discord.js';
-import Client from '../../../Client';
-import { GuildConfigCache } from '../../../helpers/guildConfigCache';
+import Client from '#src/Client';
+import { GuildConfigCache } from '#util/guildConfigCache';
 import { ChatCommand } from '../ChatCommand';
 
 export class Config extends ChatCommand {

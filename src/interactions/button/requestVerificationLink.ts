@@ -1,8 +1,8 @@
 import { ButtonInteraction } from 'discord.js';
 import { ButtonInteractionHandler } from './buttonInteractionHandler';
-import { sendVerificationReplies } from '../../helpers/verification';
-import { Cooldown } from '../../helpers/cooldown';
-import Client from '../../Client';
+import { sendVerificationReplies } from '#util/verification';
+import { Cooldown } from '#util/cooldown';
+import Client from '#src/Client';
 
 export class RequestVerificationLink implements ButtonInteractionHandler {
     readonly client: Client;

@@ -1,5 +1,5 @@
-import { GuildConfig } from '../models/guildConfig.model';
-import { User } from '../models/user.model';
+import { GuildConfig } from '#models/guildConfig.model';
+import { User } from '#models/user.model';
 import { RoleAssignmentService } from './roleAssignmentService';
 import { SHA256 } from 'crypto-js';
 

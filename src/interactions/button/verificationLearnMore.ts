@@ -1,7 +1,7 @@
 import { ButtonInteraction, MessageEmbed } from 'discord.js';
 import { ButtonInteractionHandler } from './buttonInteractionHandler';
-import { Cooldown } from '../../helpers/cooldown';
-import Client from '../../Client';
+import { Cooldown } from '#util/cooldown';
+import Client from '#src/Client';
 
 export class VerificationLearnMore implements ButtonInteractionHandler {
     readonly client: Client;

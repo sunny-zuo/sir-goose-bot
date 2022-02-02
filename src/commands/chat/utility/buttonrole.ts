@@ -1,5 +1,5 @@
 import { ChatCommand } from '../ChatCommand';
-import Client from '../../../Client';
+import Client from '#src/Client';
 import {
     ApplicationCommandOption,
     ApplicationCommandNonOptionsData,
@@ -13,9 +13,9 @@ import {
     Role,
 } from 'discord.js';
 import { inlineCode } from '@discordjs/builders';
-import ButtonRoleModel from '../../../models/buttonRole.model';
-import { GuildConfigCache } from '../../../helpers/guildConfigCache';
-import { sendEphemeralReply } from '../../../helpers/message';
+import ButtonRoleModel from '#models/buttonRole.model';
+import { GuildConfigCache } from '#util/guildConfigCache';
+import { sendEphemeralReply } from '#util/message';
 
 const BUTTON_ROLE_GUILD_LIMIT = 15;
 const BUTTON_ROLE_ROLE_LIMIT = 24;
