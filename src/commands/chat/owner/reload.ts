@@ -1,7 +1,7 @@
-import Client from '../../../Client';
+import Client from '#src/Client';
 import { ChatCommand } from '../ChatCommand';
-import GuildConfigModel from '../../../models/guildConfig.model';
-import { GuildConfigCache } from '../../../helpers/guildConfigCache';
+import GuildConfigModel from '#models/guildConfig.model';
+import { GuildConfigCache } from '#util/guildConfigCache';
 import { Message, CommandInteraction } from 'discord.js';
 
 export class Reload extends ChatCommand {

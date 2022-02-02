@@ -1,10 +1,10 @@
 import { Message, Permissions } from 'discord.js';
-import Client from '../Client';
+import Client from '#src/Client';
 import { InvalidCommandInteractionOption } from '../types';
 import { EventHandler } from './eventHandler';
-import { GuildConfigCache } from '../helpers/guildConfigCache';
+import { GuildConfigCache } from '#util/guildConfigCache';
 import { Help } from '../commands/chat/info/help';
-import { sendEphemeralReply } from '../helpers/message';
+import { sendEphemeralReply } from '#util/message';
 
 export class MessageCreateEventHandler implements EventHandler {
     readonly eventName = 'messageCreate';

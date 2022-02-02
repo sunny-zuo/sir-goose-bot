@@ -1,10 +1,10 @@
 import { EventHandler } from './eventHandler';
-import Client from '../Client';
+import Client from '#src/Client';
 import { GuildMember, MessageActionRow, MessageButton, MessageComponentInteraction, MessageEmbed, Role } from 'discord.js';
-import { Modlog } from '../helpers/modlog';
-import GuildConfigModel from '../models/guildConfig.model';
-import ButtonRoleModel from '../models/buttonRole.model';
-import { GuildConfigCache } from '../helpers/guildConfigCache';
+import { Modlog } from '#util/modlog';
+import GuildConfigModel from '#models/guildConfig.model';
+import ButtonRoleModel from '#models/buttonRole.model';
+import { GuildConfigCache } from '#util/guildConfigCache';
 import { v4 as uuidv4 } from 'uuid';
 
 export class RoleUpdateEventHandler implements EventHandler {

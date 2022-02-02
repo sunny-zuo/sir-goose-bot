@@ -1,5 +1,5 @@
 import { ChatCommand } from '../ChatCommand';
-import Client from '../../../Client';
+import Client from '#src/Client';
 import { CommandInteraction, Message, MessageEmbed } from 'discord.js';
 
 export class Coinflip extends ChatCommand {

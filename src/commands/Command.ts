@@ -15,11 +15,11 @@ import {
     TextBasedChannel,
     GuildBasedChannel,
 } from 'discord.js';
-import { CommandOptions, Category } from '../types/Command';
-import Client from '../Client';
+import { CommandOptions, Category } from '#types/Command';
+import Client from '#src/Client';
 import { GuildTextBasedChannel, Result, InvalidCommandInteractionOption, ArgumentIssue } from '../types';
-import { Cooldown } from '../helpers/cooldown';
-import { sendEphemeralReply } from '../helpers/message';
+import { Cooldown } from '#util/cooldown';
+import { sendEphemeralReply } from '#util/message';
 
 const minimumClientPermissions = [Permissions.FLAGS.VIEW_CHANNEL, Permissions.FLAGS.SEND_MESSAGES, Permissions.FLAGS.EMBED_LINKS];
 

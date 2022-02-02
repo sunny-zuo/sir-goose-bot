@@ -1,7 +1,7 @@
 import { ApplicationCommandOption, CommandInteraction, CommandInteractionOptionResolver, Message, MessageEmbed } from 'discord.js';
-import Client from '../../../Client';
-import { GuildConfigCache } from '../../../helpers/guildConfigCache';
-import { Category } from '../../../types/Command';
+import Client from '#src/Client';
+import { GuildConfigCache } from '#util/guildConfigCache';
+import { Category } from '#types/Command';
 import { ChatCommand } from '../ChatCommand';
 
 export class Help extends ChatCommand {

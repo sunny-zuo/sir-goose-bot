@@ -1,5 +1,5 @@
 import { ChatCommand } from '../ChatCommand';
-import Client from '../../../Client';
+import Client from '#src/Client';
 import {
     ApplicationCommandOption,
     CommandInteraction,
@@ -10,8 +10,8 @@ import {
     CommandInteractionOptionResolver,
     Channel,
 } from 'discord.js';
-import { GuildConfigCache } from '../../../helpers/guildConfigCache';
-import { Modlog } from '../../../helpers/modlog';
+import { GuildConfigCache } from '#util/guildConfigCache';
+import { Modlog } from '#util/modlog';
 
 export class Pin extends ChatCommand {
     private static readonly options: ApplicationCommandOption[] = [

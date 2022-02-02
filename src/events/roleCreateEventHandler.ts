@@ -1,10 +1,10 @@
 import { EventHandler } from './eventHandler';
-import Client from '../Client';
+import Client from '#src/Client';
 import { GuildMember, MessageActionRow, MessageButton, MessageComponentInteraction, MessageEmbed, Role } from 'discord.js';
-import { Modlog } from '../helpers/modlog';
-import { GuildConfigCache } from '../helpers/guildConfigCache';
+import { Modlog } from '#util/modlog';
+import { GuildConfigCache } from '#util/guildConfigCache';
 import { v4 as uuidv4 } from 'uuid';
-import GuildConfigModel from '../models/guildConfig.model';
+import GuildConfigModel from '#models/guildConfig.model';
 
 export class RoleCreateEventHandler implements EventHandler {
     readonly eventName = 'roleCreate';

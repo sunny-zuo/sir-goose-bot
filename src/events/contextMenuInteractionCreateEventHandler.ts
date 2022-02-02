@@ -1,6 +1,6 @@
 import { Interaction, Permissions } from 'discord.js';
 import { EventHandler } from './eventHandler';
-import Client from '../Client';
+import Client from '#src/Client';
 
 export class ContextMenuInteractionCreateEventHandler implements EventHandler {
     readonly eventName = 'interactionCreate';

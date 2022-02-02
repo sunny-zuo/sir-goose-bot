@@ -7,9 +7,9 @@ import {
     CommandInteractionOptionResolver,
 } from 'discord.js';
 import { ChatCommand } from '../ChatCommand';
-import Client from '../../../Client';
-import { GuildConfigCache } from '../../../helpers/guildConfigCache';
-import { VerificationRule, RoleData, VerificationRules } from '../../../types/Verification';
+import Client from '#src/Client';
+import { GuildConfigCache } from '#util/guildConfigCache';
+import { VerificationRule, RoleData, VerificationRules } from '#types/Verification';
 
 interface VerificationRuleImport {
     roles: string[];

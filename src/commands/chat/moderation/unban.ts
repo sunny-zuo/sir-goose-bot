@@ -6,13 +6,13 @@ import {
     MessageEmbed,
     Permissions,
 } from 'discord.js';
-import Client from '../../../Client';
+import Client from '#src/Client';
 import { ChatCommand } from '../ChatCommand';
-import BanModel from '../../../models/ban.model';
-import UserModel from '../../../models/user.model';
-import { Modlog } from '../../../helpers/modlog';
-import { chunk } from '../../../helpers/array';
-import { GuildConfigCache } from '../../../helpers/guildConfigCache';
+import BanModel from '#models/ban.model';
+import UserModel from '#models/user.model';
+import { Modlog } from '#util/modlog';
+import { chunk } from '#util/array';
+import { GuildConfigCache } from '#util/guildConfigCache';
 
 export class Unban extends ChatCommand {
     private static readonly options: ApplicationCommandOption[] = [

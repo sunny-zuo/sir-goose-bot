@@ -1,4 +1,4 @@
-import Client from '../Client';
+import Client from '#src/Client';
 
 export interface EventHandler {
     readonly eventName: string;

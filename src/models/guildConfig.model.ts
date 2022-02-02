@@ -1,7 +1,7 @@
 import { Snowflake } from 'discord.js';
 import { Schema, model } from 'mongoose';
-import { GuildConfigCache } from '../helpers/guildConfigCache';
-import { VerificationRules } from '../types/Verification';
+import { GuildConfigCache } from '#util/guildConfigCache';
+import { VerificationRules } from '#types/Verification';
 
 export interface GuildConfig {
     guildId: Snowflake;

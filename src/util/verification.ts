@@ -10,8 +10,8 @@ import {
     Role,
     User,
 } from 'discord.js';
-import UserModel from '../models/user.model';
-import Client from '../Client';
+import UserModel from '#models/user.model';
+import Client from '#src/Client';
 import { RoleAssignmentService } from '../services/roleAssignmentService';
 import { Modlog } from './modlog';
 import { sendEphemeralReply, sendReply } from './message';

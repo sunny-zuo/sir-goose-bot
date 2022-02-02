@@ -1,5 +1,5 @@
 import { ChatCommand } from '../ChatCommand';
-import Client from '../../../Client';
+import Client from '#src/Client';
 import { Message, CommandInteraction, MessageEmbed, MessageActionRow, MessageButton } from 'discord.js';
 
 export class Invite extends ChatCommand {

@@ -1,7 +1,7 @@
 import { GuildMember, MessageEmbed } from 'discord.js';
-import Client from '../Client';
+import Client from '#src/Client';
 import { RoleAssignmentService } from '../services/roleAssignmentService';
-import { GuildConfigCache } from '../helpers/guildConfigCache';
+import { GuildConfigCache } from '#util/guildConfigCache';
 import { EventHandler } from './eventHandler';
 
 export class GuildMemberAddEventHandler implements EventHandler {

@@ -1,5 +1,5 @@
 import { ChatCommand } from '../ChatCommand';
-import Client from '../../../Client';
+import Client from '#src/Client';
 import { Message, CommandInteraction, MessageEmbed } from 'discord.js';
 import { inlineCode } from '@discordjs/builders';
 

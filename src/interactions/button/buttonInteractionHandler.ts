@@ -1,6 +1,6 @@
 import { ButtonInteraction } from 'discord.js';
-import Client from '../../Client';
-import { Cooldown } from '../../helpers/cooldown';
+import Client from '#src/Client';
+import { Cooldown } from '#util/cooldown';
 
 export interface ButtonInteractionHandler {
     readonly client: Client;

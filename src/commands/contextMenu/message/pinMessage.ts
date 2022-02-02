@@ -1,7 +1,7 @@
 import { ContextMenuInteraction, Message, MessageEmbed, Permissions } from 'discord.js';
-import Client from '../../../Client';
-import { GuildConfigCache } from '../../../helpers/guildConfigCache';
-import { Modlog } from '../../../helpers/modlog';
+import Client from '#src/Client';
+import { GuildConfigCache } from '#util/guildConfigCache';
+import { Modlog } from '#util/modlog';
 import { ContextMenuCommand } from '../ContextMenuCommand';
 
 export class PinMessage extends ContextMenuCommand {

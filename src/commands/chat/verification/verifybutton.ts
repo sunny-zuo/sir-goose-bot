@@ -8,7 +8,7 @@ import {
     CommandInteractionOptionResolver,
 } from 'discord.js';
 import { ChatCommand } from '../ChatCommand';
-import Client from '../../../Client';
+import Client from '#src/Client';
 
 export class VerifyButton extends ChatCommand {
     private static readonly options: ApplicationCommandOption[] = [

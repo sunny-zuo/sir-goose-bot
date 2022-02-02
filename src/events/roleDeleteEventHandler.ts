@@ -1,8 +1,8 @@
 import { EventHandler } from './eventHandler';
-import Client from '../Client';
+import Client from '#src/Client';
 import { Role } from 'discord.js';
-import { Modlog } from '../helpers/modlog';
-import { GuildConfigCache } from '../helpers/guildConfigCache';
+import { Modlog } from '#util/modlog';
+import { GuildConfigCache } from '#util/guildConfigCache';
 
 export class RoleDeleteEventHandler implements EventHandler {
     readonly eventName = 'roleDelete';

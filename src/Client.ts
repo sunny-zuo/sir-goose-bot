@@ -1,7 +1,7 @@
 import Discord, { ClientOptions, Collection, User } from 'discord.js';
 import { ChatCommand } from './commands/chat/ChatCommand';
 import { ContextMenuCommand } from './commands/contextMenu/ContextMenuCommand';
-import { Logger } from './helpers/logger';
+import { Logger } from '#util/logger';
 import Events from './events';
 import ChatCommands from './commands/chat';
 import MessageCommands from './commands/contextMenu/message';

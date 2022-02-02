@@ -1,6 +1,6 @@
 import express, { Express } from 'express';
 import path from 'path';
-import Client from '../Client';
+import Client from '#src/Client';
 import indexRouter from './routes/index';
 import verifyRouter from './routes/verify';
 
