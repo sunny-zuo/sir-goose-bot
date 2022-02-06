@@ -200,24 +200,21 @@ export class RoleUpdateEventHandler implements EventHandler {
             await prompt.save();
 
             const promptChannel = await guild.channels.fetch(prompt.channelId);
-            if (!promptChannel || !promptChannel.isText()) {
-                await prompt.delete();
-                continue;
-            }
+            if (!promptChannel || !promptChannel.isText()) continue;
 
-            const promptMessage = await promptChannel.messages.fetch(prompt.messageId).catch(async () => {
-                await prompt.delete();
-            });
+            const promptMessage = await promptChannel.messages.fetch(prompt.messageId);
             if (!promptMessage) continue;
 
             const components = promptMessage.components;
 
             const row = components.find((row) =>
-                row.components.some((component) => component.type === 'BUTTON' && component.label === oldRole.name)
+                row.components.some((component) => component.type === 'BUTTON' && component.customId?.includes(oldRole.id))
             );
             if (!row) continue;
 
-            const updateIndex = row.components.findIndex((component) => component.type === 'BUTTON' && component.label === oldRole.name);
+            const updateIndex = row.components.findIndex(
+                (component) => component.type === 'BUTTON' && component.customId?.includes(oldRole.id)
+            );
             if (updateIndex === -1) continue;
 
             row.spliceComponents(

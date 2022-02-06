@@ -17,7 +17,7 @@ import ButtonRoleModel from '#models/buttonRole.model';
 import { GuildConfigCache } from '#util/guildConfigCache';
 import { sendEphemeralReply } from '#util/message';
 
-const BUTTON_ROLE_GUILD_LIMIT = 15;
+const BUTTON_ROLE_GUILD_LIMIT = 25;
 const BUTTON_ROLE_ROLE_LIMIT = 24;
 
 export class ButtonRole extends ChatCommand {
@@ -296,13 +296,54 @@ export class ButtonRole extends ChatCommand {
 
             await buttonRole.save();
             await message.edit({ components: message.components });
-            await sendEphemeralReply(interaction, { content: 'Button role prompt updated successfully!' }, 20);
-        } else if (args.getString('action', true) === 'remove') {
-            await this.sendErrorEmbed(
+            await sendEphemeralReply(
                 interaction,
-                'Not Implemented',
-                'Removing a role from a button prompt is currently not implemented, but is expected to be added very soon.',
-                true
+                { content: `The role "${role.name}" has been successfully added to the button role prompt!` },
+                20
+            );
+        } else if (args.getString('action', true) === 'remove') {
+            if (!buttonRole.roles.some((r) => r.id === role.id)) {
+                await this.sendErrorEmbed(
+                    interaction,
+                    'Role Does Not Exist',
+                    `The role ${inlineCode(role.name)} is not part of the button role prompt.`,
+                    true
+                );
+                return;
+            }
+
+            const components = message.components;
+
+            const row = components.find((row) =>
+                row.components.some((component) => component.type === 'BUTTON' && component.customId?.includes(role.id))
+            );
+            if (!row) {
+                throw new Error(
+                    `Attempted to remove a role ${role.id} from a button role prompt (${buttonRole._id}) where the id does not belong to a button`
+                );
+            }
+
+            const updateIndex = row.components.findIndex(
+                (component) => component.type === 'BUTTON' && component.customId?.includes(role.id)
+            );
+            if (updateIndex === -1) {
+                throw new Error(
+                    `Attempted to remove a role ${role.id} from a button role prompt (${buttonRole._id}) where the id does not belong to a button`
+                );
+            }
+
+            row.spliceComponents(updateIndex, 1);
+
+            const cleanComponents = components.filter((component) => component.components.length !== 0);
+            await message.edit({ components: cleanComponents });
+
+            buttonRole.roles = buttonRole.roles.filter((r) => r.id !== role.id);
+            await buttonRole.save();
+
+            await sendEphemeralReply(
+                interaction,
+                { content: `The role "${role.name}" has been successfully removed from the button role prompt.` },
+                20
             );
         }
     }
