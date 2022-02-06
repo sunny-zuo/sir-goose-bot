@@ -192,7 +192,7 @@ export class RoleUpdateEventHandler implements EventHandler {
         if (oldRole.name === newRole.name) return;
         const guild = newRole.guild;
 
-        const prompts = await ButtonRoleModel.find({ guildId: guild.id, 'roles.name': oldRole.name });
+        const prompts = await ButtonRoleModel.find({ guildId: guild.id, 'roles.id': oldRole.id });
         if (!prompts || !prompts.length) return;
 
         for (const prompt of prompts) {
