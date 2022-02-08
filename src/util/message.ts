@@ -28,7 +28,7 @@ export function sendEphemeralReply(
         return interaction.reply(message).then((sentMessage) => {
             setTimeout(async () => {
                 // we ignore the delete error as it isn't something we can feasibly handle
-                await sentMessage.delete().catch();
+                await sentMessage.delete().catch(() => undefined);
             }, deletionSeconds * 1000);
         });
     } else {

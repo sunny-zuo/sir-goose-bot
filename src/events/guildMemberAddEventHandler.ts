@@ -33,7 +33,7 @@ export class GuildMemberAddEventHandler implements EventHandler {
                                 ),
                         ],
                     })
-                    .catch(); // we ignore errors since the user likely has DMs closed, so we just silently fail
+                    .catch(() => undefined); // we ignore errors since the user likely has DMs closed, so we just silently fail
             } else if ((await GuildConfigCache.fetchConfig(member.guild.id)).enableVerification) {
                 await member
                     .send({
@@ -46,7 +46,7 @@ export class GuildMemberAddEventHandler implements EventHandler {
                                 ),
                         ],
                     })
-                    .catch(); // we ignore errors since the user likely has DMs closed, so we just silently fail
+                    .catch(() => undefined); // we ignore errors since the user likely has DMs closed, so we just silently fail
             }
         }
     }
