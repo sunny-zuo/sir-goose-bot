@@ -90,7 +90,7 @@ export async function sendVerificationReplies(
         if (user) {
             user.verifyRequestedAt = new Date();
             user.verifyRequestedServerId = interaction.guild?.id ?? '-1';
-            user.save();
+            await user.save();
         } else {
             await UserModel.create({
                 discordId: discordUser.id,
@@ -116,7 +116,7 @@ export async function sendVerificationReplies(
                     ? await sendEphemeralReply(interaction, { embeds: [embed] }, 60)
                     : await sendReply(interaction, { embeds: [embed] });
 
-                Modlog.logUserAction(client, interaction.guild, discordUser, `${discordUser} requested a verification link.`, 'BLUE');
+                await Modlog.logUserAction(client, interaction.guild, discordUser, `${discordUser} requested a verification link.`, 'BLUE');
             } else {
                 await sendReply(interaction, verifyReply);
             }

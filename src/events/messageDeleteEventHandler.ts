@@ -12,7 +12,7 @@ export class MessageDeleteEventHandler implements EventHandler {
     }
 
     async execute(message: Message): Promise<void> {
-        this.cleanupButtonRoles(message);
+        await this.cleanupButtonRoles(message);
     }
 
     async cleanupButtonRoles(message: Message): Promise<void> {

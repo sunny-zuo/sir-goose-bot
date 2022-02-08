@@ -206,7 +206,7 @@ export class ButtonRole extends ChatCommand {
         }
 
         buttonRoleDoc.messageId = message.id;
-        buttonRoleDoc.save();
+        await buttonRoleDoc.save();
     }
 
     async edit(

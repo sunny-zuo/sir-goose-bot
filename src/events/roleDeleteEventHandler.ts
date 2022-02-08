@@ -14,8 +14,8 @@ export class RoleDeleteEventHandler implements EventHandler {
     }
 
     async execute(deletedRole: Role): Promise<void> {
-        this.checkVerificationRules(deletedRole);
-        this.updateButtonRolePrompts(deletedRole);
+        await this.checkVerificationRules(deletedRole);
+        await this.updateButtonRolePrompts(deletedRole);
     }
 
     async checkVerificationRules(deletedRole: Role): Promise<void> {
@@ -28,7 +28,7 @@ export class RoleDeleteEventHandler implements EventHandler {
             for (const rule of verificationRules) {
                 for (const role of rule.roles) {
                     if (role.id === deletedRole.id) {
-                        Modlog.logInfoMessage(
+                        await Modlog.logInfoMessage(
                             this.client,
                             guild,
                             'Verification Role Deleted',

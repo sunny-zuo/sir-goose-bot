@@ -16,9 +16,9 @@ export class RoleUpdateEventHandler implements EventHandler {
     }
 
     async execute(oldRole: Role, newRole: Role): Promise<void> {
-        this.updateVerificationRules(oldRole, newRole);
-        this.promptUpdateVerificationRules(oldRole, newRole);
-        this.updateButtonRolePrompts(oldRole, newRole);
+        await this.updateVerificationRules(oldRole, newRole);
+        await this.promptUpdateVerificationRules(oldRole, newRole);
+        await this.updateButtonRolePrompts(oldRole, newRole);
     }
 
     async updateVerificationRules(oldRole: Role, newRole: Role): Promise<void> {
@@ -44,7 +44,7 @@ export class RoleUpdateEventHandler implements EventHandler {
 
             if (didRulesUpdate) {
                 await config.save();
-                Modlog.logInfoMessage(
+                await Modlog.logInfoMessage(
                     this.client,
                     guild,
                     'Verification Role Updated',

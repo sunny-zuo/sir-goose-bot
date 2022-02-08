@@ -9,6 +9,7 @@ export class ReadyEventHandler implements EventHandler {
         this.client = client;
     }
 
+    // eslint-disable-next-line @typescript-eslint/require-await
     async execute(): Promise<void> {
         const client = this.client;
         client.log.info(`Client is now ready!`);

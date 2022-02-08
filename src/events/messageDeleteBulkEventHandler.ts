@@ -12,7 +12,7 @@ export class MessageDeleteBulkEventHandler implements EventHandler {
     }
 
     async execute(messages: Collection<Snowflake, Message>): Promise<void> {
-        this.cleanupButtonRoles(messages);
+        await this.cleanupButtonRoles(messages);
     }
 
     async cleanupButtonRoles(messages: Collection<Snowflake, Message>): Promise<void> {

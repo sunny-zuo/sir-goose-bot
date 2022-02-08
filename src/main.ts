@@ -28,4 +28,4 @@ async function init(): Promise<void> {
     await client.login(process.env.DISCORD_TOKEN);
 }
 
-init();
+init().catch((error) => console.error('Error initializing application.', { error }));

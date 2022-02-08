@@ -15,7 +15,7 @@ export class RoleCreateEventHandler implements EventHandler {
     }
 
     async execute(newRole: Role): Promise<void> {
-        this.checkVerificationRules(newRole);
+        await this.checkVerificationRules(newRole);
     }
 
     async checkVerificationRules(newRole: Role): Promise<void> {

@@ -219,7 +219,7 @@ export class RoleAssignmentService {
 
         if (invalidRoles.length > 0) {
             if (log) {
-                Modlog.logInfoMessage(
+                await Modlog.logInfoMessage(
                     this.client,
                     guild,
                     'Verification Role Assignment Error',
