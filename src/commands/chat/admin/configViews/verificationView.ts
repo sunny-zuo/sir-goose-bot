@@ -1,6 +1,6 @@
 import { Message, MessageActionRow, MessageButton, MessageComponentInteraction, MessageEmbed } from 'discord.js';
 import { VerifyRules } from '../../verification/verifyrules';
-import { GuildConfigCache } from '../../../../helpers/guildConfigCache';
+import { GuildConfigCache } from '#util/guildConfigCache';
 import { OverviewView } from './overviewView';
 import { bold } from '@discordjs/builders';
 

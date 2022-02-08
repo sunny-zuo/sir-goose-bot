@@ -9,7 +9,7 @@ import {
     Permissions,
     Snowflake,
 } from 'discord.js';
-import { GuildConfigCache } from '../../../../helpers/guildConfigCache';
+import { GuildConfigCache } from '#util/guildConfigCache';
 import { OverviewView } from './overviewView';
 import { bold } from '@discordjs/builders';
 
@@ -35,7 +35,7 @@ export class ModlogView {
             new MessageButton().setCustomId('configModlogBack').setStyle('SECONDARY').setLabel('Back')
         );
 
-        interaction.editReply({ embeds: [embed], components: [buttons] });
+        await interaction.editReply({ embeds: [embed], components: [buttons] });
 
         const message = interaction.message as Message;
         await message
@@ -111,7 +111,7 @@ export class ModlogView {
                     )
                     .setColor('RED');
 
-                m.reply({ embeds: [embed] });
+                await m.reply({ embeds: [embed] });
             } else {
                 if (channel.permissionsFor(interaction.guild.me).has([Permissions.FLAGS.SEND_MESSAGES, Permissions.FLAGS.EMBED_LINKS])) {
                     const config = await GuildConfigCache.fetchOrCreate(m.guildId!);
@@ -154,7 +154,7 @@ export class ModlogView {
                         )
                         .setColor('RED');
 
-                    m.reply({ embeds: [embed] });
+                    await m.reply({ embeds: [embed] });
                 }
             }
         });

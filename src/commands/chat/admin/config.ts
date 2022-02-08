@@ -17,6 +17,6 @@ export class Config extends ChatCommand {
     }
 
     async execute(interaction: CommandInteraction): Promise<void> {
-        await OverviewView.initialRender(this.client, interaction).catch((e) => 'hi');
+        await OverviewView.initialRender(this.client, interaction);
     }
 }

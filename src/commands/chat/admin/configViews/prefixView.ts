@@ -1,6 +1,6 @@
 import { Message, MessageActionRow, MessageButton, MessageComponentInteraction, MessageEmbed } from 'discord.js';
 import { OverviewView } from './overviewView';
-import { GuildConfigCache } from '../../../../helpers/guildConfigCache';
+import { GuildConfigCache } from '#util/guildConfigCache';
 
 export class PrefixView {
     static async render(interaction: MessageComponentInteraction, filter: (i: MessageComponentInteraction) => boolean): Promise<void> {
@@ -21,7 +21,7 @@ export class PrefixView {
             new MessageButton().setCustomId('configPrefixBack').setStyle('SECONDARY').setLabel('Back')
         );
 
-        interaction.editReply({ embeds: [embed], components: [buttons] });
+        await interaction.editReply({ embeds: [embed], components: [buttons] });
 
         const message = interaction.message as Message;
         await message
@@ -84,7 +84,7 @@ export class PrefixView {
                     .setDescription('The prefix must be 1 to 5 characters in length. Please provide a new prefix.')
                     .setColor('RED');
 
-                m.channel.send({ embeds: [embed] });
+                await m.channel.send({ embeds: [embed] });
             } else {
                 const config = await GuildConfigCache.fetchOrCreate(interaction.guildId!);
                 config.prefix = newPrefix;

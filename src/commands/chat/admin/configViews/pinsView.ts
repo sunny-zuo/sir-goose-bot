@@ -1,5 +1,5 @@
 import { Message, MessageActionRow, MessageButton, MessageComponentInteraction, MessageEmbed } from 'discord.js';
-import { GuildConfigCache } from '../../../../helpers/guildConfigCache';
+import { GuildConfigCache } from '#util/guildConfigCache';
 import { OverviewView } from './overviewView';
 import { bold } from '@discordjs/builders';
 
@@ -26,7 +26,7 @@ export class PinsView {
             new MessageButton().setCustomId('configPinsBack').setStyle('SECONDARY').setLabel('Back')
         );
 
-        interaction.editReply({ embeds: [embed], components: [buttons] });
+        await interaction.editReply({ embeds: [embed], components: [buttons] });
 
         const message = interaction.message as Message;
         await message
