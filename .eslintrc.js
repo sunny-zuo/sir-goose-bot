@@ -15,6 +15,8 @@ module.exports = {
         'no-unused-vars': 'off',
         '@typescript-eslint/no-unused-vars': ['error'],
         '@typescript-eslint/no-non-null-assertion': 'off',
+        '@typescript-eslint/no-floating-promises': 'error',
+        '@typescript-eslint/require-await': 'error',
         'deprecation/deprecation': 'error',
     },
 };
