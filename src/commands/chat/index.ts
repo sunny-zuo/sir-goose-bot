@@ -8,6 +8,7 @@ import { Goose } from './fun/goose';
 import { Honk } from './fun/honk';
 
 /* Info Commands */
+import { Avatar } from './info/avatar';
 import { BotStats } from './info/botstats';
 import { Help } from './info/help';
 import { Invite } from './info/invite';
@@ -42,6 +43,7 @@ export default [
     Coinflip,
     Goose,
     Honk,
+    Avatar,
     BotStats,
     Help,
     Invite,
