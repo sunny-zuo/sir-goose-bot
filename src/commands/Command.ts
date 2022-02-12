@@ -14,11 +14,13 @@ import {
     ContextMenuInteraction,
     TextBasedChannel,
     GuildBasedChannel,
+    Interaction,
 } from 'discord.js';
 import { CommandOptions, Category } from '#types/Command';
 import Client from '#src/Client';
 import { GuildTextBasedChannel, Result, InvalidCommandInteractionOption, ArgumentIssue } from '../types';
 import { Cooldown } from '#util/cooldown';
+import { isMessage } from '#util/message';
 import { sendEphemeralReply } from '#util/message';
 
 const minimumClientPermissions = [Permissions.FLAGS.VIEW_CHANNEL, Permissions.FLAGS.SEND_MESSAGES, Permissions.FLAGS.EMBED_LINKS];
@@ -402,11 +404,9 @@ export abstract class Command {
         }
     }
 
-    isMessage(interaction: Message | CommandInteraction | ContextMenuInteraction): interaction is Message {
-        return (interaction as Message).url !== undefined;
-    }
+    isMessage = isMessage;
 
-    getUser(interaction: Message | CommandInteraction | ContextMenuInteraction): User {
+    getUser(interaction: Message | Interaction): User {
         return this.isMessage(interaction) ? interaction.author : interaction.user;
     }
 }

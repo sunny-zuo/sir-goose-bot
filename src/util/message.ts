@@ -5,6 +5,7 @@ import {
     ReplyMessageOptions,
     ButtonInteraction,
     ContextMenuInteraction,
+    Interaction,
 } from 'discord.js';
 
 export function sendReply(
@@ -36,6 +37,6 @@ export function sendEphemeralReply(
     }
 }
 
-function isMessage(interaction: Message | CommandInteraction | ButtonInteraction | ContextMenuInteraction): interaction is Message {
-    return (interaction as Message).url !== undefined;
+export function isMessage(interaction: Message | Interaction): interaction is Message {
+    return (interaction as Message).author !== undefined;
 }
