@@ -4,7 +4,6 @@ import { GuildConfigCache } from '#util/guildConfigCache';
 
 export class PrefixView {
     static async render(interaction: MessageComponentInteraction, filter: (i: MessageComponentInteraction) => boolean): Promise<void> {
-        await interaction.deferUpdate();
         const { prefix } = await GuildConfigCache.fetchOrCreate(interaction.guildId!);
         const embed = new MessageEmbed()
             .setTitle('Prefix Configuration')
@@ -21,7 +20,7 @@ export class PrefixView {
             new MessageButton().setCustomId('configPrefixBack').setStyle('SECONDARY').setLabel('Back')
         );
 
-        await interaction.editReply({ embeds: [embed], components: [buttons] });
+        await interaction.reply({ embeds: [embed], components: [buttons] });
 
         const message = interaction.message as Message;
         await message
@@ -45,14 +44,13 @@ export class PrefixView {
         interaction: MessageComponentInteraction,
         filter: (i: MessageComponentInteraction) => boolean
     ): Promise<void> {
-        await interaction.deferUpdate();
         const embed = new MessageEmbed().setDescription('What would you like the new prefix to be?').setColor('ORANGE');
 
         const button = new MessageActionRow().addComponents(
             new MessageButton().setCustomId('configPrefixChangeCancel').setStyle('DANGER').setLabel('Cancel Prefix Change')
         );
 
-        await interaction.editReply({ embeds: [embed], components: [button] });
+        await interaction.reply({ embeds: [embed], components: [button] });
 
         const message = interaction.message as Message;
 

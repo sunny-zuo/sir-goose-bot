@@ -5,7 +5,6 @@ import { bold } from '@discordjs/builders';
 
 export class PinsView {
     static async render(interaction: MessageComponentInteraction, filter: (i: MessageComponentInteraction) => boolean): Promise<void> {
-        await interaction.deferUpdate();
         const config = await GuildConfigCache.fetchOrCreate(interaction.guildId!);
 
         const embed = new MessageEmbed()
@@ -26,7 +25,7 @@ export class PinsView {
             new MessageButton().setCustomId('configPinsBack').setStyle('SECONDARY').setLabel('Back')
         );
 
-        await interaction.editReply({ embeds: [embed], components: [buttons] });
+        await interaction.reply({ embeds: [embed], components: [buttons] });
 
         const message = interaction.message as Message;
         await message
