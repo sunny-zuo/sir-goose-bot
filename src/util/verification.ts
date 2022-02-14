@@ -15,6 +15,7 @@ import Client from '#src/Client';
 import { RoleAssignmentService } from '../services/roleAssignmentService';
 import { Modlog } from './modlog';
 import { sendEphemeralReply, sendReply } from './message';
+import { VerificationRuleImport, VerificationRules } from '#types/Verification';
 
 export function getVerificationResponse(user: User): MessageOptions {
     if (!process.env.AES_PASSPHRASE || !process.env.SERVER_URI) {
@@ -132,4 +133,25 @@ export async function sendVerificationReplies(
             ephemeral ? await sendEphemeralReply(interaction, { embeds: [embed] }, 60) : await sendReply(interaction, { embeds: [embed] });
         }
     }
+}
+
+export function serializeVerificationRules(verificationRules: VerificationRules | undefined): string {
+    if (!verificationRules) {
+        return '';
+    }
+
+    const serializedRules: VerificationRuleImport[] = [];
+
+    for (const rule of verificationRules.rules) {
+        const serializedRule: VerificationRuleImport = {
+            roles: rule.roles.map((role) => role.name),
+            department: rule.department,
+            match: rule.matchType,
+            year: rule.yearMatch,
+        };
+
+        serializedRules.push(serializedRule);
+    }
+
+    return JSON.stringify({ baseYear: verificationRules.baseYear, rules: serializedRules });
 }
