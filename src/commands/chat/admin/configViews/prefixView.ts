@@ -20,7 +20,7 @@ export class PrefixView {
             new MessageButton().setCustomId('configPrefixBack').setStyle('SECONDARY').setLabel('Back')
         );
 
-        await interaction.reply({ embeds: [embed], components: [buttons] });
+        await interaction.update({ embeds: [embed], components: [buttons] });
 
         const message = interaction.message as Message;
         await message
@@ -50,7 +50,7 @@ export class PrefixView {
             new MessageButton().setCustomId('configPrefixChangeCancel').setStyle('DANGER').setLabel('Cancel Prefix Change')
         );
 
-        await interaction.reply({ embeds: [embed], components: [button] });
+        await interaction.update({ embeds: [embed], components: [button] });
 
         const message = interaction.message as Message;
 

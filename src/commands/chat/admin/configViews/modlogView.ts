@@ -34,7 +34,7 @@ export class ModlogView {
             new MessageButton().setCustomId('configModlogBack').setStyle('SECONDARY').setLabel('Back')
         );
 
-        await interaction.reply({ embeds: [embed], components: [buttons] });
+        await interaction.update({ embeds: [embed], components: [buttons] });
 
         const message = interaction.message as Message;
         await message
@@ -74,7 +74,7 @@ export class ModlogView {
             new MessageButton().setCustomId('configModlogChangeChannelCancel').setStyle('DANGER').setLabel('Cancel Modlog Channel Change')
         );
 
-        await interaction.reply({ embeds: [embed], components: [button] });
+        await interaction.update({ embeds: [embed], components: [button] });
 
         const message = interaction.message as Message;
 
