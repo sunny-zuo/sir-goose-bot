@@ -40,7 +40,7 @@ export class VerificationView {
             new MessageButton().setCustomId('configVerificationBack').setStyle('SECONDARY').setLabel('Back')
         );
 
-        await interaction.editReply({ embeds: [embed], components: [buttons] });
+        await interaction.update({ embeds: [embed], components: [buttons] });
 
         const message = interaction.message as Message;
 
@@ -79,6 +79,7 @@ export class VerificationView {
                     break;
                 }
                 case 'configVerificationBack':
+                    buttonCollector.stop('completed');
                     await OverviewView.render(i, filter);
                     break;
             }

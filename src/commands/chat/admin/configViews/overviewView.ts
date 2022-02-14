@@ -52,7 +52,7 @@ export class OverviewView {
     );
 
     static async render(interaction: MessageComponentInteraction, filter: (i: MessageComponentInteraction) => boolean): Promise<void> {
-        await interaction.reply({
+        await interaction.update({
             embeds: [await this.generateConfigViewEmbed(interaction.guild!)],
             components: [this.optionSelectMenu],
         });
