@@ -6,7 +6,6 @@ import { bold, codeBlock } from '@discordjs/builders';
 
 export class VerificationView {
     static async render(interaction: MessageComponentInteraction, filter: (i: MessageComponentInteraction) => boolean): Promise<void> {
-        await interaction.deferUpdate();
         const config = await GuildConfigCache.fetchOrCreate(interaction.guildId!);
 
         const embed = new MessageEmbed()
@@ -73,7 +72,7 @@ export class VerificationView {
                     const embed = new MessageEmbed()
                         .setColor('YELLOW')
                         .setDescription(
-                            'Verification rules cannot currently be edited in this menu. Please use the `/verifyrules` command instead.'
+                            'Verification rules currently cannot be edited in this menu. Please use the `/verifyrules` command for now.'
                         );
 
                     await i.reply({ embeds: [embed], ephemeral: true });
