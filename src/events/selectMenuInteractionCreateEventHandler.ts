@@ -10,6 +10,7 @@ export class SelectMenuInteractionCreateEventHandler implements EventHandler {
         this.client = client;
     }
 
+    // eslint-disable-next-line @typescript-eslint/require-await
     async execute(interaction: Interaction): Promise<void> {
         if (!interaction.isSelectMenu()) return;
 
