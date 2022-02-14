@@ -1,8 +1,8 @@
 import { Message, MessageActionRow, MessageButton, MessageComponentInteraction, MessageEmbed } from 'discord.js';
-import { VerifyRules } from '../../verification/verifyrules';
 import { GuildConfigCache } from '#util/guildConfigCache';
+import { serializeVerificationRules } from '#util/verification';
 import { OverviewView } from './overviewView';
-import { bold } from '@discordjs/builders';
+import { bold, codeBlock } from '@discordjs/builders';
 
 export class VerificationView {
     static async render(interaction: MessageComponentInteraction, filter: (i: MessageComponentInteraction) => boolean): Promise<void> {
@@ -64,7 +64,7 @@ export class VerificationView {
                 case 'configVerificationViewRules': {
                     const embed = new MessageEmbed().setColor('BLUE').setTitle('Verification Rules')
                         .setDescription(`[Create a new ruleset](https://sebot.sunnyzuo.com/). Current rules:
-                            \`\`\`${VerifyRules.serializeVerificationRules(config.verificationRules)}\`\`\``);
+                            ${codeBlock(serializeVerificationRules(config.verificationRules))}`);
 
                     await i.reply({ embeds: [embed], ephemeral: true });
                     break;

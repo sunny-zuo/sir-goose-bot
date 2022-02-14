@@ -9,19 +9,9 @@ import {
 import { ChatCommand } from '../ChatCommand';
 import Client from '#src/Client';
 import { GuildConfigCache } from '#util/guildConfigCache';
-import { VerificationRule, RoleData, VerificationRules } from '#types/Verification';
-
-interface VerificationRuleImport {
-    roles: string[];
-    department: string;
-    match: string;
-    year: string;
-}
-
-interface VerificationImport {
-    baseYear: number;
-    rules: VerificationRuleImport[];
-}
+import { VerificationRule, RoleData, VerificationImport } from '#types/Verification';
+import { serializeVerificationRules } from '#util/verification';
+import { codeBlock } from '@discordjs/builders';
 
 export class VerifyRules extends ChatCommand {
     private static readonly options: ApplicationCommandOption[] = [
@@ -125,7 +115,7 @@ export class VerifyRules extends ChatCommand {
                 .setDescription(`Verification is ${
                 config.enableVerification ? 'enabled' : `disabled. Enable it using \`${config.prefix}config enable_verification true\``
             }. [Create a ruleset.](https://sebot.sunnyzuo.com/)
-                \`\`\`${VerifyRules.serializeVerificationRules(config.verificationRules)}\`\`\``);
+                ${codeBlock(serializeVerificationRules(config.verificationRules))}`);
 
             await interaction.reply({ embeds: [embed] });
         } else {
@@ -134,30 +124,9 @@ export class VerifyRules extends ChatCommand {
             const embed = new MessageEmbed().setColor('GREEN').setTitle('Verification Rules').setDescription(`Verification is ${
                 config.enableVerification ? 'enabled' : `disabled. Enable it using \`${config.prefix}config enable_verification true\``
             }. [Create a ruleset.](https://sebot.sunnyzuo.com/)
-                \`\`\`${VerifyRules.serializeVerificationRules(config.verificationRules)}\`\`\``);
+                ${codeBlock(serializeVerificationRules(config.verificationRules))}`);
 
             await interaction.reply({ embeds: [embed] });
         }
-    }
-
-    static serializeVerificationRules(verificationRules: VerificationRules | undefined): string {
-        if (!verificationRules) {
-            return '';
-        }
-
-        const serializedRules: VerificationRuleImport[] = [];
-
-        for (const rule of verificationRules.rules) {
-            const serializedRule: VerificationRuleImport = {
-                roles: rule.roles.map((role) => role.name),
-                department: rule.department,
-                match: rule.matchType,
-                year: rule.yearMatch,
-            };
-
-            serializedRules.push(serializedRule);
-        }
-
-        return JSON.stringify({ baseYear: verificationRules.baseYear, rules: serializedRules });
     }
 }
