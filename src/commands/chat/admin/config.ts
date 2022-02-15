@@ -7,7 +7,7 @@ export class Config extends ChatCommand {
     constructor(client: Client) {
         super(client, {
             name: 'config',
-            description: "View or edit the server's bot configuration.",
+            description: "View and edit the server's bot configuration.",
             category: 'Admin',
             isSlashCommand: true,
             isTextCommand: false,

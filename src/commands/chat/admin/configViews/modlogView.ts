@@ -12,6 +12,7 @@ import {
 import { GuildConfigCache } from '#util/guildConfigCache';
 import { OverviewView } from './overviewView';
 import { bold } from '@discordjs/builders';
+import { Emojis } from '#util/constants';
 
 export class ModlogView {
     static async render(interaction: MessageComponentInteraction, filter: (i: MessageComponentInteraction) => boolean): Promise<void> {
@@ -20,7 +21,9 @@ export class ModlogView {
         const embed = new MessageEmbed()
             .setTitle('Modlog Configuration')
             .setDescription(
-                `Moderation logging is currently ${config.enableModlog ? bold('enabled') : bold('disabled')}.
+                `${config.enableModlog ? Emojis.GreenCheck : Emojis.RedCross} Moderation logging is currently ${
+                    config.enableModlog ? bold('enabled') : bold('disabled')
+                }.
                 
                 Logs will be sent to the channel: ${config.modlogChannelId ? `<#${config.modlogChannelId}>` : '<no channel set>'}`
             )
