@@ -1,6 +1,7 @@
 import { Message, MessageActionRow, MessageButton, MessageComponentInteraction, MessageEmbed } from 'discord.js';
 import { GuildConfigCache } from '#util/guildConfigCache';
 import { OverviewView } from './overviewView';
+import { Emojis } from '#root/src/util/constants';
 import { bold } from '@discordjs/builders';
 
 export class PinsView {
@@ -10,7 +11,9 @@ export class PinsView {
         const embed = new MessageEmbed()
             .setTitle('Pins Configuration')
             .setDescription(
-                `Pinning is currently ${config.enablePins ? bold('enabled') : bold('disabled')}.
+                `${config.enablePins ? Emojis.GreenCheck : Emojis.RedCross} Pinning is currently ${
+                    config.enablePins ? bold(`enabled`) : bold(`disabled`)
+                }.
             
                 Pinning gives all users the ability to pin messages, using the ${
                     config.prefix

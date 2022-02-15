@@ -3,6 +3,7 @@ import { GuildConfigCache } from '#util/guildConfigCache';
 import { serializeVerificationRules } from '#util/verification';
 import { OverviewView } from './overviewView';
 import { bold, codeBlock } from '@discordjs/builders';
+import { Emojis } from '#util/constants';
 
 export class VerificationView {
     static async render(interaction: MessageComponentInteraction, filter: (i: MessageComponentInteraction) => boolean): Promise<void> {
@@ -11,7 +12,9 @@ export class VerificationView {
         const embed = new MessageEmbed()
             .setTitle('Verification Configuration')
             .setDescription(
-                `Verification is currently ${config.enableVerification ? bold('enabled') : bold('disabled')}.
+                `${config.enableVerification ? Emojis.GreenCheck : Emojis.RedCross} Verification is currently ${
+                    config.enableVerification ? bold('enabled') : bold('disabled')
+                }.
                 
                 ${
                     config.verificationRules

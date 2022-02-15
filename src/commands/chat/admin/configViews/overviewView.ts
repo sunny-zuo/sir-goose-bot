@@ -12,6 +12,8 @@ import { PrefixView } from './prefixView';
 import { PinsView } from './pinsView';
 import { ModlogView } from './modlogView';
 import { VerificationView } from './verificationView';
+import { Emojis } from '#util/constants';
+import { inlineCode } from '@discordjs/builders';
 import Client from '#src/Client';
 
 export class OverviewView {
@@ -23,6 +25,12 @@ export class OverviewView {
                 description: 'Display the value of every configuration option.',
                 emoji: '🔍',
                 default: true,
+            },
+            {
+                label: 'Prefix',
+                value: 'configPrefix',
+                description: 'View or modify the prefix that the bot will respond to.',
+                emoji: '👂',
             },
             {
                 label: 'Verification',
@@ -41,12 +49,6 @@ export class OverviewView {
                 value: 'configPins',
                 description: 'Toggle the ability for all users to pin messages.',
                 emoji: '📌',
-            },
-            {
-                label: 'Prefix',
-                value: 'configPrefix',
-                description: 'View or modify the prefix that the bot will respond to.',
-                emoji: '👂',
             },
         ])
     );
@@ -84,35 +86,21 @@ export class OverviewView {
 
     static async generateConfigViewEmbed(guild: Guild): Promise<MessageEmbed> {
         const { prefix, enableModlog, modlogChannelId, enablePins, enableVerification } = await GuildConfigCache.fetchOrCreate(guild.id);
+
+        const maxInfoLabelLength = 15;
+        const enabledString = `${Emojis.GreenCheck} Enabled`;
+        const disabledString = `${Emojis.RedCross} Disabled`;
+
         const embed = new MessageEmbed()
             .setTitle(`Bot Config for ${guild.name}`)
             .setColor('BLUE')
             .setDescription(
-                `Here are the values of every bot configuration option. Use the dropdown below to find out more about each individual option and to modify options.`
-            )
-            .addFields(
-                {
-                    name: 'Prefix',
-                    value: prefix,
-                    inline: true,
-                },
-                {
-                    name: 'Verification',
-                    value: enableVerification ? 'Enabled' : 'Disabled',
-                    inline: true,
-                },
-                {
-                    name: 'Moderation Logging',
-                    value: enableModlog
-                        ? `Enabled.\nModlog Channel: ${modlogChannelId ? `<#${modlogChannelId}>` : 'no channel set'}`
-                        : 'Disabled',
-                    inline: true,
-                },
-                {
-                    name: 'Pins',
-                    value: enablePins ? 'Enabled' : 'Disabled',
-                    inline: true,
-                }
+                `${this.formatLabel('Prefix', maxInfoLabelLength)} ${prefix}
+                ${this.formatLabel('Verification', maxInfoLabelLength)} ${enableVerification ? enabledString : disabledString}
+                ${this.formatLabel('Modlog', maxInfoLabelLength)} ${enableModlog ? enabledString : disabledString}
+                ${this.formatLabel('Modlog Channel', maxInfoLabelLength)} ${modlogChannelId ? `<#${modlogChannelId}>` : 'no channel set'}
+                ${this.formatLabel('Pins', maxInfoLabelLength)} ${enablePins ? enabledString : disabledString}
+                `
             )
             .setTimestamp();
 
@@ -147,5 +135,9 @@ export class OverviewView {
                     throw e;
                 }
             });
+    }
+
+    static formatLabel(label: string, length: number): string {
+        return inlineCode(`${label.padStart(length)}:`) + ' ';
     }
 }
