@@ -6,8 +6,8 @@ import { Command } from '../Command';
 export abstract class ChatCommand extends Command {
     description: string;
     category: Category;
-    isTextCommand = true;
-    isSlashCommand = true;
+    isTextCommand: boolean;
+    isSlashCommand: boolean;
     isContextMenuCommand = false;
 
     constructor(client: Client, options: ChatCommandOptions) {
@@ -15,6 +15,8 @@ export abstract class ChatCommand extends Command {
 
         this.description = options.description;
         this.category = options.category;
+        this.isTextCommand = options.isTextCommand ?? true;
+        this.isSlashCommand = options.isSlashCommand ?? true;
     }
 
     abstract execute(
