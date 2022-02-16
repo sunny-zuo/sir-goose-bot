@@ -7,14 +7,15 @@ import {
     MessageEmbed,
     MessageSelectMenu,
 } from 'discord.js';
-import { GuildConfigCache } from '#util/guildConfigCache';
+import Client from '#src/Client';
+import { inlineCode } from '@discordjs/builders';
 import { PrefixView } from './prefixView';
 import { PinsView } from './pinsView';
 import { ModlogView } from './modlogView';
 import { VerificationView } from './verificationView';
 import { Emojis } from '#util/constants';
-import { inlineCode } from '@discordjs/builders';
-import Client from '#src/Client';
+import { getUser } from '#util/user';
+import { GuildConfigCache } from '#util/guildConfigCache';
 
 export class OverviewView {
     static readonly optionSelectMenu = new MessageActionRow().addComponents(
@@ -62,7 +63,7 @@ export class OverviewView {
         await this.listenForViewSelect(interaction.message as Message, filter);
     }
 
-    static async initialRender(client: Client, interaction: CommandInteraction): Promise<void> {
+    static async initialRender(client: Client, interaction: CommandInteraction | Message): Promise<void> {
         const configMenu = (await interaction.reply({
             embeds: [await this.generateConfigViewEmbed(interaction.guild!)],
             components: [this.optionSelectMenu],
@@ -70,9 +71,8 @@ export class OverviewView {
         })) as Message;
 
         const filter = (i: MessageComponentInteraction) => {
-            if (i.user.id === interaction.user.id) return true;
+            if (i.user.id === getUser(interaction).id) return true;
             else {
-                // TODO: refactor logging to remove the need to pass client around
                 i.reply({
                     embeds: [new MessageEmbed().setDescription("This dropdown isn't for you!").setColor('RED')],
                     ephemeral: true,
