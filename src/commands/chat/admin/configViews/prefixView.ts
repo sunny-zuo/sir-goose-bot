@@ -37,7 +37,13 @@ export class PrefixView {
                         break;
                 }
             })
-            .catch(async () => await message.edit({ components: [] }));
+            .catch(async (e) => {
+                if (e.message === 'INTERACTION_COLLECTOR_ERROR') {
+                    await message.edit({ components: [] });
+                } else {
+                    throw e;
+                }
+            });
     }
 
     static async renderPrefixChange(
@@ -113,7 +119,13 @@ export class PrefixView {
                                 break;
                         }
                     })
-                    .catch(async () => await successMessage.edit({ components: [] }));
+                    .catch(async (e) => {
+                        if (e.message === 'INTERACTION_COLLECTOR_ERROR') {
+                            await successMessage.edit({ components: [] });
+                        } else {
+                            throw e;
+                        }
+                    });
             }
         });
 
