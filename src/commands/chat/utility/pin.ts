@@ -12,6 +12,7 @@ import {
 } from 'discord.js';
 import { GuildConfigCache } from '#util/guildConfigCache';
 import { Modlog } from '#util/modlog';
+import { inlineCode } from '@discordjs/builders';
 
 export class Pin extends ChatCommand {
     private static readonly options: ApplicationCommandOption[] = [
@@ -43,7 +44,9 @@ export class Pin extends ChatCommand {
             await this.sendErrorEmbed(
                 interaction,
                 'Pinning Disabled',
-                `The pin command is not enabled on a server. If you have server moderation permissions, use \`${config.prefix}config enable_pins true\` to enable pins.`
+                `The pin command is not enabled on this server. If you have server moderation permissions, use ${inlineCode(
+                    '/config'
+                )} to enable pins.`
             );
             return;
         }

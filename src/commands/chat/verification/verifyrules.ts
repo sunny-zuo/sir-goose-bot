@@ -11,7 +11,7 @@ import Client from '#src/Client';
 import { GuildConfigCache } from '#util/guildConfigCache';
 import { VerificationRule, RoleData, VerificationImport } from '#types/Verification';
 import { serializeVerificationRules } from '#util/verification';
-import { codeBlock } from '@discordjs/builders';
+import { codeBlock, inlineCode } from '@discordjs/builders';
 
 export class VerifyRules extends ChatCommand {
     private static readonly options: ApplicationCommandOption[] = [
@@ -113,7 +113,7 @@ export class VerifyRules extends ChatCommand {
 
             const embed = new MessageEmbed().setColor('GREEN').setTitle('Verification Rules Updated Successfully')
                 .setDescription(`Verification is ${
-                config.enableVerification ? 'enabled' : `disabled. Enable it using \`${config.prefix}config enable_verification true\``
+                config.enableVerification ? 'enabled' : `disabled. Enable it using ${inlineCode('/config')}`
             }. [Create a ruleset.](https://sebot.sunnyzuo.com/)
                 ${codeBlock(serializeVerificationRules(config.verificationRules))}`);
 
@@ -122,7 +122,7 @@ export class VerifyRules extends ChatCommand {
             const config = await GuildConfigCache.fetchConfig(interaction.guild!.id);
 
             const embed = new MessageEmbed().setColor('GREEN').setTitle('Verification Rules').setDescription(`Verification is ${
-                config.enableVerification ? 'enabled' : `disabled. Enable it using \`${config.prefix}config enable_verification true\``
+                config.enableVerification ? 'enabled' : `disabled. Enable it using ${inlineCode('/config')}`
             }. [Create a ruleset.](https://sebot.sunnyzuo.com/)
                 ${codeBlock(serializeVerificationRules(config.verificationRules))}`);
 

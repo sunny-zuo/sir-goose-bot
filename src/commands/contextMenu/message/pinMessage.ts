@@ -3,6 +3,7 @@ import Client from '#src/Client';
 import { GuildConfigCache } from '#util/guildConfigCache';
 import { Modlog } from '#util/modlog';
 import { ContextMenuCommand } from '../ContextMenuCommand';
+import { inlineCode } from '@discordjs/builders';
 
 export class PinMessage extends ContextMenuCommand {
     constructor(client: Client) {
@@ -27,7 +28,9 @@ export class PinMessage extends ContextMenuCommand {
             await this.sendErrorEmbed(
                 interaction,
                 'Pinning Disabled',
-                `The pin command is not enabled on a server. If you have server moderation permissions, use \`${config.prefix}config enable_pins true\` to enable pins.`,
+                `The pin command is not enabled on this server. If you have server moderation permissions, use ${inlineCode(
+                    '/config'
+                )} to enable pins.`,
                 true
             );
             return;
