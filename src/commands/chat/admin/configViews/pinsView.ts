@@ -32,7 +32,7 @@ export class PinsView {
 
         const message = interaction.message as Message;
         await message
-            .awaitMessageComponent({ filter, componentType: 'BUTTON', time: 1000 * 60 * 5 })
+            .awaitMessageComponent({ filter, componentType: 'BUTTON', time: 1000 * 5 })
             .then(async (i) => {
                 if (!i.isButton()) return;
 
@@ -53,7 +53,7 @@ export class PinsView {
                 }
             })
             .catch(async (e) => {
-                if (e.message === 'INTERACTION_COLLECTOR_ERROR') {
+                if (e.name === 'Error [INTERACTION_COLLECTOR_ERROR]') {
                     await message.edit({ components: [] });
                 } else {
                     throw e;

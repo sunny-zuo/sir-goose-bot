@@ -64,7 +64,13 @@ export class ModlogView {
                         break;
                 }
             })
-            .catch(async () => await message.edit({ components: [] }));
+            .catch(async (e) => {
+                if (e.name === 'Error [INTERACTION_COLLECTOR_ERROR]') {
+                    await message.edit({ components: [] });
+                } else {
+                    throw e;
+                }
+            });
     }
 
     static async renderChannelChange(
@@ -147,7 +153,13 @@ export class ModlogView {
                                     break;
                             }
                         })
-                        .catch(async () => await successMessage.edit({ components: [] }));
+                        .catch(async (e) => {
+                            if (e.name === 'Error [INTERACTION_COLLECTOR_ERROR]') {
+                                await successMessage.edit({ components: [] });
+                            } else {
+                                throw e;
+                            }
+                        });
                 } else {
                     const embed = new MessageEmbed()
                         .setDescription(
