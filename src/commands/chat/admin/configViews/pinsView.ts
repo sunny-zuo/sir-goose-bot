@@ -32,7 +32,7 @@ export class PinsView {
 
         const message = interaction.message as Message;
         await message
-            .awaitMessageComponent({ filter, componentType: 'BUTTON', time: 1000 * 5 })
+            .awaitMessageComponent({ filter, componentType: 'BUTTON', time: 1000 * 60 * 5 })
             .then(async (i) => {
                 if (!i.isButton()) return;
 
