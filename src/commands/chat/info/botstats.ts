@@ -21,7 +21,7 @@ export class BotStats extends ChatCommand {
             cooldownSeconds: 5,
         });
 
-        this.latestCommit = execSync('git rev-parse HEAD').toString().trim().substr(0, 7);
+        this.latestCommit = execSync('git rev-parse HEAD').toString().trim().substring(0, 7);
     }
 
     async execute(interaction: Message | CommandInteraction): Promise<void> {
