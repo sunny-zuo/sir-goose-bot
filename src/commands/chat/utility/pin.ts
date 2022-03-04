@@ -13,6 +13,8 @@ import {
 import { GuildConfigCache } from '#util/guildConfigCache';
 import { Modlog } from '#util/modlog';
 import { inlineCode } from '@discordjs/builders';
+import { attemptPin } from '#util/pin';
+import { sendEphemeralReply } from '#util/message';
 
 export class Pin extends ChatCommand {
     private static readonly options: ApplicationCommandOption[] = [
@@ -101,32 +103,53 @@ export class Pin extends ChatCommand {
             return;
         }
 
-        if (pinMessage.pinned) {
-            await this.sendErrorEmbed(interaction, 'Pin Error', 'This message is already pinned.');
-            return;
+        const pinResult = await attemptPin(pinMessage);
+
+        if (pinResult.success) {
+            if (!this.isMessage(interaction)) {
+                this.client.log.info(
+                    `${this.getUser(interaction).tag} pinned message with id ${pinMessageId} in server ${interaction.guild} (${
+                        interaction.guildId
+                    }) using the pin command in channel ${pinMessage.channel.id}.`
+                );
+
+                await interaction.reply({
+                    embeds: [new MessageEmbed().setTitle('Message Successfully Pinned').setColor('GREEN')],
+                    ephemeral: true,
+                });
+
+                await Modlog.logUserAction(
+                    this.client,
+                    interaction.guild,
+                    this.getUser(interaction),
+                    `${interaction.member} pinned [a message](${pinMessage.url}) using the pin command in ${pinMessage.channel}.`,
+                    'BLUE'
+                );
+            }
+        } else {
+            let errorDescription;
+
+            switch (pinResult.error) {
+                case 'ALREADY_PINNED':
+                    errorDescription = 'The message is already pinned.';
+                    break;
+                case 'CHANNEL_NOT_VIEWABLE':
+                    errorDescription = 'I do not have access to view the channel containing the message you are trying to pin.';
+                    break;
+                case 'MISSING_PERMISSIONS':
+                    errorDescription = 'I need the `Manage Messages` permission to pin this message.';
+                    break;
+                case 'SYSTEM_MESSAGE':
+                    errorDescription = 'System messages (messages sent by Discord) cannot be pinned.';
+                    break;
+                default:
+                    this.client.log.error(pinResult.error);
+                    errorDescription = 'We ran into an unknown error trying to pin this message.';
+            }
+
+            const embed = new MessageEmbed().setDescription(errorDescription).setColor('RED');
+
+            await sendEphemeralReply(interaction, { embeds: [embed] });
         }
-
-        await pinMessage.pin();
-
-        if (!this.isMessage(interaction)) {
-            await interaction.reply({
-                embeds: [new MessageEmbed().setTitle('Message Successfully Pinned').setColor('GREEN')],
-                ephemeral: true,
-            });
-        }
-
-        await Modlog.logUserAction(
-            this.client,
-            interaction.guild,
-            this.getUser(interaction),
-            `${interaction.member} pinned [a message](${pinMessage.url}) using the pin command in ${pinMessage.channel}.`,
-            'BLUE'
-        );
-
-        this.client.log.info(
-            `${this.getUser(interaction).tag} pinned message with id ${pinMessageId} in server ${interaction.guild} (${
-                interaction.guildId
-            }) using the pin command in channel ${pinMessage.channel.id}.`
-        );
     }
 }
