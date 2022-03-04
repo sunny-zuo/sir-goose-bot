@@ -21,7 +21,7 @@ export class Countdown extends ChatCommand {
             const currentTerm = await axios
                 .get('https://openapi.data.uwaterloo.ca/v3/Terms/current', {
                     headers: {
-                        'X-API-KEY': process.env.UW_API_KEY,
+                        'X-API-KEY': `${process.env.UW_API_KEY}`,
                     },
                 })
                 .then((response) => response.data);
@@ -31,7 +31,7 @@ export class Countdown extends ChatCommand {
             const importantDates = await axios
                 .get('https://openapi.data.uwaterloo.ca/v3/ImportantDates', {
                     headers: {
-                        'X-API-KEY': process.env.UW_API_KEY,
+                        'X-API-KEY': `${process.env.UW_API_KEY}`,
                     },
                 })
                 .then((response) => response.data);
