@@ -3,6 +3,7 @@ import mongoose from 'mongoose';
 import { Intents, PartialTypes } from 'discord.js';
 import Client from './Client';
 import { RoleAssignmentService } from './services/roleAssignmentService';
+import { logger } from '#util/logger';
 
 dotenv.config();
 
@@ -17,10 +18,10 @@ async function init(): Promise<void> {
     await mongoose
         .connect(`${process.env.MONGO_URI}`)
         .then(() => {
-            client.log.info('Successfully connected to MongoDB database');
+            logger.info('Successfully connected to MongoDB database');
         })
         .catch((e) => {
-            client.log.error(`Failed to connect to MongoDB database: ${e}`);
+            logger.error(e, e.message);
         });
 
     RoleAssignmentService.parseCustomImports(client);

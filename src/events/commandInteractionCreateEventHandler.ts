@@ -1,6 +1,7 @@
 import { Interaction, Permissions } from 'discord.js';
 import { EventHandler } from './eventHandler';
 import Client from '#src/Client';
+import { logger } from '#util/logger';
 
 export class CommandInteractionCreateEventHandler implements EventHandler {
     readonly eventName = 'interactionCreate';
@@ -21,10 +22,13 @@ export class CommandInteractionCreateEventHandler implements EventHandler {
         if (!command.isSlashCommand) return;
         if (interaction.guild && interaction.guild.available === false) return;
         if (command.isRateLimited(interaction.user.id)) {
-            this.client.log.info(
-                `${interaction.user.tag} tried to use ${command.name} in ${interaction.guild?.name ?? 'DMs'} (${
-                    interaction.guild?.id ?? 'none'
-                }) but was rate limited.`
+            logger.info(
+                {
+                    ratelimit: { type: 'command', name: command.name },
+                    guild: { id: interaction.guild?.id ?? 'none' },
+                    user: { id: interaction.user.id },
+                },
+                'User was ratelimited on a command interaction'
             );
 
             await interaction.reply({
@@ -55,31 +59,23 @@ export class CommandInteractionCreateEventHandler implements EventHandler {
                         content:
                             'I tried to respond to your command, but I do not have permission to view the channel, send messages and/or embed links in the channel the command was triggered in.',
                     })
-                    .catch(() =>
-                        client.log.info(
-                            `${interaction.user.tag} has DMs closed and triggered a command in a channel (${interaction.channelId} in ${interaction.guildId}) I can't respond in.`
-                        )
-                    );
+                    .catch(() => undefined);
             }
 
             return;
         }
 
-        client.log.command(
-            `${interaction.user.tag} (${interaction.user.id}) ran command "${interaction.commandName}" in server ${
-                interaction?.guild?.name || 'DMs'
-            } (${interaction?.guild?.id || 'DMs'}) ${(args.data.length > 0 && `with arguments`) || 'without arguments'} via slash command`
+        logger.info(
+            {
+                command: { name: command.name },
+                guild: { id: interaction.guild?.id ?? 'none' },
+                user: { id: interaction.user.id },
+            },
+            `Executing command interaction ${command.name}`
         );
 
         command.execute(interaction, args).catch((error) => {
-            client.log.error(
-                `
-                Command: ${command.name}
-                Arguments: ${JSON.stringify(args.data, (key, value) => (typeof value === 'bigint' ? value.toString() : value))}
-                Error: ${error}
-                `,
-                error.stack
-            );
+            logger.error(error, error.message);
         });
     }
 }

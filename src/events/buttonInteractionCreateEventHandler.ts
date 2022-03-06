@@ -3,6 +3,7 @@ import { EventHandler } from './eventHandler';
 import ButtonInteractionHandlers from '../interactions/button';
 import { ButtonInteractionHandler } from '../interactions/button/buttonInteractionHandler';
 import Client from '#src/Client';
+import { logger } from '#util/logger';
 
 export class ButtonInteractionCreateEventHandler implements EventHandler {
     readonly eventName = 'interactionCreate';
@@ -21,10 +22,13 @@ export class ButtonInteractionCreateEventHandler implements EventHandler {
     async execute(interaction: Interaction): Promise<void> {
         if (!interaction.isButton()) return;
 
-        this.client.log.info(
-            `BUTTON ${interaction.user.tag} (${interaction.user.id}) pressed button with custom id ${interaction.customId} in ${
-                interaction.guild?.name ?? 'DMs'
-            } (${interaction.guild?.id ?? 'none'})`
+        logger.info(
+            {
+                button: { customId: interaction.customId },
+                guild: { id: interaction.guild?.id ?? 'none' },
+                user: { id: interaction.user.id },
+            },
+            `Processing button interaction ${interaction.customId}`
         );
 
         const [interactionName, args] = interaction.customId.split('|');
@@ -35,14 +39,7 @@ export class ButtonInteractionCreateEventHandler implements EventHandler {
             const userLimit = handler.cooldown.checkLimit(interaction.user.id);
             if (!userLimit.blocked) {
                 handler.execute(interaction, args).catch((e) => {
-                    this.client.log.error(
-                        `
-                        Button ID: ${interaction.customId}
-                        User ID: ${interaction.user.id}
-                        Error: ${e}
-                        `,
-                        e.stack
-                    );
+                    logger.error(e, e.message);
                 });
             } else {
                 const embed = new MessageEmbed()
@@ -56,10 +53,13 @@ export class ButtonInteractionCreateEventHandler implements EventHandler {
 
                 await interaction.reply({ embeds: [embed], ephemeral: true });
 
-                this.client.log.info(
-                    `${interaction.user.tag} tried to use interact with button ${handler.customId} in ${
-                        interaction.guild?.name ?? 'DMs'
-                    } (${interaction.guild?.id ?? 'none'}) but was rate limited.`
+                logger.info(
+                    {
+                        ratelimit: { type: 'button', name: handler.customId },
+                        guild: { id: interaction.guild?.id ?? 'none' },
+                        user: { id: interaction.user.id },
+                    },
+                    'User was ratelimited on a button interaction'
                 );
             }
         }

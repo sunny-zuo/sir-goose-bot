@@ -3,6 +3,7 @@ import Client from '#src/Client';
 import { Role } from 'discord.js';
 import { Modlog } from '#util/modlog';
 import { GuildConfigCache } from '#util/guildConfigCache';
+import { logger } from '#util/logger';
 import ButtonRoleModel from '../models/buttonRole.model';
 
 export class RoleDeleteEventHandler implements EventHandler {
@@ -28,16 +29,21 @@ export class RoleDeleteEventHandler implements EventHandler {
             for (const rule of verificationRules) {
                 for (const role of rule.roles) {
                     if (role.id === deletedRole.id) {
+                        logger.info(
+                            {
+                                event: { name: this.eventName },
+                                role: { id: deletedRole.id, name: deletedRole.name },
+                                guild: { id: guild.id },
+                            },
+                            'A role used for verification was deleted.'
+                        );
+
                         await Modlog.logInfoMessage(
                             this.client,
                             guild,
                             'Verification Role Deleted',
                             `The role \`${deletedRole.name}\` was setup to be one of the roles assigned in the server's verification rules, but is now deleted. Please update the verification rules!`,
                             'RED'
-                        );
-
-                        this.client.log.info(
-                            `A role named ${deletedRole.name} that was used for verification was deleted in ${guild.name} (${guild.id}).`
                         );
                         return;
                     }

@@ -6,6 +6,7 @@ import GuildConfigModel from '#models/guildConfig.model';
 import ButtonRoleModel from '#models/buttonRole.model';
 import { GuildConfigCache } from '#util/guildConfigCache';
 import { v4 as uuidv4 } from 'uuid';
+import { logger } from '#util/logger';
 
 export class RoleUpdateEventHandler implements EventHandler {
     readonly eventName = 'roleUpdate';
@@ -43,16 +44,23 @@ export class RoleUpdateEventHandler implements EventHandler {
             }
 
             if (didRulesUpdate) {
+                logger.info(
+                    {
+                        event: { name: this.eventName },
+                        role: { id: newRole.id, oldName: oldRole.name, newName: newRole.name },
+                        guild: { id: guild.id },
+                    },
+                    'Automatically updating renamed role in verification rules'
+                );
+
                 await config.save();
+
                 await Modlog.logInfoMessage(
                     this.client,
                     guild,
                     'Verification Role Updated',
                     `The role \`${oldRole.name}\` is used for verification, and was renamed to \`${newRole.name}\`. The server's verification rules have automatically updated to reflect this change.`,
                     'GREEN'
-                );
-                this.client.log.info(
-                    `Role ${oldRole.name} was renamed to ${newRole.name} in ${guild.name} (${guild.id}) and was automatically updated in verification rules.`
                 );
             }
         }
@@ -61,7 +69,7 @@ export class RoleUpdateEventHandler implements EventHandler {
     async promptUpdateVerificationRules(oldRole: Role, newRole: Role): Promise<void> {
         // this check is in place so that this function will only be called for pseudo role creation events
         if (oldRole.name !== 'new role' || newRole.name === 'new role') return;
-
+        // TODO: refactor to use a single method for roleUpdate and roleCreate rather than duplicating the code in checkVerificationRules
         const guild = newRole.guild;
         const config = await GuildConfigCache.fetchConfig(guild.id);
 
@@ -145,8 +153,9 @@ export class RoleUpdateEventHandler implements EventHandler {
                             .setTimestamp();
 
                         await i.update({ embeds: [updatedEmbed], components: [] });
-                        this.client.log.info(
-                            `Newly created role ${newRole.name} matching verification rules was automatically updated by ${i.user.tag} in ${guild.name} (${guild.id}).`
+                        logger.info(
+                            { event: { name: this.eventName }, role: { id: newRole.id, name: newRole.name }, guild: { id: guild.id } },
+                            'Newly created role matching verification rules was automatically updated'
                         );
                         validInteractionReceived = true;
                         collector.stop();
@@ -161,8 +170,9 @@ export class RoleUpdateEventHandler implements EventHandler {
                         .setTimestamp();
 
                     await i.update({ embeds: [updatedEmbed], components: [] });
-                    this.client.log.info(
-                        `Newly created role ${newRole.name} matching verification rules was set to not automatically update by ${i.user.tag} in ${guild.name} (${guild.id}).`
+                    logger.info(
+                        { event: { name: this.eventName }, role: { id: newRole.id, name: newRole.name }, guild: { id: guild.id } },
+                        'Newly created role matching verification rules was set to not automatically update'
                     );
                     validInteractionReceived = true;
                     collector.stop();
@@ -171,6 +181,11 @@ export class RoleUpdateEventHandler implements EventHandler {
 
             collector.on('end', async () => {
                 if (!validInteractionReceived) {
+                    logger.info(
+                        { event: { name: this.eventName }, role: { id: newRole.id, name: newRole.name }, guild: { id: guild.id } },
+                        'Prompt to update newly created role matching verification rules was ignored'
+                    );
+
                     const embed = new MessageEmbed()
                         .setTitle('New Role Created')
                         .setColor('BLUE')
@@ -180,9 +195,6 @@ export class RoleUpdateEventHandler implements EventHandler {
                         .setTimestamp();
 
                     await message.edit({ embeds: [embed], components: [] });
-                    this.client.log.info(
-                        `Prompt to update newly created role ${newRole.name} matching verification rules was ignored in ${guild.name} (${guild.id}).`
-                    );
                 }
             });
         }
@@ -196,6 +208,16 @@ export class RoleUpdateEventHandler implements EventHandler {
         if (!prompts || !prompts.length) return;
 
         for (const prompt of prompts) {
+            logger.info(
+                {
+                    event: { name: this.eventName },
+                    role: { id: newRole.id, oldName: oldRole.name, newName: newRole.name },
+                    guild: { id: guild.id },
+                    document: { id: prompt._id },
+                },
+                'Updating renamed role in button role prompt'
+            );
+
             prompt.roles.find((r) => r.name === oldRole.name)!.name = newRole.name;
             await prompt.save();
 
