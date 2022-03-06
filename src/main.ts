@@ -1,11 +1,10 @@
 import dotenv from 'dotenv';
+dotenv.config();
 import mongoose from 'mongoose';
 import { Intents, PartialTypes } from 'discord.js';
 import Client from './Client';
 import { RoleAssignmentService } from './services/roleAssignmentService';
 import { logger } from '#util/logger';
-
-dotenv.config();
 
 const intents = new Intents();
 intents.add('GUILDS', 'GUILD_MEMBERS', 'GUILD_MESSAGES', 'GUILD_MESSAGE_REACTIONS', 'DIRECT_MESSAGES', 'DIRECT_MESSAGE_REACTIONS');
