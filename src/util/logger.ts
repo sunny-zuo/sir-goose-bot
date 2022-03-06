@@ -4,7 +4,7 @@ const transport =
     process.env.NODE_ENV === 'production'
         ? pino.transport({
               target: 'pino/file',
-              options: { destination: './logs.json' },
+              options: { destination: './logs' },
           })
         : pino.transport({
               target: 'pino-pretty',
