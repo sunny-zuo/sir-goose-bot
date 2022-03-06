@@ -1,8 +1,13 @@
 import pino from 'pino';
 
-const transport = pino.transport({
-    target: 'pino/file',
-    options: { destination: './logs.json' },
-});
+const transport =
+    process.env.NODE_ENV === 'production'
+        ? pino.transport({
+              target: 'pino/file',
+              options: { destination: './logs.json' },
+          })
+        : pino.transport({
+              target: 'pino-pretty',
+          });
 
 export const logger = pino(transport);
