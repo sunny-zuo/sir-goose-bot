@@ -117,7 +117,7 @@ export class MessageCreateEventHandler implements EventHandler {
                 } else {
                     logger.info(
                         {
-                            command: { name: command.name },
+                            command: { name: command.name, source: 'message' },
                             guild: { id: message.guild?.id ?? 'none' },
                             user: { id: message.author.id },
                         },
@@ -138,7 +138,7 @@ export class MessageCreateEventHandler implements EventHandler {
 
                 logger.info(
                     {
-                        command: { name: command.name },
+                        command: { name: command.name, source: 'message' },
                         guild: { id: message.guild?.id ?? 'none' },
                         user: { id: message.author.id },
                     },
@@ -163,7 +163,7 @@ export class MessageCreateEventHandler implements EventHandler {
         } else {
             logger.info(
                 {
-                    command: { name: command.name },
+                    command: { name: command.name, source: 'message' },
                     guild: { id: message.guild?.id ?? 'none' },
                     user: { id: message.author.id },
                 },

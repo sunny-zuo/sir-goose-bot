@@ -67,7 +67,7 @@ export class CommandInteractionCreateEventHandler implements EventHandler {
 
         logger.info(
             {
-                command: { name: command.name },
+                command: { name: command.name, source: 'slash' },
                 guild: { id: interaction.guild?.id ?? 'none' },
                 user: { id: interaction.user.id },
             },

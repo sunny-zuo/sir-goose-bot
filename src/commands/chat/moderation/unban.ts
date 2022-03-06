@@ -13,6 +13,7 @@ import UserModel from '#models/user.model';
 import { Modlog } from '#util/modlog';
 import { chunk } from '#util/array';
 import { GuildConfigCache } from '#util/guildConfigCache';
+import { logger } from '#util/logger';
 
 export class Unban extends ChatCommand {
     private static readonly options: ApplicationCommandOption[] = [
@@ -155,8 +156,10 @@ export class Unban extends ChatCommand {
             await Modlog.logMessage(this.client, interaction.guild, { embeds });
         }
 
-        this.client.log.info(
-            `User ${this.getUser(interaction).tag} unbanned user ID ${providedUserId} in server ${guild.name} (${guild.id}).`
-        );
+        logger.info({
+            moderation: { action: 'unban', userId: providedUserId },
+            guild: { id: guild.id },
+            user: { id: this.getUser(interaction).id },
+        });
     }
 }

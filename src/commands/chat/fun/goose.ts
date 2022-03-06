@@ -2,6 +2,7 @@ import { ChatCommand } from '../ChatCommand';
 import Client from '#src/Client';
 import { CommandInteraction, Message, MessageEmbed } from 'discord.js';
 import axios from 'axios';
+import { logger } from '#util/logger';
 
 export class Goose extends ChatCommand {
     constructor(client: Client) {
@@ -23,7 +24,7 @@ export class Goose extends ChatCommand {
 
             await interaction.reply({ embeds: [embed] });
         } catch (e) {
-            this.client.log.error(`Error querying unsplash API for goose image: ${e.message}`, e.stack);
+            logger.error(e, e.message);
 
             await interaction.reply({ content: 'We ran into an error fetching a random goose image. Please try again later.' });
         }

@@ -24,7 +24,7 @@ async function init(): Promise<void> {
             logger.error(e, e.message);
         });
 
-    RoleAssignmentService.parseCustomImports(client);
+    RoleAssignmentService.parseCustomImports();
 
     await client.login(process.env.DISCORD_TOKEN);
 }

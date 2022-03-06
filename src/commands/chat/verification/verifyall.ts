@@ -3,6 +3,7 @@ import Client from '#src/Client';
 import { ChatCommand } from '../ChatCommand';
 import { GuildConfigCache } from '#util/guildConfigCache';
 import { RoleAssignmentService } from '../../../services/roleAssignmentService';
+import { logger } from '#util/logger';
 
 export class VerifyAll extends ChatCommand {
     constructor(client: Client) {
@@ -71,7 +72,7 @@ export class VerifyAll extends ChatCommand {
             }
         } catch (e) {
             clearInterval(updateInterval);
-            this.client.log.error(`Unknown error when trying to verify all: ${e}`);
+            logger.error(e, e.message);
             await message.edit({
                 embeds: [
                     new MessageEmbed().setTitle('Unknown Error').setDescription(`

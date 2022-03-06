@@ -15,6 +15,7 @@ import { Modlog } from '#util/modlog';
 import { inlineCode } from '@discordjs/builders';
 import { attemptPin } from '#util/pin';
 import { sendEphemeralReply } from '#util/message';
+import { logger } from '#util/logger';
 
 export class Pin extends ChatCommand {
     private static readonly options: ApplicationCommandOption[] = [
@@ -105,14 +106,14 @@ export class Pin extends ChatCommand {
 
         const pinResult = await attemptPin(pinMessage);
 
+        logger.info({
+            pin: { messageId: pinMessageId, source: 'message' },
+            guild: { id: interaction.guild?.id ?? 'none' },
+            user: { id: this.getUser(interaction).id },
+        });
+
         if (pinResult.success) {
             if (!this.isMessage(interaction)) {
-                this.client.log.info(
-                    `${this.getUser(interaction).tag} pinned message with id ${pinMessageId} in server ${interaction.guild} (${
-                        interaction.guildId
-                    }) using the pin command in channel ${pinMessage.channel.id}.`
-                );
-
                 await interaction.reply({
                     embeds: [new MessageEmbed().setTitle('Message Successfully Pinned').setColor('GREEN')],
                     ephemeral: true,
@@ -143,7 +144,7 @@ export class Pin extends ChatCommand {
                     errorDescription = 'System messages (messages sent by Discord) cannot be pinned.';
                     break;
                 default:
-                    this.client.log.error(pinResult.error);
+                    logger.error(pinResult.error);
                     errorDescription = 'We ran into an unknown error trying to pin this message.';
             }
 

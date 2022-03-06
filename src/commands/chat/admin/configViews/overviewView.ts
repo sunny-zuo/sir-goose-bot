@@ -16,6 +16,7 @@ import { VerificationView } from './verificationView';
 import { Emojis } from '#util/constants';
 import { getUser } from '#util/user';
 import { GuildConfigCache } from '#util/guildConfigCache';
+import { logger } from '#util/logger';
 
 export class OverviewView {
     static readonly optionSelectMenu = new MessageActionRow().addComponents(
@@ -76,7 +77,7 @@ export class OverviewView {
                 i.reply({
                     embeds: [new MessageEmbed().setDescription("This dropdown isn't for you!").setColor('RED')],
                     ephemeral: true,
-                }).catch((e) => client.log.error(`Error responding to invalid component interaction: ${e}`));
+                }).catch((e) => logger.error(e, e.message));
                 return false;
             }
         };
