@@ -1,5 +1,8 @@
 import express, { Express } from 'express';
 import path from 'path';
+import pino from 'pino';
+import pinoHttp from 'pino-http';
+import { logger } from '#util/logger';
 import Client from '#src/Client';
 import indexRouter from './routes/index';
 import verifyRouter from './routes/verify';
@@ -22,6 +25,8 @@ export class WebApp {
     init(): void {
         const app = this.app;
 
+        app.use(pinoHttp({ logger: pino() }));
+
         app.use((req, _res, next) => {
             req.client = this.client;
             next();
@@ -33,7 +38,7 @@ export class WebApp {
         app.use('/verify', verifyRouter);
 
         app.listen(process.env.PORT, () => {
-            this.client.log.info(`Web app is listening on port ${process.env.PORT}`);
+            logger.info(`Web app is listening on port ${process.env.PORT}`);
         });
     }
 }

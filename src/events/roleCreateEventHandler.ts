@@ -5,6 +5,7 @@ import { Modlog } from '#util/modlog';
 import { GuildConfigCache } from '#util/guildConfigCache';
 import { v4 as uuidv4 } from 'uuid';
 import GuildConfigModel from '#models/guildConfig.model';
+import { logger } from '#util/logger';
 
 export class RoleCreateEventHandler implements EventHandler {
     readonly eventName = 'roleCreate';
@@ -102,8 +103,9 @@ export class RoleCreateEventHandler implements EventHandler {
                             .setTimestamp();
 
                         await i.update({ embeds: [updatedEmbed], components: [] });
-                        this.client.log.info(
-                            `Newly created role ${newRole.name} matching verification rules was automatically updated by ${i.user.tag} in ${guild.name} (${guild.id}).`
+                        logger.info(
+                            { event: { name: this.eventName }, role: { id: newRole.id, name: newRole.name }, guild: { id: guild.id } },
+                            'Newly created role matching verification rules was automatically updated'
                         );
                         validInteractionReceived = true;
                         collector.stop();
@@ -118,8 +120,10 @@ export class RoleCreateEventHandler implements EventHandler {
                         .setTimestamp();
 
                     await i.update({ embeds: [updatedEmbed], components: [] });
-                    this.client.log.info(
-                        `Newly created role ${newRole.name} matching verification rules was set to not automatically update by ${i.user.tag} in ${guild.name} (${guild.id}).`
+
+                    logger.info(
+                        { event: { name: this.eventName }, role: { id: newRole.id, name: newRole.name }, guild: { id: guild.id } },
+                        'Newly created role matching verification rules was set to not automatically update'
                     );
                     validInteractionReceived = true;
                     collector.stop();
@@ -128,6 +132,11 @@ export class RoleCreateEventHandler implements EventHandler {
 
             collector.on('end', async () => {
                 if (!validInteractionReceived) {
+                    logger.info(
+                        { event: { name: this.eventName }, role: { id: newRole.id, name: newRole.name }, guild: { id: guild.id } },
+                        'Prompt to update newly created role matching verification rules was ignored'
+                    );
+
                     const embed = new MessageEmbed()
                         .setTitle('New Role Created')
                         .setColor('BLUE')
@@ -137,10 +146,6 @@ export class RoleCreateEventHandler implements EventHandler {
                         .setTimestamp();
 
                     await message.edit({ embeds: [embed], components: [] });
-
-                    this.client.log.info(
-                        `Prompt to update newly created role ${newRole.name} matching verification rules was ignored in ${guild.name} (${guild.id}).`
-                    );
                 }
             });
         }

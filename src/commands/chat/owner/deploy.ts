@@ -8,6 +8,7 @@ import {
 } from 'discord.js';
 import Client from '#src/Client';
 import { ChatCommand } from '../ChatCommand';
+import { logger } from '#util/logger';
 
 export class Deploy extends ChatCommand {
     private static options: ApplicationCommandOption[] = [
@@ -68,12 +69,12 @@ export class Deploy extends ChatCommand {
             const application = await client.application!.fetch();
             await application.commands.set(data);
 
-            client.log.info(`Loaded application commands globally`);
+            logger.info(`Loaded application commands globally`);
             await interaction.reply('Application commands have been loaded globally!');
         } else if (interaction.guild) {
             await interaction.guild.commands.set(data);
 
-            client.log.info(`Loaded application commands in guild ${interaction.guild.name}`);
+            logger.info(`Loaded application commands in guild ${interaction.guild.name}`);
             await interaction.reply('Application commands have been loaded in this guild!');
         } else {
             await interaction.reply("Can't deploy guild commands in DMs! Did you mean to deploy commands globally?");

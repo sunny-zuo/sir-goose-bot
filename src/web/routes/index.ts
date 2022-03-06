@@ -84,13 +84,13 @@ router.get('/authorize', async (req, res) => {
         res.send("You've been verified successfully! You can close this window and return to Discord.");
     } catch (e: unknown) {
         if (axios.isAxiosError(e)) {
-            req.client.log.error(
+            req.log.warn(
                 `Axios Error: Graph API responded with status code ${e.response?.status} and error object ${JSON.stringify(
                     e.response?.data
                 )} for user ${discordId}.`
             );
         } else if (e instanceof Error) {
-            req.client.log.error(e.message, e.stack);
+            req.log.error(e, e.message);
         }
 
         res.send(

@@ -5,6 +5,7 @@ import { EventHandler } from './eventHandler';
 import { GuildConfigCache } from '#util/guildConfigCache';
 import { Help } from '../commands/chat/info/help';
 import { sendEphemeralReply } from '#util/message';
+import { logger } from '#util/logger';
 
 export class MessageCreateEventHandler implements EventHandler {
     readonly eventName = 'messageCreate';
@@ -53,10 +54,13 @@ export class MessageCreateEventHandler implements EventHandler {
         }
         if (message.guild && message.guild.available === false) return;
         if (command.isRateLimited(message.author.id)) {
-            this.client.log.info(
-                `${message.author.tag} tried to use ${command.name} in ${message.guild?.name ?? 'DMs'} (${
-                    message.guild?.id ?? 'none'
-                }) but was rate limited.`
+            logger.info(
+                {
+                    ratelimit: { type: 'command', name: command.name },
+                    guild: { id: message.guild?.id ?? 'none' },
+                    user: { id: message.author.id },
+                },
+                'User was ratelimited on a message command interaction'
             );
 
             return sendEphemeralReply(
@@ -88,11 +92,7 @@ export class MessageCreateEventHandler implements EventHandler {
                         content:
                             'I tried to respond to your command, but I do not have permission to view the channel, send messages and/or embed links in the channel the command was triggered in.',
                     })
-                    .catch(() =>
-                        client.log.info(
-                            `${message.author.tag} has DMs closed and triggered a command in a channel (${message.channelId} in ${message.guildId}) I can't respond in.`
-                        )
-                    );
+                    .catch(() => undefined);
             }
 
             return;
@@ -115,21 +115,17 @@ export class MessageCreateEventHandler implements EventHandler {
                     );
                     return;
                 } else {
-                    client.log.command(
-                        `${message.author.tag} (${message.author.id}) ran command "${commandName}" without arguments in server ${
-                            message?.guild?.name || 'DMs'
-                        } (${message?.guild?.id || 'DMs'}) via message`
+                    logger.info(
+                        {
+                            command: { name: command.name, source: 'message' },
+                            guild: { id: message.guild?.id ?? 'none' },
+                            user: { id: message.author.id },
+                        },
+                        `Executing command message interaction ${command.name}`
                     );
 
                     command.execute(message).catch((error) => {
-                        client.log.error(
-                            `
-                            Command: ${command.name}
-                            Arguments: None
-                            Error: ${error}
-                            `,
-                            error.stack
-                        );
+                        logger.error(error, error.message);
                     });
                     return;
                 }
@@ -140,21 +136,17 @@ export class MessageCreateEventHandler implements EventHandler {
             if (argumentParser.success) {
                 const args = argumentParser.value;
 
-                client.log.command(
-                    `${message.author.tag} (${message.author.id}) ran command "${commandName}" with arguments in server ${
-                        message?.guild?.name || 'DMs'
-                    } (${message?.guild?.id || 'DMs'}) via message`
+                logger.info(
+                    {
+                        command: { name: command.name, source: 'message' },
+                        guild: { id: message.guild?.id ?? 'none' },
+                        user: { id: message.author.id },
+                    },
+                    `Executing command message interaction ${command.name}`
                 );
 
                 command.execute(message, args).catch((error) => {
-                    client.log.error(
-                        `
-                        Command: ${command.name}
-                        Arguments: ${JSON.stringify(args.data, (key, value) => (typeof value === 'bigint' ? value.toString() : value))}
-                        Error: ${error}
-                        `,
-                        error.stack
-                    );
+                    logger.error(error, error.message);
                 });
             } else {
                 const invalidOption: InvalidCommandInteractionOption = argumentParser.error;
@@ -169,21 +161,17 @@ export class MessageCreateEventHandler implements EventHandler {
                 );
             }
         } else {
-            client.log.command(
-                `${message.author.tag} (${message.author.id}) ran command "${commandName}" without arguments in server ${
-                    message?.guild?.name || 'DMs'
-                } (${message?.guild?.id || 'DMs'}) via message`
+            logger.info(
+                {
+                    command: { name: command.name, source: 'message' },
+                    guild: { id: message.guild?.id ?? 'none' },
+                    user: { id: message.author.id },
+                },
+                `Executing command message interaction ${command.name}`
             );
 
             command.execute(message).catch((error) => {
-                client.log.error(
-                    `
-                    Command: ${command.name}
-                    Arguments: None
-                    Error: ${error}
-                    `,
-                    error.stack
-                );
+                logger.error(error, error.message);
             });
         }
     }

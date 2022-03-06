@@ -1,6 +1,7 @@
 import { ColorResolvable, Guild, MessageEmbed, Permissions, TextChannel, User, MessageOptions, Message } from 'discord.js';
 import Client from '#src/Client';
 import { GuildConfigCache } from './guildConfigCache';
+import { logger } from '#util/logger';
 
 export class Modlog {
     static async logUserAction(
@@ -16,7 +17,7 @@ export class Modlog {
 
         if (channel && channel.permissionsFor(guild.me).has([Permissions.FLAGS.SEND_MESSAGES, Permissions.FLAGS.EMBED_LINKS])) {
             const embed = this.getUserEmbed(user, message, color);
-            const sentMessage = await channel.send({ embeds: [embed] }).catch((e) => client.log.error(e, e.stack));
+            const sentMessage = await channel.send({ embeds: [embed] }).catch((e) => logger.error(e, e.message));
             return sentMessage;
         }
     }
@@ -34,7 +35,7 @@ export class Modlog {
 
         if (channel && channel.permissionsFor(guild.me).has([Permissions.FLAGS.SEND_MESSAGES, Permissions.FLAGS.EMBED_LINKS])) {
             const embed = new MessageEmbed().setTitle(title).setColor(color).setDescription(message).setTimestamp();
-            const sentMessage = await channel.send({ embeds: [embed] }).catch((e) => client.log.error(e, e.stack));
+            const sentMessage = await channel.send({ embeds: [embed] }).catch((e) => logger.error(e, e.message));
             return sentMessage;
         }
     }
@@ -45,7 +46,7 @@ export class Modlog {
         const channel = await this.fetchModlogChannel(guild);
 
         if (channel) {
-            const sentMessage = await channel.send(message).catch((e) => client.log.error(e, e.stack));
+            const sentMessage = await channel.send(message).catch((e) => logger.error(e, e.message));
             return sentMessage;
         }
     }

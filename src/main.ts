@@ -1,10 +1,10 @@
 import dotenv from 'dotenv';
+dotenv.config();
 import mongoose from 'mongoose';
 import { Intents, PartialTypes } from 'discord.js';
 import Client from './Client';
 import { RoleAssignmentService } from './services/roleAssignmentService';
-
-dotenv.config();
+import { logger } from '#util/logger';
 
 const intents = new Intents();
 intents.add('GUILDS', 'GUILD_MEMBERS', 'GUILD_MESSAGES', 'GUILD_MESSAGE_REACTIONS', 'DIRECT_MESSAGES', 'DIRECT_MESSAGE_REACTIONS');
@@ -17,13 +17,13 @@ async function init(): Promise<void> {
     await mongoose
         .connect(`${process.env.MONGO_URI}`)
         .then(() => {
-            client.log.info('Successfully connected to MongoDB database');
+            logger.info('Successfully connected to MongoDB database');
         })
         .catch((e) => {
-            client.log.error(`Failed to connect to MongoDB database: ${e}`);
+            logger.error(e, e.message);
         });
 
-    RoleAssignmentService.parseCustomImports(client);
+    RoleAssignmentService.parseCustomImports();
 
     await client.login(process.env.DISCORD_TOKEN);
 }

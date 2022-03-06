@@ -2,6 +2,7 @@ import Client from '#src/Client';
 import { EventHandler } from './eventHandler';
 import { Message } from 'discord.js';
 import ButtonRoleModel from '#models/buttonRole.model';
+import { logger } from '#util/logger';
 
 export class MessageDeleteEventHandler implements EventHandler {
     readonly eventName = 'messageDelete';
@@ -20,7 +21,7 @@ export class MessageDeleteEventHandler implements EventHandler {
 
         const deleteResult = await ButtonRoleModel.deleteOne({ messageId: message.id });
         if (deleteResult.acknowledged && deleteResult.deletedCount) {
-            this.client.log.info(`Deleted button role with message id ${message.id}.`);
+            logger.info({ event: { name: this.eventName }, messageId: message.id }, `Deleted button role with message id ${message.id}.`);
         }
     }
 }

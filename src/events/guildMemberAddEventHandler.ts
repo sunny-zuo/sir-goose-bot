@@ -3,6 +3,7 @@ import Client from '#src/Client';
 import { RoleAssignmentService } from '../services/roleAssignmentService';
 import { GuildConfigCache } from '#util/guildConfigCache';
 import { EventHandler } from './eventHandler';
+import { logger } from '#util/logger';
 
 export class GuildMemberAddEventHandler implements EventHandler {
     readonly eventName = 'guildMemberAdd';
@@ -13,6 +14,8 @@ export class GuildMemberAddEventHandler implements EventHandler {
     }
 
     async execute(member: GuildMember): Promise<void> {
+        logger.info({ event: { name: this.eventName }, guild: { id: member.guild.id }, member: { id: member.id } });
+
         const roleAssignmentService = new RoleAssignmentService(this.client, member.id);
         const roleAssignmentResult = await roleAssignmentService.assignGuildRoles(member.guild);
 

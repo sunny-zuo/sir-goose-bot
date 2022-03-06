@@ -10,6 +10,7 @@ import BanModel from '#models/ban.model';
 import { Result } from '../types';
 import { Modlog } from '#util/modlog';
 import { RoleData } from '#types/Verification';
+import { logger } from '#util/logger';
 
 type CustomFileImport = { type: 'hash' | 'uwid'; department: string | null; entranceYear: number | null; ids: string[] };
 type CustomValues = { departments: string[]; entranceYear: number | null };
@@ -20,11 +21,11 @@ export class RoleAssignmentService {
     client: Client;
     userId: Snowflake;
 
-    static parseCustomImports(client: Client): void {
+    static parseCustomImports(): void {
         const dirLocation = path.join(process.cwd(), 'src', 'data', 'verification');
         const files = fs.readdirSync(dirLocation);
 
-        client.log.info(`Loading custom departments/entrance years from ${files.filter((file) => file.endsWith('.json')).length} files`);
+        logger.info(`Loading custom departments/entrance years from ${files.filter((file) => file.endsWith('.json')).length} files`);
 
         for (const file of files) {
             if (!file.endsWith('.json')) {
@@ -43,7 +44,7 @@ export class RoleAssignmentService {
 
                     if (customFile.entranceYear !== null) {
                         if (userVals.entranceYear !== null && userVals.entranceYear !== customFile.entranceYear) {
-                            client.log.warn(`User with id ${idHash} has been assigned a different entrance year multiple times`);
+                            logger.warn(`User with id ${idHash} has been assigned a different entrance year multiple times`);
                         }
                         userVals.entranceYear = customFile.entranceYear;
                     }
@@ -51,11 +52,11 @@ export class RoleAssignmentService {
                     this.customImport.set(idHash, userVals);
                 }
             } catch (e) {
-                client.log.error(`Error parsing custom user data file "${file}": ${e}`);
+                logger.error(e, `Error parsing custom user data file ${file}: ${e.message}`);
             }
         }
 
-        client.log.info(`Loaded custom departments/entrance years!`);
+        logger.info(`Successfully loaded custom departments/entrance years!`);
     }
 
     constructor(client: Client, userId: Snowflake) {
@@ -66,7 +67,7 @@ export class RoleAssignmentService {
     async assignAllRoles(): Promise<void> {
         const guildModels = await GuildModel.find({ enableVerification: true });
 
-        this.client.log.info(`Assigning roles to user with id ${this.userId} in all possible guilds`);
+        logger.info({ verification: 'assignAll', user: { id: this.userId } }, 'Assigning roles to user in all possible guilds');
         for (const guildModel of guildModels) {
             try {
                 const guild = this.client.guilds.cache.get(guildModel.guildId);
@@ -74,7 +75,7 @@ export class RoleAssignmentService {
                     await this.assignGuildRoles(guild);
                 }
             } catch (e) {
-                this.client.log.error(`Error assigning roles to user with id ${this.userId} in guild ${guildModel.guildId}: ${e}`);
+                logger.error(e, e.message);
             }
         }
     }
@@ -94,6 +95,8 @@ export class RoleAssignmentService {
         const user = await UserModel.findOne({ discordId: this.userId });
 
         if (member && user && user.verified && user.department && user.o365CreatedDate) {
+            logger.info({ verification: 'assignOne', user: { id: member.id }, guild: { id: guild.id } });
+
             const userBan = await BanModel.findOne({
                 guildId: guild.id,
                 uwid: user.uwid,
@@ -102,8 +105,6 @@ export class RoleAssignmentService {
             });
 
             if (userBan) {
-                this.client.log.info(`Assigned no role(s) to ${member.user.tag} (${this.userId}) in "${guild.name}" (Banned)`);
-
                 await Modlog.logUserAction(
                     this.client,
                     guild,
@@ -152,7 +153,6 @@ export class RoleAssignmentService {
                 guildModel.verificationRules?.forceRename
             );
 
-            this.client.log.info(`Assigned ${missingRoles.length} role(s) to ${member.user.tag} (${this.userId}) in "${guild.name}"`);
             return {
                 success: true,
                 value: {
@@ -177,20 +177,15 @@ export class RoleAssignmentService {
             if (newNickname !== undefined) {
                 if (!member.nickname || (member.nickname !== newNickname && forceRename)) {
                     if (member.manageable && member.guild.me?.permissions.has(Permissions.FLAGS.MANAGE_NICKNAMES)) {
+                        logger.info({ verification: 'rename', user: { id: this.userId }, guild: { id: member.guild.id } });
                         await member.setNickname(newNickname);
-                        this.client.log.info(
-                            `Renamed user ${member.user.tag} (${member.id}) to ${newNickname} in "${member.guild.name}" (${member.guild.id})`
-                        );
                         return newNickname;
-                    } else {
-                        this.client.log.info(
-                            `Attempted to rename ${member.user.tag} (${member.id}) in "${member.guild.name}" (${member.guild.id}) but was missing permissions`
-                        );
                     }
                 }
             } else {
-                this.client.log.warn(
-                    `Role assignment service was used on user ${member.user.tag} (${member.id}) in "${member.guild.name}" (${member.guild.id}) who had an undefined name.`
+                logger.warn(
+                    { verification: 'rename', user: { id: this.userId }, guild: { id: member.guild.id } },
+                    'Role assignment service was used on user who had an undefined name.'
                 );
             }
         }

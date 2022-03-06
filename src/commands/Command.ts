@@ -22,6 +22,7 @@ import { Cooldown } from '#util/cooldown';
 import { isMessage } from '#util/message';
 import { getUser } from '#util/user';
 import { sendEphemeralReply } from '#util/message';
+import { logger } from '#util/logger';
 
 const minimumClientPermissions = [Permissions.FLAGS.VIEW_CHANNEL, Permissions.FLAGS.SEND_MESSAGES, Permissions.FLAGS.EMBED_LINKS];
 
@@ -276,8 +277,13 @@ export abstract class Command {
             // this code would be ran if a bot user is not in the guild, and we would have an APIInteractionGuildMember
             // https://discord.com/developers/docs/resources/guild#guild-member-object
             // for now, we consider this behavior unsupported and return false
-            this.client.log.warn(
-                `Command was ran from guild ${interaction.guild!.name} (${interaction.guild!.id}) where the bot user isn't present`
+            logger.warn(
+                {
+                    command: { name: this.name, type: isMessage(interaction) ? 'MESSAGE' : interaction.type },
+                    guild: { name: interaction.guild?.name, id: interaction.guild?.id },
+                    userId: getUser(interaction).id,
+                },
+                "Command was ran from a guild where the bot user isn't present"
             );
             return false;
         }

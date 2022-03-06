@@ -1,6 +1,7 @@
 import { Interaction } from 'discord.js';
 import { EventHandler } from './eventHandler';
 import Client from '../Client';
+import { logger } from '#util/logger';
 
 export class SelectMenuInteractionCreateEventHandler implements EventHandler {
     readonly eventName = 'interactionCreate';
@@ -14,12 +15,13 @@ export class SelectMenuInteractionCreateEventHandler implements EventHandler {
     async execute(interaction: Interaction): Promise<void> {
         if (!interaction.isSelectMenu()) return;
 
-        this.client.log.info(
-            `SELECT_MENU ${interaction.user.tag} (${interaction.user.id}) interacted with select menu with custom id ${
-                interaction.customId
-            } and selected ${JSON.stringify(interaction.values)} in ${interaction.guild?.name ?? 'DMs'} (${
-                interaction.guild?.id ?? 'none'
-            })`
+        logger.info(
+            {
+                selectMenu: { customId: interaction.customId, values: interaction.values },
+                guild: { id: interaction.guild?.id ?? 'none' },
+                user: { id: interaction.user.id },
+            },
+            `Processing select menu interaction ${interaction.customId}`
         );
     }
 }

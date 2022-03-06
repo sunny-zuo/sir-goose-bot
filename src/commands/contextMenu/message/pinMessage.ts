@@ -5,6 +5,7 @@ import { Modlog } from '#util/modlog';
 import { ContextMenuCommand } from '../ContextMenuCommand';
 import { inlineCode } from '@discordjs/builders';
 import { attemptPin } from '#util/pin';
+import { logger } from '#util/logger';
 
 export class PinMessage extends ContextMenuCommand {
     constructor(client: Client) {
@@ -39,13 +40,13 @@ export class PinMessage extends ContextMenuCommand {
 
         const pinResult = await attemptPin(message);
 
-        if (pinResult.success) {
-            this.client.log.info(
-                `${this.getUser(interaction).tag} pinned message with id ${message.id} in server ${interaction.guild} (${
-                    interaction.guildId
-                }) using the pin context menu command in channel ${message.channel.id}.`
-            );
+        logger.info({
+            pin: { messageId: message.id, source: 'contextMenu' },
+            guild: { id: interaction.guild?.id ?? 'none' },
+            user: { id: interaction.user.id },
+        });
 
+        if (pinResult.success) {
             await Modlog.logUserAction(
                 this.client,
                 interaction.guild,
@@ -75,7 +76,7 @@ export class PinMessage extends ContextMenuCommand {
                     errorDescription = 'System messages (messages sent by Discord) cannot be pinned.';
                     break;
                 default:
-                    this.client.log.error(pinResult.error);
+                    logger.error(pinResult.error);
                     errorDescription = 'We ran into an unknown error trying to pin this message.';
             }
 

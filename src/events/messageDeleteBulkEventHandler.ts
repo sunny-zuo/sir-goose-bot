@@ -2,6 +2,7 @@ import Client from '#src/Client';
 import { EventHandler } from './eventHandler';
 import { Collection, Message, Snowflake } from 'discord.js';
 import ButtonRoleModel from '#models/buttonRole.model';
+import { logger } from '#util/logger';
 
 export class MessageDeleteBulkEventHandler implements EventHandler {
     readonly eventName = 'messageDeleteBulk';
@@ -28,9 +29,13 @@ export class MessageDeleteBulkEventHandler implements EventHandler {
         }
 
         const messageIds = messagesToCheck.map((message) => message.id);
+
         const deleteResult = await ButtonRoleModel.deleteMany({ messageId: { $in: messageIds } });
         if (deleteResult.acknowledged && deleteResult.deletedCount) {
-            this.client.log.info(`Deleted ${deleteResult.deletedCount} button role documents from bulk message delete.`);
+            logger.info(
+                { event: { name: this.eventName }, messageIds: [...messages.keys()] },
+                `Deleted ${deleteResult.deletedCount} button role documents from bulk message delete.`
+            );
         }
     }
 }

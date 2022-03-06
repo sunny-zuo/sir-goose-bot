@@ -2,6 +2,7 @@ import { ChatCommand } from '../ChatCommand';
 import Client from '#src/Client';
 import { CommandInteraction, Message, MessageEmbed, MessageOptions } from 'discord.js';
 import axios from 'axios';
+import { logger } from '#util/logger';
 
 export class Honk extends ChatCommand {
     constructor(client: Client) {
@@ -22,7 +23,7 @@ export class Honk extends ChatCommand {
                 const imageUrl = await axios.get(randomGoose).then((r) => r.request.res.responseUrl);
                 response = { embeds: [new MessageEmbed().setColor('AQUA').setTitle('HONK HONK').setImage(imageUrl)] };
             } catch (e) {
-                this.client.log.error(`Error querying unsplash API for goose image: ${e.message}`, e.stack);
+                logger.error(e, e.message);
             }
 
             await interaction.reply(response);
