@@ -1,0 +1,14 @@
+version: '3.8'
+
+services:
+    sir-goose:
+        build:
+            context: ./
+        container_name: sir-goose
+        env_file: ./.env
+        environment:
+            - NODE_ENV=development
+        image: sir-goose:latest
+        ports:
+            - '5000:5000'
+        restart: always
