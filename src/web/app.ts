@@ -1,6 +1,5 @@
 import express, { Express } from 'express';
 import path from 'path';
-import pino from 'pino';
 import pinoHttp from 'pino-http';
 import { logger } from '#util/logger';
 import Client from '#src/Client';
@@ -25,7 +24,7 @@ export class WebApp {
     init(): void {
         const app = this.app;
 
-        app.use(pinoHttp({ logger: pino() }));
+        app.use(pinoHttp({ logger }));
 
         app.use((req, _res, next) => {
             req.client = this.client;
