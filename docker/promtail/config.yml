@@ -1,0 +1,20 @@
+server:
+    http_listen_port: 0
+    grpc_listen_port: 0
+
+positions:
+    filename: /tmp/positions.yaml
+
+client:
+
+scrape_configs:
+    - job_name: goose
+      static_configs:
+          - targets:
+                - localhost
+            labels:
+                job: gooselogs
+                __path__: /logs/*.log
+
+target_config:
+    sync_period: '10s'
