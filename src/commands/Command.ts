@@ -153,7 +153,9 @@ export abstract class Command {
                         return { success: true, value: commandInteractionOption };
                     }
                     for (const suboption of expectedOption.options) {
-                        const result = await this.parseMessageValue(interaction, suboption, argArray);
+                        const tempArgArray =
+                            this.isLastOption(suboption, expectedOption.options) && argArray.length ? [argArray.join(' ')] : argArray;
+                        const result = await this.parseMessageValue(interaction, suboption, tempArgArray);
                         if (!result.success) {
                             if (result.error.issue === ArgumentIssue.MISSING) {
                                 if (expectedOption.type === 'SUB_COMMAND' || expectedOption.type === 'SUB_COMMAND_GROUP') {
@@ -196,7 +198,8 @@ export abstract class Command {
                 : [args.trim()]; // TODO: handle arguments with spaces
 
         for (const expectedOption of expectedOptions) {
-            const result = await this.parseMessageValue(interaction, expectedOption, argArray);
+            const tempArgArray = this.isLastOption(expectedOption, expectedOptions) && argArray.length ? [argArray.join(' ')] : argArray;
+            const result = await this.parseMessageValue(interaction, expectedOption, tempArgArray);
             if (!result.success) {
                 if (result.error.issue === ArgumentIssue.MISSING) {
                     if (expectedOption.type === 'SUB_COMMAND' || expectedOption.type === 'SUB_COMMAND_GROUP') {
@@ -215,6 +218,13 @@ export abstract class Command {
         }
         // @ts-expect-error - we rely on creating our own CommandInteractionOptionResolver to easily support text and slash commands
         return { success: true, value: new CommandInteractionOptionResolver(interaction.client, options) };
+    }
+
+    isLastOption(option: ApplicationCommandOption, options: ApplicationCommandOption[]): boolean {
+        if (option.type === 'SUB_COMMAND_GROUP' || (option.type === 'SUB_COMMAND' && option.options?.length)) return false;
+        else if (option.type === 'SUB_COMMAND') return true;
+        else if (option === options.slice(-1)[0]) return true;
+        else return false;
     }
 
     parseMessageArgumentsError(option: CommandInteractionOption, issue: ArgumentIssue): InvalidCommandInteractionOption {
