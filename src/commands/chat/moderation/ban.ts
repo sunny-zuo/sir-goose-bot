@@ -92,12 +92,11 @@ export class Ban extends ChatCommand {
 
         const guild = interaction.guild;
         if (!guild) return;
-        await guild.members.fetch();
 
         const modlogEmbeds: MessageEmbed[] = [];
         const banReason = args.getString('reason') ?? 'No reason provided.';
         const providedUserId = args.getString('user_id') ?? (args.getMember('user') as GuildMember)?.id;
-        const memberToBan = guild.members.cache.get(providedUserId);
+        const memberToBan = await guild.members.fetch(providedUserId);
 
         const banUserInfo = await UserModel.findOne({ discordId: providedUserId });
         const possibleAlts =

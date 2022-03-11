@@ -69,12 +69,11 @@ export class Unban extends ChatCommand {
 
         const guild = interaction.guild;
         if (!guild) return;
-        await guild.bans.fetch();
 
         const modlogEmbeds: MessageEmbed[] = [];
         const unbanReason = args.getString('reason') ?? 'No reason provided.';
         const providedUserId = args.getString('user_id', true);
-        const bannedUser = guild.bans.cache.get(providedUserId);
+        const bannedUser = await guild.bans.fetch(providedUserId);
 
         if (!bannedUser) {
             await this.sendErrorEmbed(interaction, 'User Not Banned', `Unable to ban user ID ${providedUserId} - they are not banned.`);
