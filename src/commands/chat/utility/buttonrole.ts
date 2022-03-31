@@ -14,8 +14,8 @@ import {
 } from 'discord.js';
 import { inlineCode } from '@discordjs/builders';
 import ButtonRoleModel from '#models/buttonRole.model';
-import { GuildConfigCache } from '#util/guildConfigCache';
 import { sendEphemeralReply } from '#util/message';
+import { logger } from '#util/logger';
 
 const BUTTON_ROLE_GUILD_LIMIT = 25;
 const BUTTON_ROLE_ROLE_LIMIT = 24;
@@ -83,9 +83,10 @@ export class ButtonRole extends ChatCommand {
             name: 'buttonrole',
             description: 'Create a prompt allowing users to self assign roles using buttons.',
             category: 'Utility',
+            isTextCommand: false,
             options: ButtonRole.options,
             guildOnly: true,
-            examples: ['@role1 @role2 @role3'],
+            examples: ['message @role1 @role2 @role3'],
             clientPermissions: [Permissions.FLAGS.MANAGE_ROLES],
             userPermissions: [Permissions.FLAGS.MANAGE_ROLES, Permissions.FLAGS.MANAGE_GUILD],
             cooldownSeconds: 600,
@@ -95,22 +96,18 @@ export class ButtonRole extends ChatCommand {
 
     async execute(
         interaction: Message | CommandInteraction,
-        args?: Omit<CommandInteractionOptionResolver, 'getMessage' | 'getFocused'>
+        args: Omit<CommandInteractionOptionResolver, 'getMessage' | 'getFocused'>
     ): Promise<void> {
-        const config = await GuildConfigCache.fetchConfig(interaction.guild?.id);
-        if (!args) {
-            await this.sendErrorEmbed(
-                interaction,
-                'Option Missing',
-                `No option was specified. Use slash commands or ${inlineCode(`${config.prefix}help buttonrole`)} for usage information.`
-            );
-            return;
-        }
-
-        if (args.getSubcommand() === 'create') {
-            await this.create(interaction, args);
-        } else if (args.getSubcommand() === 'edit') {
-            await this.edit(interaction, args);
+        const subcommand = args.getSubcommand();
+        switch (subcommand) {
+            case 'create':
+                await this.create(interaction, args);
+                break;
+            case 'edit':
+                await this.edit(interaction, args);
+                break;
+            default:
+                logger.error(args.data, 'Invalid subcommand provided for buttonrole creation');
         }
     }
 
