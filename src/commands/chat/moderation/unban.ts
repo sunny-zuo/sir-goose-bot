@@ -1,11 +1,4 @@
-import {
-    ApplicationCommandOption,
-    CommandInteraction,
-    CommandInteractionOptionResolver,
-    Message,
-    MessageEmbed,
-    Permissions,
-} from 'discord.js';
+import { ApplicationCommandOption, CommandInteraction, CommandInteractionOptionResolver, MessageEmbed, Permissions } from 'discord.js';
 import Client from '#src/Client';
 import { ChatCommand } from '../ChatCommand';
 import BanModel from '#models/ban.model';
@@ -53,7 +46,7 @@ export class Unban extends ChatCommand {
     }
 
     async execute(
-        interaction: Message | CommandInteraction,
+        interaction: CommandInteraction,
         args: Omit<CommandInteractionOptionResolver, 'getMessage' | 'getFocused'>
     ): Promise<void> {
         const guild = interaction.guild;

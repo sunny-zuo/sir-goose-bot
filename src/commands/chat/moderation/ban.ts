@@ -3,7 +3,6 @@ import {
     CommandInteraction,
     CommandInteractionOptionResolver,
     GuildMember,
-    Message,
     MessageEmbed,
     Permissions,
 } from 'discord.js';
@@ -73,7 +72,7 @@ export class Ban extends ChatCommand {
     }
 
     async execute(
-        interaction: Message | CommandInteraction,
+        interaction: CommandInteraction,
         args: Omit<CommandInteractionOptionResolver, 'getMessage' | 'getFocused'>
     ): Promise<void> {
         const guild = interaction.guild;

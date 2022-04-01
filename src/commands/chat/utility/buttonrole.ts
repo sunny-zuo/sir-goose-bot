@@ -5,7 +5,6 @@ import {
     ApplicationCommandNonOptionsData,
     CommandInteraction,
     CommandInteractionOptionResolver,
-    Message,
     MessageActionRow,
     MessageButton,
     MessageEmbed,
@@ -95,7 +94,7 @@ export class ButtonRole extends ChatCommand {
     }
 
     async execute(
-        interaction: Message | CommandInteraction,
+        interaction: CommandInteraction,
         args: Omit<CommandInteractionOptionResolver, 'getMessage' | 'getFocused'>
     ): Promise<void> {
         const subcommand = args.getSubcommand();
@@ -112,7 +111,7 @@ export class ButtonRole extends ChatCommand {
     }
 
     async create(
-        interaction: Message | CommandInteraction,
+        interaction: CommandInteraction,
         args: Omit<CommandInteractionOptionResolver, 'getMessage' | 'getFocused'>
     ): Promise<void> {
         if (!interaction.guildId) return;
@@ -190,26 +189,17 @@ export class ButtonRole extends ChatCommand {
             )
             .setColor('#2F3136');
 
-        let message: Message;
+        const channel = interaction.channel ?? (await interaction.guild?.channels.fetch(interaction.channelId));
+        if (!channel?.isText()) return;
 
-        if (this.isMessage(interaction)) {
-            message = await interaction.channel.send({ embeds: [embed], components });
-        } else {
-            const channel = interaction.channel ?? (await interaction.guild?.channels.fetch(interaction.channelId));
-            if (!channel?.isText()) return;
-
-            message = await channel.send({ embeds: [embed], components });
-            await interaction.reply({ content: 'Button role prompt successfully created!', ephemeral: true });
-        }
+        const message = await channel.send({ embeds: [embed], components });
+        await interaction.reply({ content: 'Button role prompt successfully created!', ephemeral: true });
 
         buttonRoleDoc.messageId = message.id;
         await buttonRoleDoc.save();
     }
 
-    async edit(
-        interaction: Message | CommandInteraction,
-        args: Omit<CommandInteractionOptionResolver, 'getMessage' | 'getFocused'>
-    ): Promise<void> {
+    async edit(interaction: CommandInteraction, args: Omit<CommandInteractionOptionResolver, 'getMessage' | 'getFocused'>): Promise<void> {
         if (!interaction.guildId) return;
 
         const buttonRole = await ButtonRoleModel.findOne({ guildId: interaction.guildId, messageId: args.getString('message_id', true) });
