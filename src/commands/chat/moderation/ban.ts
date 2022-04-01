@@ -3,7 +3,6 @@ import {
     CommandInteraction,
     CommandInteractionOptionResolver,
     GuildMember,
-    Message,
     MessageEmbed,
     Permissions,
 } from 'discord.js';
@@ -13,7 +12,6 @@ import BanModel from '#models/ban.model';
 import UserModel from '#models/user.model';
 import { Modlog } from '#util/modlog';
 import { chunk } from '#util/array';
-import { GuildConfigCache } from '#util/guildConfigCache';
 import { logger } from '#util/logger';
 
 export class Ban extends ChatCommand {
@@ -63,6 +61,7 @@ export class Ban extends ChatCommand {
             name: 'ban',
             description: 'Ban a user and all known alt accounts linked via their UWaterloo ID',
             category: 'Moderation',
+            isTextCommand: false,
             options: Ban.options,
             guildOnly: true,
             examples: ['id 123456789012345678 reason', 'user @user reason'],
@@ -73,23 +72,9 @@ export class Ban extends ChatCommand {
     }
 
     async execute(
-        interaction: Message | CommandInteraction,
-        args?: Omit<CommandInteractionOptionResolver, 'getMessage' | 'getFocused'>
+        interaction: CommandInteraction,
+        args: Omit<CommandInteractionOptionResolver, 'getMessage' | 'getFocused'>
     ): Promise<void> {
-        const guildConfig = await GuildConfigCache.fetchConfig(interaction.guild!.id);
-        // TODO: Refactor once help message supports subcommands
-        if (args === undefined || !args?.data || args.data.length === 0) {
-            await this.sendErrorEmbed(
-                interaction,
-                'Usage:',
-                `
-                Ban by Discord ID: \`${guildConfig.prefix}ban id 123456789012345678 reason\`
-                Ban by Discord user: \`${guildConfig.prefix}ban user @user reason\`
-                `
-            );
-            return;
-        }
-
         const guild = interaction.guild;
         if (!guild) return;
 
