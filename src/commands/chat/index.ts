@@ -20,6 +20,7 @@ import { Unban } from './moderation/unban';
 
 /* Owner Commands */
 import { Deploy } from './owner/deploy';
+import { GuildList } from './owner/guildlist';
 import { Reload } from './owner/reload';
 
 /* Utility Commands */
@@ -51,6 +52,7 @@ export default [
     Ban,
     Unban,
     Deploy,
+    GuildList,
     Reload,
     ButtonRole,
     Pin,
