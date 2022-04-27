@@ -2,6 +2,7 @@ import { ButtonInteractionCreateEventHandler } from './buttonInteractionCreateEv
 import { CommandInteractionCreateEventHandler } from './commandInteractionCreateEventHandler';
 import { ContextMenuInteractionCreateEventHandler } from './contextMenuInteractionCreateEventHandler';
 import { GuildCreateEventHandler } from './guildCreateEventHandler';
+import { GuildDeleteEventHandler } from './guildDeleteEventHandler';
 import { GuildMemberAddEventHandler } from './guildMemberAddEventHandler';
 import { MessageCreateEventHandler } from './messageCreateEventHandler';
 import { MessageDeleteBulkEventHandler } from './messageDeleteBulkEventHandler';
@@ -18,6 +19,7 @@ export default [
     CommandInteractionCreateEventHandler,
     ContextMenuInteractionCreateEventHandler,
     GuildCreateEventHandler,
+    GuildDeleteEventHandler,
     MessageCreateEventHandler,
     MessageDeleteBulkEventHandler,
     MessageDeleteEventHandler,
