@@ -12,7 +12,7 @@ module.exports = {
         node: true,
     },
     rules: {
-        'no-unused-vars': 'off',
+        'no-empty': ['error', { allowEmptyCatch: true }],
         '@typescript-eslint/no-unused-vars': ['error'],
         '@typescript-eslint/no-non-null-assertion': 'off',
         '@typescript-eslint/no-floating-promises': 'error',
