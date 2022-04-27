@@ -44,7 +44,6 @@
     "dependencies": {
         "@discordjs/builders": "~0.11.0",
         "axios": "~0.26.0",
-        "chalk": "~4.1.1",
         "crypto-js": "~4.1.1",
         "discord.js": "~13.6.0",
         "dotenv": "~10.0.0",
