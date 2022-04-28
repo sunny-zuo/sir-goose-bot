@@ -15,7 +15,7 @@ const schema = new Schema<Ban>(
     {
         guildId: { type: String, required: true },
         userId: { type: String, required: true },
-        uwid: { type: String, required: true },
+        uwid: { type: String, required: false },
         expiry: Date,
         reason: String,
         bannedBy: { type: String, required: true },
