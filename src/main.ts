@@ -1,5 +1,4 @@
-import dotenv from 'dotenv';
-dotenv.config();
+import 'dotenv/config';
 import mongoose from 'mongoose';
 import { Intents, PartialTypes } from 'discord.js';
 import Client from './Client';
