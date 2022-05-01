@@ -101,37 +101,44 @@ export async function sendVerificationReplies(
             });
         }
 
-        const verifyReply = getVerificationResponse(discordUser);
+        await safeSendVerificationEmbed(client, interaction, discordUser, ephemeral);
+    }
+}
 
-        try {
-            if (interaction.guild) {
-                await discordUser.send(verifyReply);
+export async function safeSendVerificationEmbed(
+    client: Client,
+    interaction: CommandInteraction | ButtonInteraction | Message,
+    discordUser: User,
+    ephemeral = false
+) {
+    const verifyReply = getVerificationResponse(discordUser);
 
-                const embed = new MessageEmbed()
-                    .setTitle('Verification Link Sent')
-                    .setDescription("We've sent you a verification link via direct message. Please check your DMs!")
-                    .setColor('BLUE')
-                    .setTimestamp();
+    try {
+        if (interaction.guild) {
+            await discordUser.send(verifyReply);
 
-                ephemeral
-                    ? await sendEphemeralReply(interaction, { embeds: [embed] }, 60)
-                    : await sendReply(interaction, { embeds: [embed] });
-
-                await Modlog.logUserAction(client, interaction.guild, discordUser, `${discordUser} requested a verification link.`, 'BLUE');
-            } else {
-                await sendReply(interaction, verifyReply);
-            }
-        } catch (err) {
             const embed = new MessageEmbed()
-                .setTitle('Unable to Send Verification Link')
-                .setDescription(
-                    'We were unable to DM you a verification link. Please [temporarily change your privacy settings](https://cdn.discordapp.com/attachments/811741914340393000/820114337514651658/permissions.png) to allow direct messages from server members in order to verify.'
-                )
-                .setColor('RED')
+                .setTitle('Verification Link Sent')
+                .setDescription("We've sent you a verification link via direct message. Please check your DMs!")
+                .setColor('BLUE')
                 .setTimestamp();
 
             ephemeral ? await sendEphemeralReply(interaction, { embeds: [embed] }, 60) : await sendReply(interaction, { embeds: [embed] });
+
+            await Modlog.logUserAction(client, interaction.guild, discordUser, `${discordUser} requested a verification link.`, 'BLUE');
+        } else {
+            await sendReply(interaction, verifyReply);
         }
+    } catch (err) {
+        const embed = new MessageEmbed()
+            .setTitle('Unable to Send Verification Link')
+            .setDescription(
+                'We were unable to DM you a verification link. Please [temporarily change your privacy settings](https://cdn.discordapp.com/attachments/811741914340393000/820114337514651658/permissions.png) to allow direct messages from server members in order to verify.'
+            )
+            .setColor('RED')
+            .setTimestamp();
+
+        ephemeral ? await sendEphemeralReply(interaction, { embeds: [embed] }, 60) : await sendReply(interaction, { embeds: [embed] });
     }
 }
 
