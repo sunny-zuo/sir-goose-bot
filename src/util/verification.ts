@@ -53,7 +53,7 @@ export async function sendVerificationReplies(
         const service = new RoleAssignmentService(client, discordUser.id);
         let assignedRoles: Role[] = [];
         if (interaction.guild) {
-            const roleAssign = await service.assignGuildRoles(interaction.guild, true, false);
+            const roleAssign = await service.assignGuildRoles(interaction.guild, { log: true, returnMissing: false });
             if (roleAssign.success) {
                 ({ assignedRoles } = roleAssign.value);
             } else if (roleAssign.error === 'User is banned') {

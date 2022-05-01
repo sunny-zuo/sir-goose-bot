@@ -14,6 +14,7 @@ import { logger } from '#util/logger';
 
 type CustomFileImport = { type: 'hash' | 'uwid'; department: string | null; entranceYear: number | null; ids: string[] };
 type CustomValues = { departments: string[]; entranceYear: number | null };
+type AssignGuildRolesParams = { log?: boolean; returnMissing?: boolean; oldDepartment?: string };
 export type RoleAssignmentResult = { assignedRoles: Role[]; updatedName?: string };
 
 export class RoleAssignmentService {
@@ -80,7 +81,9 @@ export class RoleAssignmentService {
         }
     }
 
-    async assignGuildRoles(guild: Guild, log = true, returnMissing = true): Promise<Result<RoleAssignmentResult, string>> {
+    async assignGuildRoles(guild: Guild, params: AssignGuildRolesParams = {}): Promise<Result<RoleAssignmentResult, string>> {
+        params = { log: true, returnMissing: true, ...params };
+
         const guildModel = await GuildConfigCache.fetchConfig(guild.id);
         if (
             !guildModel ||
@@ -118,12 +121,12 @@ export class RoleAssignmentService {
                 return { success: false, error: 'User is banned' };
             }
 
-            const allRoles = await this.getMatchingRoles(guild, log);
+            const allRoles = await this.getMatchingRoles(guild, params.log);
             const missingRoles = allRoles.filter((role) => !member.roles.cache.has(role.id));
 
             if (missingRoles.length > 0) {
                 await member.roles.add(missingRoles, 'Verified via Sir Goose Bot');
-                if (log) {
+                if (params.log) {
                     await Modlog.logUserAction(
                         this.client,
                         guild,
@@ -135,7 +138,7 @@ export class RoleAssignmentService {
                     );
                 }
             } else if (user.verifyRequestedServerId === guild.id && allRoles.length === 0) {
-                if (log) {
+                if (params.log) {
                     await Modlog.logUserAction(
                         this.client,
                         guild,
@@ -156,7 +159,7 @@ export class RoleAssignmentService {
             return {
                 success: true,
                 value: {
-                    assignedRoles: returnMissing ? missingRoles : allRoles,
+                    assignedRoles: params.returnMissing ? missingRoles : allRoles,
                     updatedName: newNickname,
                 },
             };

@@ -63,7 +63,7 @@ export class VerifyAll extends ChatCommand {
         try {
             for (const member of members.values()) {
                 const service = new RoleAssignmentService(this.client, member.id);
-                const roleAssignment = await service.assignGuildRoles(interaction.guild, false);
+                const roleAssignment = await service.assignGuildRoles(interaction.guild, { log: false });
                 progress++;
 
                 if (roleAssignment.success && (roleAssignment.value.assignedRoles.length > 0 || roleAssignment.value.updatedName)) {
