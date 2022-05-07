@@ -101,18 +101,21 @@ export async function sendVerificationReplies(
             });
         }
 
-        await safeSendVerificationEmbed(client, interaction, discordUser, ephemeral);
+        await safeSendVerificationEmbed(client, interaction, discordUser, { ephemeral });
     }
 }
+
+type SafeSendVerificationEmbedOptions = { ephemeral?: boolean; isReverify?: boolean };
 
 export async function safeSendVerificationEmbed(
     client: Client,
     interaction: CommandInteraction | ButtonInteraction | Message,
     discordUser: User,
-    ephemeral = false,
-    isReverify = false
+    options: SafeSendVerificationEmbedOptions = {}
 ) {
-    const verifyReply = getVerificationResponse(discordUser, isReverify);
+    options = { ephemeral: false, isReverify: false, ...options };
+
+    const verifyReply = getVerificationResponse(discordUser, options.isReverify);
 
     try {
         if (interaction.guild) {
@@ -124,7 +127,9 @@ export async function safeSendVerificationEmbed(
                 .setColor('BLUE')
                 .setTimestamp();
 
-            ephemeral ? await sendEphemeralReply(interaction, { embeds: [embed] }, 60) : await sendReply(interaction, { embeds: [embed] });
+            options.ephemeral
+                ? await sendEphemeralReply(interaction, { embeds: [embed] }, 60)
+                : await sendReply(interaction, { embeds: [embed] });
 
             await Modlog.logUserAction(client, interaction.guild, discordUser, `${discordUser} requested a verification link.`, 'BLUE');
         } else {
@@ -139,7 +144,9 @@ export async function safeSendVerificationEmbed(
             .setColor('RED')
             .setTimestamp();
 
-        ephemeral ? await sendEphemeralReply(interaction, { embeds: [embed] }, 60) : await sendReply(interaction, { embeds: [embed] });
+        options.ephemeral
+            ? await sendEphemeralReply(interaction, { embeds: [embed] }, 60)
+            : await sendReply(interaction, { embeds: [embed] });
     }
 }
 

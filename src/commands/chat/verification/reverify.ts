@@ -29,7 +29,7 @@ export class ReVerify extends ChatCommand {
         if (!user || !user.verified) {
             await sendVerificationReplies(this.client, interaction, discordUser);
         } else {
-            await safeSendVerificationEmbed(this.client, interaction, discordUser, true, true);
+            await safeSendVerificationEmbed(this.client, interaction, discordUser, { ephemeral: true, isReverify: true });
         }
     }
 }
