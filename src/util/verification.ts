@@ -17,7 +17,7 @@ import { Modlog } from './modlog';
 import { sendEphemeralReply, sendReply } from './message';
 import { VerificationRuleImport, VerificationRules } from '#types/Verification';
 
-export function getVerificationResponse(user: User): MessageOptions {
+export function getVerificationResponse(user: User, isReverify = false): MessageOptions {
     if (!process.env.AES_PASSPHRASE || !process.env.SERVER_URI) {
         throw new Error('Verification URL settings are unset');
     }
@@ -32,7 +32,7 @@ export function getVerificationResponse(user: User): MessageOptions {
         .setTitle('Verification Link')
         .setColor('BLUE')
         .setDescription(
-            `Click the button below and login with your UWaterloo account to verify.
+            `Click the button below and login with your UWaterloo account to ${isReverify ? 'reverify' : 'verify'}.
                         
                 Authorization allows us to read your profile information to confirm that you are/were a UW student, and you can revoke this permission at any time.
                 If you run into issues, message the server admins or ${process.env.OWNER_DISCORD_USERNAME} for help!`
@@ -53,7 +53,7 @@ export async function sendVerificationReplies(
         const service = new RoleAssignmentService(client, discordUser.id);
         let assignedRoles: Role[] = [];
         if (interaction.guild) {
-            const roleAssign = await service.assignGuildRoles(interaction.guild, true, false);
+            const roleAssign = await service.assignGuildRoles(interaction.guild, { log: true, returnMissing: false });
             if (roleAssign.success) {
                 ({ assignedRoles } = roleAssign.value);
             } else if (roleAssign.error === 'User is banned') {
@@ -101,37 +101,52 @@ export async function sendVerificationReplies(
             });
         }
 
-        const verifyReply = getVerificationResponse(discordUser);
+        await safeSendVerificationEmbed(client, interaction, discordUser, { ephemeral });
+    }
+}
 
-        try {
-            if (interaction.guild) {
-                await discordUser.send(verifyReply);
+type SafeSendVerificationEmbedOptions = { ephemeral?: boolean; isReverify?: boolean };
 
-                const embed = new MessageEmbed()
-                    .setTitle('Verification Link Sent')
-                    .setDescription("We've sent you a verification link via direct message. Please check your DMs!")
-                    .setColor('BLUE')
-                    .setTimestamp();
+export async function safeSendVerificationEmbed(
+    client: Client,
+    interaction: CommandInteraction | ButtonInteraction | Message,
+    discordUser: User,
+    options: SafeSendVerificationEmbedOptions = {}
+) {
+    options = { ephemeral: false, isReverify: false, ...options };
 
-                ephemeral
-                    ? await sendEphemeralReply(interaction, { embeds: [embed] }, 60)
-                    : await sendReply(interaction, { embeds: [embed] });
+    const verifyReply = getVerificationResponse(discordUser, options.isReverify);
 
-                await Modlog.logUserAction(client, interaction.guild, discordUser, `${discordUser} requested a verification link.`, 'BLUE');
-            } else {
-                await sendReply(interaction, verifyReply);
-            }
-        } catch (err) {
+    try {
+        if (interaction.guild) {
+            await discordUser.send(verifyReply);
+
             const embed = new MessageEmbed()
-                .setTitle('Unable to Send Verification Link')
-                .setDescription(
-                    'We were unable to DM you a verification link. Please [temporarily change your privacy settings](https://cdn.discordapp.com/attachments/811741914340393000/820114337514651658/permissions.png) to allow direct messages from server members in order to verify.'
-                )
-                .setColor('RED')
+                .setTitle('Verification Link Sent')
+                .setDescription("We've sent you a verification link via direct message. Please check your DMs!")
+                .setColor('BLUE')
                 .setTimestamp();
 
-            ephemeral ? await sendEphemeralReply(interaction, { embeds: [embed] }, 60) : await sendReply(interaction, { embeds: [embed] });
+            options.ephemeral
+                ? await sendEphemeralReply(interaction, { embeds: [embed] }, 60)
+                : await sendReply(interaction, { embeds: [embed] });
+
+            await Modlog.logUserAction(client, interaction.guild, discordUser, `${discordUser} requested a verification link.`, 'BLUE');
+        } else {
+            await sendReply(interaction, verifyReply);
         }
+    } catch (err) {
+        const embed = new MessageEmbed()
+            .setTitle('Unable to Send Verification Link')
+            .setDescription(
+                'We were unable to DM you a verification link. Please [temporarily change your privacy settings](https://cdn.discordapp.com/attachments/811741914340393000/820114337514651658/permissions.png) to allow direct messages from server members in order to verify.'
+            )
+            .setColor('RED')
+            .setTimestamp();
+
+        options.ephemeral
+            ? await sendEphemeralReply(interaction, { embeds: [embed] }, 60)
+            : await sendReply(interaction, { embeds: [embed] });
     }
 }
 

@@ -25,11 +25,16 @@ router.get('/authorize', async (req, res) => {
         return;
     }
 
-    const decodedUID = AES.decrypt(state.replace(/_/g, '/').replace(/-/g, '+'), process.env.AES_PASSPHRASE).toString(enc.Utf8);
-    if (!decodedUID.endsWith('-sebot')) {
+    let decodedUID: string;
+    try {
+        decodedUID = AES.decrypt(state.replace(/_/g, '/').replace(/-/g, '+'), process.env.AES_PASSPHRASE).toString(enc.Utf8);
+
+        if (!decodedUID.endsWith('-sebot')) throw new Error('Malformed verification link');
+    } catch (e) {
         res.send('Error: The link you followed appears to be malformed. Try verifying again.');
         return;
     }
+
     const discordId = decodedUID.replace('-sebot', '');
 
     const getTokenParams = new URLSearchParams();
@@ -60,6 +65,9 @@ router.get('/authorize', async (req, res) => {
         const { userPrincipalName, givenName, surname, department, createdDateTime } = userDataReq.data;
         const uwid = userPrincipalName.replace('@uwaterloo.ca', '');
 
+        const existingUser = await UserModel.findOne({ discordId: discordId, department: { $ne: null } });
+        const oldDepartment = existingUser?.department;
+
         await UserModel.updateOne(
             { discordId: discordId },
             {
@@ -79,7 +87,7 @@ router.get('/authorize', async (req, res) => {
         );
 
         const roleAssignmentService = new RoleAssignmentService(req.client, discordId as Snowflake);
-        await roleAssignmentService.assignAllRoles();
+        await roleAssignmentService.assignAllRoles(oldDepartment);
 
         res.send("You've been verified successfully! You can close this window and return to Discord.");
     } catch (e: unknown) {

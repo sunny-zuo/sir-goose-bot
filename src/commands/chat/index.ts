@@ -32,6 +32,7 @@ import { Course } from './uwaterloo/course';
 import { Countdown } from './uwaterloo/countdown';
 
 /* Verification Commands */
+import { ReVerify } from './verification/reverify';
 import { Verify } from './verification/verify';
 import { VerifyAll } from './verification/verifyall';
 import { VerifyButton } from './verification/verifybutton';
@@ -58,6 +59,7 @@ export default [
     Pin,
     Course,
     Countdown,
+    ReVerify,
     Verify,
     VerifyAll,
     VerifyButton,

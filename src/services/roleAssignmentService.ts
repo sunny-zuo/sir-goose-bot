@@ -14,6 +14,7 @@ import { logger } from '#util/logger';
 
 type CustomFileImport = { type: 'hash' | 'uwid'; department: string | null; entranceYear: number | null; ids: string[] };
 type CustomValues = { departments: string[]; entranceYear: number | null };
+type AssignGuildRolesParams = { log?: boolean; returnMissing?: boolean; oldDepartment?: string };
 export type RoleAssignmentResult = { assignedRoles: Role[]; updatedName?: string };
 
 export class RoleAssignmentService {
@@ -64,7 +65,7 @@ export class RoleAssignmentService {
         this.userId = userId;
     }
 
-    async assignAllRoles(): Promise<void> {
+    async assignAllRoles(oldDepartment?: string): Promise<void> {
         const guildModels = await GuildModel.find({ enableVerification: true });
 
         logger.info({ verification: 'assignAll', user: { id: this.userId } }, 'Assigning roles to user in all possible guilds');
@@ -72,7 +73,7 @@ export class RoleAssignmentService {
             try {
                 const guild = this.client.guilds.cache.get(guildModel.guildId);
                 if (guild) {
-                    await this.assignGuildRoles(guild);
+                    await this.assignGuildRoles(guild, { oldDepartment });
                 }
             } catch (e) {
                 logger.error(e, e.message);
@@ -80,7 +81,9 @@ export class RoleAssignmentService {
         }
     }
 
-    async assignGuildRoles(guild: Guild, log = true, returnMissing = true): Promise<Result<RoleAssignmentResult, string>> {
+    async assignGuildRoles(guild: Guild, params: AssignGuildRolesParams = {}): Promise<Result<RoleAssignmentResult, string>> {
+        params = { log: true, returnMissing: true, ...params };
+
         const guildModel = await GuildConfigCache.fetchConfig(guild.id);
         if (
             !guildModel ||
@@ -118,24 +121,34 @@ export class RoleAssignmentService {
                 return { success: false, error: 'User is banned' };
             }
 
-            const allRoles = await this.getMatchingRoles(guild, log);
-            const missingRoles = allRoles.filter((role) => !member.roles.cache.has(role.id));
+            const newRoles = await this.getMatchingRoles(guild, user, params.log);
 
-            if (missingRoles.length > 0) {
-                await member.roles.add(missingRoles, 'Verified via Sir Goose Bot');
-                if (log) {
+            let oldRoles: Role[] = [];
+            if (params.oldDepartment) {
+                oldRoles = await this.getMatchingRoles(guild, { ...user.toObject(), department: params.oldDepartment }, false);
+            }
+
+            const rolesToSet = member.roles.cache.clone();
+            const missingRoles = newRoles.filter((role) => !member.roles.cache.has(role.id));
+
+            oldRoles.map((role) => rolesToSet.delete(role.id));
+            newRoles.map((role) => rolesToSet.set(role.id, role));
+
+            if (!rolesToSet.equals(member.roles.cache)) {
+                await member.roles.set(rolesToSet, 'Verified via Sir Goose Bot');
+                if (params.log) {
                     await Modlog.logUserAction(
                         this.client,
                         guild,
                         member.user,
-                        `${member} successfully verified and was assigned the ${allRoles
+                        `${member} successfully verified and was assigned the ${newRoles
                             .map((role) => `\`${role.name}\``)
                             .join(', ')} role(s).`,
                         'GREEN'
                     );
                 }
-            } else if (user.verifyRequestedServerId === guild.id && allRoles.length === 0) {
-                if (log) {
+            } else if (user.verifyRequestedServerId === guild.id && newRoles.length === 0) {
+                if (params.log) {
                     await Modlog.logUserAction(
                         this.client,
                         guild,
@@ -156,7 +169,7 @@ export class RoleAssignmentService {
             return {
                 success: true,
                 value: {
-                    assignedRoles: returnMissing ? missingRoles : allRoles,
+                    assignedRoles: params.returnMissing ? missingRoles : newRoles,
                     updatedName: newNickname,
                 },
             };
@@ -193,8 +206,7 @@ export class RoleAssignmentService {
         return undefined;
     }
 
-    private async getMatchingRoles(guild: Guild, log = true): Promise<Role[]> {
-        const user = await UserModel.findOne({ discordId: this.userId });
+    private async getMatchingRoles(guild: Guild, user: UserInterface, log = true): Promise<Role[]> {
         const config = await GuildConfigCache.fetchConfig(guild.id);
 
         const roleData = RoleAssignmentService.getMatchingRoleData(user, config);
