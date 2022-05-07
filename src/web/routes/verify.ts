@@ -11,10 +11,15 @@ router.get('/:encodedId', async (req, res) => {
     }
 
     if (req.params.encodedId) {
-        const decodedUID = AES.decrypt(req.params.encodedId.replace(/_/g, '/').replace(/-/g, '+'), process.env.AES_PASSPHRASE).toString(
-            enc.Utf8
-        );
-        if (!decodedUID.endsWith('-sebot')) {
+        let decodedUID: string | undefined;
+
+        try {
+            decodedUID = AES.decrypt(req.params.encodedId.replace(/_/g, '/').replace(/-/g, '+'), process.env.AES_PASSPHRASE).toString(
+                enc.Utf8
+            );
+        } catch (e) {}
+
+        if (!decodedUID || !decodedUID.endsWith('-sebot')) {
             res.send('Error: The link you followed appears to be malformed. Try requesting a new verification link.');
             return;
         }
