@@ -25,11 +25,16 @@ router.get('/authorize', async (req, res) => {
         return;
     }
 
-    const decodedUID = AES.decrypt(state.replace(/_/g, '/').replace(/-/g, '+'), process.env.AES_PASSPHRASE).toString(enc.Utf8);
-    if (!decodedUID.endsWith('-sebot')) {
+    let decodedUID: string;
+    try {
+        decodedUID = AES.decrypt(state.replace(/_/g, '/').replace(/-/g, '+'), process.env.AES_PASSPHRASE).toString(enc.Utf8);
+
+        if (!decodedUID.endsWith('-sebot')) throw new Error('Malformed verification link');
+    } catch (e) {
         res.send('Error: The link you followed appears to be malformed. Try verifying again.');
         return;
     }
+
     const discordId = decodedUID.replace('-sebot', '');
 
     const getTokenParams = new URLSearchParams();

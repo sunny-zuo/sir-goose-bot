@@ -11,18 +11,18 @@ router.get('/:encodedId', async (req, res) => {
     }
 
     if (req.params.encodedId) {
-        let decodedUID: string | undefined;
+        let decodedUID: string;
 
         try {
             decodedUID = AES.decrypt(req.params.encodedId.replace(/_/g, '/').replace(/-/g, '+'), process.env.AES_PASSPHRASE).toString(
                 enc.Utf8
             );
-        } catch (e) {}
-
-        if (!decodedUID || !decodedUID.endsWith('-sebot')) {
+            if (!decodedUID.endsWith('-sebot')) throw new Error('Malformed verification link');
+        } catch (e) {
             res.send('Error: The link you followed appears to be malformed. Try requesting a new verification link.');
             return;
         }
+
         const discordId = decodedUID.replace('-sebot', '');
 
         await UserModel.updateOne({ discordId: discordId }, { $set: { verifiedClickedAt: new Date() } });
