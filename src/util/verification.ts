@@ -17,7 +17,7 @@ import { Modlog } from './modlog';
 import { sendEphemeralReply, sendReply } from './message';
 import { VerificationRuleImport, VerificationRules } from '#types/Verification';
 
-export function getVerificationResponse(user: User): MessageOptions {
+export function getVerificationResponse(user: User, isReverify = false): MessageOptions {
     if (!process.env.AES_PASSPHRASE || !process.env.SERVER_URI) {
         throw new Error('Verification URL settings are unset');
     }
@@ -32,7 +32,7 @@ export function getVerificationResponse(user: User): MessageOptions {
         .setTitle('Verification Link')
         .setColor('BLUE')
         .setDescription(
-            `Click the button below and login with your UWaterloo account to verify.
+            `Click the button below and login with your UWaterloo account to ${isReverify ? 'reverify' : 'verify'}.
                         
                 Authorization allows us to read your profile information to confirm that you are/were a UW student, and you can revoke this permission at any time.
                 If you run into issues, message the server admins or ${process.env.OWNER_DISCORD_USERNAME} for help!`
@@ -109,9 +109,10 @@ export async function safeSendVerificationEmbed(
     client: Client,
     interaction: CommandInteraction | ButtonInteraction | Message,
     discordUser: User,
-    ephemeral = false
+    ephemeral = false,
+    isReverify = false
 ) {
-    const verifyReply = getVerificationResponse(discordUser);
+    const verifyReply = getVerificationResponse(discordUser, isReverify);
 
     try {
         if (interaction.guild) {
