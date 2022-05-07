@@ -60,6 +60,9 @@ router.get('/authorize', async (req, res) => {
         const { userPrincipalName, givenName, surname, department, createdDateTime } = userDataReq.data;
         const uwid = userPrincipalName.replace('@uwaterloo.ca', '');
 
+        const existingUser = await UserModel.findOne({ discordId: discordId, department: { $ne: null } });
+        const oldDepartment = existingUser?.department;
+
         await UserModel.updateOne(
             { discordId: discordId },
             {
@@ -79,7 +82,7 @@ router.get('/authorize', async (req, res) => {
         );
 
         const roleAssignmentService = new RoleAssignmentService(req.client, discordId as Snowflake);
-        await roleAssignmentService.assignAllRoles();
+        await roleAssignmentService.assignAllRoles(oldDepartment);
 
         res.send("You've been verified successfully! You can close this window and return to Discord.");
     } catch (e: unknown) {
