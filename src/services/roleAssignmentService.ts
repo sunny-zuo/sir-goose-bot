@@ -125,7 +125,7 @@ export class RoleAssignmentService {
 
             let oldRoles: Role[] = [];
             if (params.oldDepartment) {
-                oldRoles = await this.getMatchingRoles(guild, { ...user, department: params.oldDepartment }, false);
+                oldRoles = await this.getMatchingRoles(guild, { ...user.toObject(), department: params.oldDepartment }, false);
             }
 
             const rolesToSet = member.roles.cache.clone();
