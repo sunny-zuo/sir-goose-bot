@@ -1,6 +1,6 @@
 import { ChatCommand } from '../ChatCommand';
 import Client from '#src/Client';
-import { CommandInteraction, Message, MessageEmbed, MessageOptions } from 'discord.js';
+import { CommandInteraction, Message, MessageEmbed, InteractionReplyOptions, ReplyMessageOptions } from 'discord.js';
 import axios from 'axios';
 import { logger } from '#util/logger';
 
@@ -17,7 +17,7 @@ export class Honk extends ChatCommand {
 
     async execute(interaction: Message | CommandInteraction): Promise<void> {
         if (Math.random() < 0.4) {
-            let response: MessageOptions = { content: 'HONK HONK' };
+            let response: InteractionReplyOptions & ReplyMessageOptions = { content: 'HONK HONK' };
             try {
                 const randomGoose = 'https://source.unsplash.com/random?goose,geese';
                 const imageUrl = await axios.get(randomGoose).then((r) => r.request.res.responseUrl);
