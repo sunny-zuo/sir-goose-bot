@@ -104,7 +104,7 @@ export class Pin extends ChatCommand {
             return;
         }
 
-        const pinResult = await attemptPin(pinMessage);
+        const pinResult = await attemptPin(pinMessage, `Pinned by ${this.getUser(interaction).tag} (${this.getUser(interaction).id})`);
 
         logger.info({
             pin: { messageId: pinMessageId, source: 'message' },
