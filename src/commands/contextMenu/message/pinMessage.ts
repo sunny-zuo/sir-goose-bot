@@ -38,7 +38,7 @@ export class PinMessage extends ContextMenuCommand {
             return;
         }
 
-        const pinResult = await attemptPin(message);
+        const pinResult = await attemptPin(message, `Pinned by ${interaction.user.tag} (${interaction.user.id})`);
 
         logger.info({
             pin: { messageId: message.id, source: 'contextMenu' },

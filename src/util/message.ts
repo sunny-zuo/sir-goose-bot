@@ -10,7 +10,7 @@ import {
 
 export function sendReply(
     interaction: Message | CommandInteraction | ButtonInteraction,
-    message: InteractionReplyOptions | ReplyMessageOptions
+    message: InteractionReplyOptions & ReplyMessageOptions
 ): Promise<void | Message> {
     // this is dumb but it fixes a typescript error when replying to any of 3 interaction types ¯\_(ツ)_/¯
     if (isMessage(interaction)) {
@@ -22,7 +22,7 @@ export function sendReply(
 
 export function sendEphemeralReply(
     interaction: Message | CommandInteraction | ButtonInteraction | ContextMenuInteraction,
-    message: InteractionReplyOptions | ReplyMessageOptions,
+    message: InteractionReplyOptions & ReplyMessageOptions,
     deletionSeconds = 30
 ): Promise<void> {
     if (isMessage(interaction)) {

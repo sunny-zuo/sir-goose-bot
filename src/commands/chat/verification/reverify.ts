@@ -9,7 +9,7 @@ export class ReVerify extends ChatCommand {
     constructor(client: Client) {
         super(client, {
             name: 'reverify',
-            description: 'Reverify your UW identity to update you roles',
+            description: 'Reverify your UW identity to update your roles',
             category: 'Verification',
             cooldownSeconds: 600,
             cooldownMaxUses: 5,

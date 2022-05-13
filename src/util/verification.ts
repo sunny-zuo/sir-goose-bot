@@ -2,11 +2,12 @@ import { AES } from 'crypto-js';
 import {
     ButtonInteraction,
     CommandInteraction,
+    InteractionReplyOptions,
     Message,
     MessageActionRow,
     MessageButton,
     MessageEmbed,
-    MessageOptions,
+    ReplyMessageOptions,
     Role,
     User,
 } from 'discord.js';
@@ -17,7 +18,7 @@ import { Modlog } from './modlog';
 import { sendEphemeralReply, sendReply } from './message';
 import { VerificationRuleImport, VerificationRules } from '#types/Verification';
 
-export function getVerificationResponse(user: User, isReverify = false): MessageOptions {
+export function getVerificationResponse(user: User, isReverify = false): InteractionReplyOptions & ReplyMessageOptions {
     if (!process.env.AES_PASSPHRASE || !process.env.SERVER_URI) {
         throw new Error('Verification URL settings are unset');
     }

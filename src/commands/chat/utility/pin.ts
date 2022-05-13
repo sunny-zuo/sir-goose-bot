@@ -86,25 +86,16 @@ export class Pin extends ChatCommand {
 
         try {
             pinMessage = await channel.messages.fetch(pinMessageId);
-
-            if (!pinMessageId || !pinMessage) {
-                await this.sendErrorEmbed(
-                    interaction,
-                    'Pin Error',
-                    'You did not provide a message to pin. Either reply to the message you want to quote, or supply the message id and use the command in the same channel as the message you want to pin.'
-                );
-                return;
-            }
         } catch (e) {
             await this.sendErrorEmbed(
                 interaction,
                 'Pin Error',
-                'You did not provide a message to pin. Either reply to the message you want to quote, or supply the message id and use the command in the same channel as the message you want to pin.'
+                'You did not provide a valid message to pin. Either reply to the message you want to quote, or supply the message id and use the command in the same channel as the message you want to pin.'
             );
             return;
         }
 
-        const pinResult = await attemptPin(pinMessage);
+        const pinResult = await attemptPin(pinMessage, `Pinned by ${this.getUser(interaction).tag} (${this.getUser(interaction).id})`);
 
         logger.info({
             pin: { messageId: pinMessageId, source: 'message' },

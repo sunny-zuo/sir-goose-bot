@@ -45,7 +45,7 @@
         "@discordjs/builders": "~0.13.0",
         "axios": "~0.27.2",
         "crypto-js": "~4.1.1",
-        "discord.js": "~13.6.0",
+        "discord.js": "~13.7.0",
         "dotenv": "~16.0.0",
         "express": "~4.18.0",
         "graphql": "~16.4.0",
