@@ -16,7 +16,7 @@ import Client from '#src/Client';
 import { RoleAssignmentService } from '../services/roleAssignmentService';
 import { Modlog } from './modlog';
 import { sendEphemeralReply, sendReply } from './message';
-import { VerificationRuleImport, VerificationRules } from '#types/Verification';
+import { VerificationRuleImportV1, VerificationRules } from '#types/Verification';
 
 export function getVerificationResponse(user: User, isReverify = false): InteractionReplyOptions & ReplyMessageOptions {
     if (!process.env.AES_PASSPHRASE || !process.env.SERVER_URI) {
@@ -156,10 +156,10 @@ export function serializeVerificationRules(verificationRules: VerificationRules 
         return '';
     }
 
-    const serializedRules: VerificationRuleImport[] = [];
+    const serializedRules: VerificationRuleImportV1[] = [];
 
     for (const rule of verificationRules.rules) {
-        const serializedRule: VerificationRuleImport = {
+        const serializedRule: VerificationRuleImportV1 = {
             roles: rule.roles.map((role) => role.name),
             department: rule.department,
             match: rule.matchType,

@@ -25,14 +25,26 @@ export interface RoleData {
     id: Snowflake;
 }
 
-export interface VerificationRuleImport {
+export interface VerificationRuleImportV1 {
     roles: string[];
     department: string;
     match: string;
     year: string;
 }
-
-export interface VerificationImport {
+export interface VerificationImportV1 {
     baseYear: number;
-    rules: VerificationRuleImport[];
+    rules: VerificationRuleImportV1[];
+}
+
+export interface VerificationRuleImportV2 {
+    roles: string[];
+    department: string;
+    match: string;
+    yearMatch: string;
+    year?: number;
+}
+
+export interface VerificationImportV2 {
+    v: number;
+    rules: VerificationRuleImportV1[];
 }
