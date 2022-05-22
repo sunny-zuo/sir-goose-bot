@@ -25,12 +25,14 @@ export interface RoleData {
     id: Snowflake;
 }
 
+// deprecated
 export interface VerificationRuleImportV1 {
     roles: string[];
     department: string;
     match: string;
     year: string;
 }
+// deprecated
 export interface VerificationImportV1 {
     baseYear: number;
     rules: VerificationRuleImportV1[];
@@ -46,5 +48,5 @@ export interface VerificationRuleImportV2 {
 
 export interface VerificationImportV2 {
     v: number;
-    rules: VerificationRuleImportV1[];
+    rules: VerificationRuleImportV2[];
 }
