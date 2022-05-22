@@ -65,11 +65,15 @@ export class Modlog {
     static async fetchModlogChannel(guild: Guild): Promise<TextChannel | null> {
         const config = await GuildConfigCache.fetchConfig(guild.id);
         if (config.enableModlog && config.modlogChannelId) {
-            const channel = await guild.channels.fetch(config.modlogChannelId);
-
-            if (channel && channel.type === 'GUILD_TEXT') {
-                return channel;
-            } else {
+            try {
+                const channel = await guild.channels.fetch(config.modlogChannelId);
+                if (channel && channel.type === 'GUILD_TEXT') {
+                    return channel;
+                } else {
+                    return null;
+                }
+            } catch (e) {
+                logger.warn({ modlog: 'channelFetch' }, e);
                 return null;
             }
         } else {
