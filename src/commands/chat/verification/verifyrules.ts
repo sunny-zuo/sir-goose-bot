@@ -76,6 +76,18 @@ export class VerifyRules extends ChatCommand {
                     importedRule.yearMatch &&
                     (!isNaN(Number(importedRule.year)) || importedRule.yearMatch === 'all')
                 ) {
+                    if (
+                        !['all', 'equal', 'upper', 'lower'].includes(importedRule.yearMatch) ||
+                        !['anything', 'exact', 'begins', 'contains'].includes(importedRule.match)
+                    ) {
+                        await this.sendErrorEmbed(
+                            interaction,
+                            'Import Error',
+                            'You provided an invalid rule import. Please make sure you copy and pasted correctly from the [rule creation tool.](https://sebot.sunnyzuo.com/).'
+                        );
+                        return;
+                    }
+
                     const roles: RoleData[] = [];
 
                     for (const roleName of importedRule.roles) {
