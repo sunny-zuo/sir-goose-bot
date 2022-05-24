@@ -9,7 +9,7 @@ import {
 import { ChatCommand } from '../ChatCommand';
 import Client from '#src/Client';
 import { GuildConfigCache } from '#util/guildConfigCache';
-import { VerificationRule, RoleData, VerificationImport } from '#types/Verification';
+import { VerificationRule, RoleData, VerificationImportV2 } from '#types/Verification';
 import { serializeVerificationRules } from '#util/verification';
 import { codeBlock, inlineCode } from '@discordjs/builders';
 
@@ -40,10 +40,12 @@ export class VerifyRules extends ChatCommand {
         const ruleString = args?.getString('rules');
 
         if (ruleString) {
-            let importedJSON: VerificationImport;
+            let importedJSON: VerificationImportV2;
 
             try {
                 importedJSON = JSON.parse(ruleString);
+
+                if (importedJSON?.v !== 2) throw new Error('Rule import was not v2');
             } catch (e) {
                 await this.sendErrorEmbed(
                     interaction,
@@ -53,7 +55,7 @@ export class VerifyRules extends ChatCommand {
                 return;
             }
 
-            if (!importedJSON.rules || importedJSON.rules.length === 0 || isNaN(importedJSON.baseYear)) {
+            if (!importedJSON.rules || importedJSON.rules.length === 0) {
                 await this.sendErrorEmbed(
                     interaction,
                     'Import Error',
@@ -67,11 +69,29 @@ export class VerifyRules extends ChatCommand {
             await interaction.guild?.roles.fetch();
 
             for (const importedRule of importedJSON.rules) {
-                if (importedRule.roles?.length > 0 && importedRule.department && importedRule.match && importedRule.year) {
+                if (
+                    importedRule.roles?.length > 0 &&
+                    importedRule.department &&
+                    importedRule.match &&
+                    importedRule.yearMatch &&
+                    (!isNaN(Number(importedRule.year)) || importedRule.yearMatch === 'all')
+                ) {
+                    if (
+                        !['all', 'equal', 'upper', 'lower'].includes(importedRule.yearMatch) ||
+                        !['anything', 'exact', 'begins', 'contains'].includes(importedRule.match)
+                    ) {
+                        await this.sendErrorEmbed(
+                            interaction,
+                            'Import Error',
+                            'You provided an invalid rule import. Please make sure you copy and pasted correctly from the [rule creation tool.](https://sebot.sunnyzuo.com/).'
+                        );
+                        return;
+                    }
+
                     const roles: RoleData[] = [];
 
                     for (const roleName of importedRule.roles) {
-                        const role = await interaction.guild?.roles.cache.find((role) => role.name === roleName);
+                        const role = interaction.guild?.roles.cache.find((role) => role.name === roleName);
 
                         if (!role) {
                             await this.sendErrorEmbed(
@@ -95,8 +115,10 @@ export class VerifyRules extends ChatCommand {
                         roles: roles,
                         department: String(importedRule.department),
                         matchType: String(importedRule.match),
-                        yearMatch: String(importedRule.year),
+                        yearMatch: String(importedRule.yearMatch),
                     };
+
+                    if (importedRule.year) newRule.year = Number(importedRule.year);
 
                     newRules.push(newRule);
                 }
@@ -105,7 +127,7 @@ export class VerifyRules extends ChatCommand {
             const config = await GuildConfigCache.fetchOrCreate(interaction.guild!.id);
 
             config.verificationRules = {
-                baseYear: Number(importedJSON.baseYear),
+                baseYear: -1, // TODO: remove base year from code
                 rules: newRules,
             };
 
