@@ -3,6 +3,10 @@ version: '3.8'
 volumes:
     logs:
     prometheus_data:
+    grafana_data:
+
+networks:
+    grafnet:
 
 services:
     sir-goose:
@@ -17,6 +21,8 @@ services:
             - logs:/logs/
         ports:
             - '5000:5000'
+        networks:
+            - 'grafnet'
         restart: always
 
     prometheus:
@@ -25,7 +31,7 @@ services:
         restart: unless-stopped
         volumes:
             - ./docker/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
-            - prometheus_data:/prometheus
+            - prometheus_data:/var/lib/prometheus
         command:
             - '--config.file=/etc/prometheus/prometheus.yml'
             - '--storage.tsdb.path=/prometheus'
@@ -34,6 +40,18 @@ services:
             - '--web.enable-lifecycle'
         expose:
             - 9090
+        networks:
+            - 'grafnet'
+
+    grafana:
+        image: grafana/grafana
+        container_name: grafana
+        ports:
+            - '3000:3000'
+        volumes:
+            - grafana_data:/var/lib/grafana
+        networks:
+            - 'grafnet'
 
     promtail:
         image: grafana/promtail:2.4.1
@@ -41,3 +59,5 @@ services:
             - logs:/logs/
             - ./docker/promtail/:/etc/promtail/
         command: -config.file=/etc/promtail/config.yml
+        networks:
+            - 'grafnet'
