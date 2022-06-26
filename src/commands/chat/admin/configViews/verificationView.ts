@@ -27,7 +27,7 @@ export class VerificationView {
             .setColor('BLUE')
             .setTimestamp();
 
-        const buttons = new MessageActionRow().addComponents(
+        const row1 = new MessageActionRow().addComponents(
             new MessageButton()
                 .setCustomId('configVerificationEnable')
                 .setStyle('SUCCESS')
@@ -38,12 +38,19 @@ export class VerificationView {
                 .setStyle('DANGER')
                 .setLabel('Disable')
                 .setDisabled(!config.enableVerification),
-            new MessageButton().setCustomId('configVerificationViewRules').setStyle('PRIMARY').setLabel('View Verification Rules'),
-            new MessageButton().setCustomId('configVerificationSetRules').setStyle('PRIMARY').setLabel('Update Verification Rules'),
+            new MessageButton().setCustomId('configVerificationViewRules').setStyle('PRIMARY').setLabel('View Rules'),
+            new MessageButton().setCustomId('configVerificationSetRules').setStyle('PRIMARY').setLabel('Update Rules')
+        );
+
+        const row2 = new MessageActionRow().addComponents(
+            new MessageButton()
+                .setStyle('LINK')
+                .setLabel('Read the Verification Guide')
+                .setURL('https://sir-goose.notion.site/sir-goose/Setting-Up-Verification-0f309b2a00fc4e198b5f2182d2452fcd'),
             new MessageButton().setCustomId('configVerificationBack').setStyle('SECONDARY').setLabel('Back')
         );
 
-        await interaction.update({ embeds: [embed], components: [buttons] });
+        await interaction.update({ embeds: [embed], components: [row1, row2] });
 
         const message = interaction.message as Message;
 
