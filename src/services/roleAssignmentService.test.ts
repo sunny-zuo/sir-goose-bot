@@ -154,7 +154,7 @@ describe('roleAssignmentService', () => {
                     verified: true,
                     uwid: uwid,
                     department: 'VPA/Software Engineering',
-                    o365CreatedDate: new Date(2020, 6),
+                    o365CreatedDate: new Date(2020, 5),
                 };
             });
 
@@ -208,7 +208,7 @@ describe('roleAssignmentService', () => {
             });
 
             it('only matches the user with an upper year check when user is upper year', () => {
-                user.o365CreatedDate = new Date(2019, 6);
+                user.o365CreatedDate = new Date(2019, 5);
 
                 config.verificationRules!.rules[0].yearMatch = 'equal';
                 expect(RoleAssignmentService.getMatchingRoleData(user, config)).toEqual([]);
@@ -221,7 +221,7 @@ describe('roleAssignmentService', () => {
             });
 
             it('only matches the user with an lower year check when user is lower year', () => {
-                user.o365CreatedDate = new Date(2021, 6);
+                user.o365CreatedDate = new Date(2021, 5);
 
                 config.verificationRules!.rules[0].yearMatch = 'equal';
                 expect(RoleAssignmentService.getMatchingRoleData(user, config)).toEqual([]);
@@ -231,6 +231,20 @@ describe('roleAssignmentService', () => {
 
                 config.verificationRules!.rules[0].yearMatch = 'lower';
                 expect(RoleAssignmentService.getMatchingRoleData(user, config)).toEqual([exampleRoleData]);
+            });
+
+            it('considers a user who started in May of one year as starting in the previous year', () => {
+                user.o365CreatedDate = new Date(2020, 4);
+                config.verificationRules!.baseYear = 2019;
+
+                config.verificationRules!.rules[0].yearMatch = 'equal';
+                expect(RoleAssignmentService.getMatchingRoleData(user, config)).toEqual([exampleRoleData]);
+
+                config.verificationRules!.rules[0].yearMatch = 'upper';
+                expect(RoleAssignmentService.getMatchingRoleData(user, config)).toEqual([]);
+
+                config.verificationRules!.rules[0].yearMatch = 'lower';
+                expect(RoleAssignmentService.getMatchingRoleData(user, config)).toEqual([]);
             });
 
             describe('when multiple matching rules exist', () => {
@@ -327,10 +341,10 @@ describe('roleAssignmentService', () => {
                     config.verificationRules!.rules[0].yearMatch = 'equal';
                     config.verificationRules!.rules[0].year = 2019;
 
-                    user.o365CreatedDate = new Date(2019, 6);
+                    user.o365CreatedDate = new Date(2019, 5);
                     expect(RoleAssignmentService.getMatchingRoleData(user, config)).toEqual([exampleRoleData]);
 
-                    user.o365CreatedDate = new Date(2020, 6);
+                    user.o365CreatedDate = new Date(2020, 5);
                     expect(RoleAssignmentService.getMatchingRoleData(user, config)).toEqual([]);
                 });
             });

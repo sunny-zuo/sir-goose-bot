@@ -284,7 +284,15 @@ export class RoleAssignmentService {
         const customDepartments = customValues?.departments ?? [];
         departments = [...departments, ...customDepartments];
 
-        const entranceYear = customValues?.entranceYear ?? user.o365CreatedDate.getFullYear();
+        // students who started before 2020 will have an o365CreatedDate in March 2020, so we mark them as 2019.
+        function parseO365Year(createdDate: Date): number {
+            if (createdDate.getFullYear() === 2020 && createdDate.getMonth() < 5) {
+                return createdDate.getFullYear() - 1;
+            }
+            return createdDate.getFullYear();
+        }
+
+        const entranceYear = customValues?.entranceYear ?? parseO365Year(user.o365CreatedDate);
 
         for (const rule of config.verificationRules.rules) {
             if (
