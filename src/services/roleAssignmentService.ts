@@ -286,9 +286,7 @@ export class RoleAssignmentService {
 
         // students who started before 2020 will have an o365CreatedDate in March 2020, so we mark them as 2019.
         function parseO365Year(createdDate: Date): number {
-            if (createdDate.getFullYear() === 2020 && createdDate.getMonth() < 5) {
-                return createdDate.getFullYear() - 1;
-            }
+            if (createdDate.getFullYear() === 2020 && createdDate.getMonth() < 5) return 2019;
             return createdDate.getFullYear();
         }
 
