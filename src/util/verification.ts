@@ -36,7 +36,7 @@ export function getVerificationResponse(user: User, isReverify = false): Interac
             `Click the button below and login with your UWaterloo account to ${isReverify ? 'reverify' : 'verify'}.
                         
                 Authorization allows us to read your profile information to confirm that you are/were a UW student, and you can revoke this permission at any time.
-                If you run into issues, message the server admins or ${process.env.OWNER_DISCORD_USERNAME} for help!`
+                If you run into issues, message the server admins or [join the support server](https://discord.gg/KHByMmrrw2) for help!`
         );
 
     return { embeds: [embed], components: [button] };

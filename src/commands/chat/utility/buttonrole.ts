@@ -153,7 +153,7 @@ export class ButtonRole extends ChatCommand {
             await this.sendErrorEmbed(
                 interaction,
                 'Too Many Button Role Prompts',
-                `You cannot have more than ${BUTTON_ROLE_GUILD_LIMIT} button roles prompts. Please message ${process.env.OWNER_DISCORD_USERNAME} if you have a good reason to get this limit increased.`
+                `You cannot have more than ${BUTTON_ROLE_GUILD_LIMIT} button roles prompts. Please ask in the [support server](https://discord.gg/KHByMmrrw2) if you have a good reason to get this limit increased.`
             );
             return;
         }

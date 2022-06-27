@@ -6,7 +6,9 @@ const router = express.Router();
 
 router.get('/:encodedId', async (req, res) => {
     if (!process.env.AES_PASSPHRASE || !process.env.TENANT_ID || !process.env.CLIENT_ID || !process.env.SERVER_URI) {
-        res.send(`The bot configuration was not setup correctly. Please notify ${process.env.OWNER_DISCORD_USERNAME} so they can fix it.`);
+        res.send(
+            `The bot configuration was not setup correctly. Please notify the support server (https://discord.gg/KHByMmrrw2) so that it can be fixed.`
+        );
         return;
     }
 
