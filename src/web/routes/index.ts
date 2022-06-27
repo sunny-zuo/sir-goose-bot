@@ -21,7 +21,9 @@ router.get('/authorize', async (req, res) => {
         return;
     }
     if (!process.env.AES_PASSPHRASE || !process.env.CLIENT_ID || !process.env.CLIENT_SECRET || !process.env.SERVER_URI) {
-        res.send(`The bot configuration was not setup correctly. Please notify ${process.env.OWNER_DISCORD_USERNAME} so they can fix it.`);
+        res.send(
+            `The bot configuration was not setup correctly. Please notify the support server (https://discord.gg/KHByMmrrw2) so that it can be fixed.`
+        );
         return;
     }
 
@@ -102,7 +104,7 @@ router.get('/authorize', async (req, res) => {
         }
 
         res.send(
-            `We ran into an error verifying your account. Please try again later or message ${process.env.OWNER_DISCORD_USERNAME} on Discord for help.`
+            `We ran into an error verifying your account. Please try again later or join the support server for help: https://discord.gg/KHByMmrrw2`
         );
     }
 });

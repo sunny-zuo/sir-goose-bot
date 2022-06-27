@@ -6,7 +6,7 @@ Sir Goose is built using discord.js v13, with full support for slash commands an
 
 ## Features
 
--   **Verification**: Let users link their Discord with their UWaterloo identity and automatically assign roles based on their program of study and their year.
+-   **Verification**: Let users link their Discord with their UWaterloo identity and automatically assign roles based on their program of study and their year. [Read the guide](https://sir-goose.notion.site/sir-goose/Setting-Up-Verification-0f309b2a00fc4e198b5f2182d2452fcd) on setting up verification for your server!
 
 -   **Verification Rule Builder**: Customize verification role assignment to be as specific as you want using [a web interface](https://sebot.sunnyzuo.com/).
 

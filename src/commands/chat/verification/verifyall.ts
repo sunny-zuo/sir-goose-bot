@@ -77,7 +77,7 @@ export class VerifyAll extends ChatCommand {
                 embeds: [
                     new MessageEmbed().setTitle('Unknown Error').setDescription(`
                             We ran into an unknown error trying to verify all users.
-                            Please try again later or message ${process.env.OWNER_DISCORD_USERNAME} for help.
+                            Please try again later or join the [support server](https://discord.gg/KHByMmrrw2) for help.
 
                             **Progress Made Before Error:**
                             ${this.generateProgressBar(progress, total)}

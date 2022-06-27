@@ -85,6 +85,11 @@ export class Help extends ChatCommand {
                 }
             }
 
+            embed.addField(
+                'Verification Guide',
+                'Looking to setup verification for your server? [Check out the guide!](https://sir-goose.notion.site/sir-goose/Setting-Up-Verification-0f309b2a00fc4e198b5f2182d2452fcd)'
+            );
+
             await interaction.reply({ embeds: [embed] });
         }
     }
