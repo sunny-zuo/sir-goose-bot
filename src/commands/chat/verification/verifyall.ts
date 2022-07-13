@@ -1,4 +1,4 @@
-import { CommandInteraction, GuildMember, Message, MessageEmbed, Permissions } from 'discord.js';
+import { CommandInteraction, Message, MessageEmbed, Permissions } from 'discord.js';
 import Client from '#src/Client';
 import { ChatCommand } from '../ChatCommand';
 import { GuildConfigCache } from '#util/guildConfigCache';
