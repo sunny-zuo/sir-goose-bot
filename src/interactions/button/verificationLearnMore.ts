@@ -26,6 +26,10 @@ export class VerificationLearnMore implements ButtonInteractionHandler {
             Once you've verified with Sir Goose, you'll be automatically verified on all servers using Sir Goose for verification!`
         );
         embed.addField(
+            'Does Sir Goose get access to my password?',
+            'No. Authentication uses [OAuth 2.0](https://oauth.net/2/), an industry standard protocol for authorization. Logging in will authorize the bot to read your profile info, without sharing your password with the bot.'
+        );
+        embed.addField(
             'What is my data used for?',
             'Your data will be used to assign roles configured by server admins, and may be used to assist in misconduct investigations when there is clear evidence of wrongdoing. Your data may also be used to prevent ban circumvention.'
         );
