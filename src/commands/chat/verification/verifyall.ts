@@ -1,4 +1,4 @@
-import { CommandInteraction, Message, MessageEmbed, Permissions } from 'discord.js';
+import { CommandInteraction, GuildMember, Message, MessageEmbed, Permissions } from 'discord.js';
 import Client from '#src/Client';
 import { ChatCommand } from '../ChatCommand';
 import { GuildConfigCache } from '#util/guildConfigCache';
@@ -23,7 +23,20 @@ export class VerifyAll extends ChatCommand {
 
         const config = await GuildConfigCache.fetchConfig(interaction.guild.id);
         if (interaction.guild && config.enableVerification === false) {
-            await this.sendErrorEmbed(interaction, 'Verification Not Enabled', 'This server does not have verification enabled.');
+            const member = interaction.member as GuildMember | null;
+
+            if (member && member.permissions.has(Permissions.FLAGS.MANAGE_GUILD)) {
+                await this.sendErrorEmbed(
+                    interaction,
+                    'Verification Not Enabled',
+                    `This server does not have verification enabled.
+
+                    Looking to enable verification? [Read the guide.](https://sir-goose.notion.site/sir-goose/Setting-Up-Verification-0f309b2a00fc4e198b5f2182d2452fcd)`
+                );
+            } else {
+                await this.sendErrorEmbed(interaction, 'Verification Not Enabled', 'This server does not have verification enabled.');
+            }
+
             return;
         }
 
