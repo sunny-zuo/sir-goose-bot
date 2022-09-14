@@ -27,7 +27,9 @@ function processFile(filePath: string) {
         const lines = file
             .split('\n')
             .filter((line) => line.length > 0)
-            .map((line) => line.replace('@uwaterloo.ca', '').trim());
+            .map((line) => line.split(/\s/g).filter((str) => str.endsWith('@uwaterloo.ca'))[0])
+            .filter((email) => email !== undefined)
+            .map((email) => email.replace('@uwaterloo.ca', '').trim());
 
         const output = {
             type: 'hash | uwid',
