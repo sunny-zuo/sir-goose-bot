@@ -42,25 +42,56 @@ export class BotStats extends ChatCommand {
             .setColor('BLUE')
             .setTimestamp();
 
-        embed.addField('Servers', this.formatValue(this.client.guilds.cache.size.toString(), fieldMaxLength), true);
-        embed.addField('Channels', this.formatValue(this.client.channels.cache.size.toString(), fieldMaxLength), true);
-        embed.addField(
-            'Users',
-            this.formatValue(this.client.guilds.cache.reduce((total, guild) => (total += guild.memberCount), 0).toString(), fieldMaxLength),
-            true
-        );
-
-        embed.addField('CPU Usage', this.formatValue(`${this.calculateCPUUsage().toFixed(2)}%`, fieldMaxLength), true);
-        embed.addField(
-            'RAM Usage',
-            this.formatValue(`${Math.round(process.memoryUsage().heapUsed / 1024 / 1024)} MB`, fieldMaxLength),
-            true
-        );
-        embed.addField('Ping', this.formatValue(`${this.client.ws.ping}ms`, fieldMaxLength), true);
-
-        embed.addField('Bot Version', this.formatValue(version ?? 'Unknown', fieldMaxLength), true);
-        embed.addField('Commit', this.formatValue(this.latestCommit, fieldMaxLength), true);
-        embed.addField('Uptime', this.formatValue(`${uptimeDays}d ${uptimeHours}h`, fieldMaxLength), true);
+        embed.addFields([
+            {
+                name: 'Servers',
+                value: this.formatValue(this.client.guilds.cache.size.toString(), fieldMaxLength),
+                inline: true,
+            },
+            {
+                name: 'Channels',
+                value: this.formatValue(this.client.channels.cache.size.toString(), fieldMaxLength),
+                inline: true,
+            },
+            {
+                name: 'Users',
+                value: this.formatValue(
+                    this.client.guilds.cache.reduce((total, guild) => (total += guild.memberCount), 0).toString(),
+                    fieldMaxLength
+                ),
+                inline: true,
+            },
+            {
+                name: 'CPU Usage',
+                value: this.formatValue(`${this.calculateCPUUsage().toFixed(2)}%`, fieldMaxLength),
+                inline: true,
+            },
+            {
+                name: 'RAM Usage',
+                value: this.formatValue(`${Math.round(process.memoryUsage().heapUsed / 1024 / 1024)} MB`, fieldMaxLength),
+                inline: true,
+            },
+            {
+                name: 'Ping',
+                value: this.formatValue(`${this.client.ws.ping}ms`, fieldMaxLength),
+                inline: true,
+            },
+            {
+                name: 'Bot Version',
+                value: this.formatValue(version ?? 'Unknown', fieldMaxLength),
+                inline: true,
+            },
+            {
+                name: 'Commit',
+                value: this.formatValue(this.latestCommit, fieldMaxLength),
+                inline: true,
+            },
+            {
+                name: 'Uptime',
+                value: this.formatValue(`${uptimeDays}d ${uptimeHours}h`, fieldMaxLength),
+                inline: true,
+            },
+        ]);
 
         await interaction.reply({ embeds: [embed] });
     }

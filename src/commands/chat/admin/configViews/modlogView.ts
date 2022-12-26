@@ -1,6 +1,6 @@
 import {
     Guild,
-    GuildChannel,
+    GuildBasedChannel,
     Message,
     MessageActionRow,
     MessageButton,
@@ -189,7 +189,7 @@ export class ModlogView {
         });
     }
 
-    static async parseChannel(guild: Guild, message: string): Promise<GuildChannel | null> {
+    static async parseChannel(guild: Guild, message: string): Promise<GuildBasedChannel | null> {
         const matches = message.match(/^<#(\d+)>$/);
         if (matches) {
             const id = matches[1] as Snowflake;
@@ -198,7 +198,7 @@ export class ModlogView {
         } else {
             await guild.channels.fetch();
             const channel = guild.channels.cache.find((c) => c.name === message && !c.isThread());
-            if (channel) return channel as GuildChannel;
+            if (channel) return channel;
             else return null;
         }
     }

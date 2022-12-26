@@ -14,15 +14,20 @@ import {
     ContextMenuInteraction,
     TextBasedChannel,
     GuildBasedChannel,
+    ApplicationCommandOptionType,
+    GuildChannel,
+    NewsChannel,
+    TextChannel,
 } from 'discord.js';
 import { CommandOptions, Category } from '#types/Command';
 import Client from '#src/Client';
-import { GuildTextBasedChannel, Result, InvalidCommandInteractionOption, ArgumentIssue } from '../types';
+import { Result, InvalidCommandInteractionOption, ArgumentIssue } from '../types';
 import { Cooldown } from '#util/cooldown';
 import { isMessage } from '#util/message';
 import { getUser } from '#util/user';
 import { sendEphemeralReply } from '#util/message';
 import { logger } from '#util/logger';
+import { ApplicationCommandOptionTypesStringMap } from '#util/constants';
 
 const minimumClientPermissions = [Permissions.FLAGS.VIEW_CHANNEL, Permissions.FLAGS.SEND_MESSAGES, Permissions.FLAGS.EMBED_LINKS];
 
@@ -60,6 +65,13 @@ export abstract class Command {
     isRateLimited(userId: Snowflake): boolean {
         return this.cooldown.checkLimit(userId).blocked;
     }
+
+    parseApplicationCommandOptionType(option: ApplicationCommandOption): ApplicationCommandOptionType {
+        const type = option.type;
+        if (typeof type === 'string') return type;
+        else return ApplicationCommandOptionTypesStringMap[type];
+    }
+
     async parseMessageValue(
         interaction: Message | CommandInteraction,
         expectedOption: ApplicationCommandOption,
@@ -68,7 +80,7 @@ export abstract class Command {
         const stringArg = argArray.shift();
         const commandInteractionOption: CommandInteractionOption = {
             name: expectedOption.name,
-            type: expectedOption.type,
+            type: this.parseApplicationCommandOptionType(expectedOption),
         };
 
         if (stringArg === undefined) {
@@ -279,10 +291,24 @@ export abstract class Command {
         }
 
         if (interaction.member && interaction.member instanceof GuildMember) {
-            return (
-                (await this.checkClientPermissions(interaction.channel, interaction)) &&
-                (await this.checkMemberPermissions(interaction.member, interaction.channel, interaction))
-            );
+            if (interaction.channel.isThread()) {
+                const parentId = interaction.channel.parentId;
+                if (!parentId) return false; // should only be null if bot user can't view channel or bot user does not exist
+
+                // TODO: remove this cast - we cast because fetching a thread's parent can only be a NewsChannel or a TextChannel
+                const parentChannel = (await interaction.channel.guild.channels.fetch(parentId)) as NewsChannel | TextChannel;
+                if (!parentChannel) return false;
+
+                return (
+                    (await this.checkClientPermissions(parentChannel, interaction)) &&
+                    (await this.checkMemberPermissions(interaction.member, parentChannel, interaction))
+                );
+            } else {
+                return (
+                    (await this.checkClientPermissions(interaction.channel, interaction)) &&
+                    (await this.checkMemberPermissions(interaction.member, interaction.channel, interaction))
+                );
+            }
         } else {
             // this code would be ran if a bot user is not in the guild, and we would have an APIInteractionGuildMember
             // https://discord.com/developers/docs/resources/guild#guild-member-object
@@ -301,7 +327,7 @@ export abstract class Command {
 
     async checkMemberPermissions(
         member: GuildMember | null,
-        channel: GuildTextBasedChannel,
+        channel: GuildChannel,
         interaction: Message | CommandInteraction | ContextMenuInteraction | null = null,
         ownerOverride = true
     ): Promise<boolean> {
@@ -332,7 +358,7 @@ export abstract class Command {
     }
 
     async checkClientPermissions(
-        channel: GuildTextBasedChannel,
+        channel: GuildChannel,
         interaction: Message | CommandInteraction | ContextMenuInteraction | null = null
     ): Promise<boolean> {
         if (channel.guild.me === null) return false;
