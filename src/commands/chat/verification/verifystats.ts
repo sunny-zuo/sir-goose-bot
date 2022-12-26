@@ -70,10 +70,10 @@ export class VerifyStats extends ChatCommand {
                 ).toFixed(2)}%)
                 `
             )
-            .addField(
-                'Roles',
-                roles.map((role) => `${this.formatLabel(role.name, maxRoleNameLength)} ${role.members.size} Members`).join('\n')
-            )
+            .addFields({
+                name: 'Roles',
+                value: roles.map((role) => `${this.formatLabel(role.name, maxRoleNameLength)} ${role.members.size} Members`).join('\n'),
+            })
             .setTimestamp();
 
         const guildIconURL = guild.iconURL({ dynamic: true });
