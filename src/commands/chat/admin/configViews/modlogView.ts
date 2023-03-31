@@ -120,7 +120,11 @@ export class ModlogView {
 
                 await m.reply({ embeds: [embed] });
             } else {
-                if (channel.permissionsFor(interaction.guild.members.me!).has([Permissions.FLAGS.SEND_MESSAGES, Permissions.FLAGS.EMBED_LINKS])) {
+                if (
+                    channel
+                        .permissionsFor(interaction.guild.members.me!)
+                        .has([Permissions.FLAGS.SEND_MESSAGES, Permissions.FLAGS.EMBED_LINKS])
+                ) {
                     const config = await GuildConfigCache.fetchOrCreate(m.guildId!);
                     config.modlogChannelId = channel.id;
                     await config.save();
