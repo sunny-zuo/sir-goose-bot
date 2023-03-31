@@ -11,11 +11,11 @@ export class Modlog {
         message: string,
         color: ColorResolvable = 'BLUE'
     ): Promise<Message | void> {
-        if (!guild || !guild.me) return;
+        if (!guild || !guild.members.me) return;
 
         const channel = await this.fetchModlogChannel(guild);
 
-        if (channel && channel.permissionsFor(guild.me).has([Permissions.FLAGS.SEND_MESSAGES, Permissions.FLAGS.EMBED_LINKS])) {
+        if (channel && channel.permissionsFor(guild.members.me).has([Permissions.FLAGS.SEND_MESSAGES, Permissions.FLAGS.EMBED_LINKS])) {
             const embed = this.getUserEmbed(user, message, color);
             const sentMessage = await channel.send({ embeds: [embed] }).catch((e) => logger.error(e, e.message));
             return sentMessage;
@@ -29,11 +29,11 @@ export class Modlog {
         message: string,
         color: ColorResolvable = 'BLUE'
     ): Promise<Message | void> {
-        if (!guild || !guild.me) return;
+        if (!guild || !guild.members.me) return;
 
         const channel = await this.fetchModlogChannel(guild);
 
-        if (channel && channel.permissionsFor(guild.me).has([Permissions.FLAGS.SEND_MESSAGES, Permissions.FLAGS.EMBED_LINKS])) {
+        if (channel && channel.permissionsFor(guild.members.me).has([Permissions.FLAGS.SEND_MESSAGES, Permissions.FLAGS.EMBED_LINKS])) {
             const embed = new MessageEmbed().setTitle(title).setColor(color).setDescription(message).setTimestamp();
             const sentMessage = await channel.send({ embeds: [embed] }).catch((e) => logger.error(e, e.message));
             return sentMessage;
@@ -41,7 +41,7 @@ export class Modlog {
     }
 
     static async logMessage(client: Client, guild: Guild | null, message: MessageOptions): Promise<Message | void> {
-        if (!guild || !guild.me) return;
+        if (!guild || !guild.members.me) return;
 
         const channel = await this.fetchModlogChannel(guild);
 

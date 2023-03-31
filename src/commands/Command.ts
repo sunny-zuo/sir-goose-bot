@@ -284,8 +284,8 @@ export abstract class Command {
         if (!interaction.channel) return false;
         if (interaction.channel.type === 'DM' || interaction.member === null) return true;
         if (
-            interaction.channel.guild.me &&
-            !interaction.channel.permissionsFor(interaction.channel.guild.me).has(minimumClientPermissions)
+            interaction.channel.guild.members.me &&
+            !interaction.channel.permissionsFor(interaction.channel.guild.members.me).has(minimumClientPermissions)
         ) {
             return false;
         }
@@ -361,8 +361,8 @@ export abstract class Command {
         channel: GuildChannel,
         interaction: Message | CommandInteraction | ContextMenuInteraction | null = null
     ): Promise<boolean> {
-        if (channel.guild.me === null) return false;
-        const missingPermissions = channel.permissionsFor(channel.guild.me).missing(this.clientPermissions);
+        if (channel.guild.members.me === null) return false;
+        const missingPermissions = channel.permissionsFor(channel.guild.members.me).missing(this.clientPermissions);
 
         if (missingPermissions.length === 0) return true;
 
