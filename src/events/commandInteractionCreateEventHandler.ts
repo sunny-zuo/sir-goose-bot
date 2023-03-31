@@ -49,9 +49,9 @@ export class CommandInteractionCreateEventHandler implements EventHandler {
             if (
                 interaction.channel &&
                 interaction.channel.type === 'GUILD_TEXT' &&
-                interaction.channel.guild.me &&
+                interaction.channel.guild.members.me &&
                 !interaction.channel
-                    .permissionsFor(interaction.channel.guild.me)
+                    .permissionsFor(interaction.channel.guild.members.me)
                     .has([Permissions.FLAGS.SEND_MESSAGES, Permissions.FLAGS.EMBED_LINKS])
             ) {
                 await interaction.user

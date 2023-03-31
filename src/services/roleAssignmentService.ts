@@ -189,7 +189,7 @@ export class RoleAssignmentService {
 
             if (newNickname !== undefined) {
                 if (!member.nickname || (member.nickname !== newNickname && forceRename)) {
-                    if (member.manageable && member.guild.me?.permissions.has(Permissions.FLAGS.MANAGE_NICKNAMES)) {
+                    if (member.manageable && member.guild.members.me?.permissions.has(Permissions.FLAGS.MANAGE_NICKNAMES)) {
                         logger.info({ verification: 'rename', user: { id: this.userId }, guild: { id: member.guild.id } });
                         await member.setNickname(newNickname);
                         return newNickname;

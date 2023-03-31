@@ -111,7 +111,7 @@ export class ModlogView {
         messageCollector.on('collect', async (m) => {
             const channel = await this.parseChannel(m.guild!, m.content);
 
-            if (!channel || !channel.viewable || !interaction.guild?.me) {
+            if (!channel || !channel.viewable || !interaction.guild?.members.me) {
                 const embed = new MessageEmbed()
                     .setDescription(
                         'The channel provided could not be found. Please make sure that the channel exists and that I have access to the channel.'
@@ -120,7 +120,11 @@ export class ModlogView {
 
                 await m.reply({ embeds: [embed] });
             } else {
-                if (channel.permissionsFor(interaction.guild.me).has([Permissions.FLAGS.SEND_MESSAGES, Permissions.FLAGS.EMBED_LINKS])) {
+                if (
+                    channel
+                        .permissionsFor(interaction.guild.members.me!)
+                        .has([Permissions.FLAGS.SEND_MESSAGES, Permissions.FLAGS.EMBED_LINKS])
+                ) {
                     const config = await GuildConfigCache.fetchOrCreate(m.guildId!);
                     config.modlogChannelId = channel.id;
                     await config.save();

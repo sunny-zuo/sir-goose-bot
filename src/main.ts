@@ -5,6 +5,8 @@ import Client from './Client';
 import { RoleAssignmentService } from './services/roleAssignmentService';
 import { logger } from '#util/logger';
 
+mongoose.set('strictQuery', false);
+
 const intents = new Intents();
 intents.add('GUILDS', 'GUILD_MEMBERS', 'GUILD_MESSAGES', 'GUILD_MESSAGE_REACTIONS', 'DIRECT_MESSAGES', 'DIRECT_MESSAGE_REACTIONS');
 
