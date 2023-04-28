@@ -32,8 +32,14 @@ export default class Client extends Discord.Client {
                 const eventHandler = new Event(this);
                 logger.info({ event: { name: eventHandler.eventName } }, `Registering event: ${eventHandler.eventName}`);
 
-                // @ts-expect-error - since events have varying parameters, we just trust that the event handler has the correct types
-                super.on(eventHandler.eventName, (...args) => eventHandler.execute(...args));
+                super.on(eventHandler.eventName, async (...args) => {
+                    try {
+                        // @ts-expect-error - since events have varying parameters, we just trust that the event handler has the correct types
+                        await eventHandler.execute(...args);
+                    } catch (e) {
+                        logger.error(e, e.message);
+                    }
+                });
             } catch (e) {
                 logger.error(e, e.message);
             }
