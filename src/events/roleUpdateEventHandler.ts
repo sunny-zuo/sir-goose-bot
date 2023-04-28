@@ -221,7 +221,7 @@ export class RoleUpdateEventHandler implements EventHandler {
             prompt.roles.find((r) => r.name === oldRole.name)!.name = newRole.name;
             await prompt.save();
 
-            const promptChannel = await guild.channels.fetch(prompt.channelId);
+            const promptChannel = await guild.channels.fetch(prompt.channelId).catch(() => null);
             if (!promptChannel || !promptChannel.isText()) continue;
 
             const promptMessage = await promptChannel.messages.fetch(prompt.messageId);

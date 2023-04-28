@@ -197,7 +197,7 @@ export class ModlogView {
         const matches = message.match(/^<#(\d+)>$/);
         if (matches) {
             const id = matches[1] as Snowflake;
-            const channel = await guild.channels.fetch(id);
+            const channel = await guild.channels.fetch(id).catch(() => null);
             return channel;
         } else {
             await guild.channels.fetch();

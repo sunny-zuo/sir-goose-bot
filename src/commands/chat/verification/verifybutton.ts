@@ -51,7 +51,7 @@ export class VerifyButton extends ChatCommand {
         if (this.isMessage(interaction)) {
             await interaction.channel.send({ content: content, components: [components] });
         } else {
-            const channel = interaction.channel ?? (await interaction.guild?.channels.fetch(interaction.channelId));
+            const channel = interaction.channel ?? (await interaction.guild?.channels.fetch(interaction.channelId).catch(() => null));
             if (!channel?.isText()) return;
 
             await channel.send({ content: content, components: [components] });
