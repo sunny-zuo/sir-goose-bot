@@ -37,7 +37,7 @@ export default class Client extends Discord.Client {
                         // @ts-expect-error - since events have varying parameters, we just trust that the event handler has the correct types
                         await eventHandler.execute(...args);
                     } catch (e) {
-                        logger.error(e, `event handler for ${eventHandler.eventName} error: ${e.message}`);
+                        logger.error(e, `Error from event handler for event "${eventHandler.eventName}"`);
                     }
                 });
             } catch (e) {
