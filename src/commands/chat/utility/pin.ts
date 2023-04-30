@@ -66,7 +66,8 @@ export class Pin extends ChatCommand {
             }
         } else {
             pinMessageId = args?.getString('message_id') as Snowflake;
-            const fetchedChannel = interaction.channel ?? (await interaction.guild?.channels.fetch(interaction?.channelId).catch(() => null));
+            const fetchedChannel =
+                interaction.channel ?? (await interaction.guild?.channels.fetch(interaction?.channelId).catch(() => null));
             if (fetchedChannel?.type === 'GUILD_TEXT') {
                 channel = fetchedChannel;
             }

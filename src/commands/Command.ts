@@ -296,7 +296,9 @@ export abstract class Command {
                 if (!parentId) return false; // should only be null if bot user can't view channel or bot user does not exist
 
                 // TODO: remove this cast - we cast because fetching a thread's parent can only be a NewsChannel or a TextChannel
-                const parentChannel = (await interaction.channel.guild.channels.fetch(parentId).catch(() => null)) as NewsChannel | TextChannel;
+                const parentChannel = (await interaction.channel.guild.channels.fetch(parentId).catch(() => null)) as
+                    | NewsChannel
+                    | TextChannel;
                 if (!parentChannel) return false;
 
                 return (
