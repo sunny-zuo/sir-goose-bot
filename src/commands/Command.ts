@@ -266,17 +266,17 @@ export abstract class Command {
 
     async getRoleFromMention(interaction: Message | CommandInteraction, mention: string): Promise<Role | undefined | null> {
         const matches = mention.match(/^<@&(\d+)>$/);
-        if (!matches) return undefined;
+        if (!matches) return null;
         const id = matches[1] as Snowflake;
-        const role = await interaction.guild?.roles.fetch(id);
+        const role = await interaction.guild?.roles.fetch(id).catch(() => null);
         return role;
     }
 
     async getChannelFromMention(interaction: Message | CommandInteraction, mention: string): Promise<GuildBasedChannel | undefined | null> {
         const matches = mention.match(/^<#(\d+)>$/);
-        if (!matches) return undefined;
+        if (!matches) return null;
         const id = matches[1] as Snowflake;
-        const channel = await interaction.guild?.channels.fetch(id);
+        const channel = await interaction.guild?.channels.fetch(id).catch(() => null);
         return channel;
     }
 
@@ -296,7 +296,9 @@ export abstract class Command {
                 if (!parentId) return false; // should only be null if bot user can't view channel or bot user does not exist
 
                 // TODO: remove this cast - we cast because fetching a thread's parent can only be a NewsChannel or a TextChannel
-                const parentChannel = (await interaction.channel.guild.channels.fetch(parentId)) as NewsChannel | TextChannel;
+                const parentChannel = (await interaction.channel.guild.channels.fetch(parentId).catch(() => null)) as
+                    | NewsChannel
+                    | TextChannel;
                 if (!parentChannel) return false;
 
                 return (

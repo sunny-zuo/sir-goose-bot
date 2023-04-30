@@ -66,7 +66,7 @@ export class Modlog {
         const config = await GuildConfigCache.fetchConfig(guild.id);
         if (config.enableModlog && config.modlogChannelId) {
             try {
-                const channel = await guild.channels.fetch(config.modlogChannelId);
+                const channel = await guild.channels.fetch(config.modlogChannelId).catch(() => null);
                 if (channel && channel.type === 'GUILD_TEXT') {
                     return channel;
                 } else {

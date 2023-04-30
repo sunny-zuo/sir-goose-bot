@@ -60,13 +60,14 @@ export class Pin extends ChatCommand {
         if (this.isMessage(interaction)) {
             pinMessageId = (args?.getString('message_id') as Snowflake) || interaction.reference?.messageId;
             if (interaction.channel.partial) {
-                channel = await interaction.channel.fetch();
+                channel = await interaction.channel.fetch().catch(() => undefined);
             } else {
                 channel = interaction.channel;
             }
         } else {
             pinMessageId = args?.getString('message_id') as Snowflake;
-            const fetchedChannel = interaction.channel ?? (await interaction.guild?.channels.fetch(interaction?.channelId));
+            const fetchedChannel =
+                interaction.channel ?? (await interaction.guild?.channels.fetch(interaction?.channelId).catch(() => null));
             if (fetchedChannel?.type === 'GUILD_TEXT') {
                 channel = fetchedChannel;
             }

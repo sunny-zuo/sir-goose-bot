@@ -81,7 +81,7 @@ export class Ban extends ChatCommand {
         const modlogEmbeds: MessageEmbed[] = [];
         const banReason = args.getString('reason') ?? 'No reason provided.';
         const providedUserId = args.getString('user_id') ?? (args.getMember('user') as GuildMember)?.id;
-        const memberToBan = await guild.members.fetch(providedUserId);
+        const memberToBan = await guild.members.fetch(providedUserId).catch(() => null);
 
         const banUserInfo = await UserModel.findOne({ discordId: providedUserId });
         const possibleAlts =
@@ -95,7 +95,7 @@ export class Ban extends ChatCommand {
         }
 
         for (const alt of possibleAlts) {
-            const altMember = guild.members.cache.get(alt.discordId);
+            const altMember = await guild.members.fetch(alt.discordId).catch(() => null);
             if (altMember && !altMember.bannable) {
                 await this.sendErrorEmbed(
                     interaction,
@@ -119,7 +119,7 @@ export class Ban extends ChatCommand {
         }
 
         for (const alt of possibleAlts) {
-            const altMember = guild.members.cache.get(alt.discordId);
+            const altMember = await guild.members.fetch(alt.discordId).catch(() => null);
             if (altMember && altMember.bannable) {
                 const altBanMessage = `Banned by ${this.getUser(interaction).tag} | Alt of ${
                     memberToBan?.user.tag ?? `user with id ${providedUserId}`
