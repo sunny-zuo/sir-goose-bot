@@ -75,6 +75,8 @@ export class Ban extends ChatCommand {
         interaction: CommandInteraction,
         args: Omit<CommandInteractionOptionResolver, 'getMessage' | 'getFocused'>
     ): Promise<void> {
+        await interaction.deferReply();
+
         const guild = interaction.guild;
         if (!guild) return;
 
@@ -90,18 +92,26 @@ export class Ban extends ChatCommand {
                 : [];
 
         if (memberToBan && !memberToBan.bannable) {
-            await this.sendErrorEmbed(interaction, 'Unable To Ban', `I do not have permission to ban ${memberToBan}.`);
+            await interaction.editReply({
+                embeds: [
+                    new MessageEmbed().setDescription(`Unable to ban - I do not have permission to ban ${memberToBan}.`).setColor('RED'),
+                ],
+            });
             return;
         }
 
         for (const alt of possibleAlts) {
             const altMember = await guild.members.fetch(alt.discordId).catch(() => null);
             if (altMember && !altMember.bannable) {
-                await this.sendErrorEmbed(
-                    interaction,
-                    'Unable To Ban',
-                    `I do not have permission to ban ${altMember}. (alt of the member you wanted to ban)`
-                );
+                await interaction.editReply({
+                    embeds: [
+                        new MessageEmbed()
+                            .setDescription(
+                                `Unable to ban - I do not have permission to ban ${altMember}. (alt of the member you wanted to ban).`
+                            )
+                            .setColor('RED'),
+                    ],
+                });
                 return;
             }
         }
@@ -167,7 +177,7 @@ export class Ban extends ChatCommand {
 
             await guild.bans.create(providedUserId, { reason: `Banned by ${this.getUser(interaction).tag} | ${banReason}` });
 
-            await interaction.reply({
+            await interaction.editReply({
                 embeds: [
                     new MessageEmbed()
                         .setDescription(`**${memberToBan} and ${modlogEmbeds.length - 1} alt accounts were banned |** ${banReason}`)
@@ -175,7 +185,7 @@ export class Ban extends ChatCommand {
                 ],
             });
         } else if (banUserInfo && banUserInfo.uwid) {
-            await interaction.reply({
+            await interaction.editReply({
                 embeds: [
                     new MessageEmbed()
                         .setDescription(`**User ID ${providedUserId} and ${modlogEmbeds.length} alt accounts were banned |** ${banReason}`)
@@ -183,7 +193,7 @@ export class Ban extends ChatCommand {
                 ],
             });
         } else {
-            await interaction.reply({
+            await interaction.editReply({
                 embeds: [
                     new MessageEmbed()
                         .setDescription(`Unable to ban user ID ${providedUserId} - they are not verified and are not in this server.`)
