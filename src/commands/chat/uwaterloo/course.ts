@@ -67,10 +67,10 @@ export class Course extends ChatCommand {
         const trimString = (str: string, max: number) =>
             str && str.length > max
                 ? `${str
-                    .slice(0, max - 3)
-                    .split(' ')
-                    .slice(0, -1)
-                    .join(' ')}...`
+                      .slice(0, max - 3)
+                      .split(' ')
+                      .slice(0, -1)
+                      .join(' ')}...`
                 : str;
 
         const course = response.course[0];
