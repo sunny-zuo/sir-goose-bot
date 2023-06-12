@@ -41,7 +41,6 @@ export class Course extends ChatCommand {
 
         const variables = {
             code: code,
-            user_id: 0,
         };
 
         const response = await request(uwflowEndpoint, uwflowQuery, variables);
