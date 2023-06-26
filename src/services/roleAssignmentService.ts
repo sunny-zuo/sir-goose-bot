@@ -134,6 +134,12 @@ export class RoleAssignmentService {
             oldRoles.map((role) => rolesToSet.delete(role.id));
             newRoles.map((role) => rolesToSet.set(role.id, role));
 
+            // custom rule for UWaterloo WiE guild to remove the "Unverified" role from users when they verify
+            // todo: build this out into rules
+            if (guild.id === '767143197813112833') {
+                rolesToSet.delete('865768247366385664');
+            }
+
             if (!rolesToSet.equals(member.roles.cache)) {
                 await member.roles.set(rolesToSet, 'Verified via Sir Goose Bot');
                 if (params.log) {
