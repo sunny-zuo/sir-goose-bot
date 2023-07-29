@@ -3,7 +3,6 @@ import Client from '#src/Client';
 import { CommandInteraction, Message, MessageEmbed } from 'discord.js';
 import { hyperlink, codeBlock } from '@discordjs/builders';
 import { Duration } from 'luxon';
-import { execSync } from 'child_process';
 import { cpus } from 'os';
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -21,7 +20,7 @@ export class BotStats extends ChatCommand {
             cooldownSeconds: 5,
         });
 
-        this.latestCommit = execSync('git rev-parse HEAD').toString().trim().substring(0, 7);
+        this.latestCommit = process.env.GIT_COMMIT ?? 'unknown';
     }
 
     async execute(interaction: Message | CommandInteraction): Promise<void> {
