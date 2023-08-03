@@ -25,8 +25,8 @@ services:
         env_file: ./docker/caddy/.env
         volumes:
             - ./docker/caddy/Caddyfile:/etc/caddy/Caddyfile
-            - ./volumes/caddy/caddy_config:/config
-            - ./volumes/caddy/caddy_data:/data
+            - caddy-config:/config
+            - caddy-storage:/data
 
     prometheus:
         image: prom/prometheus:v2.46.0
@@ -44,7 +44,7 @@ services:
             - '--storage.tsdb.retention.time=90d'
             - '--web.enable-lifecycle'
         volumes:
-            - ./volumes/prometheus/data:/prometheus
+            - prometheus-storage:/prometheus
             - ./docker/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
         expose:
             - '9090'
@@ -58,7 +58,7 @@ services:
         user: root
         restart: unless-stopped
         volumes:
-            - ./volumes/grafana/data:/var/lib/grafana
+            - grafana-storage:/var/lib/grafana
         expose:
             - '3000'
         labels:
@@ -109,7 +109,7 @@ services:
         user: root
         restart: unless-stopped
         volumes:
-            - ./volumes/loki:/loki
+            - loki-storage:/loki
             - ./docker/loki/loki-config.yml:/etc/loki-config.yml
         command:
             - '-config.file=/etc/loki-config.yml'
@@ -121,3 +121,15 @@ services:
 networks:
     default:
         name: 'geese'
+
+volumes:
+    caddy-storage:
+        external: true
+    caddy-config:
+        external: true
+    grafana-storage:
+        external: true
+    prometheus-storage:
+        external: true
+    loki-storage:
+        external: true

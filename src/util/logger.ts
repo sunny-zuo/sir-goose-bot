@@ -4,7 +4,7 @@ const transport =
     process.env.NODE_ENV === 'production'
         ? pino.transport({
               target: 'pino-loki',
-              options: { batching: true, interval: 5, host: 'http://loki:3100' },
+              options: { batching: false, host: 'http://loki:3100' },
           })
         : pino.transport({
               target: 'pino-pretty',
