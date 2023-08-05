@@ -1,6 +1,9 @@
-import { CommandInteraction, Permissions, Modal, TextInputComponent, MessageActionRow, ModalActionRowComponent } from 'discord.js';
+import { CommandInteraction, MessageActionRow, MessageButton, MessageEmbed, Permissions } from 'discord.js';
 import { ChatCommand } from '../ChatCommand';
 import Client from '#src/Client';
+import { GuildConfigCache } from '../../../util/guildConfigCache';
+import { codeBlock, inlineCode } from '@discordjs/builders';
+import { serializeVerificationRules } from '../../../util/verification';
 
 export class VerifyRules extends ChatCommand {
     constructor(client: Client) {
@@ -12,28 +15,24 @@ export class VerifyRules extends ChatCommand {
             clientPermissions: [Permissions.FLAGS.MANAGE_ROLES],
             userPermissions: [Permissions.FLAGS.MANAGE_GUILD],
             isSlashCommand: true,
-            isTextCommand: false,
+            isTextCommand: true,
         });
     }
 
-    async execute(
-        interaction: CommandInteraction
-        // args?: Omit<CommandInteractionOptionResolver, 'getMessage' | 'getFocused'>
-    ): Promise<void> {
-        //  const ruleString = args?.getString('rules');
+    async execute(interaction: CommandInteraction): Promise<void> {
+        const config = await GuildConfigCache.fetchConfig(interaction.guild!.id);
 
-        const modal = new Modal().setCustomId('verifyRulesModal').setTitle('Verification Rules');
+        const components: MessageActionRow[] = [];
+        const componentRow = new MessageActionRow();
 
-        const ruleStringInput = new TextInputComponent()
-            .setCustomId('ruleStringInput')
-            .setLabel('Paste ruleset here:')
-            .setStyle('PARAGRAPH')
-            .setRequired(true);
+        componentRow.addComponents(new MessageButton().setCustomId(`verifyRules`).setLabel('Update rules').setStyle('PRIMARY'));
+        components.push(componentRow);
 
-        const actionRow = new MessageActionRow<ModalActionRowComponent>().addComponents(ruleStringInput);
+        const embed = new MessageEmbed().setColor('GREEN').setTitle('Verification Rules').setDescription(`Verification is ${
+            config.enableVerification ? 'enabled ' : `disabled. Enable it using ${inlineCode('/config')}`
+        }. [Create a ruleset.](https://sebot.sunnyzuo.com/)
+                ${codeBlock(serializeVerificationRules(config.verificationRules))}`);
 
-        modal.addComponents(actionRow);
-
-        await interaction.showModal(modal);
+        await interaction.reply({ embeds: [embed], components });
     }
 }
