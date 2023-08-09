@@ -12,17 +12,24 @@ export class ModalSubmitInteractionCreateEventHandler implements EventHandler {
 
     constructor(client: Client) {
         this.client = client;
-    }
-
-    async execute(interaction: Interaction): Promise<void> {
-        if (!interaction.isModalSubmit()) return;
-
-        const client = this.client;
 
         for (const InteractionHandler of ModalSubmitInteractionHandlers) {
             const interactionHandler = new InteractionHandler(client);
             this.modalSubmitInteractionHandlers.set(interactionHandler.customId, interactionHandler);
         }
+    }
+
+    async execute(interaction: Interaction): Promise<void> {
+        if (!interaction.isModalSubmit()) return;
+
+        logger.info(
+            {
+                modal: { customId: interaction.customId },
+                guild: { id: interaction.guild?.id ?? 'none' },
+                user: { id: interaction.user.id },
+            },
+            `Processing modal submission ${interaction.customId}`
+        );
 
         const [interactionName] = interaction.customId.split('|');
         const handler = this.modalSubmitInteractionHandlers.get(interactionName);
@@ -34,14 +41,5 @@ export class ModalSubmitInteractionCreateEventHandler implements EventHandler {
                 logger.error(e, e.message);
             }
         }
-
-        logger.info(
-            {
-                modal: { customId: interaction.customId },
-                guild: { id: interaction.guild?.id ?? 'none' },
-                user: { id: interaction.user.id },
-            },
-            `Processing modal submission ${interaction.customId}`
-        );
     }
 }
