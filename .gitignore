@@ -117,6 +117,3 @@ dist
 
 # Data files
 src/data/**/*.json
-
-# Docker volumes
-volumes/*

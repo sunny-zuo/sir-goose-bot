@@ -8,7 +8,9 @@ services:
             - NODE_ENV=production
         image: sir-goose:latest
         volumes:
-            - ./logs:/logs/
+            - type: bind
+              source: ./logs
+              target: /usr/src/goose/logs
         expose:
             - '5000'
         restart: unless-stopped
