@@ -12,7 +12,7 @@ import { SelectMenuInteractionCreateEventHandler } from './selectMenuInteraction
 import { RoleCreateEventHandler } from './roleCreateEventHandler';
 import { RoleDeleteEventHandler } from './roleDeleteEventHandler';
 import { RoleUpdateEventHandler } from './roleUpdateEventHandler';
-import { modalSubmitInteractionCreateEventHandler } from './modalSubmitInteractionCreateEventHandler';
+import { ModalSubmitInteractionCreateEventHandler } from './modalSubmitInteractionCreateEventHandler';
 
 export default [
     GuildMemberAddEventHandler,
@@ -29,5 +29,5 @@ export default [
     RoleCreateEventHandler,
     RoleDeleteEventHandler,
     RoleUpdateEventHandler,
-    modalSubmitInteractionCreateEventHandler,
+    ModalSubmitInteractionCreateEventHandler,
 ];

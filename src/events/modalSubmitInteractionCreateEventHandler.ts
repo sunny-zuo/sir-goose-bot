@@ -5,7 +5,7 @@ import { logger } from '#util/logger';
 import ModalSubmitInteractionHandlers from '../interactions/modal';
 import { ModalSubmitInteractionHandler } from '../interactions/modal/modalInteractionHandler';
 
-export class modalSubmitInteractionCreateEventHandler implements EventHandler {
+export class ModalSubmitInteractionCreateEventHandler implements EventHandler {
     readonly eventName = 'interactionCreate';
     readonly client: Client;
     readonly modalSubmitInteractionHandlers = new Collection<string, ModalSubmitInteractionHandler>();
