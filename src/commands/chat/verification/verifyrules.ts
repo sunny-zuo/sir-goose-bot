@@ -1,9 +1,9 @@
 import { CommandInteraction, Message, MessageActionRow, MessageButton, MessageEmbed, Permissions } from 'discord.js';
 import { ChatCommand } from '../ChatCommand';
 import Client from '#src/Client';
-import { GuildConfigCache } from '../../../util/guildConfigCache';
+import { GuildConfigCache } from '#util/guildConfigCache';
 import { codeBlock, inlineCode } from '@discordjs/builders';
-import { serializeVerificationRules } from '../../../util/verification';
+import { serializeVerificationRules } from '#util/verification';
 
 export class VerifyRules extends ChatCommand {
     constructor(client: Client) {

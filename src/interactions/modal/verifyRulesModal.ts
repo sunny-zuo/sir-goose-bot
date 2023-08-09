@@ -3,8 +3,8 @@ import { MessageEmbed, ModalSubmitInteraction } from 'discord.js';
 import { ModalSubmitInteractionHandler } from './modalInteractionHandler';
 import { RoleData, VerificationImportV2, VerificationRule } from '#root/src/types/Verification';
 import { codeBlock, inlineCode } from '@discordjs/builders';
-import { serializeVerificationRules } from '../../util/verification';
-import { GuildConfigCache } from '../../util/guildConfigCache';
+import { serializeVerificationRules } from '#util/verification';
+import { GuildConfigCache } from '#util/guildConfigCache';
 
 export class VerifyRulesModal implements ModalSubmitInteractionHandler {
     readonly client: Client;
