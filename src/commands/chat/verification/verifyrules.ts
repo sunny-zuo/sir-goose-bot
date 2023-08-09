@@ -20,17 +20,15 @@ export class VerifyRules extends ChatCommand {
     async execute(interaction: Message | CommandInteraction): Promise<void> {
         const config = await GuildConfigCache.fetchConfig(interaction.guild!.id);
 
-        const components: MessageActionRow[] = [];
-        const componentRow = new MessageActionRow();
-
-        componentRow.addComponents(new MessageButton().setCustomId(`verifyRules`).setLabel('Update rules').setStyle('PRIMARY'));
-        components.push(componentRow);
+        const button = new MessageActionRow().addComponents(
+            new MessageButton().setCustomId(`verifyRules`).setLabel('Update rules').setStyle('PRIMARY')
+        );
 
         const embed = new MessageEmbed().setColor('BLUE').setTitle('Verification Rules').setDescription(`Verification is ${
             config.enableVerification ? 'enabled ' : `disabled. Enable it using ${inlineCode('/config')}`
         }. [Create a ruleset.](https://sebot.sunnyzuo.com/)
                 ${codeBlock(serializeVerificationRules(config.verificationRules))}`);
 
-        await interaction.reply({ embeds: [embed], components });
+        await interaction.reply({ embeds: [embed], components: [button] });
     }
 }
