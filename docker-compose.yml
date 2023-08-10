@@ -1,19 +1,18 @@
 services:
     sir-goose:
-        build:
-            context: ./
+        image: ghcr.io/sunny-zuo/sir-goose-bot:master
         container_name: sir-goose
+        hostname: sir-goose
+        restart: unless-stopped
         env_file: ./.env
         environment:
             - NODE_ENV=production
-        image: sir-goose:latest
         volumes:
             - type: bind
               source: ./logs
               target: /usr/src/goose/logs
         expose:
             - '5000'
-        restart: unless-stopped
 
     caddy:
         image: caddy
@@ -119,6 +118,12 @@ services:
             - '3100'
         labels:
             org.label-schema.group: 'monitoring'
+
+    watchtower:
+        image: containrrr/watchtower
+        volumes:
+            - /var/run/docker.sock:/var/run/docker.sock
+        command: ['--interval', '3600', 'sir-goose']
 
 networks:
     default:

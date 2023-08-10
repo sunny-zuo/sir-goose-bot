@@ -1,7 +1,7 @@
 {$DOMAIN} {
-    reverse_proxy sir-goose:5000
+	reverse_proxy sir-goose:5000
 }
 
 graf.{$DOMAIN} {
-    reverse_proxy grafana:3000
+	reverse_proxy grafana:3000
 }
