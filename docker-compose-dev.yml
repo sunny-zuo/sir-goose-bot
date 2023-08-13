@@ -1,16 +1,16 @@
 services:
     sir-goose:
-        image: ghcr.io/sunny-zuo/sir-goose-bot:master
+        build:
+            context: ./
         container_name: sir-goose
         hostname: sir-goose
         restart: unless-stopped
         env_file: ./.env
         environment:
             - NODE_ENV=production
+        image: sir-goose:latest
         volumes:
-            - type: bind
-              source: ./logs
-              target: /usr/src/goose/logs
+            - ./logs:/logs/
         expose:
             - '5000'
             - '8080'

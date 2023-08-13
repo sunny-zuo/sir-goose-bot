@@ -4,6 +4,7 @@ import { Intents, PartialTypes } from 'discord.js';
 import Client from './Client';
 import { RoleAssignmentService } from './services/roleAssignmentService';
 import { logger } from '#util/logger';
+import { register, collectDefaultMetrics } from 'prom-client';
 
 mongoose.set('strictQuery', false);
 
@@ -15,6 +16,9 @@ const partials: PartialTypes[] = ['CHANNEL', 'MESSAGE'];
 const client = new Client({ intents: intents, partials: partials });
 
 async function init(): Promise<void> {
+    register.setDefaultLabels({ app: 'sir-goose-bot' });
+    collectDefaultMetrics({ register, prefix: 'sir_goose_bot_' });
+
     await mongoose
         .connect(`${process.env.MONGO_URI}`)
         .then(() => {
