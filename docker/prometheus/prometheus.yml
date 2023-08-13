@@ -14,3 +14,7 @@ scrape_configs:
     - job_name: 'prometheus'
       static_configs:
           - targets: ['localhost:9090']
+
+    - job_name: 'sir-goose-bot'
+      static_configs:
+          - targets: ['sir-goose:8080']
