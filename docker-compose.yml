@@ -11,6 +11,9 @@ services:
             - type: bind
               source: ./logs
               target: /usr/src/goose/logs
+            - type: bind
+              source: ./src/data/verification
+              target: /usr/src/goose/src/data/verification
         expose:
             - '5000'
             - '8080'

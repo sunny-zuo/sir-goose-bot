@@ -10,7 +10,8 @@ services:
             - NODE_ENV=production
         image: sir-goose:latest
         volumes:
-            - ./logs:/logs/
+            - ./logs:/usr/src/goose/logs
+            - ./src/data/verification:/usr/src/goose/src/data/verification
         expose:
             - '5000'
             - '8080'
