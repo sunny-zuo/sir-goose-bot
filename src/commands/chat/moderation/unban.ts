@@ -4,7 +4,6 @@ import { ChatCommand } from '../ChatCommand';
 import BanModel from '#models/ban.model';
 import UserModel from '#models/user.model';
 import { Modlog } from '#util/modlog';
-import { chunk } from '#util/array';
 import { logger } from '#util/logger';
 
 export class Unban extends ChatCommand {
@@ -15,9 +14,9 @@ export class Unban extends ChatCommand {
             type: 'SUB_COMMAND',
             options: [
                 {
-                    name: 'user_id',
-                    description: 'The discord user id of the user to unban.',
-                    type: 'STRING',
+                    name: 'user',
+                    description: 'The discord user to unban.',
+                    type: 'USER',
                     required: true,
                 },
                 {
@@ -52,95 +51,71 @@ export class Unban extends ChatCommand {
         const guild = interaction.guild;
         if (!guild) return;
 
-        const modlogEmbeds: MessageEmbed[] = [];
-        const unbanReason = args.getString('reason') ?? 'No reason provided.';
-        const providedUserId = args.getString('user_id', true);
-        const bannedUser = await guild.bans.fetch(providedUserId);
+        await interaction.deferReply();
 
-        if (!bannedUser) {
-            await this.sendErrorEmbed(interaction, 'User Not Banned', `Unable to ban user ID ${providedUserId} - they are not banned.`);
+        const userToUnban = args.getUser('user', true);
+        const providedUnbanReason = args.getString('reason') ?? 'No reason provided.';
+        const unbanReason = `Unbanned by ${interaction.user.tag} | Target unban user: ${userToUnban.tag} | ${providedUnbanReason}`;
+
+        const userInfo = await UserModel.findOne({ discordId: userToUnban.id });
+        const userIsVerified = userInfo && userInfo.uwid;
+        const allAccountIds = userIsVerified
+            ? await UserModel.find({ uwid: userInfo.uwid }).then((data) => data.map((user) => user.discordId))
+            : [userToUnban.id];
+
+        if (userIsVerified) {
+            await BanModel.updateMany({ discordId: [...allAccountIds] }, { unbanned: true });
         }
 
-        const unbanUserInfo = await UserModel.findOne({ discordId: providedUserId });
-        const possibleAlts = unbanUserInfo && unbanUserInfo.uwid ? await UserModel.find({ uwid: unbanUserInfo.uwid }) : [];
+        const unbannedUserIds = [];
 
-        if (unbanUserInfo && unbanUserInfo.uwid) {
-            await BanModel.updateMany(
-                { discordId: [providedUserId, ...possibleAlts.map((alt) => alt.uwid).filter((uwid) => !!uwid)] },
-                { unbanned: true }
-            );
-        }
-
-        for (const alt of possibleAlts) {
-            const altMember = guild.bans.cache.get(alt.discordId);
-            if (altMember) {
-                const altUnbanMessage = `Unbanned by ${this.getUser(interaction).tag} | Alt of ${
-                    bannedUser?.user.tag ?? `user with id ${providedUserId}`
-                } | ${unbanReason}`;
-
-                await guild.bans.remove(alt.discordId, altUnbanMessage);
-
-                modlogEmbeds.push(
-                    Modlog.getUserEmbed(
-                        altMember.user,
-                        `
-                            **User**: ${altMember}
-                            **Action**: Unban
-                            **Reason**: ${unbanReason} (alt of ${bannedUser?.user.tag ?? `user with id ${providedUserId}`})
-                            **Moderator**: ${interaction.member}
-                        `,
-                        'GREEN'
-                    )
-                );
+        for (const accountId of allAccountIds) {
+            const ban = await guild.bans.fetch(accountId).catch(() => undefined);
+            if (ban) {
+                try {
+                    await guild.bans.remove(accountId, unbanReason);
+                    unbannedUserIds.push(accountId);
+                } catch (e) {
+                    logger.warn(e, 'Failed to unban user when ban existed.');
+                }
             }
         }
 
-        if (bannedUser || possibleAlts.length) {
-            if (bannedUser) {
-                modlogEmbeds.unshift(
-                    Modlog.getUserEmbed(
-                        bannedUser.user,
-                        `
-                        **User**: ${bannedUser}
-                        **Action**: Unban
-                        **Reason**: ${unbanReason}
-                        **Moderator**: ${interaction.member}
-                        `,
-                        'GREEN'
-                    )
-                );
-
-                await guild.bans.remove(providedUserId, `Unbanned by ${this.getUser(interaction).tag} | ${unbanReason}`);
-            }
+        if (unbannedUserIds.length === 0) {
+            const nonVerifiedError = `Unable to unban user ${userToUnban.tag} - they are not banned, and they are not verified, so no alts could be found.`;
+            const verifiedError = `Unable to unabn user ${userToUnban.tag} - they are not banned and no alts could be found.`;
 
             await interaction.reply({
-                embeds: [
-                    new MessageEmbed()
-                        .setDescription(
-                            `**User ID ${providedUserId} and ${modlogEmbeds.length - 1} alt accounts were unbanned |** ${unbanReason}`
-                        )
-                        .setColor('GREEN'),
-                ],
+                embeds: [new MessageEmbed().setDescription(userIsVerified ? verifiedError : nonVerifiedError).setColor('YELLOW')],
             });
         } else {
-            await interaction.reply({
-                embeds: [
-                    new MessageEmbed()
-                        .setDescription(`Unable to unban user ID ${providedUserId} - they are not verified or are not banned.`)
-                        .setColor('YELLOW'),
-                ],
+            logger.info({
+                moderation: { action: 'unban', userId: userToUnban.id },
+                guild: { id: guild.id },
+                user: { id: this.getUser(interaction).id },
             });
-        }
 
-        // max embed limit is 10 per message - this lets us properly log when a user has >10 alt accounts
-        for (const embeds of chunk(modlogEmbeds, 10)) {
-            await Modlog.logMessage(this.client, interaction.guild, { embeds });
-        }
+            const altsWereUnbanned = unbannedUserIds.length > 1;
+            const userMessage = altsWereUnbanned
+                ? `${userToUnban} and alt accounts with ids: ${unbannedUserIds.filter((id) => id != userToUnban.id).join(', ')}`
+                : `${userToUnban}`;
 
-        logger.info({
-            moderation: { action: 'unban', userId: providedUserId },
-            guild: { id: guild.id },
-            user: { id: this.getUser(interaction).id },
-        });
+            await interaction.reply({
+                embeds: [new MessageEmbed().setDescription(`${userMessage} was successfully unbanned.`).setColor('GREEN')],
+            });
+
+            await Modlog.logUserAction(
+                this.client,
+                guild,
+                userToUnban,
+                `
+                    **User**: ${userMessage}
+                    **Action**: Unban
+                    **Reason**: ${unbanReason}
+                    **Moderator**: ${interaction.member}
+                `,
+                'GREEN'
+            );
+        }
     }
 }
