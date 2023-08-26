@@ -104,7 +104,7 @@ export class Unban extends ChatCommand {
             logger.info({
                 moderation: { action: 'unban', userId: userIdToUnban },
                 guild: { id: guild.id },
-                user: { id: this.getUser(interaction).id },
+                user: { id: interaction.user.id },
             });
 
             const altsWereUnbanned = unbannedUserIds.length > 1;
