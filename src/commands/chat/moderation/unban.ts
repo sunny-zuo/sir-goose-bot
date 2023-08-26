@@ -5,6 +5,7 @@ import BanModel from '#models/ban.model';
 import UserModel from '#models/user.model';
 import { Modlog } from '#util/modlog';
 import { logger } from '#util/logger';
+import { inlineCode, hyperlink } from '@discordjs/builders';
 
 export class Unban extends ChatCommand {
     private static readonly options: ApplicationCommandOption[] = [
@@ -14,9 +15,9 @@ export class Unban extends ChatCommand {
             type: 'SUB_COMMAND',
             options: [
                 {
-                    name: 'user',
-                    description: 'The discord user to unban.',
-                    type: 'USER',
+                    name: 'user_id',
+                    description: 'The discord user id to unban.',
+                    type: 'STRING',
                     required: true,
                 },
                 {
@@ -53,15 +54,15 @@ export class Unban extends ChatCommand {
 
         await interaction.deferReply();
 
-        const userToUnban = args.getUser('user', true);
+        const userIdToUnban = args.getString('user_id', true);
         const providedUnbanReason = args.getString('reason') ?? 'No reason provided.';
-        const unbanReason = `Unbanned by ${interaction.user.tag} | Target unban user: ${userToUnban.tag} | ${providedUnbanReason}`;
+        const unbanReason = `Unbanned by ${interaction.user.tag} | Target unban user id: ${userIdToUnban} | ${providedUnbanReason}`;
 
-        const userInfo = await UserModel.findOne({ discordId: userToUnban.id });
+        const userInfo = await UserModel.findOne({ discordId: userIdToUnban });
         const userIsVerified = userInfo && userInfo.uwid;
         const allAccountIds = userIsVerified
             ? await UserModel.find({ uwid: userInfo.uwid }).then((data) => data.map((user) => user.discordId))
-            : [userToUnban.id];
+            : [userIdToUnban];
 
         if (userIsVerified) {
             await BanModel.updateMany({ discordId: [...allAccountIds] }, { unbanned: true });
@@ -82,32 +83,46 @@ export class Unban extends ChatCommand {
         }
 
         if (unbannedUserIds.length === 0) {
-            const nonVerifiedError = `Unable to unban user ${userToUnban.tag} - they are not banned, and they are not verified, so no alts could be found.`;
-            const verifiedError = `Unable to unabn user ${userToUnban.tag} - they are not banned and no alts could be found.`;
+            const userIdHelp = `It's also possible that you're using an invalid user id. User IDs are a long string of numbers, that look like ${inlineCode(
+                '1144955602704019500'
+            )}. ${hyperlink(
+                'Learn how to find user IDs here.',
+                'https://support.discord.com/hc/en-us/articles/206346498-Where-can-I-find-my-User-Server-Message-ID-'
+            )}`;
 
-            await interaction.reply({
+            const nonVerifiedError = `Unable to unban user with id ${inlineCode(
+                userIdToUnban
+            )} - they are not banned, and they are not verified, so no alts could be found.\n\n${userIdHelp}`;
+            const verifiedError = `Unable to unban user with id ${inlineCode(
+                userIdToUnban
+            )} - they are not banned and no alts could be found.\n\n${userIdHelp}`;
+
+            await interaction.editReply({
                 embeds: [new MessageEmbed().setDescription(userIsVerified ? verifiedError : nonVerifiedError).setColor('YELLOW')],
             });
         } else {
             logger.info({
-                moderation: { action: 'unban', userId: userToUnban.id },
+                moderation: { action: 'unban', userId: userIdToUnban },
                 guild: { id: guild.id },
                 user: { id: this.getUser(interaction).id },
             });
 
             const altsWereUnbanned = unbannedUserIds.length > 1;
             const userMessage = altsWereUnbanned
-                ? `${userToUnban} and alt accounts with ids: ${unbannedUserIds.filter((id) => id != userToUnban.id).join(', ')}`
-                : `${userToUnban}`;
+                ? `User with id ${inlineCode(userIdToUnban)} and alt accounts with ids: ${unbannedUserIds
+                      .filter((id) => id != userIdToUnban)
+                      .map((id) => inlineCode(id))
+                      .join(', ')}`
+                : `User with id ${inlineCode(userIdToUnban)}`;
 
-            await interaction.reply({
+            await interaction.editReply({
                 embeds: [new MessageEmbed().setDescription(`${userMessage} was successfully unbanned.`).setColor('GREEN')],
             });
 
             await Modlog.logUserAction(
                 this.client,
                 guild,
-                userToUnban,
+                interaction.user,
                 `
                     **User**: ${userMessage}
                     **Action**: Unban
