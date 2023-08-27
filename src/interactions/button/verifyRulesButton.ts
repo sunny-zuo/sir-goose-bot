@@ -10,7 +10,7 @@ export class VerifyRulesButton implements ButtonInteractionHandler {
 
     constructor(client: Client) {
         this.client = client;
-        this.cooldown = new Cooldown(60, 3);
+        this.cooldown = new Cooldown(5, 3);
     }
 
     async execute(interaction: ButtonInteraction): Promise<void> {
