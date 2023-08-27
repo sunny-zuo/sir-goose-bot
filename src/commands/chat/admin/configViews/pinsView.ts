@@ -1,7 +1,7 @@
 import { Message, MessageActionRow, MessageButton, MessageComponentInteraction, MessageEmbed } from 'discord.js';
 import { GuildConfigCache } from '#util/guildConfigCache';
 import { OverviewView } from './overviewView';
-import { Emojis } from '#root/src/util/constants';
+import { Emojis } from '#util/constants';
 import { bold } from '@discordjs/builders';
 
 export class PinsView {

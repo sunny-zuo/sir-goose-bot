@@ -1,7 +1,7 @@
-import Client from '#root/src/Client';
-import { MessageEmbed, ModalSubmitInteraction } from 'discord.js';
+import Client from '#src/Client';
+import { GuildMember, MessageEmbed, ModalSubmitInteraction, Permissions } from 'discord.js';
 import { ModalSubmitInteractionHandler } from './modalInteractionHandler';
-import { RoleData, VerificationImportV2, VerificationRule } from '#root/src/types/Verification';
+import { RoleData, VerificationImportV2, VerificationRule } from '#types/Verification';
 import { codeBlock, inlineCode } from '@discordjs/builders';
 import { serializeVerificationRules } from '#util/verification';
 import { GuildConfigCache } from '#util/guildConfigCache';
@@ -15,6 +15,15 @@ export class VerifyRulesModal implements ModalSubmitInteractionHandler {
     }
 
     async execute(interaction: ModalSubmitInteraction): Promise<void> {
+        // TODO: refactor into more generic permission checker
+        const member = interaction.member as GuildMember;
+        if (!member.permissions.has(Permissions.FLAGS.MANAGE_GUILD)) {
+            await interaction.reply({
+                embeds: [new MessageEmbed().setDescription('You must have the Manage Guild permission to use this modal.').setColor('RED')],
+            });
+            return;
+        }
+
         const ruleString = interaction.fields.getTextInputValue('ruleStringInput');
 
         let importedJSON: VerificationImportV2;

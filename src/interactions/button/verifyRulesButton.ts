@@ -1,4 +1,13 @@
-import { ButtonInteraction, MessageActionRow, Modal, ModalActionRowComponent, TextInputComponent } from 'discord.js';
+import {
+    ButtonInteraction,
+    GuildMember,
+    MessageActionRow,
+    MessageEmbed,
+    Modal,
+    ModalActionRowComponent,
+    Permissions,
+    TextInputComponent,
+} from 'discord.js';
 import { ButtonInteractionHandler } from './buttonInteractionHandler';
 import { Cooldown } from '#util/cooldown';
 import Client from '#src/Client';
@@ -14,6 +23,17 @@ export class VerifyRulesButton implements ButtonInteractionHandler {
     }
 
     async execute(interaction: ButtonInteraction): Promise<void> {
+        // TODO: refactor into more generic permission checker
+        const member = interaction.member as GuildMember;
+        if (!member.permissions.has(Permissions.FLAGS.MANAGE_GUILD)) {
+            await interaction.reply({
+                embeds: [
+                    new MessageEmbed().setDescription('You must have the Manage Guild permission to use this button.').setColor('RED'),
+                ],
+            });
+            return;
+        }
+
         const modal = new Modal().setCustomId('verifyRulesModal').setTitle('Verification Rules');
 
         const ruleStringInput = new TextInputComponent()
