@@ -21,7 +21,7 @@ export class VerifyRules extends ChatCommand {
         const config = await GuildConfigCache.fetchConfig(interaction.guild!.id);
 
         const button = new MessageActionRow().addComponents(
-            new MessageButton().setCustomId(`verifyRules`).setLabel('Update rules').setStyle('PRIMARY')
+            new MessageButton().setCustomId(`verifyRules`).setLabel('Update Rules').setStyle('PRIMARY')
         );
 
         const embed = new MessageEmbed().setColor('BLUE').setTitle('Verification Rules').setDescription(`Verification is ${
