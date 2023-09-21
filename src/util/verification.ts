@@ -51,7 +51,8 @@ export async function sendVerificationReplies(
     isDeferred = false
 ): Promise<void> {
     if (isDeferred && !isMessage(interaction) && !interaction.deferred) {
-        await interaction.deferReply();
+        if (isEphemeral) await interaction.deferReply({ ephemeral: true });
+        else await interaction.deferReply();
     }
 
     const user = await UserModel.findOne({ discordId: discordUser.id });
@@ -125,7 +126,8 @@ export async function safeSendVerificationEmbed(
     options = { isEphemeral: false, isReverify: false, isDeferred: false, ...options };
 
     if (options.isDeferred && !isMessage(interaction) && !interaction.deferred) {
-        await interaction.deferReply();
+        if (options.isEphemeral) await interaction.deferReply({ ephemeral: true });
+        else await interaction.deferReply();
     }
 
     const verifyReply = getVerificationResponse(discordUser, options.isReverify);
