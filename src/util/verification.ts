@@ -17,6 +17,7 @@ import { RoleAssignmentService } from '../services/roleAssignmentService';
 import { Modlog } from './modlog';
 import { sendEphemeralReply, sendReply } from './message';
 import { VerificationRuleImportV2, VerificationRules } from '#types/Verification';
+import { isMessage } from '#util/message';
 
 export function getVerificationResponse(user: User, isReverify = false): InteractionReplyOptions & ReplyMessageOptions {
     if (!process.env.AES_PASSPHRASE || !process.env.SERVER_URI) {
@@ -46,8 +47,13 @@ export async function sendVerificationReplies(
     client: Client,
     interaction: Message | CommandInteraction | ButtonInteraction,
     discordUser: User,
-    ephemeral = false
+    isEphemeral = false,
+    isDeferred = false
 ): Promise<void> {
+    if (isDeferred && !isMessage(interaction) && !interaction.deferred) {
+        await interaction.deferReply();
+    }
+
     const user = await UserModel.findOne({ discordId: discordUser.id });
 
     if (user?.verified && user?.department && user?.o365CreatedDate) {
@@ -66,9 +72,9 @@ export async function sendVerificationReplies(
                     .setColor('RED')
                     .setTimestamp();
 
-                ephemeral
-                    ? await sendEphemeralReply(interaction, { embeds: [embed] }, 60)
-                    : await sendReply(interaction, { embeds: [embed] });
+                isEphemeral
+                    ? await sendEphemeralReply(interaction, { embeds: [embed] }, 60, isDeferred)
+                    : await sendReply(interaction, { embeds: [embed] }, isDeferred);
 
                 return;
             }
@@ -87,7 +93,9 @@ export async function sendVerificationReplies(
             .setColor('GREEN')
             .setTimestamp();
 
-        ephemeral ? await sendEphemeralReply(interaction, { embeds: [embed] }, 60) : await sendReply(interaction, { embeds: [embed] });
+        isEphemeral
+            ? await sendEphemeralReply(interaction, { embeds: [embed] }, 60, isDeferred)
+            : await sendReply(interaction, { embeds: [embed] }, isDeferred);
     } else {
         if (user) {
             user.verifyRequestedAt = new Date();
@@ -102,11 +110,11 @@ export async function sendVerificationReplies(
             });
         }
 
-        await safeSendVerificationEmbed(client, interaction, discordUser, { ephemeral });
+        await safeSendVerificationEmbed(client, interaction, discordUser, { isEphemeral, isDeferred });
     }
 }
 
-type SafeSendVerificationEmbedOptions = { ephemeral?: boolean; isReverify?: boolean };
+type SafeSendVerificationEmbedOptions = { isEphemeral?: boolean; isReverify?: boolean; isDeferred?: boolean };
 
 export async function safeSendVerificationEmbed(
     client: Client,
@@ -114,7 +122,11 @@ export async function safeSendVerificationEmbed(
     discordUser: User,
     options: SafeSendVerificationEmbedOptions = {}
 ) {
-    options = { ephemeral: false, isReverify: false, ...options };
+    options = { isEphemeral: false, isReverify: false, isDeferred: false, ...options };
+
+    if (options.isDeferred && !isMessage(interaction) && !interaction.deferred) {
+        await interaction.deferReply();
+    }
 
     const verifyReply = getVerificationResponse(discordUser, options.isReverify);
 
@@ -128,13 +140,13 @@ export async function safeSendVerificationEmbed(
                 .setColor('BLUE')
                 .setTimestamp();
 
-            options.ephemeral
-                ? await sendEphemeralReply(interaction, { embeds: [embed] }, 60)
-                : await sendReply(interaction, { embeds: [embed] });
+            options.isEphemeral
+                ? await sendEphemeralReply(interaction, { embeds: [embed] }, 60, options.isDeferred)
+                : await sendReply(interaction, { embeds: [embed] }, options.isDeferred);
 
             await Modlog.logUserAction(client, interaction.guild, discordUser, `${discordUser} requested a verification link.`, 'BLUE');
         } else {
-            await sendReply(interaction, verifyReply);
+            await sendReply(interaction, verifyReply, options.isDeferred);
         }
     } catch (err) {
         const embed = new MessageEmbed()
@@ -145,9 +157,9 @@ export async function safeSendVerificationEmbed(
             .setColor('RED')
             .setTimestamp();
 
-        options.ephemeral
-            ? await sendEphemeralReply(interaction, { embeds: [embed] }, 60)
-            : await sendReply(interaction, { embeds: [embed] });
+        options.isEphemeral
+            ? await sendEphemeralReply(interaction, { embeds: [embed] }, 60, options.isDeferred)
+            : await sendReply(interaction, { embeds: [embed] }, options.isDeferred);
     }
 }
 

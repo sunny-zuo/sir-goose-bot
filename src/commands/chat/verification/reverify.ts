@@ -1,4 +1,4 @@
-import { CommandInteraction, Message } from 'discord.js';
+import { CommandInteraction } from 'discord.js';
 import Client from '#src/Client';
 import { ChatCommand } from '../ChatCommand';
 import { GuildConfigCache } from '#util/guildConfigCache';
@@ -13,10 +13,13 @@ export class ReVerify extends ChatCommand {
             category: 'Verification',
             cooldownSeconds: 600,
             cooldownMaxUses: 5,
+            isTextCommand: false,
         });
     }
 
-    async execute(interaction: Message | CommandInteraction): Promise<void> {
+    async execute(interaction: CommandInteraction): Promise<void> {
+        await interaction.deferReply({ ephemeral: true });
+
         const config = await GuildConfigCache.fetchConfig(interaction.guild?.id);
         if (interaction.guild && config.enableVerification === false) {
             await this.sendErrorEmbed(interaction, 'Verification Not Enabled', 'This server does not have verification enabled.');
@@ -27,9 +30,13 @@ export class ReVerify extends ChatCommand {
         const user = await UserModel.findOne({ discordId: discordUser.id });
 
         if (!user || !user.verified) {
-            await sendVerificationReplies(this.client, interaction, discordUser);
+            await sendVerificationReplies(this.client, interaction, discordUser, true, true);
         } else {
-            await safeSendVerificationEmbed(this.client, interaction, discordUser, { ephemeral: true, isReverify: true });
+            await safeSendVerificationEmbed(this.client, interaction, discordUser, {
+                isEphemeral: true,
+                isReverify: true,
+                isDeferred: true,
+            });
         }
     }
 }

@@ -38,6 +38,6 @@ export class Verify extends ChatCommand {
 
         const discordUser = this.getUser(interaction);
 
-        await sendVerificationReplies(this.client, interaction, discordUser);
+        await sendVerificationReplies(this.client, interaction, discordUser, false, true);
     }
 }
