@@ -8,32 +8,37 @@ import {
     Interaction,
 } from 'discord.js';
 
-export function sendReply(
+export async function sendReply(
     interaction: Message | CommandInteraction | ButtonInteraction,
-    message: InteractionReplyOptions & ReplyMessageOptions
-): Promise<void | Message> {
-    // this is dumb but it fixes a typescript error when replying to any of 3 interaction types ¯\_(ツ)_/¯
+    message: InteractionReplyOptions & ReplyMessageOptions,
+    isDeferred = false
+): Promise<void> {
     if (isMessage(interaction)) {
-        return interaction.reply(message);
+        await interaction.reply(message);
+    } else if (isDeferred) {
+        await interaction.editReply(message);
     } else {
-        return interaction.reply(message);
+        await interaction.reply(message);
     }
 }
 
-export function sendEphemeralReply(
+export async function sendEphemeralReply(
     interaction: Message | CommandInteraction | ButtonInteraction | ContextMenuInteraction,
     message: InteractionReplyOptions & ReplyMessageOptions,
-    deletionSeconds = 30
+    deletionSeconds = 30,
+    isDeferred = false
 ): Promise<void> {
     if (isMessage(interaction)) {
-        return interaction.reply(message).then((sentMessage) => {
+        await interaction.reply(message).then((sentMessage) => {
             setTimeout(async () => {
                 // we ignore the delete error as it isn't something we can feasibly handle
                 await sentMessage.delete().catch(() => undefined);
             }, deletionSeconds * 1000);
         });
+    } else if (isDeferred) {
+        await interaction.editReply(message);
     } else {
-        return interaction.reply({ ...message, ephemeral: true });
+        await interaction.reply({ ...message, ephemeral: true });
     }
 }
 

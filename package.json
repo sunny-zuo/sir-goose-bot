@@ -9,6 +9,7 @@
         "start": "npm run build && node dist/main.js",
         "lint:eslint": "eslint --ext .ts src",
         "lint:prettier": "prettier --check \"src/**/*.ts\"",
+        "lint": "npm run lint:eslint && npm run limt:prettier",
         "format": "prettier --write \"src/**/*.ts\""
     },
     "repository": {
