@@ -1,10 +1,11 @@
 import {
     ApplicationCommandOption,
-    CommandInteraction,
+    ApplicationCommandOptionType,
+    ChatInputCommandInteraction,
     CommandInteractionOptionResolver,
     GuildMember,
-    MessageEmbed,
-    Permissions,
+    EmbedBuilder,
+    PermissionsBitField,
 } from 'discord.js';
 import Client from '#src/Client';
 import { ChatCommand } from '../ChatCommand';
@@ -19,18 +20,18 @@ export class Ban extends ChatCommand {
         {
             name: 'user',
             description: 'Ban a user by mentioning them',
-            type: 'SUB_COMMAND',
+            type: ApplicationCommandOptionType.Subcommand,
             options: [
                 {
                     name: 'user',
                     description: 'The user to ban.',
-                    type: 'USER',
+                    type: ApplicationCommandOptionType.User,
                     required: true,
                 },
                 {
                     name: 'reason',
                     description: 'The reason for the ban.',
-                    type: 'STRING',
+                    type: ApplicationCommandOptionType.String,
                     required: false,
                 },
             ],
@@ -38,18 +39,18 @@ export class Ban extends ChatCommand {
         {
             name: 'id',
             description: 'Ban a user by their discord user id',
-            type: 'SUB_COMMAND',
+            type: ApplicationCommandOptionType.Subcommand,
             options: [
                 {
                     name: 'user_id',
                     description: 'The discord user id of the user to ban.',
-                    type: 'STRING',
+                    type: ApplicationCommandOptionType.String,
                     required: true,
                 },
                 {
                     name: 'reason',
                     description: 'The reason for the ban.',
-                    type: 'STRING',
+                    type: ApplicationCommandOptionType.String,
                     required: false,
                 },
             ],
@@ -65,14 +66,14 @@ export class Ban extends ChatCommand {
             options: Ban.options,
             guildOnly: true,
             examples: ['id 123456789012345678 reason', 'user @user reason'],
-            clientPermissions: [Permissions.FLAGS.BAN_MEMBERS],
-            userPermissions: [Permissions.FLAGS.BAN_MEMBERS],
+            clientPermissions: [PermissionsBitField.Flags.BanMembers],
+            userPermissions: [PermissionsBitField.Flags.BanMembers],
             cooldownSeconds: 2,
         });
     }
 
     async execute(
-        interaction: CommandInteraction,
+        interaction: ChatInputCommandInteraction,
         args: Omit<CommandInteractionOptionResolver, 'getMessage' | 'getFocused'>
     ): Promise<void> {
         await interaction.deferReply();
@@ -80,7 +81,7 @@ export class Ban extends ChatCommand {
         const guild = interaction.guild;
         if (!guild) return;
 
-        const modlogEmbeds: MessageEmbed[] = [];
+        const modlogEmbeds: EmbedBuilder[] = [];
         const banReason = args.getString('reason') ?? 'No reason provided.';
         const providedUserId = args.getString('user_id') ?? (args.getMember('user') as GuildMember)?.id;
         const memberToBan = await guild.members.fetch(providedUserId).catch(() => null);
@@ -94,7 +95,7 @@ export class Ban extends ChatCommand {
         if (memberToBan && !memberToBan.bannable) {
             await interaction.editReply({
                 embeds: [
-                    new MessageEmbed().setDescription(`Unable to ban - I do not have permission to ban ${memberToBan}.`).setColor('RED'),
+                    new EmbedBuilder().setDescription(`Unable to ban - I do not have permission to ban ${memberToBan}.`).setColor('Red'),
                 ],
             });
             return;
@@ -105,11 +106,11 @@ export class Ban extends ChatCommand {
             if (altMember && !altMember.bannable) {
                 await interaction.editReply({
                     embeds: [
-                        new MessageEmbed()
+                        new EmbedBuilder()
                             .setDescription(
                                 `Unable to ban - I do not have permission to ban ${altMember}. (alt of the member you wanted to ban).`
                             )
-                            .setColor('RED'),
+                            .setColor('Red'),
                     ],
                 });
                 return;
@@ -145,7 +146,7 @@ export class Ban extends ChatCommand {
                             **Reason**: ${banReason} (alt of ${memberToBan?.user.tag ?? `user with id ${providedUserId}`})
                             **Moderator**: ${interaction.member}
                             `,
-                        'RED'
+                        'Red'
                     )
                 );
             }
@@ -155,9 +156,9 @@ export class Ban extends ChatCommand {
             await memberToBan
                 .send({
                     embeds: [
-                        new MessageEmbed()
+                        new EmbedBuilder()
                             .setDescription(`You have been permanantly banned in ${guild.name} for: ${banReason}`)
-                            .setColor('RED'),
+                            .setColor('Red'),
                     ],
                 })
                 .catch(() => undefined);
@@ -171,7 +172,7 @@ export class Ban extends ChatCommand {
                     **Reason**: ${banReason}
                     **Moderator**: ${interaction.member}
                     `,
-                    'RED'
+                    'Red'
                 )
             );
 
@@ -179,25 +180,25 @@ export class Ban extends ChatCommand {
 
             await interaction.editReply({
                 embeds: [
-                    new MessageEmbed()
+                    new EmbedBuilder()
                         .setDescription(`**${memberToBan} and ${modlogEmbeds.length - 1} alt accounts were banned |** ${banReason}`)
-                        .setColor('GREEN'),
+                        .setColor('Green'),
                 ],
             });
         } else if (banUserInfo && banUserInfo.uwid) {
             await interaction.editReply({
                 embeds: [
-                    new MessageEmbed()
+                    new EmbedBuilder()
                         .setDescription(`**User ID ${providedUserId} and ${modlogEmbeds.length} alt accounts were banned |** ${banReason}`)
-                        .setColor('GREEN'),
+                        .setColor('Green'),
                 ],
             });
         } else {
             await interaction.editReply({
                 embeds: [
-                    new MessageEmbed()
+                    new EmbedBuilder()
                         .setDescription(`Unable to ban user ID ${providedUserId} - they are not verified and are not in this server.`)
-                        .setColor('YELLOW'),
+                        .setColor('Yellow'),
                 ],
             });
         }

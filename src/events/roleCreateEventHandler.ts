@@ -1,6 +1,16 @@
 import { EventHandler } from './eventHandler';
 import Client from '#src/Client';
-import { GuildMember, MessageActionRow, MessageButton, MessageComponentInteraction, MessageEmbed, Role } from 'discord.js';
+import {
+    GuildMember,
+    ActionRowBuilder,
+    ButtonBuilder,
+    MessageComponentInteraction,
+    EmbedBuilder,
+    Role,
+    ButtonStyle,
+    ComponentType,
+    PermissionFlagsBits,
+} from 'discord.js';
 import { Modlog } from '#util/modlog';
 import { GuildConfigCache } from '#util/guildConfigCache';
 import { v4 as uuidv4 } from 'uuid';
@@ -36,9 +46,9 @@ export class RoleCreateEventHandler implements EventHandler {
         }
 
         if (doesRoleNameMatch) {
-            const embed = new MessageEmbed()
+            const embed = new EmbedBuilder()
                 .setTitle('New Role Created')
-                .setColor('BLUE')
+                .setColor('Blue')
                 .setDescription(
                     `The newly created role named \`${newRole.name}\` matches the name of a role set in verification rules. Would you like to automatically update the verification rules to assign the newly created role when the rule(s) match?`
                 )
@@ -46,24 +56,24 @@ export class RoleCreateEventHandler implements EventHandler {
 
             const updateId = uuidv4();
             const ignoreId = uuidv4();
-            const row = new MessageActionRow().addComponents(
-                new MessageButton().setCustomId(updateId).setLabel('Update Roles').setStyle('SUCCESS'),
-                new MessageButton().setCustomId(ignoreId).setLabel('Ignore').setStyle('DANGER')
+            const row = new ActionRowBuilder<ButtonBuilder>().addComponents(
+                new ButtonBuilder().setCustomId(updateId).setLabel('Update Roles').setStyle(ButtonStyle.Success),
+                new ButtonBuilder().setCustomId(ignoreId).setLabel('Ignore').setStyle(ButtonStyle.Danger)
             );
 
             const message = await Modlog.logMessage(this.client, guild, { embeds: [embed], components: [row] });
             if (!message) return;
 
             const filter = (i: MessageComponentInteraction) => i.member !== undefined;
-            const collector = message.createMessageComponentCollector({ filter, componentType: 'BUTTON', time: 1000 * 60 * 5 });
+            const collector = message.createMessageComponentCollector({ filter, componentType: ComponentType.Button, time: 1000 * 60 * 5 });
             let validInteractionReceived = false;
 
             collector.on('collect', async (i) => {
                 const member = i.member as GuildMember;
 
-                if (!member.permissions.has('MANAGE_GUILD')) {
-                    const embed = new MessageEmbed()
-                        .setColor('RED')
+                if (!member.permissions.has(PermissionFlagsBits.ManageGuild)) {
+                    const embed = new EmbedBuilder()
+                        .setColor('Red')
                         .setDescription('You must have the `Manage Server` permission to interact with this button.');
 
                     await i.reply({ embeds: [embed] });
@@ -94,9 +104,9 @@ export class RoleCreateEventHandler implements EventHandler {
                     if (newConfig && didRulesUpdate) {
                         await newConfig.save();
 
-                        const updatedEmbed = new MessageEmbed()
+                        const updatedEmbed = new EmbedBuilder()
                             .setTitle('New Role Created')
-                            .setColor('GREEN')
+                            .setColor('Green')
                             .setDescription(
                                 `The newly created role named \`${newRole.name}\` was updated to be the role assigned in verification rules by ${i.member}.`
                             )
@@ -111,9 +121,9 @@ export class RoleCreateEventHandler implements EventHandler {
                         collector.stop();
                     }
                 } else if (i.customId === ignoreId) {
-                    const updatedEmbed = new MessageEmbed()
+                    const updatedEmbed = new EmbedBuilder()
                         .setTitle('New Role Created')
-                        .setColor('YELLOW')
+                        .setColor('Yellow')
                         .setDescription(
                             `${i.member} selected to not update the verification rules to assign the newly created role \`${newRole.name}\` when rules dictate that a role named \`${newRole.name}\` should be assigned.`
                         )
@@ -137,9 +147,9 @@ export class RoleCreateEventHandler implements EventHandler {
                         'Prompt to update newly created role matching verification rules was ignored'
                     );
 
-                    const embed = new MessageEmbed()
+                    const embed = new EmbedBuilder()
                         .setTitle('New Role Created')
-                        .setColor('BLUE')
+                        .setColor('Blue')
                         .setDescription(
                             `The newly created role named \`${newRole.name}\` matches the name of a role set in verification rules. No one responded to the prompt asking if verification rules should be automatically updated :(`
                         )

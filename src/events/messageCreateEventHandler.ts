@@ -1,4 +1,13 @@
-import { Message, MessageActionRow, MessageButton, MessageEmbed, Permissions } from 'discord.js';
+import {
+    Message,
+    ActionRowBuilder,
+    ButtonBuilder,
+    EmbedBuilder,
+    ButtonStyle,
+    PermissionsBitField,
+    ChannelType,
+    ApplicationCommandOptionType,
+} from 'discord.js';
 import Client from '#src/Client';
 import { InvalidCommandInteractionOption } from '../types';
 import { EventHandler } from './eventHandler';
@@ -6,6 +15,7 @@ import { GuildConfigCache } from '#util/guildConfigCache';
 import { Help } from '../commands/chat/info/help';
 import { sendEphemeralReply } from '#util/message';
 import { logger } from '#util/logger';
+import { ApplicationCommandOptionTypeToString } from '#util/constants';
 
 export class MessageCreateEventHandler implements EventHandler {
     readonly eventName = 'messageCreate';
@@ -33,18 +43,18 @@ export class MessageCreateEventHandler implements EventHandler {
         if (!command || !command.enabled) return;
         if (!command.isTextCommand) {
             if (command.isSlashCommand) {
-                const embed = new MessageEmbed()
+                const embed = new EmbedBuilder()
                     .setTitle('Command Unavailable as Text Command')
-                    .setColor('RED')
+                    .setColor('Red')
                     .setDescription(
                         `This command can only be used as a slash command (\`/${command.name}\`). If the slash command does not appear, you may need to grant the bot permissions to create slash commands.`
                     )
                     .setTimestamp();
 
-                const button = new MessageActionRow().addComponents(
-                    new MessageButton()
+                const button = new ActionRowBuilder<ButtonBuilder>().addComponents(
+                    new ButtonBuilder()
                         .setLabel('Grant Slash Command Permission')
-                        .setStyle('LINK')
+                        .setStyle(ButtonStyle.Link)
                         .setURL('https://discord.com/api/oauth2/authorize?client_id=740653704683716699&scope=applications.commands')
                 );
 
@@ -81,11 +91,11 @@ export class MessageCreateEventHandler implements EventHandler {
         }
         if (!(await command.checkCommandPermissions(message))) {
             if (
-                message.channel.type === 'GUILD_TEXT' &&
+                message.channel.type === ChannelType.GuildText &&
                 message.channel.guild.members.me &&
                 !message.channel
                     .permissionsFor(message.channel.guild.members.me)
-                    .has([Permissions.FLAGS.SEND_MESSAGES, Permissions.FLAGS.EMBED_LINKS])
+                    .has([PermissionsBitField.Flags.SendMessages, PermissionsBitField.Flags.EmbedLinks])
             ) {
                 await message.author
                     .send({
@@ -101,8 +111,8 @@ export class MessageCreateEventHandler implements EventHandler {
         if (command.options.length > 0) {
             if (messageContent[0] === undefined || messageContent[0].length === 0) {
                 if (
-                    command.options[0].type === 'SUB_COMMAND' ||
-                    command.options[0].type === 'SUB_COMMAND_GROUP' ||
+                    command.options[0].type === ApplicationCommandOptionType.Subcommand ||
+                    command.options[0].type === ApplicationCommandOptionType.SubcommandGroup ||
                     command.options[0].required
                 ) {
                     await command.sendErrorEmbed(
@@ -155,7 +165,7 @@ export class MessageCreateEventHandler implements EventHandler {
                     'Invalid Arguments Provided',
                     `You provided an invalid argument for \`${
                         invalidOption.name
-                    }\`, which needs to be a \`${invalidOption.type.toLowerCase()}\`.
+                    }\`, which needs to be a \`${ApplicationCommandOptionTypeToString.get(invalidOption.type)}\`.
                     
                     Command Usage: \`${`${prefix}${commandName} ${Help.listArguments(command)}`.trim()}\``
                 );

@@ -1,9 +1,9 @@
-import { Interaction, Permissions } from 'discord.js';
+import { ChannelType, Interaction, PermissionsBitField } from 'discord.js';
 import { EventHandler } from './eventHandler';
 import Client from '#src/Client';
 import { logger } from '#util/logger';
 
-export class CommandInteractionCreateEventHandler implements EventHandler {
+export class ChatInputCommandInteractionCreateEventHandler implements EventHandler {
     readonly eventName = 'interactionCreate';
     readonly client: Client;
 
@@ -12,7 +12,7 @@ export class CommandInteractionCreateEventHandler implements EventHandler {
     }
 
     async execute(interaction: Interaction): Promise<void> {
-        if (!interaction.isCommand()) return;
+        if (!interaction.isChatInputCommand()) return;
 
         const client = this.client;
         const command = client.chatCommands.get(interaction.commandName);
@@ -48,11 +48,11 @@ export class CommandInteractionCreateEventHandler implements EventHandler {
         if (!(await command.checkCommandPermissions(interaction))) {
             if (
                 interaction.channel &&
-                interaction.channel.type === 'GUILD_TEXT' &&
+                interaction.channel.type === ChannelType.GuildText &&
                 interaction.channel.guild.members.me &&
                 !interaction.channel
                     .permissionsFor(interaction.channel.guild.members.me)
-                    .has([Permissions.FLAGS.SEND_MESSAGES, Permissions.FLAGS.EMBED_LINKS])
+                    .has([PermissionsBitField.Flags.SendMessages, PermissionsBitField.Flags.EmbedLinks])
             ) {
                 await interaction.user
                     .send({

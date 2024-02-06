@@ -1,4 +1,4 @@
-import { CommandInteraction, Permissions } from 'discord.js';
+import { ChatInputCommandInteraction, PermissionsBitField } from 'discord.js';
 import Client from '#src/Client';
 import { ChatCommand } from '../ChatCommand';
 import { OverviewView } from './configViews/overviewView';
@@ -12,11 +12,11 @@ export class Config extends ChatCommand {
             isSlashCommand: true,
             isTextCommand: true,
             guildOnly: true,
-            userPermissions: [Permissions.FLAGS.MANAGE_GUILD],
+            userPermissions: [PermissionsBitField.Flags.ManageGuild],
         });
     }
 
-    async execute(interaction: CommandInteraction): Promise<void> {
+    async execute(interaction: ChatInputCommandInteraction): Promise<void> {
         await OverviewView.initialRender(this.client, interaction);
     }
 }

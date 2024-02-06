@@ -1,4 +1,4 @@
-import { CommandInteraction, GuildMember, Message, Permissions } from 'discord.js';
+import { ChatInputCommandInteraction, GuildMember, Message, PermissionsBitField } from 'discord.js';
 import Client from '#src/Client';
 import { ChatCommand } from '../ChatCommand';
 import { GuildConfigCache } from '#util/guildConfigCache';
@@ -15,13 +15,13 @@ export class Verify extends ChatCommand {
         });
     }
 
-    async execute(interaction: Message | CommandInteraction): Promise<void> {
+    async execute(interaction: Message | ChatInputCommandInteraction): Promise<void> {
         const config = await GuildConfigCache.fetchConfig(interaction.guild?.id);
 
         if (interaction.guild && config.enableVerification === false) {
             const member = interaction.member as GuildMember | null;
 
-            if (member && member.permissions.has(Permissions.FLAGS.MANAGE_GUILD)) {
+            if (member && member.permissions.has(PermissionsBitField.Flags.ManageGuild)) {
                 await this.sendErrorEmbed(
                     interaction,
                     'Verification Not Enabled',

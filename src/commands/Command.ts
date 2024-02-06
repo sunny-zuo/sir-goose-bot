@@ -1,9 +1,9 @@
 import {
     GuildMember,
     Message,
-    MessageEmbed,
-    Permissions,
-    CommandInteraction,
+    EmbedBuilder,
+    PermissionsBitField,
+    ChatInputCommandInteraction,
     ApplicationCommandOption,
     CommandInteractionOption,
     User,
@@ -11,13 +11,14 @@ import {
     Role,
     ColorResolvable,
     CommandInteractionOptionResolver,
-    ContextMenuInteraction,
     TextBasedChannel,
     GuildBasedChannel,
     ApplicationCommandOptionType,
     GuildChannel,
     NewsChannel,
     TextChannel,
+    UserContextMenuCommandInteraction,
+    ChannelType,
 } from 'discord.js';
 import { CommandOptions, Category } from '#types/Command';
 import Client from '#src/Client';
@@ -27,9 +28,12 @@ import { isMessage } from '#util/message';
 import { getUser } from '#util/user';
 import { sendEphemeralReply } from '#util/message';
 import { logger } from '#util/logger';
-import { ApplicationCommandOptionTypesStringMap } from '#util/constants';
 
-const minimumClientPermissions = [Permissions.FLAGS.VIEW_CHANNEL, Permissions.FLAGS.SEND_MESSAGES, Permissions.FLAGS.EMBED_LINKS];
+const minimumClientPermissions = [
+    PermissionsBitField.Flags.ViewChannel,
+    PermissionsBitField.Flags.SendMessages,
+    PermissionsBitField.Flags.EmbedLinks,
+];
 
 export abstract class Command {
     client: Client;
@@ -67,13 +71,11 @@ export abstract class Command {
     }
 
     parseApplicationCommandOptionType(option: ApplicationCommandOption): ApplicationCommandOptionType {
-        const type = option.type;
-        if (typeof type === 'string') return type;
-        else return ApplicationCommandOptionTypesStringMap[type];
+        return option.type;
     }
 
     async parseMessageValue(
-        interaction: Message | CommandInteraction,
+        interaction: Message | ChatInputCommandInteraction,
         expectedOption: ApplicationCommandOption,
         argArray: string[]
     ): Promise<Result<CommandInteractionOption, InvalidCommandInteractionOption>> {
@@ -88,10 +90,10 @@ export abstract class Command {
         }
 
         switch (expectedOption.type) {
-            case 'STRING':
+            case ApplicationCommandOptionType.String:
                 commandInteractionOption.value = stringArg;
                 break;
-            case 'INTEGER': {
+            case ApplicationCommandOptionType.Integer: {
                 const val = Math.round(Number(stringArg));
                 if (isNaN(val)) {
                     return {
@@ -103,7 +105,7 @@ export abstract class Command {
                 commandInteractionOption.value = val;
                 break;
             }
-            case 'BOOLEAN': {
+            case ApplicationCommandOptionType.Boolean: {
                 if (stringArg === 'true') commandInteractionOption.value = true;
                 else if (stringArg === 'false') commandInteractionOption.value = false;
                 else {
@@ -115,7 +117,7 @@ export abstract class Command {
 
                 break;
             }
-            case 'USER': {
+            case ApplicationCommandOptionType.User: {
                 const user = await this.getUserFromMention(interaction, stringArg);
                 if (user === undefined) {
                     return {
@@ -131,7 +133,7 @@ export abstract class Command {
 
                 break;
             }
-            case 'CHANNEL': {
+            case ApplicationCommandOptionType.Channel: {
                 const channel = await this.getChannelFromMention(interaction, stringArg);
                 if (!channel) {
                     return {
@@ -143,7 +145,7 @@ export abstract class Command {
                 commandInteractionOption.channel = channel;
                 break;
             }
-            case 'ROLE': {
+            case ApplicationCommandOptionType.Role: {
                 const role = await this.getRoleFromMention(interaction, stringArg);
                 if (!role) {
                     return {
@@ -155,8 +157,8 @@ export abstract class Command {
                 commandInteractionOption.role = role;
                 break;
             }
-            case 'SUB_COMMAND':
-            case 'SUB_COMMAND_GROUP': {
+            case ApplicationCommandOptionType.Subcommand:
+            case ApplicationCommandOptionType.SubcommandGroup: {
                 if (expectedOption.name === stringArg.toLowerCase()) {
                     const suboptions: CommandInteractionOption[] = [];
 
@@ -170,7 +172,10 @@ export abstract class Command {
                         const result = await this.parseMessageValue(interaction, suboption, tempArgArray);
                         if (!result.success) {
                             if (result.error.issue === ArgumentIssue.MISSING) {
-                                if (expectedOption.type === 'SUB_COMMAND' || expectedOption.type === 'SUB_COMMAND_GROUP') {
+                                if (
+                                    expectedOption.type === ApplicationCommandOptionType.Subcommand ||
+                                    expectedOption.type === ApplicationCommandOptionType.SubcommandGroup
+                                ) {
                                     continue;
                                 } else {
                                     break;
@@ -190,8 +195,7 @@ export abstract class Command {
 
                 break;
             }
-
-            case 'MENTIONABLE':
+            case ApplicationCommandOptionType.Mentionable:
                 throw new Error(`Option type ${expectedOption.type} is currently unsupported.`);
         }
 
@@ -199,13 +203,15 @@ export abstract class Command {
     }
 
     async parseMessageArguments(
-        interaction: Message | CommandInteraction,
+        interaction: Message | ChatInputCommandInteraction,
         args: string
     ): Promise<Result<CommandInteractionOptionResolver, InvalidCommandInteractionOption>> {
         const options: CommandInteractionOption[] = [];
         const expectedOptions = this.options;
         const argArray =
-            expectedOptions.length > 1 || expectedOptions[0].type === 'SUB_COMMAND' || expectedOptions[0].type === 'SUB_COMMAND_GROUP'
+            expectedOptions.length > 1 ||
+            expectedOptions[0].type === ApplicationCommandOptionType.Subcommand ||
+            expectedOptions[0].type === ApplicationCommandOptionType.SubcommandGroup
                 ? args.trim().split(' ')
                 : [args.trim()]; // TODO: handle arguments with spaces
 
@@ -214,7 +220,10 @@ export abstract class Command {
             const result = await this.parseMessageValue(interaction, expectedOption, tempArgArray);
             if (!result.success) {
                 if (result.error.issue === ArgumentIssue.MISSING) {
-                    if (expectedOption.type === 'SUB_COMMAND' || expectedOption.type === 'SUB_COMMAND_GROUP') {
+                    if (
+                        expectedOption.type === ApplicationCommandOptionType.Subcommand ||
+                        expectedOption.type === ApplicationCommandOptionType.SubcommandGroup
+                    ) {
                         continue;
                     } else if (expectedOption.required) {
                         return { success: false, error: result.error };
@@ -232,9 +241,13 @@ export abstract class Command {
         return { success: true, value: new CommandInteractionOptionResolver(interaction.client, options) };
     }
 
-    isLastOption(option: ApplicationCommandOption, options: ApplicationCommandOption[]): boolean {
-        if (option.type === 'SUB_COMMAND_GROUP' || (option.type === 'SUB_COMMAND' && option.options?.length)) return false;
-        else if (option.type === 'SUB_COMMAND') return true;
+    isLastOption(option: ApplicationCommandOption, options: readonly ApplicationCommandOption[]): boolean {
+        if (
+            option.type === ApplicationCommandOptionType.SubcommandGroup ||
+            (option.type === ApplicationCommandOptionType.Subcommand && option.options?.length)
+        )
+            return false;
+        else if (option.type === ApplicationCommandOptionType.Subcommand) return true;
         else if (option === options.slice(-1)[0]) return true;
         else return false;
     }
@@ -246,7 +259,7 @@ export abstract class Command {
         return invalidOption;
     }
 
-    async getUserFromMention(interaction: Message | CommandInteraction, mention: string): Promise<User | undefined> {
+    async getUserFromMention(interaction: Message | ChatInputCommandInteraction, mention: string): Promise<User | undefined> {
         const matches = mention.match(/^<@!?(\d+)>$/);
         if (!matches) return undefined;
         const id = matches[1] as Snowflake;
@@ -255,7 +268,7 @@ export abstract class Command {
         return user;
     }
 
-    async getMemberFromMention(interaction: Message | CommandInteraction, mention: string): Promise<GuildMember | undefined> {
+    async getMemberFromMention(interaction: Message | ChatInputCommandInteraction, mention: string): Promise<GuildMember | undefined> {
         const matches = mention.match(/^<@!?(\d+)>$/);
         if (!matches) return undefined;
         const id = matches[1] as Snowflake;
@@ -264,7 +277,7 @@ export abstract class Command {
         return user;
     }
 
-    async getRoleFromMention(interaction: Message | CommandInteraction, mention: string): Promise<Role | undefined | null> {
+    async getRoleFromMention(interaction: Message | ChatInputCommandInteraction, mention: string): Promise<Role | undefined | null> {
         const matches = mention.match(/^<@&(\d+)>$/);
         if (!matches) return null;
         const id = matches[1] as Snowflake;
@@ -272,7 +285,10 @@ export abstract class Command {
         return role;
     }
 
-    async getChannelFromMention(interaction: Message | CommandInteraction, mention: string): Promise<GuildBasedChannel | undefined | null> {
+    async getChannelFromMention(
+        interaction: Message | ChatInputCommandInteraction,
+        mention: string
+    ): Promise<GuildBasedChannel | undefined | null> {
         const matches = mention.match(/^<#(\d+)>$/);
         if (!matches) return null;
         const id = matches[1] as Snowflake;
@@ -280,9 +296,11 @@ export abstract class Command {
         return channel;
     }
 
-    async checkCommandPermissions(interaction: Message | CommandInteraction | ContextMenuInteraction): Promise<boolean> {
+    async checkCommandPermissions(
+        interaction: Message | ChatInputCommandInteraction | UserContextMenuCommandInteraction
+    ): Promise<boolean> {
         if (!interaction.channel) return false;
-        if (interaction.channel.type === 'DM' || interaction.member === null) return true;
+        if (interaction.channel.type === ChannelType.DM || interaction.member === null) return true;
         if (
             interaction.channel.guild.members.me &&
             !interaction.channel.permissionsFor(interaction.channel.guild.members.me).has(minimumClientPermissions)
@@ -330,7 +348,7 @@ export abstract class Command {
     async checkMemberPermissions(
         member: GuildMember | null,
         channel: GuildChannel,
-        interaction: Message | CommandInteraction | ContextMenuInteraction | null = null,
+        interaction: Message | ChatInputCommandInteraction | UserContextMenuCommandInteraction | null = null,
         ownerOverride = true
     ): Promise<boolean> {
         if (member === null) return false;
@@ -361,7 +379,7 @@ export abstract class Command {
 
     async checkClientPermissions(
         channel: GuildChannel,
-        interaction: Message | CommandInteraction | ContextMenuInteraction | null = null
+        interaction: Message | ChatInputCommandInteraction | UserContextMenuCommandInteraction | null = null
     ): Promise<boolean> {
         if (channel.guild.members.me === null) return false;
         const missingPermissions = channel.permissionsFor(channel.guild.members.me).missing(this.clientPermissions);
@@ -383,7 +401,7 @@ export abstract class Command {
     getValidChannel(channel: TextBasedChannel | null): Promise<TextBasedChannel> {
         return new Promise((resolve, reject) => {
             if (channel !== null) {
-                if (channel.type === 'DM') {
+                if (channel.type === ChannelType.DM) {
                     const dmChannel = channel;
                     if (dmChannel.partial) {
                         resolve(dmChannel.fetch());
@@ -402,44 +420,44 @@ export abstract class Command {
     }
 
     sendSuccessEmbed(
-        interaction: Message | CommandInteraction | ContextMenuInteraction,
+        interaction: Message | ChatInputCommandInteraction | UserContextMenuCommandInteraction,
         title: string,
         description: string,
         ephemeral = false,
         deletionSeconds = 30
-    ): Promise<void | Message> {
-        return this.sendColorEmbed(interaction, 'GREEN', title, description, ephemeral, deletionSeconds);
+    ): Promise<unknown> {
+        return this.sendColorEmbed(interaction, 'Green', title, description, ephemeral, deletionSeconds);
     }
 
     sendNeutralEmbed(
-        interaction: Message | CommandInteraction | ContextMenuInteraction,
+        interaction: Message | ChatInputCommandInteraction | UserContextMenuCommandInteraction,
         title: string,
         description: string,
         ephemeral = false,
         deletionSeconds = 30
-    ): Promise<void | Message> {
-        return this.sendColorEmbed(interaction, 'BLUE', title, description, ephemeral, deletionSeconds);
+    ): Promise<unknown> {
+        return this.sendColorEmbed(interaction, 'Blue', title, description, ephemeral, deletionSeconds);
     }
 
     sendErrorEmbed(
-        interaction: Message | CommandInteraction | ContextMenuInteraction,
+        interaction: Message | ChatInputCommandInteraction | UserContextMenuCommandInteraction,
         title: string,
         description: string,
         ephemeral = false,
         deletionSeconds = 30
-    ): Promise<void | Message> {
-        return this.sendColorEmbed(interaction, 'RED', title, description, ephemeral, deletionSeconds);
+    ): Promise<unknown> {
+        return this.sendColorEmbed(interaction, 'Red', title, description, ephemeral, deletionSeconds);
     }
 
     sendColorEmbed(
-        interaction: Message | CommandInteraction | ContextMenuInteraction,
+        interaction: Message | ChatInputCommandInteraction | UserContextMenuCommandInteraction,
         color: ColorResolvable,
         title: string,
         description: string,
         ephemeral = false,
         deletionSeconds = 30
-    ): Promise<void | Message> {
-        const embed = new MessageEmbed().setTitle(title).setColor(color).setDescription(description).setTimestamp();
+    ): Promise<unknown> {
+        const embed = new EmbedBuilder().setTitle(title).setColor(color).setDescription(description).setTimestamp();
 
         if (ephemeral) {
             return sendEphemeralReply(interaction, { embeds: [embed] }, deletionSeconds);

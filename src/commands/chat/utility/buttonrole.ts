@@ -3,18 +3,23 @@ import Client from '#src/Client';
 import {
     ApplicationCommandOption,
     ApplicationCommandNonOptionsData,
-    CommandInteraction,
     CommandInteractionOptionResolver,
-    MessageActionRow,
-    MessageButton,
-    MessageEmbed,
-    Permissions,
+    ActionRowBuilder,
+    ButtonBuilder,
+    EmbedBuilder,
+    PermissionsBitField,
     Role,
+    ApplicationCommandOptionType,
+    ButtonStyle,
+    ChannelType,
+    ComponentType,
+    inlineCode,
+    ChatInputCommandInteraction,
 } from 'discord.js';
-import { inlineCode } from '@discordjs/builders';
 import ButtonRoleModel from '#models/buttonRole.model';
 import { sendEphemeralReply } from '#util/message';
 import { logger } from '#util/logger';
+import { convertButtonActionRowToBuilder } from '#util/messageComponents';
 
 const BUTTON_ROLE_GUILD_LIMIT = 25;
 const BUTTON_ROLE_ROLE_LIMIT = 24;
@@ -24,12 +29,12 @@ export class ButtonRole extends ChatCommand {
         {
             name: 'create',
             description: 'Create a button role prompt',
-            type: 'SUB_COMMAND',
+            type: ApplicationCommandOptionType.Subcommand,
             options: [
                 {
                     name: 'message',
                     description: 'Message to send with the prompt',
-                    type: 'STRING',
+                    type: ApplicationCommandOptionType.String,
                 },
                 ...ButtonRole.createRoleOptions(BUTTON_ROLE_ROLE_LIMIT),
             ],
@@ -37,18 +42,18 @@ export class ButtonRole extends ChatCommand {
         {
             name: 'edit',
             description: 'Edit a button role prompt',
-            type: 'SUB_COMMAND',
+            type: ApplicationCommandOptionType.Subcommand,
             options: [
                 {
                     name: 'message_id',
                     description: 'The message id of the button role prompt to edit',
-                    type: 'STRING',
+                    type: ApplicationCommandOptionType.String,
                     required: true,
                 },
                 {
                     name: 'action',
                     description: 'Action to perform',
-                    type: 'STRING',
+                    type: ApplicationCommandOptionType.String,
                     required: true,
                     choices: [
                         { name: 'Add Role', value: 'add' },
@@ -58,13 +63,13 @@ export class ButtonRole extends ChatCommand {
                 {
                     name: 'role',
                     description: 'Role to add or remove',
-                    type: 'ROLE',
+                    type: ApplicationCommandOptionType.Role,
                     required: true,
                 },
                 {
                     name: 'row',
                     description: 'Row to add the role to. Does nothing for removal.',
-                    type: 'NUMBER',
+                    type: ApplicationCommandOptionType.Number,
                     choices: [
                         { name: 'Row 1', value: 0 },
                         { name: 'Row 2', value: 1 },
@@ -86,15 +91,15 @@ export class ButtonRole extends ChatCommand {
             options: ButtonRole.options,
             guildOnly: true,
             examples: ['message @role1 @role2 @role3'],
-            clientPermissions: [Permissions.FLAGS.MANAGE_ROLES],
-            userPermissions: [Permissions.FLAGS.MANAGE_ROLES, Permissions.FLAGS.MANAGE_GUILD],
+            clientPermissions: [PermissionsBitField.Flags.ManageRoles],
+            userPermissions: [PermissionsBitField.Flags.ManageRoles, PermissionsBitField.Flags.ManageGuild],
             cooldownSeconds: 600,
             cooldownMaxUses: 12,
         });
     }
 
     async execute(
-        interaction: CommandInteraction,
+        interaction: ChatInputCommandInteraction,
         args: Omit<CommandInteractionOptionResolver, 'getMessage' | 'getFocused'>
     ): Promise<void> {
         const subcommand = args.getSubcommand();
@@ -111,7 +116,7 @@ export class ButtonRole extends ChatCommand {
     }
 
     async create(
-        interaction: CommandInteraction,
+        interaction: ChatInputCommandInteraction,
         args: Omit<CommandInteractionOptionResolver, 'getMessage' | 'getFocused'>
     ): Promise<void> {
         if (!interaction.guildId) return;
@@ -165,15 +170,15 @@ export class ButtonRole extends ChatCommand {
             roles: roles.flat().map((r) => ({ name: r.name, id: r.id })),
         });
 
-        const components: MessageActionRow[] = [];
+        const components: ActionRowBuilder<ButtonBuilder>[] = [];
         for (const roleRow of roles) {
-            const componentRow = new MessageActionRow();
+            const componentRow = new ActionRowBuilder<ButtonBuilder>();
             for (const role of roleRow) {
                 componentRow.addComponents(
-                    new MessageButton()
+                    new ButtonBuilder()
                         .setCustomId(`buttonRole|{"roleId":"${role.id}","_id":"${buttonRoleDoc._id}"}`)
                         .setLabel(role.name)
-                        .setStyle('PRIMARY')
+                        .setStyle(ButtonStyle.Primary)
                 );
             }
 
@@ -182,7 +187,7 @@ export class ButtonRole extends ChatCommand {
             }
         }
 
-        const embed = new MessageEmbed()
+        const embed = new EmbedBuilder()
             .setDescription(
                 args?.getString('message') ??
                     "Select role(s) to add/remove. The button will add the role if you don't have it, and remove it if you do."
@@ -190,7 +195,7 @@ export class ButtonRole extends ChatCommand {
             .setColor('#2F3136');
 
         const channel = interaction.channel ?? (await interaction.guild?.channels.fetch(interaction.channelId).catch(() => null));
-        if (!channel?.isText()) return;
+        if (channel?.type !== ChannelType.GuildText) return;
 
         const message = await channel.send({ embeds: [embed], components });
         await interaction.reply({ content: 'Button role prompt successfully created!', ephemeral: true });
@@ -199,7 +204,10 @@ export class ButtonRole extends ChatCommand {
         await buttonRoleDoc.save();
     }
 
-    async edit(interaction: CommandInteraction, args: Omit<CommandInteractionOptionResolver, 'getMessage' | 'getFocused'>): Promise<void> {
+    async edit(
+        interaction: ChatInputCommandInteraction,
+        args: Omit<CommandInteractionOptionResolver, 'getMessage' | 'getFocused'>
+    ): Promise<void> {
         if (!interaction.guildId) return;
 
         const buttonRole = await ButtonRoleModel.findOne({ guildId: interaction.guildId, messageId: args.getString('message_id', true) });
@@ -214,7 +222,7 @@ export class ButtonRole extends ChatCommand {
         }
 
         const channel = await interaction.guild?.channels.fetch(buttonRole.channelId).catch(() => null);
-        if (!channel?.isText()) {
+        if (channel?.type !== ChannelType.GuildText) {
             await this.sendErrorEmbed(
                 interaction,
                 'Invalid Channel',
@@ -271,13 +279,15 @@ export class ButtonRole extends ChatCommand {
                 return;
             }
 
-            const button = new MessageButton()
+            const newComponents: ActionRowBuilder<ButtonBuilder>[] = message.components.map(convertButtonActionRowToBuilder);
+
+            const button = new ButtonBuilder()
                 .setCustomId(`buttonRole|{"roleId":"${role.id}","_id":"${buttonRole._id}"}`)
                 .setLabel(role.name)
-                .setStyle('PRIMARY');
+                .setStyle(ButtonStyle.Primary);
             message.components[selectedRow]
-                ? message.components[selectedRow].addComponents(button)
-                : message.components.push(new MessageActionRow().addComponents(button));
+                ? newComponents[selectedRow].addComponents(button)
+                : newComponents.push(new ActionRowBuilder<ButtonBuilder>().addComponents(button));
 
             buttonRole.roles.push({ name: role.name, id: role.id });
 
@@ -299,29 +309,28 @@ export class ButtonRole extends ChatCommand {
                 return;
             }
 
-            const components = message.components;
-
-            const row = components.find((row) =>
-                row.components.some((component) => component.type === 'BUTTON' && component.customId?.includes(role.id))
+            const rowIndex = message.components.findIndex((row) =>
+                row.components.some((component) => component.type === ComponentType.Button && component.customId?.includes(role.id))
             );
-            if (!row) {
+            if (rowIndex === -1) {
                 throw new Error(
                     `Attempted to remove a role ${role.id} from a button role prompt (${buttonRole._id}) where the id does not belong to a button`
                 );
             }
 
-            const updateIndex = row.components.findIndex(
-                (component) => component.type === 'BUTTON' && component.customId?.includes(role.id)
+            const colIndex = message.components[rowIndex].components.findIndex(
+                (component) => component.type === ComponentType.Button && component.customId?.includes(role.id)
             );
-            if (updateIndex === -1) {
+            if (colIndex === -1) {
                 throw new Error(
                     `Attempted to remove a role ${role.id} from a button role prompt (${buttonRole._id}) where the id does not belong to a button`
                 );
             }
 
-            row.spliceComponents(updateIndex, 1);
+            const newComponents: ActionRowBuilder<ButtonBuilder>[] = message.components.map(convertButtonActionRowToBuilder);
+            newComponents[rowIndex].components.splice(colIndex, 1);
 
-            const cleanComponents = components.filter((component) => component.components.length !== 0);
+            const cleanComponents = newComponents.filter((component) => component.components.length !== 0);
             await message.edit({ components: cleanComponents });
 
             buttonRole.roles = buttonRole.roles.filter((r) => r.id !== role.id);
@@ -341,7 +350,7 @@ export class ButtonRole extends ChatCommand {
             options.push({
                 name: `role${i}`,
                 description: `Role ${i} (Row ${Math.ceil(i / 5)})`,
-                type: 'ROLE',
+                type: ApplicationCommandOptionType.Role,
             });
         }
 

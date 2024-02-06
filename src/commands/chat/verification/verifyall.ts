@@ -1,4 +1,4 @@
-import { CommandInteraction, Message, MessageEmbed, Permissions } from 'discord.js';
+import { ChatInputCommandInteraction, Message, EmbedBuilder, PermissionsBitField } from 'discord.js';
 import Client from '#src/Client';
 import { ChatCommand } from '../ChatCommand';
 import { GuildConfigCache } from '#util/guildConfigCache';
@@ -13,12 +13,12 @@ export class VerifyAll extends ChatCommand {
             category: 'Verification',
             cooldownSeconds: 3600,
             cooldownMaxUses: 5,
-            clientPermissions: [Permissions.FLAGS.MANAGE_ROLES],
-            userPermissions: [Permissions.FLAGS.MANAGE_GUILD],
+            clientPermissions: [PermissionsBitField.Flags.ManageRoles],
+            userPermissions: [PermissionsBitField.Flags.ManageGuild],
         });
     }
 
-    async execute(interaction: Message | CommandInteraction): Promise<void> {
+    async execute(interaction: Message | ChatInputCommandInteraction): Promise<void> {
         if (!interaction.guild) return;
 
         const config = await GuildConfigCache.fetchConfig(interaction.guild.id);
@@ -61,7 +61,7 @@ export class VerifyAll extends ChatCommand {
         const embed = this.generateProgressEmbed(progress, total);
 
         // This will always return a Message if the bot user is in the guild
-        const message = (await interaction.reply({ embeds: [embed], fetchReply: true })) as Message;
+        const message = await interaction.reply({ embeds: [embed], fetchReply: true });
 
         const updateInterval = setInterval(async () => {
             await message.edit({ embeds: [this.generateProgressEmbed(progress, total)] });
@@ -82,7 +82,7 @@ export class VerifyAll extends ChatCommand {
             logger.error(e, e.message);
             await message.edit({
                 embeds: [
-                    new MessageEmbed().setTitle('Unknown Error').setDescription(`
+                    new EmbedBuilder().setTitle('Unknown Error').setDescription(`
                             We ran into an unknown error trying to verify all users.
                             Please try again later or join the [support server](https://discord.gg/KHByMmrrw2) for help.
 
@@ -97,8 +97,8 @@ export class VerifyAll extends ChatCommand {
         await message.edit({ embeds: [this.generateProgressEmbed(progress, total)] });
     }
 
-    private generateProgressEmbed(progress: number, total: number): MessageEmbed {
-        return new MessageEmbed()
+    private generateProgressEmbed(progress: number, total: number): EmbedBuilder {
+        return new EmbedBuilder()
             .setTitle(progress !== total ? `Attempting to verify all ${total} users...` : `All ${total} users have been verified!`)
             .setDescription(
                 `
@@ -108,7 +108,7 @@ export class VerifyAll extends ChatCommand {
                 ${this.generateProgressBar(progress, total)}
             `
             )
-            .setColor(progress === total ? 'GREEN' : 'BLUE');
+            .setColor(progress === total ? 'Green' : 'Blue');
     }
 
     private generateProgressBar(progress: number, total: number): string {

@@ -1,6 +1,6 @@
 import { ChatCommand } from '../ChatCommand';
 import Client from '#src/Client';
-import { CommandInteraction, Message, MessageEmbed } from 'discord.js';
+import { ChatInputCommandInteraction, Message, EmbedBuilder } from 'discord.js';
 
 export class Coinflip extends ChatCommand {
     constructor(client: Client) {
@@ -13,10 +13,10 @@ export class Coinflip extends ChatCommand {
         });
     }
 
-    async execute(interaction: Message | CommandInteraction): Promise<void> {
+    async execute(interaction: Message | ChatInputCommandInteraction): Promise<void> {
         if (Math.random() < 0.5) {
-            const embed = new MessageEmbed()
-                .setColor('BLUE')
+            const embed = new EmbedBuilder()
+                .setColor('Blue')
                 .setImage('https://i.imgur.com/3YvGn4c.png')
                 .setFooter({
                     text: `Requested by ${this.getUser(interaction).tag}`,
@@ -25,8 +25,8 @@ export class Coinflip extends ChatCommand {
 
             await interaction.reply({ content: `Coin flipped: It's heads!`, embeds: [embed] });
         } else {
-            const embed = new MessageEmbed()
-                .setColor('BLUE')
+            const embed = new EmbedBuilder()
+                .setColor('Blue')
                 .setImage('https://i.imgur.com/pzSSgHA.png')
                 .setFooter({
                     text: `Requested by ${this.getUser(interaction).tag}`,

@@ -1,6 +1,6 @@
 import { ChatCommand } from '../ChatCommand';
 import Client from '#src/Client';
-import { CommandInteraction, Message, MessageEmbed } from 'discord.js';
+import { ChatInputCommandInteraction, Message, EmbedBuilder } from 'discord.js';
 import axios from 'axios';
 import { logger } from '#util/logger';
 
@@ -16,11 +16,11 @@ export class Goose extends ChatCommand {
         });
     }
 
-    async execute(interaction: Message | CommandInteraction): Promise<void> {
+    async execute(interaction: Message | ChatInputCommandInteraction): Promise<void> {
         try {
             const randomGoose = 'https://source.unsplash.com/random?goose,geese';
             const imageUrl = await axios.get(randomGoose).then((r) => r.request.res.responseUrl);
-            const embed = new MessageEmbed().setColor('GREEN').setTitle('HONK HONK').setImage(imageUrl);
+            const embed = new EmbedBuilder().setColor('Green').setTitle('HONK HONK').setImage(imageUrl);
 
             await interaction.reply({ embeds: [embed] });
         } catch (e) {

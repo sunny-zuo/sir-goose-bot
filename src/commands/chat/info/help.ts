@@ -1,4 +1,11 @@
-import { ApplicationCommandOption, CommandInteraction, CommandInteractionOptionResolver, Message, MessageEmbed } from 'discord.js';
+import {
+    ApplicationCommandOption,
+    ChatInputCommandInteraction,
+    CommandInteractionOptionResolver,
+    Message,
+    EmbedBuilder,
+    ApplicationCommandOptionType,
+} from 'discord.js';
 import Client from '#src/Client';
 import { GuildConfigCache } from '#util/guildConfigCache';
 import { Category } from '#types/Command';
@@ -9,7 +16,7 @@ export class Help extends ChatCommand {
         {
             name: 'command',
             description: 'The name of the specific command you want to learn more about',
-            type: 'STRING',
+            type: ApplicationCommandOptionType.String,
             required: false,
         },
     ];
@@ -26,7 +33,7 @@ export class Help extends ChatCommand {
     }
 
     async execute(
-        interaction: Message | CommandInteraction,
+        interaction: Message | ChatInputCommandInteraction,
         args?: Omit<CommandInteractionOptionResolver, 'getMessage' | 'getFocused'>
     ): Promise<void> {
         const client = this.client;
@@ -40,9 +47,9 @@ export class Help extends ChatCommand {
                 return;
             }
 
-            const embed = new MessageEmbed()
+            const embed = new EmbedBuilder()
                 .setTitle(`Command: \`${`${prefix}${commandQuery.toLowerCase()}${Help.listArguments(command)}`.trim()}\``)
-                .setColor('AQUA')
+                .setColor('Aqua')
                 .addFields(
                     { name: 'Description', value: command.description },
                     {
@@ -68,13 +75,13 @@ export class Help extends ChatCommand {
         } else {
             const categories: Category[] = [...new Set(client.chatCommands.map((command) => command.category))].sort();
 
-            const embed = new MessageEmbed()
+            const embed = new EmbedBuilder()
                 .setTitle('Command Help')
                 .setDescription(
                     `In this server, the bot responds to the prefix \`${prefix}\`. You can also use slash commands!
                     For more info on a specific command, type \`${prefix}help (command)\``
                 )
-                .setColor('AQUA')
+                .setColor('Aqua')
                 .setTimestamp();
 
             for (const category of categories) {
@@ -106,10 +113,16 @@ export class Help extends ChatCommand {
         for (const option of command.options) {
             let optionString = '';
 
-            if (option.type === 'SUB_COMMAND' || option.type === 'SUB_COMMAND_GROUP') {
+            if (option.type === ApplicationCommandOptionType.Subcommand || option.type === ApplicationCommandOptionType.SubcommandGroup) {
                 // TODO: refactor help command to display subcommands properly
                 return '';
-            } else if ((option.type === 'STRING' || option.type === 'INTEGER' || option.type === 'NUMBER') && option.choices) {
+            } else if (
+                (option.type === ApplicationCommandOptionType.String ||
+                    option.type === ApplicationCommandOptionType.Integer ||
+                    option.type === ApplicationCommandOptionType.Number) &&
+                !option.autocomplete &&
+                option.choices
+            ) {
                 optionString = option.choices.map((choice) => choice.value).join('|');
             } else {
                 optionString = option.name;

@@ -2,17 +2,19 @@ import { ChatCommand } from '../ChatCommand';
 import Client from '#src/Client';
 import {
     ApplicationCommandOption,
-    CommandInteraction,
+    ChatInputCommandInteraction,
     Message,
-    MessageEmbed,
-    Permissions,
+    EmbedBuilder,
+    PermissionsBitField,
     Snowflake,
     CommandInteractionOptionResolver,
     Channel,
+    ChannelType,
+    ApplicationCommandOptionType,
+    inlineCode,
 } from 'discord.js';
 import { GuildConfigCache } from '#util/guildConfigCache';
 import { Modlog } from '#util/modlog';
-import { inlineCode } from '@discordjs/builders';
 import { attemptPin } from '#util/pin';
 import { sendEphemeralReply } from '#util/message';
 import { logger } from '#util/logger';
@@ -22,7 +24,7 @@ export class Pin extends ChatCommand {
         {
             name: 'message_id',
             description: 'The id of the message to pin.',
-            type: 'STRING',
+            type: ApplicationCommandOptionType.String,
         },
     ];
     constructor(client: Client) {
@@ -32,14 +34,14 @@ export class Pin extends ChatCommand {
             category: 'Utility',
             options: Pin.options,
             guildOnly: true,
-            clientPermissions: [Permissions.FLAGS.MANAGE_MESSAGES],
+            clientPermissions: [PermissionsBitField.Flags.ManageMessages],
             cooldownSeconds: 60,
             cooldownMaxUses: 2,
         });
     }
 
     async execute(
-        interaction: Message | CommandInteraction,
+        interaction: Message | ChatInputCommandInteraction,
         args?: Omit<CommandInteractionOptionResolver, 'getMessage' | 'getFocused'>
     ): Promise<void> {
         const config = await GuildConfigCache.fetchConfig(interaction.guild!.id);
@@ -54,11 +56,11 @@ export class Pin extends ChatCommand {
             return;
         }
 
-        let channel: Channel | undefined;
+        let channel: Channel | undefined | null;
         let pinMessageId: Snowflake | undefined | null;
 
         if (this.isMessage(interaction)) {
-            pinMessageId = (args?.getString('message_id') as Snowflake) || interaction.reference?.messageId;
+            pinMessageId = (args?.getString('message_id') as Snowflake) ?? interaction.reference?.messageId;
             if (interaction.channel.partial) {
                 channel = await interaction.channel.fetch().catch(() => undefined);
             } else {
@@ -68,12 +70,12 @@ export class Pin extends ChatCommand {
             pinMessageId = args?.getString('message_id') as Snowflake;
             const fetchedChannel =
                 interaction.channel ?? (await interaction.guild?.channels.fetch(interaction?.channelId).catch(() => null));
-            if (fetchedChannel?.type === 'GUILD_TEXT') {
+            if (fetchedChannel?.type !== ChannelType.GuildText) {
                 channel = fetchedChannel;
             }
         }
 
-        if (!channel || !channel.isText()) return;
+        if (!channel || channel.type !== ChannelType.GuildText) return;
         if (!pinMessageId) {
             await this.sendErrorEmbed(
                 interaction,
@@ -107,7 +109,7 @@ export class Pin extends ChatCommand {
         if (pinResult.success) {
             if (!this.isMessage(interaction)) {
                 await interaction.reply({
-                    embeds: [new MessageEmbed().setTitle('Message Successfully Pinned').setColor('GREEN')],
+                    embeds: [new EmbedBuilder().setTitle('Message Successfully Pinned').setColor('Green')],
                     ephemeral: true,
                 });
 
@@ -116,7 +118,7 @@ export class Pin extends ChatCommand {
                     interaction.guild,
                     this.getUser(interaction),
                     `${interaction.member} pinned [a message](${pinMessage.url}) using the pin command in ${pinMessage.channel}.`,
-                    'BLUE'
+                    'Blue'
                 );
             }
         } else {
@@ -140,7 +142,7 @@ export class Pin extends ChatCommand {
                     errorDescription = 'We ran into an unknown error trying to pin this message.';
             }
 
-            const embed = new MessageEmbed().setDescription(errorDescription).setColor('RED');
+            const embed = new EmbedBuilder().setDescription(errorDescription).setColor('Red');
 
             await sendEphemeralReply(interaction, { embeds: [embed] });
         }

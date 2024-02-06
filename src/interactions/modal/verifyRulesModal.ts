@@ -1,8 +1,7 @@
 import Client from '#src/Client';
-import { GuildMember, MessageEmbed, ModalSubmitInteraction, Permissions } from 'discord.js';
+import { GuildMember, EmbedBuilder, ModalSubmitInteraction, codeBlock, inlineCode, PermissionsBitField } from 'discord.js';
 import { ModalSubmitInteractionHandler } from './modalInteractionHandler';
 import { RoleData, VerificationImportV2, VerificationRule } from '#types/Verification';
-import { codeBlock, inlineCode } from '@discordjs/builders';
 import { serializeVerificationRules } from '#util/verification';
 import { GuildConfigCache } from '#util/guildConfigCache';
 
@@ -17,9 +16,9 @@ export class VerifyRulesModal implements ModalSubmitInteractionHandler {
     async execute(interaction: ModalSubmitInteraction): Promise<void> {
         // TODO: refactor into more generic permission checker
         const member = interaction.member as GuildMember;
-        if (!member.permissions.has(Permissions.FLAGS.MANAGE_GUILD)) {
+        if (!member.permissions.has(PermissionsBitField.Flags.ManageGuild)) {
             await interaction.reply({
-                embeds: [new MessageEmbed().setDescription('You must have the Manage Guild permission to use this modal.').setColor('RED')],
+                embeds: [new EmbedBuilder().setDescription('You must have the Manage Guild permission to use this modal.').setColor('Red')],
             });
             return;
         }
@@ -28,12 +27,12 @@ export class VerifyRulesModal implements ModalSubmitInteractionHandler {
 
         let importedJSON: VerificationImportV2;
 
-        const importErrorEmbed = new MessageEmbed()
+        const importErrorEmbed = new EmbedBuilder()
             .setTitle('Import Error')
             .setDescription(
                 'You provided an invalid rule import. Please make sure you copy and pasted correctly from the [rule creation tool.](https://sebot.sunnyzuo.com/).'
             )
-            .setColor('RED');
+            .setColor('Red');
 
         try {
             importedJSON = JSON.parse(ruleString);
@@ -75,20 +74,20 @@ export class VerifyRulesModal implements ModalSubmitInteractionHandler {
                     const role = interaction.guild?.roles.cache.find((role) => role.name === roleName);
 
                     if (!role) {
-                        const errorEmbed = new MessageEmbed()
+                        const errorEmbed = new EmbedBuilder()
                             .setTitle('Invalid Role')
                             .setDescription(`The role "${roleName}" could not be found on this server.`)
-                            .setColor('RED');
+                            .setColor('Red');
 
                         await interaction.reply({ embeds: [errorEmbed] });
                         return;
                     } else if (!role.editable) {
-                        const errorEmbed = new MessageEmbed()
+                        const errorEmbed = new EmbedBuilder()
                             .setTitle('Unable to Assign Role')
                             .setDescription(
                                 `I do not have permission to assign the "${roleName}" role. Make sure I have the \`Manage Roles\` permission and that my role is placed above all roles that you want to assign.`
                             )
-                            .setColor('RED');
+                            .setColor('Red');
 
                         await interaction.reply({ embeds: [errorEmbed] });
                         return;
@@ -118,7 +117,7 @@ export class VerifyRulesModal implements ModalSubmitInteractionHandler {
 
         await config.save();
 
-        const embed = new MessageEmbed().setColor('GREEN').setTitle('Verification Rules Updated Successfully')
+        const embed = new EmbedBuilder().setColor('Green').setTitle('Verification Rules Updated Successfully')
             .setDescription(`Verification is ${
             config.enableVerification ? 'enabled' : `disabled. Enable it using ${inlineCode('/config')}`
         }. [Create a ruleset.](https://sebot.sunnyzuo.com/)

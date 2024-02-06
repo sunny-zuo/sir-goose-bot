@@ -1,14 +1,15 @@
 import {
-    CommandInteraction,
+    ComponentType,
     Guild,
     Message,
-    MessageActionRow,
+    ActionRowBuilder,
     MessageComponentInteraction,
-    MessageEmbed,
-    MessageSelectMenu,
+    EmbedBuilder,
+    StringSelectMenuBuilder,
+    inlineCode,
+    ChatInputCommandInteraction,
 } from 'discord.js';
 import Client from '#src/Client';
-import { inlineCode } from '@discordjs/builders';
 import { PrefixView } from './prefixView';
 import { PinsView } from './pinsView';
 import { ModlogView } from './modlogView';
@@ -19,8 +20,8 @@ import { GuildConfigCache } from '#util/guildConfigCache';
 import { logger } from '#util/logger';
 
 export class OverviewView {
-    static readonly optionSelectMenu = new MessageActionRow().addComponents(
-        new MessageSelectMenu().setCustomId('configSelect').setOptions([
+    static readonly optionSelectMenu = new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(
+        new StringSelectMenuBuilder().setCustomId('configSelect').setOptions([
             {
                 label: 'View Options',
                 value: 'configView',
@@ -61,21 +62,21 @@ export class OverviewView {
             components: [this.optionSelectMenu],
         });
 
-        await this.listenForViewSelect(interaction.message as Message, filter);
+        await this.listenForViewSelect(interaction.message, filter);
     }
 
-    static async initialRender(client: Client, interaction: CommandInteraction | Message): Promise<void> {
-        const configMenu = (await interaction.reply({
+    static async initialRender(client: Client, interaction: ChatInputCommandInteraction | Message): Promise<void> {
+        const configMenu = await interaction.reply({
             embeds: [await this.generateConfigViewEmbed(interaction.guild!)],
             components: [this.optionSelectMenu],
             fetchReply: true,
-        })) as Message;
+        });
 
         const filter = (i: MessageComponentInteraction) => {
             if (i.user.id === getUser(interaction).id) return true;
             else {
                 i.reply({
-                    embeds: [new MessageEmbed().setDescription("This dropdown isn't for you!").setColor('RED')],
+                    embeds: [new EmbedBuilder().setDescription("This dropdown isn't for you!").setColor('Red')],
                     ephemeral: true,
                 }).catch((e) => logger.error(e, e.message));
                 return false;
@@ -85,16 +86,16 @@ export class OverviewView {
         await this.listenForViewSelect(configMenu, filter);
     }
 
-    static async generateConfigViewEmbed(guild: Guild): Promise<MessageEmbed> {
+    static async generateConfigViewEmbed(guild: Guild): Promise<EmbedBuilder> {
         const { prefix, enableModlog, modlogChannelId, enablePins, enableVerification } = await GuildConfigCache.fetchOrCreate(guild.id);
 
         const maxInfoLabelLength = 15;
         const enabledString = `${Emojis.GreenCheck} Enabled`;
         const disabledString = `${Emojis.RedCross} Disabled`;
 
-        const embed = new MessageEmbed()
+        const embed = new EmbedBuilder()
             .setTitle(`Bot Config for ${guild.name}`)
-            .setColor('BLUE')
+            .setColor('Blue')
             .setDescription(
                 `${this.formatLabel('Prefix', maxInfoLabelLength)} ${prefix}
                 ${this.formatLabel('Verification', maxInfoLabelLength)} ${enableVerification ? enabledString : disabledString}
@@ -110,9 +111,9 @@ export class OverviewView {
 
     static async listenForViewSelect(message: Message, filter: (i: MessageComponentInteraction) => boolean): Promise<void> {
         await message
-            .awaitMessageComponent({ filter, componentType: 'SELECT_MENU', time: 1000 * 60 * 5 })
+            .awaitMessageComponent({ filter, componentType: ComponentType.StringSelect, time: 1000 * 60 * 5 })
             .then(async (i) => {
-                if (!i.isSelectMenu()) return;
+                if (!i.isStringSelectMenu()) return;
 
                 switch (i.values[0]) {
                     case 'configVerification':

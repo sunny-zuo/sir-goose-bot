@@ -1,7 +1,6 @@
 import { ChatCommand } from '../ChatCommand';
 import Client from '#src/Client';
-import { Message, CommandInteraction, MessageEmbed, Snowflake, Role } from 'discord.js';
-import { inlineCode } from '@discordjs/builders';
+import { Message, ChatInputCommandInteraction, EmbedBuilder, Snowflake, Role, inlineCode } from 'discord.js';
 import { GuildConfigCache } from '#util/guildConfigCache';
 import UserModel from '#models/user.model';
 
@@ -17,16 +16,16 @@ export class VerifyStats extends ChatCommand {
         });
     }
 
-    async execute(interaction: Message | CommandInteraction): Promise<void> {
+    async execute(interaction: Message | ChatInputCommandInteraction): Promise<void> {
         const { guild } = interaction;
         if (!guild) return;
         const config = await GuildConfigCache.fetchConfig(guild.id);
 
         if (!config.enableVerification) {
-            const embed = new MessageEmbed()
+            const embed = new EmbedBuilder()
                 .setTitle('Verification Not Enabled')
                 .setDescription("Verification is not enabled on this server, so I can't display any stats.")
-                .setColor('YELLOW')
+                .setColor('Yellow')
                 .setTimestamp();
             await interaction.reply({ embeds: [embed] });
             return;
@@ -39,9 +38,9 @@ export class VerifyStats extends ChatCommand {
             }
         }
 
-        const roles = (await Promise.all([...new Set(roleIds)].map((id) => guild.roles.fetch(id))))
-            .filter((role) => role !== null)
-            .sort((a, b) => b!.rawPosition - a!.rawPosition) as Role[];
+        const roles = (
+            (await Promise.all([...new Set(roleIds)].map((id) => guild.roles.fetch(id)))).filter((role) => role !== null) as Role[]
+        ).sort((a, b) => b.rawPosition - a.rawPosition);
 
         const maxInfoLabelLength = 16;
         const maxRoleNameLength = Math.max(
@@ -56,9 +55,9 @@ export class VerifyStats extends ChatCommand {
         const userIds = userMembers.map((member) => member.id);
         const verifiedUserCount = await UserModel.countDocuments({ verified: true, discordId: { $in: userIds } });
 
-        const embed = new MessageEmbed()
+        const embed = new EmbedBuilder()
             .setTitle('Server Verification Stats')
-            .setColor('BLUE')
+            .setColor('Blue')
             .setDescription(
                 `
                 ${this.formatLabel('Total Members', maxInfoLabelLength)} ${allMembers.size} (${userMembers.size} users, ${
@@ -76,7 +75,7 @@ export class VerifyStats extends ChatCommand {
             })
             .setTimestamp();
 
-        const guildIconURL = guild.iconURL({ dynamic: true });
+        const guildIconURL = guild.iconURL();
         guildIconURL ? embed.setThumbnail(guildIconURL) : null;
 
         await interaction.reply({ embeds: [embed] });

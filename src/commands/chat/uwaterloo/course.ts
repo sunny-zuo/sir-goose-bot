@@ -1,4 +1,11 @@
-import { ApplicationCommandOption, CommandInteraction, MessageEmbed, Message, CommandInteractionOptionResolver } from 'discord.js';
+import {
+    ApplicationCommandOption,
+    ChatInputCommandInteraction,
+    EmbedBuilder,
+    Message,
+    CommandInteractionOptionResolver,
+    ApplicationCommandOptionType,
+} from 'discord.js';
 import Client from '#src/Client';
 import { ChatCommand } from '../ChatCommand';
 import { request } from 'graphql-request';
@@ -9,7 +16,7 @@ export class Course extends ChatCommand {
         {
             name: 'course',
             description: 'Enter a course code to learn more about, such as MATH 135',
-            type: 'STRING',
+            type: ApplicationCommandOptionType.String,
             required: true,
         },
     ];
@@ -28,7 +35,7 @@ export class Course extends ChatCommand {
     }
 
     async execute(
-        interaction: Message | CommandInteraction,
+        interaction: Message | ChatInputCommandInteraction,
         args: Omit<CommandInteractionOptionResolver, 'getMessage' | 'getFocused'>
     ): Promise<void> {
         const courseMatcher = /([a-zA-Z]{2,}[ ]?\d+[a-zA-Z]?)/g;
@@ -46,8 +53,8 @@ export class Course extends ChatCommand {
         const response = await request(uwflowEndpoint, uwflowQuery, variables);
 
         if (response.course.length < 1) {
-            const embed = new MessageEmbed()
-                .setColor('RED')
+            const embed = new EmbedBuilder()
+                .setColor('Red')
                 .setTitle('Error: No Course Found')
                 .setDescription(`No course with the name '${courseName}' was found.`)
                 .setTimestamp();
@@ -77,8 +84,8 @@ export class Course extends ChatCommand {
         const prereqs = trimString(course.prereqs?.replace(courseMatcher, replacer), 1024) ?? 'None';
         const antireqs = trimString(course.antireqs?.replace(courseMatcher, replacer), 1024) ?? 'None';
 
-        const embed = new MessageEmbed()
-            .setColor('AQUA')
+        const embed = new EmbedBuilder()
+            .setColor('Aqua')
             .setTitle(`${course.code.toUpperCase()}: ${course.name}`)
             .setDescription(`${course.description}\n**[View course on UWFlow](https://uwflow.com/course/${code})**`)
             .addFields(

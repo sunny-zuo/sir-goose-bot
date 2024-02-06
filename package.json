@@ -43,7 +43,6 @@
         "typescript": "~5.3.3"
     },
     "dependencies": {
-        "@discordjs/builders": "~0.13.0",
         "axios": "~1.6.3",
         "crypto-js": "~4.2.0",
         "discord.js": "~14.14.1",

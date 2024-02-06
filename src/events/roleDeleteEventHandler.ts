@@ -1,10 +1,11 @@
 import { EventHandler } from './eventHandler';
 import Client from '#src/Client';
-import { Role } from 'discord.js';
+import { ActionRowBuilder, ButtonBuilder, ChannelType, ComponentType, Role } from 'discord.js';
 import { Modlog } from '#util/modlog';
 import { GuildConfigCache } from '#util/guildConfigCache';
 import { logger } from '#util/logger';
-import ButtonRoleModel from '../models/buttonRole.model';
+import ButtonRoleModel from '#models/buttonRole.model';
+import { convertButtonActionRowToBuilder } from '#util/messageComponents';
 
 export class RoleDeleteEventHandler implements EventHandler {
     readonly eventName = 'roleDelete';
@@ -43,7 +44,7 @@ export class RoleDeleteEventHandler implements EventHandler {
                             guild,
                             'Verification Role Deleted',
                             `The role \`${deletedRole.name}\` was setup to be one of the roles assigned in the server's verification rules, but is now deleted. Please update the verification rules!`,
-                            'RED'
+                            'Red'
                         );
                         return;
                     }
@@ -63,25 +64,25 @@ export class RoleDeleteEventHandler implements EventHandler {
             await prompt.save();
 
             const promptChannel = await guild.channels.fetch(prompt.channelId).catch(() => null);
-            if (!promptChannel || !promptChannel.isText()) continue;
+            if (!promptChannel || promptChannel.type !== ChannelType.GuildText) continue;
 
             const promptMessage = await promptChannel.messages.fetch(prompt.messageId);
             if (!promptMessage) continue;
 
-            const components = promptMessage.components;
-
-            const row = components.find((row) =>
-                row.components.some((component) => component.type === 'BUTTON' && component.customId?.includes(deletedRole.id))
+            const rowIndex = promptMessage.components.findIndex((row) =>
+                row.components.some((component) => component.type === ComponentType.Button && component.customId?.includes(deletedRole.id))
             );
-            if (!row) continue;
+            if (rowIndex === -1) continue;
 
-            const updateIndex = row.components.findIndex(
-                (component) => component.type === 'BUTTON' && component.customId?.includes(deletedRole.id)
+            const colIndex = promptMessage.components[rowIndex].components.findIndex(
+                (component) => component.type === ComponentType.Button && component.customId?.includes(deletedRole.id)
             );
-            if (updateIndex === -1) continue;
+            if (colIndex === -1) continue;
 
-            row.spliceComponents(updateIndex, 1);
-            const cleanComponents = components.filter((component) => component.components.length !== 0);
+            const newComponents: ActionRowBuilder<ButtonBuilder>[] = promptMessage.components.map(convertButtonActionRowToBuilder);
+            newComponents[rowIndex].components.splice(colIndex, 1);
+
+            const cleanComponents = newComponents.filter((component) => component.components.length !== 0);
             await promptMessage.edit({ components: cleanComponents });
         }
     }

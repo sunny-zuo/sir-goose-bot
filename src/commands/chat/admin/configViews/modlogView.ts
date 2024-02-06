@@ -1,24 +1,25 @@
 import {
+    ActionRowBuilder,
+    ButtonBuilder,
+    ButtonStyle,
+    ComponentType,
+    EmbedBuilder,
     Guild,
     GuildBasedChannel,
-    Message,
-    MessageActionRow,
-    MessageButton,
     MessageComponentInteraction,
-    MessageEmbed,
-    Permissions,
+    PermissionsBitField,
     Snowflake,
 } from 'discord.js';
 import { GuildConfigCache } from '#util/guildConfigCache';
 import { OverviewView } from './overviewView';
-import { bold } from '@discordjs/builders';
+import { bold } from 'discord.js';
 import { Emojis } from '#util/constants';
 
 export class ModlogView {
     static async render(interaction: MessageComponentInteraction, filter: (i: MessageComponentInteraction) => boolean): Promise<void> {
         const config = await GuildConfigCache.fetchOrCreate(interaction.guildId!);
 
-        const embed = new MessageEmbed()
+        const embed = new EmbedBuilder()
             .setTitle('Modlog Configuration')
             .setDescription(
                 `${config.enableModlog ? Emojis.GreenCheck : Emojis.RedCross} Moderation logging is currently ${
@@ -27,21 +28,29 @@ export class ModlogView {
                 
                 Logs will be sent to the channel: ${config.modlogChannelId ? `<#${config.modlogChannelId}>` : '<no channel set>'}`
             )
-            .setColor('BLUE')
+            .setColor('Blue')
             .setTimestamp();
 
-        const buttons = new MessageActionRow().addComponents(
-            new MessageButton().setCustomId('configModlogEnable').setStyle('SUCCESS').setLabel('Enable').setDisabled(config.enableModlog),
-            new MessageButton().setCustomId('configModlogDisable').setStyle('DANGER').setLabel('Disable').setDisabled(!config.enableModlog),
-            new MessageButton().setCustomId('configModlogChangeChannel').setStyle('PRIMARY').setLabel('Set Modlog Channel'),
-            new MessageButton().setCustomId('configModlogBack').setStyle('SECONDARY').setLabel('Back')
+        const buttons = new ActionRowBuilder<ButtonBuilder>().addComponents(
+            new ButtonBuilder()
+                .setCustomId('configModlogEnable')
+                .setStyle(ButtonStyle.Success)
+                .setLabel('Enable')
+                .setDisabled(config.enableModlog),
+            new ButtonBuilder()
+                .setCustomId('configModlogDisable')
+                .setStyle(ButtonStyle.Danger)
+                .setLabel('Disable')
+                .setDisabled(!config.enableModlog),
+            new ButtonBuilder().setCustomId('configModlogChangeChannel').setStyle(ButtonStyle.Primary).setLabel('Set Modlog Channel'),
+            new ButtonBuilder().setCustomId('configModlogBack').setStyle(ButtonStyle.Secondary).setLabel('Back')
         );
 
         await interaction.update({ embeds: [embed], components: [buttons] });
 
-        const message = interaction.message as Message;
+        const message = interaction.message;
         await message
-            .awaitMessageComponent({ filter, componentType: 'BUTTON', time: 1000 * 60 * 5 })
+            .awaitMessageComponent({ filter, componentType: ComponentType.Button, time: 1000 * 60 * 5 })
             .then(async (i) => {
                 if (!i.isButton()) return;
 
@@ -77,23 +86,26 @@ export class ModlogView {
         interaction: MessageComponentInteraction,
         filter: (i: MessageComponentInteraction) => boolean
     ): Promise<void> {
-        const embed = new MessageEmbed().setDescription('What would you like the modlog channel to be?').setColor('ORANGE');
+        const embed = new EmbedBuilder().setDescription('What would you like the modlog channel to be?').setColor('Orange');
 
-        const button = new MessageActionRow().addComponents(
-            new MessageButton().setCustomId('configModlogChangeChannelCancel').setStyle('DANGER').setLabel('Cancel Modlog Channel Change')
+        const button = new ActionRowBuilder<ButtonBuilder>().addComponents(
+            new ButtonBuilder()
+                .setCustomId('configModlogChangeChannelCancel')
+                .setStyle(ButtonStyle.Danger)
+                .setLabel('Cancel Modlog Channel Change')
         );
 
         await interaction.update({ embeds: [embed], components: [button] });
 
-        const message = interaction.message as Message;
+        const message = interaction.message;
 
-        const buttonCollector = await message.createMessageComponentCollector({
+        const buttonCollector = message.createMessageComponentCollector({
             filter,
-            componentType: 'BUTTON',
+            componentType: ComponentType.Button,
             time: 1000 * 60,
             max: 1,
         });
-        const messageCollector = await message.channel.createMessageCollector({
+        const messageCollector = message.channel.createMessageCollector({
             filter: (m) => m.author.id === interaction.user.id,
             time: 1000 * 60,
         });
@@ -112,31 +124,31 @@ export class ModlogView {
             const channel = await this.parseChannel(m.guild!, m.content);
 
             if (!channel || !channel.viewable || !interaction.guild?.members.me) {
-                const embed = new MessageEmbed()
+                const embed = new EmbedBuilder()
                     .setDescription(
                         'The channel provided could not be found. Please make sure that the channel exists and that I have access to the channel.'
                     )
-                    .setColor('RED');
+                    .setColor('Red');
 
                 await m.reply({ embeds: [embed] });
             } else {
                 if (
                     channel
                         .permissionsFor(interaction.guild.members.me!)
-                        .has([Permissions.FLAGS.SEND_MESSAGES, Permissions.FLAGS.EMBED_LINKS])
+                        .has([PermissionsBitField.Flags.SendMessages, PermissionsBitField.Flags.EmbedLinks])
                 ) {
                     const config = await GuildConfigCache.fetchOrCreate(m.guildId!);
                     config.modlogChannelId = channel.id;
                     await config.save();
 
-                    const embed = new MessageEmbed()
+                    const embed = new EmbedBuilder()
                         .setDescription(`The modlog channel has been successfully updated to ${channel}.`)
-                        .setColor('GREEN');
+                        .setColor('Green');
 
-                    const button = new MessageActionRow().addComponents(
-                        new MessageButton()
+                    const button = new ActionRowBuilder<ButtonBuilder>().addComponents(
+                        new ButtonBuilder()
                             .setCustomId('configModlogChangeSuccessReturn')
-                            .setStyle('SUCCESS')
+                            .setStyle(ButtonStyle.Success)
                             .setLabel('View Modlog Config')
                     );
 
@@ -147,7 +159,7 @@ export class ModlogView {
                     messageCollector.stop('completed');
 
                     await successMessage
-                        .awaitMessageComponent({ filter, componentType: 'BUTTON', time: 1000 * 60 * 1 })
+                        .awaitMessageComponent({ filter, componentType: ComponentType.Button, time: 1000 * 60 * 1 })
                         .then(async (i) => {
                             if (!i.isButton()) return;
 
@@ -165,11 +177,11 @@ export class ModlogView {
                             }
                         });
                 } else {
-                    const embed = new MessageEmbed()
+                    const embed = new EmbedBuilder()
                         .setDescription(
                             'I do not have permission to send messages and embed links in the modlog channel you provided. Please update my permissions and try again.'
                         )
-                        .setColor('RED');
+                        .setColor('Red');
 
                     await m.reply({ embeds: [embed] });
                 }
@@ -182,10 +194,10 @@ export class ModlogView {
                 case 'cancelled':
                     break;
                 default: {
-                    const embed = new MessageEmbed()
+                    const embed = new EmbedBuilder()
                         .setTitle('Modlog Channel Change Cancelled')
                         .setDescription('No channel was provided within the time limit, so no changes were made.')
-                        .setColor('RED')
+                        .setColor('Red')
                         .setTimestamp();
                     await message.edit({ embeds: [embed], components: [] });
                 }

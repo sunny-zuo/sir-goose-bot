@@ -1,4 +1,14 @@
-import { ColorResolvable, Guild, MessageEmbed, Permissions, TextChannel, User, MessageOptions, Message } from 'discord.js';
+import {
+    ColorResolvable,
+    Guild,
+    EmbedBuilder,
+    PermissionsBitField,
+    TextChannel,
+    User,
+    MessageCreateOptions,
+    Message,
+    ChannelType,
+} from 'discord.js';
 import Client from '#src/Client';
 import { GuildConfigCache } from './guildConfigCache';
 import { logger } from '#util/logger';
@@ -9,13 +19,16 @@ export class Modlog {
         guild: Guild | null,
         user: User,
         message: string,
-        color: ColorResolvable = 'BLUE'
+        color: ColorResolvable = 'Blue'
     ): Promise<Message | void> {
         if (!guild || !guild.members.me) return;
 
         const channel = await this.fetchModlogChannel(guild);
 
-        if (channel && channel.permissionsFor(guild.members.me).has([Permissions.FLAGS.SEND_MESSAGES, Permissions.FLAGS.EMBED_LINKS])) {
+        if (
+            channel &&
+            channel.permissionsFor(guild.members.me).has([PermissionsBitField.Flags.SendMessages, PermissionsBitField.Flags.EmbedLinks])
+        ) {
             const embed = this.getUserEmbed(user, message, color);
             const sentMessage = await channel.send({ embeds: [embed] }).catch((e) => logger.error(e, e.message));
             return sentMessage;
@@ -27,20 +40,23 @@ export class Modlog {
         guild: Guild | null,
         title: string,
         message: string,
-        color: ColorResolvable = 'BLUE'
+        color: ColorResolvable = 'Blue'
     ): Promise<Message | void> {
         if (!guild || !guild.members.me) return;
 
         const channel = await this.fetchModlogChannel(guild);
 
-        if (channel && channel.permissionsFor(guild.members.me).has([Permissions.FLAGS.SEND_MESSAGES, Permissions.FLAGS.EMBED_LINKS])) {
-            const embed = new MessageEmbed().setTitle(title).setColor(color).setDescription(message).setTimestamp();
+        if (
+            channel &&
+            channel.permissionsFor(guild.members.me).has([PermissionsBitField.Flags.SendMessages, PermissionsBitField.Flags.EmbedLinks])
+        ) {
+            const embed = new EmbedBuilder().setTitle(title).setColor(color).setDescription(message).setTimestamp();
             const sentMessage = await channel.send({ embeds: [embed] }).catch((e) => logger.error(e, e.message));
             return sentMessage;
         }
     }
 
-    static async logMessage(client: Client, guild: Guild | null, message: MessageOptions): Promise<Message | void> {
+    static async logMessage(client: Client, guild: Guild | null, message: MessageCreateOptions): Promise<Message | void> {
         if (!guild || !guild.members.me) return;
 
         const channel = await this.fetchModlogChannel(guild);
@@ -51,8 +67,8 @@ export class Modlog {
         }
     }
 
-    static getUserEmbed(user: User, message: string, color: ColorResolvable = 'BLUE'): MessageEmbed {
-        const embed = new MessageEmbed()
+    static getUserEmbed(user: User, message: string, color: ColorResolvable = 'Blue'): EmbedBuilder {
+        const embed = new EmbedBuilder()
             .setAuthor({ name: user.tag, iconURL: user.displayAvatarURL() })
             .setColor(color)
             .setDescription(message)
@@ -67,7 +83,7 @@ export class Modlog {
         if (config.enableModlog && config.modlogChannelId) {
             try {
                 const channel = await guild.channels.fetch(config.modlogChannelId).catch(() => null);
-                if (channel && channel.type === 'GUILD_TEXT') {
+                if (channel && channel.type === ChannelType.GuildText) {
                     return channel;
                 } else {
                     return null;

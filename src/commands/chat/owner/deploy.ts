@@ -2,6 +2,8 @@ import {
     ApplicationCommandData,
     ApplicationCommandOption,
     ApplicationCommandOptionData,
+    ApplicationCommandOptionType,
+    ApplicationCommandType,
     CommandInteraction,
     CommandInteractionOptionResolver,
     Message,
@@ -15,12 +17,12 @@ export class Deploy extends ChatCommand {
         {
             name: 'guild',
             description: 'Deploy all commands in the current guild',
-            type: 'SUB_COMMAND',
+            type: ApplicationCommandOptionType.Subcommand,
         },
         {
             name: 'global',
             description: 'Deploy all commands globally',
-            type: 'SUB_COMMAND',
+            type: ApplicationCommandOptionType.Subcommand,
         },
     ];
     constructor(client: Client) {
@@ -53,7 +55,7 @@ export class Deploy extends ChatCommand {
                         and it's more convenient to use the former in the rest of the code at the moment
                     */
                     options: command.options as ApplicationCommandOptionData[],
-                    type: 'CHAT_INPUT',
+                    type: ApplicationCommandType.ChatInput,
                 });
             }
         }
@@ -61,7 +63,7 @@ export class Deploy extends ChatCommand {
         for (const [, command] of client.contextMenuCommands) {
             data.push({
                 name: command.name,
-                type: 'MESSAGE',
+                type: ApplicationCommandType.Message,
             });
         }
 

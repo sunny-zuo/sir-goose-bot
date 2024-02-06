@@ -1,6 +1,6 @@
 import { ChatCommand } from '../ChatCommand';
 import Client from '#src/Client';
-import { CommandInteraction, Message, MessageEmbed, InteractionReplyOptions, ReplyMessageOptions } from 'discord.js';
+import { ChatInputCommandInteraction, Message, EmbedBuilder, InteractionReplyOptions, MessageReplyOptions } from 'discord.js';
 import axios from 'axios';
 import { logger } from '#util/logger';
 
@@ -15,13 +15,13 @@ export class Honk extends ChatCommand {
         });
     }
 
-    async execute(interaction: Message | CommandInteraction): Promise<void> {
+    async execute(interaction: Message | ChatInputCommandInteraction): Promise<void> {
         if (Math.random() < 0.4) {
-            let response: InteractionReplyOptions & ReplyMessageOptions = { content: 'HONK HONK' };
+            let response: InteractionReplyOptions & MessageReplyOptions = { content: 'HONK HONK' };
             try {
                 const randomGoose = 'https://source.unsplash.com/random?goose,geese';
                 const imageUrl = await axios.get(randomGoose).then((r) => r.request.res.responseUrl);
-                response = { embeds: [new MessageEmbed().setColor('AQUA').setTitle('HONK HONK').setImage(imageUrl)] };
+                response = { embeds: [new EmbedBuilder().setColor('Aqua').setTitle('HONK HONK').setImage(imageUrl)] };
             } catch (e) {
                 logger.error(e, e.message);
             }

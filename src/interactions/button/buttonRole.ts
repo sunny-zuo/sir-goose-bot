@@ -1,8 +1,7 @@
-import { ButtonInteraction, GuildMember, MessageEmbed, Snowflake } from 'discord.js';
+import { ButtonInteraction, GuildMember, EmbedBuilder, Snowflake, inlineCode } from 'discord.js';
 import { ButtonInteractionHandler } from './buttonInteractionHandler';
 import { Cooldown } from '#util/cooldown';
 import Client from '#src/Client';
-import { inlineCode } from '@discordjs/builders';
 import ButtonRoleModel from '#models/buttonRole.model';
 import { logger } from '#util/logger';
 
@@ -54,15 +53,15 @@ export class ButtonRole implements ButtonInteractionHandler {
             if (role.editable) {
                 const member = interaction.member as GuildMember;
                 if (member.roles.cache.has(role.id)) {
-                    const embed = new MessageEmbed()
+                    const embed = new EmbedBuilder()
                         .setDescription(`The role ${inlineCode(role.name)} was successfully removed.`)
-                        .setColor('YELLOW');
+                        .setColor('Yellow');
                     await member.roles.remove(role);
                     await interaction.editReply({ embeds: [embed] });
                 } else {
-                    const embed = new MessageEmbed()
+                    const embed = new EmbedBuilder()
                         .setDescription(`The role ${inlineCode(role.name)} was successfully added.`)
-                        .setColor('GREEN');
+                        .setColor('Green');
                     await member.roles.add(role);
                     await interaction.editReply({ embeds: [embed] });
                 }

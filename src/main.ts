@@ -1,6 +1,6 @@
 import 'dotenv/config';
 import mongoose from 'mongoose';
-import { Intents, PartialTypes } from 'discord.js';
+import { GatewayIntentBits, Partials } from 'discord.js';
 import Client from './Client';
 import { RoleAssignmentService } from './services/roleAssignmentService';
 import { logger } from '#util/logger';
@@ -8,11 +8,15 @@ import { register, collectDefaultMetrics } from 'prom-client';
 
 mongoose.set('strictQuery', false);
 
-const intents = new Intents();
-intents.add('GUILDS', 'GUILD_MEMBERS', 'GUILD_MESSAGES', 'GUILD_MESSAGE_REACTIONS', 'DIRECT_MESSAGES', 'DIRECT_MESSAGE_REACTIONS');
-
-const partials: PartialTypes[] = ['CHANNEL', 'MESSAGE'];
-
+const intents = [
+    GatewayIntentBits.Guilds,
+    GatewayIntentBits.GuildMembers,
+    GatewayIntentBits.GuildMessages,
+    GatewayIntentBits.GuildMessageReactions,
+    GatewayIntentBits.DirectMessages,
+    GatewayIntentBits.DirectMessageReactions,
+];
+const partials: Partials[] = [Partials.Channel, Partials.Message];
 const client = new Client({ intents: intents, partials: partials });
 
 async function init(): Promise<void> {

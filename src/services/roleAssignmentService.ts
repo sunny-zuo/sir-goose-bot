@@ -1,7 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import { SHA256 } from 'crypto-js';
-import { Collection, Guild, GuildMember, Permissions, Role, Snowflake } from 'discord.js';
+import { Collection, Guild, GuildMember, PermissionsBitField, Role, Snowflake } from 'discord.js';
 import Client from '#src/Client';
 import { GuildConfigCache } from '#util/guildConfigCache';
 import UserModel, { User as UserInterface } from '#models/user.model';
@@ -115,7 +115,7 @@ export class RoleAssignmentService {
                     `We attempted to verify ${member} but did not assign any roles as they are banned. ${
                         userBan.userId !== member.id ? `(Alt of user id ${userBan.userId})` : ''
                     }`,
-                    'YELLOW'
+                    'Yellow'
                 );
 
                 return { success: false, error: 'User is banned' };
@@ -150,7 +150,7 @@ export class RoleAssignmentService {
                         `${member} successfully verified and was assigned the ${newRoles
                             .map((role) => `\`${role.name}\``)
                             .join(', ')} role(s).`,
-                        'GREEN'
+                        'Green'
                     );
                 }
             } else if (user.verifyRequestedServerId === guild.id && newRoles.length === 0) {
@@ -160,7 +160,7 @@ export class RoleAssignmentService {
                         guild,
                         member.user,
                         `${member} successfully verified but was not assigned any roles due to the server configuration.`,
-                        'BLUE'
+                        'Blue'
                     );
                 }
             }
@@ -195,7 +195,7 @@ export class RoleAssignmentService {
 
             if (newNickname !== undefined) {
                 if (!member.nickname || (member.nickname !== newNickname && forceRename)) {
-                    if (member.manageable && member.guild.members.me?.permissions.has(Permissions.FLAGS.MANAGE_NICKNAMES)) {
+                    if (member.manageable && member.guild.members.me?.permissions.has(PermissionsBitField.Flags.ManageNicknames)) {
                         logger.info({ verification: 'rename', user: { id: this.userId }, guild: { id: member.guild.id } });
                         await member.setNickname(newNickname);
                         return newNickname;
@@ -239,7 +239,7 @@ export class RoleAssignmentService {
                     `We attempted to assign the role(s) ${invalidRoles.map((role) => `"${role.name}" (${role.id})`).join(', ')} to <@${
                         this.userId
                     }>, but the role not found or could not be assigned due to hierarchy or permissions issues. Make sure my role has the Manage Roles permission and is above all roles you want to assign.`,
-                    'RED'
+                    'Red'
                 );
             }
         }

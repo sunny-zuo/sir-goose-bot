@@ -1,6 +1,6 @@
 import Client from '#src/Client';
 import { ChatCommand } from '../ChatCommand';
-import { Message, CommandInteraction, MessageEmbed } from 'discord.js';
+import { Message, ChatInputCommandInteraction, EmbedBuilder } from 'discord.js';
 
 export class GuildList extends ChatCommand {
     constructor(client: Client) {
@@ -15,13 +15,13 @@ export class GuildList extends ChatCommand {
         });
     }
 
-    async execute(interaction: Message | CommandInteraction): Promise<void> {
+    async execute(interaction: Message | ChatInputCommandInteraction): Promise<void> {
         const guilds = interaction.client.guilds.cache.map((guild) => `${guild.name} | ${guild.id} | ${guild.memberCount} members`);
 
-        const embed = new MessageEmbed()
+        const embed = new EmbedBuilder()
             .setTitle('Guild List')
             .setTimestamp()
-            .setColor('BLUE')
+            .setColor('Blue')
             // TODO: paginate
             .setDescription(guilds.join('\n').substring(0, 2000));
 
