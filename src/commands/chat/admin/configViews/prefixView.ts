@@ -1,30 +1,30 @@
-import { Message, MessageActionRow, MessageButton, MessageComponentInteraction, MessageEmbed } from 'discord.js';
+import { ActionRowBuilder, ButtonBuilder, MessageComponentInteraction, EmbedBuilder, ButtonStyle, ComponentType } from 'discord.js';
 import { OverviewView } from './overviewView';
 import { GuildConfigCache } from '#util/guildConfigCache';
 
 export class PrefixView {
     static async render(interaction: MessageComponentInteraction, filter: (i: MessageComponentInteraction) => boolean): Promise<void> {
         const { prefix } = await GuildConfigCache.fetchOrCreate(interaction.guildId!);
-        const embed = new MessageEmbed()
+        const embed = new EmbedBuilder()
             .setTitle('Prefix Configuration')
             .setDescription(
                 `The prefix that the bot will respond to is currently set to \`${prefix}\`.
 
                 You can also use slash commands! (highly recommended)`
             )
-            .setColor('BLUE')
+            .setColor('Blue')
             .setTimestamp();
 
-        const buttons = new MessageActionRow().addComponents(
-            new MessageButton().setCustomId('configPrefixChange').setStyle('PRIMARY').setLabel('Change Prefix'),
-            new MessageButton().setCustomId('configPrefixBack').setStyle('SECONDARY').setLabel('Back')
+        const buttons = new ActionRowBuilder<ButtonBuilder>().addComponents(
+            new ButtonBuilder().setCustomId('configPrefixChange').setStyle(ButtonStyle.Primary).setLabel('Change Prefix'),
+            new ButtonBuilder().setCustomId('configPrefixBack').setStyle(ButtonStyle.Secondary).setLabel('Back')
         );
 
         await interaction.update({ embeds: [embed], components: [buttons] });
 
-        const message = interaction.message as Message;
+        const message = interaction.message;
         await message
-            .awaitMessageComponent({ filter, componentType: 'BUTTON', time: 1000 * 60 * 5 })
+            .awaitMessageComponent({ filter, componentType: ComponentType.Button, time: 1000 * 60 * 5 })
             .then(async (i) => {
                 if (!i.isButton()) return;
 
@@ -38,7 +38,7 @@ export class PrefixView {
                 }
             })
             .catch(async (e) => {
-                if (e.name === 'Error [INTERACTION_COLLECTOR_ERROR]') {
+                if (e.name === 'Error [InteractionCollectorError]') {
                     await message.edit({ components: [] });
                 } else {
                     throw e;
@@ -50,19 +50,19 @@ export class PrefixView {
         interaction: MessageComponentInteraction,
         filter: (i: MessageComponentInteraction) => boolean
     ): Promise<void> {
-        const embed = new MessageEmbed().setDescription('What would you like the new prefix to be?').setColor('ORANGE');
+        const embed = new EmbedBuilder().setDescription('What would you like the new prefix to be?').setColor('Orange');
 
-        const button = new MessageActionRow().addComponents(
-            new MessageButton().setCustomId('configPrefixChangeCancel').setStyle('DANGER').setLabel('Cancel Prefix Change')
+        const button = new ActionRowBuilder<ButtonBuilder>().addComponents(
+            new ButtonBuilder().setCustomId('configPrefixChangeCancel').setStyle(ButtonStyle.Danger).setLabel('Cancel Prefix Change')
         );
 
         await interaction.update({ embeds: [embed], components: [button] });
 
-        const message = interaction.message as Message;
+        const message = interaction.message;
 
         const buttonCollector = await message.createMessageComponentCollector({
             filter,
-            componentType: 'BUTTON',
+            componentType: ComponentType.Button,
             time: 1000 * 60,
             max: 1,
         });
@@ -84,9 +84,9 @@ export class PrefixView {
         messageCollector.on('collect', async (m) => {
             const newPrefix = m.content.trim();
             if (newPrefix.length > 5 || newPrefix.length === 0) {
-                const embed = new MessageEmbed()
+                const embed = new EmbedBuilder()
                     .setDescription('The prefix must be 1 to 5 characters in length. Please provide a new prefix.')
-                    .setColor('RED');
+                    .setColor('Red');
 
                 await m.channel.send({ embeds: [embed] });
             } else {
@@ -94,12 +94,15 @@ export class PrefixView {
                 config.prefix = newPrefix;
                 await config.save();
 
-                const embed = new MessageEmbed()
+                const embed = new EmbedBuilder()
                     .setDescription(`The prefix has been successfully updated to \`${newPrefix}\`.`)
-                    .setColor('GREEN');
+                    .setColor('Green');
 
-                const button = new MessageActionRow().addComponents(
-                    new MessageButton().setCustomId('configPrefixChangeSuccessReturn').setStyle('SUCCESS').setLabel('View Prefix Config')
+                const button = new ActionRowBuilder<ButtonBuilder>().addComponents(
+                    new ButtonBuilder()
+                        .setCustomId('configPrefixChangeSuccessReturn')
+                        .setStyle(ButtonStyle.Success)
+                        .setLabel('View Prefix Config')
                 );
 
                 const successMessage = await m.channel.send({ embeds: [embed], components: [button] });
@@ -109,7 +112,7 @@ export class PrefixView {
                 messageCollector.stop('completed');
 
                 await successMessage
-                    .awaitMessageComponent({ filter, componentType: 'BUTTON', time: 1000 * 60 * 1 })
+                    .awaitMessageComponent({ filter, componentType: ComponentType.Button, time: 1000 * 60 * 1 })
                     .then(async (i) => {
                         if (!i.isButton()) return;
 
@@ -120,7 +123,7 @@ export class PrefixView {
                         }
                     })
                     .catch(async (e) => {
-                        if (e.name === 'Error [INTERACTION_COLLECTOR_ERROR]') {
+                        if (e.name === 'Error [InteractionCollectorError]') {
                             await successMessage.edit({ components: [] });
                         } else {
                             throw e;
@@ -135,10 +138,10 @@ export class PrefixView {
                 case 'cancelled':
                     break;
                 default: {
-                    const embed = new MessageEmbed()
+                    const embed = new EmbedBuilder()
                         .setTitle('Prefix Change Cancelled')
                         .setDescription('No prefix was provided within the time limit, so no changes were made.')
-                        .setColor('RED')
+                        .setColor('Red')
                         .setTimestamp();
                     await message.edit({ embeds: [embed], components: [] });
                 }

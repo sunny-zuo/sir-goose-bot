@@ -1,7 +1,6 @@
 import { ChatCommand } from '../ChatCommand';
 import Client from '#src/Client';
-import { Message, CommandInteraction, MessageEmbed } from 'discord.js';
-import { inlineCode } from '@discordjs/builders';
+import { Message, ChatInputCommandInteraction, EmbedBuilder, inlineCode } from 'discord.js';
 
 export class Ping extends ChatCommand {
     constructor(client: Client) {
@@ -13,21 +12,21 @@ export class Ping extends ChatCommand {
         });
     }
 
-    async execute(interaction: Message | CommandInteraction): Promise<void> {
-        const message = (await interaction.reply({
-            embeds: [new MessageEmbed().setDescription('Pinging...').setColor('BLUE')],
+    async execute(interaction: Message | ChatInputCommandInteraction): Promise<void> {
+        const message = await interaction.reply({
+            embeds: [new EmbedBuilder().setDescription('Pinging...').setColor('Blue')],
             fetchReply: true,
-        })) as Message;
+        });
         const ping = message.createdTimestamp - interaction.createdTimestamp;
         const heartbeat = this.client.ws.ping;
 
-        const embed = new MessageEmbed()
+        const embed = new EmbedBuilder()
             .setDescription(
                 `Pong! Sir Goose's roundtrip latency is ${`${inlineCode(`${ping.toString()}ms`)}`}. The websocket heartbeat is ${inlineCode(
                     `${heartbeat.toString()}ms`
                 )}.`
             )
-            .setColor('BLUE');
+            .setColor('Blue');
 
         await message.edit({ embeds: [embed] });
     }

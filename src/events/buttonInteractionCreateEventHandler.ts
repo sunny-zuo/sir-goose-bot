@@ -1,4 +1,4 @@
-import { Collection, Interaction, MessageEmbed } from 'discord.js';
+import { Collection, Interaction, EmbedBuilder } from 'discord.js';
 import { EventHandler } from './eventHandler';
 import ButtonInteractionHandlers from '../interactions/button';
 import { ButtonInteractionHandler } from '../interactions/button/buttonInteractionHandler';
@@ -42,9 +42,9 @@ export class ButtonInteractionCreateEventHandler implements EventHandler {
                     logger.error(e, e.message);
                 });
             } else {
-                const embed = new MessageEmbed()
+                const embed = new EmbedBuilder()
                     .setTitle('Rate Limited')
-                    .setColor('RED')
+                    .setColor('Red')
                     .setDescription(
                         handler.limitMessage ??
                             `You can only interact with this button type ${handler.cooldown.maxUses} time(s) every ${handler.cooldown.seconds} seconds. Please try again in ${userLimit.secondsUntilReset} seconds.`

@@ -1,6 +1,6 @@
 import { ChatCommand } from '../ChatCommand';
 import Client from '#src/Client';
-import { Message, CommandInteraction, MessageEmbed, MessageActionRow, MessageButton } from 'discord.js';
+import { Message, ChatInputCommandInteraction, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } from 'discord.js';
 
 export class Invite extends ChatCommand {
     constructor(client: Client) {
@@ -12,12 +12,12 @@ export class Invite extends ChatCommand {
         });
     }
 
-    async execute(interaction: Message | CommandInteraction): Promise<void> {
-        const embed = new MessageEmbed().setDescription('Press the button below to add Sir Goose to your server:').setColor('GREEN');
-        const button = new MessageActionRow().addComponents(
-            new MessageButton()
+    async execute(interaction: Message | ChatInputCommandInteraction): Promise<void> {
+        const embed = new EmbedBuilder().setDescription('Press the button below to add Sir Goose to your server:').setColor('Green');
+        const button = new ActionRowBuilder<ButtonBuilder>().addComponents(
+            new ButtonBuilder()
                 .setLabel('Invite!')
-                .setStyle('LINK')
+                .setStyle(ButtonStyle.Link)
                 .setURL(
                     'https://discord.com/api/oauth2/authorize?client_id=740653704683716699&permissions=8&scope=bot%20applications.commands'
                 )

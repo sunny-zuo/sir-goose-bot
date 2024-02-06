@@ -2,11 +2,12 @@ import { ChatCommand } from '../ChatCommand';
 import Client from '#src/Client';
 import {
     Message,
-    CommandInteraction,
-    MessageEmbed,
+    EmbedBuilder,
     ApplicationCommandOption,
     CommandInteractionOptionResolver,
     GuildMember,
+    ChatInputCommandInteraction,
+    ApplicationCommandOptionType,
 } from 'discord.js';
 
 export class Avatar extends ChatCommand {
@@ -14,7 +15,7 @@ export class Avatar extends ChatCommand {
         {
             name: 'user',
             description: "The user who's avatar you want to fetch. Defaults to yourself.",
-            type: 'USER',
+            type: ApplicationCommandOptionType.User,
             required: false,
         },
     ];
@@ -30,18 +31,19 @@ export class Avatar extends ChatCommand {
     }
 
     async execute(
-        interaction: Message | CommandInteraction,
+        interaction: Message | ChatInputCommandInteraction,
         args?: Omit<CommandInteractionOptionResolver, 'getMessage' | 'getFocused'>
     ): Promise<void> {
         const member: GuildMember = (args?.getMember('user') as GuildMember) ?? null;
         const user = args?.getUser('user') ?? this.getUser(interaction);
-        const avatarURL = member?.displayAvatarURL({ dynamic: true, size: 512 }) ?? user.displayAvatarURL({ dynamic: true, size: 512 });
+        const avatarURL =
+            member?.displayAvatarURL({ extension: 'png', size: 512 }) ?? user.displayAvatarURL({ extension: 'png', size: 512 });
 
-        const embed = new MessageEmbed()
+        const embed = new EmbedBuilder()
             .setTitle('Avatar')
             .setAuthor({ name: user.tag, iconURL: avatarURL })
             .setImage(avatarURL)
-            .setColor('BLUE');
+            .setColor('Blue');
 
         await interaction.reply({ embeds: [embed] });
     }

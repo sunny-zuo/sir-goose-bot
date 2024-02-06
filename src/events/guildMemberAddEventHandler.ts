@@ -1,4 +1,4 @@
-import { GuildMember, MessageEmbed } from 'discord.js';
+import { GuildMember, EmbedBuilder } from 'discord.js';
 import Client from '#src/Client';
 import { RoleAssignmentService } from '../services/roleAssignmentService';
 import { GuildConfigCache } from '#util/guildConfigCache';
@@ -26,9 +26,9 @@ export class GuildMemberAddEventHandler implements EventHandler {
                 await member
                     .send({
                         embeds: [
-                            new MessageEmbed()
+                            new EmbedBuilder()
                                 .setTitle(`Welcome to ${member.guild.name}!`)
-                                .setColor('GREEN')
+                                .setColor('Green')
                                 .setDescription(
                                     `Since you've verified with the bot in the past, you've been automatically verified and have received the ${assignedRoles
                                         .map((role) => `\`${role.name}\``)
@@ -41,9 +41,9 @@ export class GuildMemberAddEventHandler implements EventHandler {
                 await member
                     .send({
                         embeds: [
-                            new MessageEmbed()
+                            new EmbedBuilder()
                                 .setTitle(`Welcome to ${member.guild.name}!`)
-                                .setColor('BLUE')
+                                .setColor('Blue')
                                 .setDescription(
                                     "Since you've verified with the bot in the past, you've been automatically verified. However, the server has configured the bot to not assign any roles to you for various reasons (most likely due to only wanting to verify certain groups of people). If you think this is a mistake, please message a server admin."
                                 ),

@@ -1,4 +1,4 @@
-import { ButtonInteraction, MessageEmbed } from 'discord.js';
+import { ButtonInteraction, EmbedBuilder } from 'discord.js';
 import { ButtonInteractionHandler } from './buttonInteractionHandler';
 import { Cooldown } from '#util/cooldown';
 import Client from '#src/Client';
@@ -14,7 +14,7 @@ export class VerificationLearnMore implements ButtonInteractionHandler {
     }
 
     async execute(interaction: ButtonInteraction): Promise<void> {
-        const embed = new MessageEmbed().setTitle('Verification FAQ').setColor('BLUE').setTimestamp();
+        const embed = new EmbedBuilder().setTitle('Verification FAQ').setColor('Blue').setTimestamp();
 
         embed.addFields([
             {

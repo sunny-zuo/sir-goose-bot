@@ -1,7 +1,7 @@
 import { EventHandler } from './eventHandler';
 import Client from '#src/Client';
 import { logger } from '#util/logger';
-import { Guild } from 'discord.js';
+import { AuditLogEvent, Guild } from 'discord.js';
 
 export class GuildCreateEventHandler implements EventHandler {
     readonly eventName = 'guildCreate';
@@ -15,7 +15,7 @@ export class GuildCreateEventHandler implements EventHandler {
         let botInviter;
 
         try {
-            const logs = await guild.fetchAuditLogs({ type: 'BOT_ADD', limit: 1 });
+            const logs = await guild.fetchAuditLogs({ type: AuditLogEvent.BotAdd, limit: 1 });
             const log = logs.entries.first();
 
             if (log && log.target && log.target.id === this.client.user?.id) {

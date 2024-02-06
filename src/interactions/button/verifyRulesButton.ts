@@ -1,12 +1,13 @@
 import {
     ButtonInteraction,
     GuildMember,
-    MessageActionRow,
-    MessageEmbed,
-    Modal,
-    ModalActionRowComponent,
-    Permissions,
-    TextInputComponent,
+    ActionRowBuilder,
+    EmbedBuilder,
+    ModalBuilder,
+    PermissionsBitField,
+    TextInputBuilder,
+    TextInputStyle,
+    ModalActionRowComponentBuilder,
 } from 'discord.js';
 import { ButtonInteractionHandler } from './buttonInteractionHandler';
 import { Cooldown } from '#util/cooldown';
@@ -25,24 +26,24 @@ export class VerifyRulesButton implements ButtonInteractionHandler {
     async execute(interaction: ButtonInteraction): Promise<void> {
         // TODO: refactor into more generic permission checker
         const member = interaction.member as GuildMember;
-        if (!member.permissions.has(Permissions.FLAGS.MANAGE_GUILD)) {
+        if (!member.permissions.has(PermissionsBitField.Flags.ManageGuild)) {
             await interaction.reply({
                 embeds: [
-                    new MessageEmbed().setDescription('You must have the Manage Guild permission to use this button.').setColor('RED'),
+                    new EmbedBuilder().setDescription('You must have the Manage Guild permission to use this button.').setColor('Red'),
                 ],
             });
             return;
         }
 
-        const modal = new Modal().setCustomId('verifyRulesModal').setTitle('Verification Rules');
+        const modal = new ModalBuilder().setCustomId('verifyRulesModal').setTitle('Verification Rules');
 
-        const ruleStringInput = new TextInputComponent()
+        const ruleStringInput = new TextInputBuilder()
             .setCustomId('ruleStringInput')
             .setLabel('Paste ruleset here:')
-            .setStyle('PARAGRAPH')
+            .setStyle(TextInputStyle.Paragraph)
             .setRequired(true);
 
-        const actionRow = new MessageActionRow<ModalActionRowComponent>().addComponents(ruleStringInput);
+        const actionRow = new ActionRowBuilder<ModalActionRowComponentBuilder>().addComponents(ruleStringInput);
 
         modal.addComponents(actionRow);
 

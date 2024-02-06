@@ -1,4 +1,4 @@
-import { CommandInteraction } from 'discord.js';
+import { ChatInputCommandInteraction } from 'discord.js';
 import Client from '#src/Client';
 import { ChatCommand } from '../ChatCommand';
 import { GuildConfigCache } from '#util/guildConfigCache';
@@ -17,7 +17,7 @@ export class ReVerify extends ChatCommand {
         });
     }
 
-    async execute(interaction: CommandInteraction): Promise<void> {
+    async execute(interaction: ChatInputCommandInteraction): Promise<void> {
         await interaction.deferReply({ ephemeral: true });
 
         const config = await GuildConfigCache.fetchConfig(interaction.guild?.id);

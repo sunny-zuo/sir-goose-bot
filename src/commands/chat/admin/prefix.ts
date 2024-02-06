@@ -1,10 +1,11 @@
 import {
     ApplicationCommandOption,
-    CommandInteraction,
+    ApplicationCommandOptionType,
     CommandInteractionOptionResolver,
     Message,
-    MessageEmbed,
-    Permissions,
+    EmbedBuilder,
+    PermissionsBitField,
+    ChatInputCommandInteraction,
 } from 'discord.js';
 import Client from '#src/Client';
 import { ChatCommand } from '../ChatCommand';
@@ -16,7 +17,7 @@ export class Prefix extends ChatCommand {
         {
             name: 'prefix',
             description: 'The new prefix that the bot will respond to',
-            type: 'STRING',
+            type: ApplicationCommandOptionType.String,
             required: false,
         },
     ];
@@ -29,12 +30,12 @@ export class Prefix extends ChatCommand {
             options: Prefix.options,
             guildOnly: true,
             examples: ['!'],
-            userPermissions: [Permissions.FLAGS.MANAGE_GUILD],
+            userPermissions: [PermissionsBitField.Flags.ManageGuild],
         });
     }
 
     async execute(
-        interaction: Message | CommandInteraction,
+        interaction: Message | ChatInputCommandInteraction,
         args?: Omit<CommandInteractionOptionResolver, 'getMessage' | 'getFocused'>
     ): Promise<void> {
         const newPrefix = args?.getString('prefix');
@@ -47,8 +48,8 @@ export class Prefix extends ChatCommand {
             await this.sendSuccessEmbed(interaction, 'Prefix Updated', `The prefix has been set to \`${newPrefix}\``);
         } else {
             const guild = await GuildConfigModel.findOne({ guildId: interaction.guild!.id });
-            const embed = new MessageEmbed()
-                .setColor('BLUE')
+            const embed = new EmbedBuilder()
+                .setColor('Blue')
                 .setTitle('Bot Prefix')
                 .setDescription(`The current prefix is \`${guild?.prefix || '$'}\`. You can also use Discord slash commands!`)
                 .setTimestamp();

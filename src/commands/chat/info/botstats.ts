@@ -1,7 +1,6 @@
 import { ChatCommand } from '../ChatCommand';
 import Client from '#src/Client';
-import { CommandInteraction, Message, MessageEmbed } from 'discord.js';
-import { hyperlink, codeBlock } from '@discordjs/builders';
+import { ChatInputCommandInteraction, Message, EmbedBuilder, hyperlink, codeBlock } from 'discord.js';
 import { Duration } from 'luxon';
 import { cpus } from 'os';
 
@@ -20,17 +19,17 @@ export class BotStats extends ChatCommand {
             cooldownSeconds: 5,
         });
 
-        this.latestCommit = process.env.GIT_COMMIT?.slice(-7) ?? 'unknown';
+        this.latestCommit = process.env.GIT_COMMIT?.slice(7) ?? 'unknown';
     }
 
-    async execute(interaction: Message | CommandInteraction): Promise<void> {
+    async execute(interaction: Message | ChatInputCommandInteraction): Promise<void> {
         const fieldMaxLength = 10;
 
         const uptimeDuration = Duration.fromMillis(this.client.uptime ?? 0).shiftTo('days', 'hours');
         const uptimeDays = Math.floor(uptimeDuration.days);
         const uptimeHours = Math.floor(uptimeDuration.hours);
 
-        const embed = new MessageEmbed()
+        const embed = new EmbedBuilder()
             .setTitle('Sir Goose Stats')
             .setDescription(
                 `${hyperlink(
@@ -38,7 +37,7 @@ export class BotStats extends ChatCommand {
                     'https://discord.com/api/oauth2/authorize?client_id=740653704683716699&permissions=8&scope=bot%20applications.commands'
                 )} ~ ${hyperlink('View on GitHub', 'https://github.com/sunny-zuo/sir-goose-bot')}`
             )
-            .setColor('BLUE')
+            .setColor('Blue')
             .setTimestamp();
 
         embed.addFields([

@@ -1,15 +1,23 @@
-import { Message, MessageActionRow, MessageButton, MessageComponentInteraction, MessageEmbed } from 'discord.js';
+import {
+    ActionRowBuilder,
+    ButtonBuilder,
+    MessageComponentInteraction,
+    EmbedBuilder,
+    ButtonStyle,
+    ComponentType,
+    bold,
+    codeBlock,
+} from 'discord.js';
 import { GuildConfigCache } from '#util/guildConfigCache';
 import { serializeVerificationRules } from '#util/verification';
 import { OverviewView } from './overviewView';
-import { bold, codeBlock } from '@discordjs/builders';
 import { Emojis } from '#util/constants';
 
 export class VerificationView {
     static async render(interaction: MessageComponentInteraction, filter: (i: MessageComponentInteraction) => boolean): Promise<void> {
         const config = await GuildConfigCache.fetchOrCreate(interaction.guildId!);
 
-        const embed = new MessageEmbed()
+        const embed = new EmbedBuilder()
             .setTitle('Verification Configuration')
             .setDescription(
                 `${config.enableVerification ? Emojis.GreenCheck : Emojis.RedCross} Verification is currently ${
@@ -24,37 +32,41 @@ export class VerificationView {
                           )}. [Create a ruleset here](https://sebot.sunnyzuo.com/)!`
                 }`
             )
-            .setColor('BLUE')
+            .setColor('Blue')
             .setTimestamp();
 
-        const row1 = new MessageActionRow().addComponents(
-            new MessageButton()
+        const row1 = new ActionRowBuilder<ButtonBuilder>().addComponents(
+            new ButtonBuilder()
                 .setCustomId('configVerificationEnable')
-                .setStyle('SUCCESS')
+                .setStyle(ButtonStyle.Success)
                 .setLabel('Enable')
                 .setDisabled(config.enableVerification),
-            new MessageButton()
+            new ButtonBuilder()
                 .setCustomId('configVerificationDisable')
-                .setStyle('DANGER')
+                .setStyle(ButtonStyle.Danger)
                 .setLabel('Disable')
                 .setDisabled(!config.enableVerification),
-            new MessageButton().setCustomId('configVerificationViewRules').setStyle('PRIMARY').setLabel('View Rules'),
-            new MessageButton().setCustomId('configVerificationSetRules').setStyle('PRIMARY').setLabel('Update Rules')
+            new ButtonBuilder().setCustomId('configVerificationViewRules').setStyle(ButtonStyle.Primary).setLabel('View Rules'),
+            new ButtonBuilder().setCustomId('configVerificationSetRules').setStyle(ButtonStyle.Primary).setLabel('Update Rules')
         );
 
-        const row2 = new MessageActionRow().addComponents(
-            new MessageButton()
-                .setStyle('LINK')
+        const row2 = new ActionRowBuilder<ButtonBuilder>().addComponents(
+            new ButtonBuilder()
+                .setStyle(ButtonStyle.Link)
                 .setLabel('Read the Verification Guide')
                 .setURL('https://sir-goose.notion.site/sir-goose/Setting-Up-Verification-0f309b2a00fc4e198b5f2182d2452fcd'),
-            new MessageButton().setCustomId('configVerificationBack').setStyle('SECONDARY').setLabel('Back')
+            new ButtonBuilder().setCustomId('configVerificationBack').setStyle(ButtonStyle.Secondary).setLabel('Back')
         );
 
         await interaction.update({ embeds: [embed], components: [row1, row2] });
 
-        const message = interaction.message as Message;
+        const message = interaction.message;
 
-        const buttonCollector = message.createMessageComponentCollector({ filter, componentType: 'BUTTON', time: 1000 * 60 * 5 });
+        const buttonCollector = message.createMessageComponentCollector({
+            filter,
+            componentType: ComponentType.Button,
+            time: 1000 * 60 * 5,
+        });
 
         buttonCollector.on('collect', async (i) => {
             switch (i.customId) {
@@ -71,7 +83,7 @@ export class VerificationView {
                     await this.render(i, filter);
                     break;
                 case 'configVerificationViewRules': {
-                    const embed = new MessageEmbed().setColor('BLUE').setTitle('Verification Rules')
+                    const embed = new EmbedBuilder().setColor('Blue').setTitle('Verification Rules')
                         .setDescription(`[Create a new ruleset](https://sebot.sunnyzuo.com/). Current rules:
                             ${codeBlock(serializeVerificationRules(config.verificationRules))}`);
 
@@ -79,8 +91,8 @@ export class VerificationView {
                     break;
                 }
                 case 'configVerificationSetRules': {
-                    const embed = new MessageEmbed()
-                        .setColor('YELLOW')
+                    const embed = new EmbedBuilder()
+                        .setColor('Yellow')
                         .setDescription(
                             'Verification rules currently cannot be edited in this menu. Please use the `/verifyrules` command for now.'
                         );

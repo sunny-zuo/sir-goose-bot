@@ -2,15 +2,14 @@ import {
     Message,
     CommandInteraction,
     InteractionReplyOptions,
-    ReplyMessageOptions,
     ButtonInteraction,
-    ContextMenuInteraction,
-    Interaction,
+    UserContextMenuCommandInteraction,
+    MessageReplyOptions,
 } from 'discord.js';
 
 export async function sendReply(
     interaction: Message | CommandInteraction | ButtonInteraction,
-    message: InteractionReplyOptions & ReplyMessageOptions,
+    message: InteractionReplyOptions & MessageReplyOptions,
     isDeferred = false
 ): Promise<void> {
     if (isMessage(interaction)) {
@@ -23,8 +22,8 @@ export async function sendReply(
 }
 
 export async function sendEphemeralReply(
-    interaction: Message | CommandInteraction | ButtonInteraction | ContextMenuInteraction,
-    message: InteractionReplyOptions & ReplyMessageOptions,
+    interaction: Message | CommandInteraction | ButtonInteraction | UserContextMenuCommandInteraction,
+    message: InteractionReplyOptions & MessageReplyOptions,
     deletionSeconds = 30,
     isDeferred = false
 ): Promise<void> {
@@ -42,6 +41,8 @@ export async function sendEphemeralReply(
     }
 }
 
-export function isMessage(interaction: Message | Interaction): interaction is Message {
+export function isMessage(
+    interaction: Message | CommandInteraction | ButtonInteraction | UserContextMenuCommandInteraction
+): interaction is Message {
     return (interaction as Message).author !== undefined;
 }

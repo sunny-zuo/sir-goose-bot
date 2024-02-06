@@ -1,4 +1,4 @@
-import { Message, CommandInteraction, CommandInteractionOptionResolver } from 'discord.js';
+import { Message, ChatInputCommandInteraction, CommandInteractionOptionResolver } from 'discord.js';
 import Client from '#src/Client';
 import { Category, ChatCommandOptions } from '#types/Command';
 import { Command } from '../Command';
@@ -20,7 +20,7 @@ export abstract class ChatCommand extends Command {
     }
 
     abstract execute(
-        interaction: Message | CommandInteraction,
+        interaction: Message | ChatInputCommandInteraction,
         args?: Omit<CommandInteractionOptionResolver, 'getMessage' | 'getFocused'>
     ): Promise<void>;
 }

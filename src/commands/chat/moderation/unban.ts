@@ -1,29 +1,37 @@
-import { ApplicationCommandOption, CommandInteraction, CommandInteractionOptionResolver, MessageEmbed, Permissions } from 'discord.js';
+import {
+    ApplicationCommandOption,
+    ApplicationCommandOptionType,
+    ChatInputCommandInteraction,
+    CommandInteractionOptionResolver,
+    EmbedBuilder,
+    PermissionsBitField,
+    inlineCode,
+    hyperlink,
+} from 'discord.js';
 import Client from '#src/Client';
 import { ChatCommand } from '../ChatCommand';
 import BanModel from '#models/ban.model';
 import UserModel from '#models/user.model';
 import { Modlog } from '#util/modlog';
 import { logger } from '#util/logger';
-import { inlineCode, hyperlink } from '@discordjs/builders';
 
 export class Unban extends ChatCommand {
     private static readonly options: ApplicationCommandOption[] = [
         {
             name: 'id',
             description: 'Unban a user by their discord user id',
-            type: 'SUB_COMMAND',
+            type: ApplicationCommandOptionType.Subcommand,
             options: [
                 {
                     name: 'user_id',
                     description: 'The discord user id to unban.',
-                    type: 'STRING',
+                    type: ApplicationCommandOptionType.String,
                     required: true,
                 },
                 {
                     name: 'reason',
                     description: 'The reason for the unban.',
-                    type: 'STRING',
+                    type: ApplicationCommandOptionType.String,
                     required: false,
                 },
             ],
@@ -39,14 +47,14 @@ export class Unban extends ChatCommand {
             options: Unban.options,
             guildOnly: true,
             examples: ['id 123456789012345678 reason'],
-            clientPermissions: [Permissions.FLAGS.BAN_MEMBERS],
-            userPermissions: [Permissions.FLAGS.BAN_MEMBERS],
+            clientPermissions: [PermissionsBitField.Flags.BanMembers],
+            userPermissions: [PermissionsBitField.Flags.BanMembers],
             cooldownSeconds: 2,
         });
     }
 
     async execute(
-        interaction: CommandInteraction,
+        interaction: ChatInputCommandInteraction,
         args: Omit<CommandInteractionOptionResolver, 'getMessage' | 'getFocused'>
     ): Promise<void> {
         const guild = interaction.guild;
@@ -98,7 +106,7 @@ export class Unban extends ChatCommand {
             )} - they are not banned and no alts could be found.\n\n${userIdHelp}`;
 
             await interaction.editReply({
-                embeds: [new MessageEmbed().setDescription(userIsVerified ? verifiedError : nonVerifiedError).setColor('YELLOW')],
+                embeds: [new EmbedBuilder().setDescription(userIsVerified ? verifiedError : nonVerifiedError).setColor('Yellow')],
             });
         } else {
             logger.info({
@@ -116,7 +124,7 @@ export class Unban extends ChatCommand {
                 : `User with id ${inlineCode(userIdToUnban)}`;
 
             await interaction.editReply({
-                embeds: [new MessageEmbed().setDescription(`${userMessage} was successfully unbanned.`).setColor('GREEN')],
+                embeds: [new EmbedBuilder().setDescription(`${userMessage} was successfully unbanned.`).setColor('Green')],
             });
 
             await Modlog.logUserAction(
@@ -129,7 +137,7 @@ export class Unban extends ChatCommand {
                     **Reason**: ${unbanReason}
                     **Moderator**: ${interaction.member}
                 `,
-                'GREEN'
+                'Green'
             );
         }
     }

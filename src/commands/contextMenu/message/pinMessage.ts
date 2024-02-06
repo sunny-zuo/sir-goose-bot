@@ -1,9 +1,8 @@
-import { ContextMenuInteraction, Message, MessageEmbed, Permissions } from 'discord.js';
+import { UserContextMenuCommandInteraction, EmbedBuilder, inlineCode, PermissionsBitField } from 'discord.js';
 import Client from '#src/Client';
 import { GuildConfigCache } from '#util/guildConfigCache';
 import { Modlog } from '#util/modlog';
 import { ContextMenuCommand } from '../ContextMenuCommand';
-import { inlineCode } from '@discordjs/builders';
 import { attemptPin } from '#util/pin';
 import { logger } from '#util/logger';
 
@@ -14,14 +13,14 @@ export class PinMessage extends ContextMenuCommand {
             description: 'Context menu pin command',
             category: 'Message',
             guildOnly: true,
-            clientPermissions: [Permissions.FLAGS.MANAGE_MESSAGES],
+            clientPermissions: [PermissionsBitField.Flags.ManageMessages],
             cooldownSeconds: 60,
             cooldownMaxUses: 2,
         });
     }
 
-    async execute(interaction: ContextMenuInteraction): Promise<void> {
-        const message = interaction.options.getMessage('message') as Message;
+    async execute(interaction: UserContextMenuCommandInteraction): Promise<void> {
+        const message = interaction.options.getMessage('message');
         if (!message) return;
 
         const config = await GuildConfigCache.fetchConfig(interaction.guild!.id);
@@ -52,11 +51,11 @@ export class PinMessage extends ContextMenuCommand {
                 interaction.guild,
                 this.getUser(interaction),
                 `${interaction.member} pinned [a message](${message.url}) using the pin command in ${message.channel}.`,
-                'BLUE'
+                'Blue'
             );
 
             await interaction.reply({
-                embeds: [new MessageEmbed().setDescription('Message Successfully Pinned').setColor('GREEN')],
+                embeds: [new EmbedBuilder().setDescription('Message Successfully Pinned').setColor('Green')],
                 ephemeral: true,
             });
         } else {
@@ -80,7 +79,7 @@ export class PinMessage extends ContextMenuCommand {
                     errorDescription = 'We ran into an unknown error trying to pin this message.';
             }
 
-            const embed = new MessageEmbed().setDescription(errorDescription).setColor('RED');
+            const embed = new EmbedBuilder().setDescription(errorDescription).setColor('Red');
             await interaction.reply({ embeds: [embed], ephemeral: true });
         }
     }

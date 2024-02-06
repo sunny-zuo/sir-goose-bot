@@ -1,8 +1,17 @@
-import { CommandInteraction, Message, MessageActionRow, MessageButton, MessageEmbed, Permissions } from 'discord.js';
+import {
+    ChatInputCommandInteraction,
+    Message,
+    ActionRowBuilder,
+    ButtonBuilder,
+    EmbedBuilder,
+    codeBlock,
+    inlineCode,
+    PermissionsBitField,
+    ButtonStyle,
+} from 'discord.js';
 import { ChatCommand } from '../ChatCommand';
 import Client from '#src/Client';
 import { GuildConfigCache } from '#util/guildConfigCache';
-import { codeBlock, inlineCode } from '@discordjs/builders';
 import { serializeVerificationRules } from '#util/verification';
 
 export class VerifyRules extends ChatCommand {
@@ -12,19 +21,19 @@ export class VerifyRules extends ChatCommand {
             description: 'Set or see verification rules. Create a ruleset here: https://sebot.sunnyzuo.com/',
             category: 'Verification',
             guildOnly: true,
-            clientPermissions: [Permissions.FLAGS.MANAGE_ROLES],
-            userPermissions: [Permissions.FLAGS.MANAGE_GUILD],
+            clientPermissions: [PermissionsBitField.Flags.ManageRoles],
+            userPermissions: [PermissionsBitField.Flags.ManageGuild],
         });
     }
 
-    async execute(interaction: Message | CommandInteraction): Promise<void> {
+    async execute(interaction: Message | ChatInputCommandInteraction): Promise<void> {
         const config = await GuildConfigCache.fetchConfig(interaction.guild!.id);
 
-        const button = new MessageActionRow().addComponents(
-            new MessageButton().setCustomId(`verifyRules`).setLabel('Update Rules').setStyle('PRIMARY')
+        const button = new ActionRowBuilder<ButtonBuilder>().addComponents(
+            new ButtonBuilder().setCustomId(`verifyRules`).setLabel('Update Rules').setStyle(ButtonStyle.Primary)
         );
 
-        const embed = new MessageEmbed().setColor('BLUE').setTitle('Verification Rules').setDescription(`Verification is ${
+        const embed = new EmbedBuilder().setColor('Blue').setTitle('Verification Rules').setDescription(`Verification is ${
             config.enableVerification ? 'enabled ' : `disabled. Enable it using ${inlineCode('/config')}`
         }. [Create a ruleset.](https://sebot.sunnyzuo.com/)
                 ${codeBlock(serializeVerificationRules(config.verificationRules))}`);

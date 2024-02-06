@@ -1,12 +1,24 @@
 import { EventHandler } from './eventHandler';
 import Client from '#src/Client';
-import { GuildMember, MessageActionRow, MessageButton, MessageComponentInteraction, MessageEmbed, Role } from 'discord.js';
+import {
+    ChannelType,
+    ComponentType,
+    GuildMember,
+    ActionRowBuilder,
+    ButtonBuilder,
+    MessageComponentInteraction,
+    EmbedBuilder,
+    PermissionsBitField,
+    Role,
+    ButtonStyle,
+} from 'discord.js';
 import { Modlog } from '#util/modlog';
 import GuildConfigModel from '#models/guildConfig.model';
 import ButtonRoleModel from '#models/buttonRole.model';
 import { GuildConfigCache } from '#util/guildConfigCache';
 import { v4 as uuidv4 } from 'uuid';
 import { logger } from '#util/logger';
+import { convertButtonActionRowToBuilder } from '#util/messageComponents';
 
 export class RoleUpdateEventHandler implements EventHandler {
     readonly eventName = 'roleUpdate';
@@ -60,7 +72,7 @@ export class RoleUpdateEventHandler implements EventHandler {
                     guild,
                     'Verification Role Updated',
                     `The role \`${oldRole.name}\` is used for verification, and was renamed to \`${newRole.name}\`. The server's verification rules have automatically updated to reflect this change.`,
-                    'GREEN'
+                    'Green'
                 );
             }
         }
@@ -86,9 +98,9 @@ export class RoleUpdateEventHandler implements EventHandler {
         }
 
         if (doesRoleNameMatch) {
-            const embed = new MessageEmbed()
+            const embed = new EmbedBuilder()
                 .setTitle('New Role Created')
-                .setColor('BLUE')
+                .setColor('Blue')
                 .setDescription(
                     `The newly created role named \`${newRole.name}\` matches the name of a role set in verification rules. Would you like to automatically update the verification rules to assign the newly created role when the rule(s) match?`
                 )
@@ -96,24 +108,24 @@ export class RoleUpdateEventHandler implements EventHandler {
 
             const updateId = uuidv4();
             const ignoreId = uuidv4();
-            const row = new MessageActionRow().addComponents(
-                new MessageButton().setCustomId(updateId).setLabel('Update Roles').setStyle('SUCCESS'),
-                new MessageButton().setCustomId(ignoreId).setLabel('Ignore').setStyle('DANGER')
+            const row = new ActionRowBuilder<ButtonBuilder>().addComponents(
+                new ButtonBuilder().setCustomId(updateId).setLabel('Update Roles').setStyle(ButtonStyle.Success),
+                new ButtonBuilder().setCustomId(ignoreId).setLabel('Ignore').setStyle(ButtonStyle.Danger)
             );
 
             const message = await Modlog.logMessage(this.client, guild, { embeds: [embed], components: [row] });
             if (!message) return;
 
             const filter = (i: MessageComponentInteraction) => i.member !== undefined;
-            const collector = message.createMessageComponentCollector({ filter, componentType: 'BUTTON', time: 1000 * 60 * 5 });
+            const collector = message.createMessageComponentCollector({ filter, componentType: ComponentType.Button, time: 1000 * 60 * 5 });
             let validInteractionReceived = false;
 
             collector.on('collect', async (i) => {
                 const member = i.member as GuildMember;
 
-                if (!member.permissions.has('MANAGE_GUILD')) {
-                    const embed = new MessageEmbed()
-                        .setColor('RED')
+                if (!member.permissions.has(PermissionsBitField.Flags.ManageGuild)) {
+                    const embed = new EmbedBuilder()
+                        .setColor('Red')
                         .setDescription('You must have the `Manage Server` permission to interact with this button.');
 
                     await i.reply({ embeds: [embed] });
@@ -144,9 +156,9 @@ export class RoleUpdateEventHandler implements EventHandler {
                     if (newConfig && didRulesUpdate) {
                         await newConfig.save();
 
-                        const updatedEmbed = new MessageEmbed()
+                        const updatedEmbed = new EmbedBuilder()
                             .setTitle('New Role Created')
-                            .setColor('GREEN')
+                            .setColor('Green')
                             .setDescription(
                                 `The newly created role named \`${newRole.name}\` was updated to be the role assigned in verification rules by ${i.member}.`
                             )
@@ -161,9 +173,9 @@ export class RoleUpdateEventHandler implements EventHandler {
                         collector.stop();
                     }
                 } else if (i.customId === ignoreId) {
-                    const updatedEmbed = new MessageEmbed()
+                    const updatedEmbed = new EmbedBuilder()
                         .setTitle('New Role Created')
-                        .setColor('YELLOW')
+                        .setColor('Yellow')
                         .setDescription(
                             `${i.member} selected to not update the verification rules to assign the newly created role \`${newRole.name}\` when rules dictate that a role named \`${newRole.name}\` should be assigned.`
                         )
@@ -186,9 +198,9 @@ export class RoleUpdateEventHandler implements EventHandler {
                         'Prompt to update newly created role matching verification rules was ignored'
                     );
 
-                    const embed = new MessageEmbed()
+                    const embed = new EmbedBuilder()
                         .setTitle('New Role Created')
-                        .setColor('BLUE')
+                        .setColor('Blue')
                         .setDescription(
                             `The newly created role named \`${newRole.name}\` matches the name of a role set in verification rules. No one responded to the prompt asking if verification rules should be automatically updated :(`
                         )
@@ -222,33 +234,32 @@ export class RoleUpdateEventHandler implements EventHandler {
             await prompt.save();
 
             const promptChannel = await guild.channels.fetch(prompt.channelId).catch(() => null);
-            if (!promptChannel || !promptChannel.isText()) continue;
+            if (!promptChannel || promptChannel.type !== ChannelType.GuildText) continue;
 
             const promptMessage = await promptChannel.messages.fetch(prompt.messageId);
             if (!promptMessage) continue;
 
-            const components = promptMessage.components;
-
-            const row = components.find((row) =>
-                row.components.some((component) => component.type === 'BUTTON' && component.customId?.includes(oldRole.id))
+            const rowIndex = promptMessage.components.findIndex((row) =>
+                row.components.some((component) => component.type === ComponentType.Button && component.customId?.includes(oldRole.id))
             );
-            if (!row) continue;
+            if (rowIndex === -1) continue;
 
-            const updateIndex = row.components.findIndex(
-                (component) => component.type === 'BUTTON' && component.customId?.includes(oldRole.id)
+            const colIndex = promptMessage.components[rowIndex].components.findIndex(
+                (component) => component.type === ComponentType.Button && component.customId?.includes(oldRole.id)
             );
-            if (updateIndex === -1) continue;
+            if (colIndex === -1) continue;
 
-            row.spliceComponents(
-                updateIndex,
+            const newComponents: ActionRowBuilder<ButtonBuilder>[] = promptMessage.components.map(convertButtonActionRowToBuilder);
+            newComponents[rowIndex].components.splice(
+                colIndex,
                 1,
-                new MessageButton()
+                new ButtonBuilder()
                     .setLabel(newRole.name)
-                    .setStyle('PRIMARY')
+                    .setStyle(ButtonStyle.Primary)
                     .setCustomId(`buttonRole|{"roleId":"${newRole.id}","_id":"${prompt._id}"}`)
             );
 
-            await promptMessage.edit({ components });
+            await promptMessage.edit({ components: newComponents });
         }
     }
 }

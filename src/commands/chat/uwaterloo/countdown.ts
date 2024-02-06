@@ -2,7 +2,7 @@ import Client from '#src/Client';
 import { ChatCommand } from '../ChatCommand';
 import { DateTime } from 'luxon';
 import axios from 'axios';
-import { CommandInteraction, Message } from 'discord.js';
+import { ChatInputCommandInteraction, Message } from 'discord.js';
 
 export class Countdown extends ChatCommand {
     private _examsEndDate?: DateTime;
@@ -16,7 +16,7 @@ export class Countdown extends ChatCommand {
         });
     }
 
-    async execute(interaction: Message | CommandInteraction): Promise<void> {
+    async execute(interaction: Message | ChatInputCommandInteraction): Promise<void> {
         if (!this._examsEndDate || !this._termEndDate || DateTime.local() > this._termEndDate) {
             const currentTerm = await axios
                 .get('https://openapi.data.uwaterloo.ca/v3/Terms/current', {
