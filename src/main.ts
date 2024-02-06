@@ -15,6 +15,7 @@ const intents = [
     GatewayIntentBits.GuildMessageReactions,
     GatewayIntentBits.DirectMessages,
     GatewayIntentBits.DirectMessageReactions,
+    GatewayIntentBits.MessageContent,
 ];
 const partials: Partials[] = [Partials.Channel, Partials.Message];
 const client = new Client({ intents: intents, partials: partials });

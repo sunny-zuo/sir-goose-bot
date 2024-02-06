@@ -70,10 +70,6 @@ export abstract class Command {
         return this.cooldown.checkLimit(userId).blocked;
     }
 
-    parseApplicationCommandOptionType(option: ApplicationCommandOption): ApplicationCommandOptionType {
-        return option.type;
-    }
-
     async parseMessageValue(
         interaction: Message | ChatInputCommandInteraction,
         expectedOption: ApplicationCommandOption,
@@ -82,7 +78,7 @@ export abstract class Command {
         const stringArg = argArray.shift();
         const commandInteractionOption: CommandInteractionOption = {
             name: expectedOption.name,
-            type: this.parseApplicationCommandOptionType(expectedOption),
+            type: expectedOption.type,
         };
 
         if (stringArg === undefined) {

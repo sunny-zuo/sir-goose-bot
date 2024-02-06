@@ -60,7 +60,7 @@ export class PinsView {
                 }
             })
             .catch(async (e) => {
-                if (e.name === 'Error [INTERACTION_COLLECTOR_ERROR]') {
+                if (e.name === 'Error [InteractionCollectorError]') {
                     await message.edit({ components: [] });
                 } else {
                     throw e;
