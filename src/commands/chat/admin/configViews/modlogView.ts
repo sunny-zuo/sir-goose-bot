@@ -2,18 +2,18 @@ import {
     ActionRowBuilder,
     ButtonBuilder,
     ButtonStyle,
+    ChannelSelectMenuBuilder,
+    ChannelType,
     ComponentType,
     EmbedBuilder,
-    Guild,
-    GuildBasedChannel,
     MessageComponentInteraction,
     PermissionsBitField,
-    Snowflake,
 } from 'discord.js';
 import { GuildConfigCache } from '#util/guildConfigCache';
 import { OverviewView } from './overviewView';
 import { bold } from 'discord.js';
 import { Emojis } from '#util/constants';
+import { logger } from '#util/logger';
 
 export class ModlogView {
     static async render(interaction: MessageComponentInteraction, filter: (i: MessageComponentInteraction) => boolean): Promise<void> {
@@ -58,15 +58,15 @@ export class ModlogView {
                     case 'configModlogEnable':
                         config.enableModlog = true;
                         await config.save();
-                        await this.render(i, filter);
+                        await ModlogView.render(i, filter);
                         break;
                     case 'configModlogDisable':
                         config.enableModlog = false;
                         await config.save();
-                        await this.render(i, filter);
+                        await ModlogView.render(i, filter);
                         break;
                     case 'configModlogChangeChannel':
-                        await this.renderChannelChange(i, filter);
+                        await ModlogView.renderChannelChange(i, filter);
                         break;
                     case 'configModlogBack':
                         await OverviewView.render(i, filter);
@@ -86,136 +86,127 @@ export class ModlogView {
         interaction: MessageComponentInteraction,
         filter: (i: MessageComponentInteraction) => boolean
     ): Promise<void> {
-        const embed = new EmbedBuilder().setDescription('What would you like the modlog channel to be?').setColor('Orange');
+        const config = await GuildConfigCache.fetchOrCreate(interaction.guildId!);
 
-        const button = new ActionRowBuilder<ButtonBuilder>().addComponents(
-            new ButtonBuilder()
-                .setCustomId('configModlogChangeChannelCancel')
-                .setStyle(ButtonStyle.Danger)
-                .setLabel('Cancel Modlog Channel Change')
+        const embed = new EmbedBuilder()
+            .setDescription(
+                `What channel do you want Sir Goose moderation logs to be sent to?\n
+                The current log channel is ${
+                    config.modlogChannelId ? `<#${config.modlogChannelId}>.` : 'not set, so no logs will be sent.'
+                }`
+            )
+            .setColor('Aqua');
+
+        const buttonRow = new ActionRowBuilder<ButtonBuilder>().addComponents(
+            new ButtonBuilder().setCustomId('configModlogChangeChannelCancel').setStyle(ButtonStyle.Danger).setLabel('Cancel Change')
         );
 
-        await interaction.update({ embeds: [embed], components: [button] });
+        const channelSelectRow = new ActionRowBuilder<ChannelSelectMenuBuilder>().addComponents(
+            new ChannelSelectMenuBuilder()
+                .setCustomId('configModlogChannelChangeChannelSelect')
+                .setPlaceholder('Select the new modlog channel')
+                .setChannelTypes(ChannelType.GuildText)
+                .setMaxValues(1)
+        );
+
+        await interaction.update({ embeds: [embed], components: [channelSelectRow, buttonRow] });
 
         const message = interaction.message;
-
-        const buttonCollector = message.createMessageComponentCollector({
-            filter,
-            componentType: ComponentType.Button,
-            time: 1000 * 60,
-            max: 1,
-        });
-        const messageCollector = message.channel.createMessageCollector({
-            filter: (m) => m.author.id === interaction.user.id,
-            time: 1000 * 60,
-        });
-
-        buttonCollector.on('collect', async (i) => {
-            switch (i.customId) {
-                case 'configModlogChangeChannelCancel':
-                    buttonCollector.stop('cancelled');
-                    messageCollector.stop('cancelled');
-                    await this.render(i, filter);
-                    break;
-            }
-        });
-
-        messageCollector.on('collect', async (m) => {
-            const channel = await this.parseChannel(m.guild!, m.content);
-
-            if (!channel || !channel.viewable || !interaction.guild?.members.me) {
-                const embed = new EmbedBuilder()
-                    .setDescription(
-                        'The channel provided could not be found. Please make sure that the channel exists and that I have access to the channel.'
-                    )
-                    .setColor('Red');
-
-                await m.reply({ embeds: [embed] });
-            } else {
-                if (
-                    channel
-                        .permissionsFor(interaction.guild.members.me!)
-                        .has([PermissionsBitField.Flags.SendMessages, PermissionsBitField.Flags.EmbedLinks])
-                ) {
-                    const config = await GuildConfigCache.fetchOrCreate(m.guildId!);
-                    config.modlogChannelId = channel.id;
-                    await config.save();
-
-                    const embed = new EmbedBuilder()
-                        .setDescription(`The modlog channel has been successfully updated to ${channel}.`)
-                        .setColor('Green');
-
-                    const button = new ActionRowBuilder<ButtonBuilder>().addComponents(
-                        new ButtonBuilder()
-                            .setCustomId('configModlogChangeSuccessReturn')
-                            .setStyle(ButtonStyle.Success)
-                            .setLabel('View Modlog Config')
-                    );
-
-                    const successMessage = await m.reply({ embeds: [embed], components: [button] });
-                    await message.edit({ components: [] });
-
-                    buttonCollector.stop('completed');
-                    messageCollector.stop('completed');
-
-                    await successMessage
-                        .awaitMessageComponent({ filter, componentType: ComponentType.Button, time: 1000 * 60 * 1 })
-                        .then(async (i) => {
-                            if (!i.isButton()) return;
-
-                            switch (i.customId) {
-                                case 'configModlogChangeSuccessReturn':
-                                    await this.render(i, filter);
-                                    break;
-                            }
-                        })
-                        .catch(async (e) => {
-                            if (e.name === 'Error [InteractionCollectorError]') {
-                                await successMessage.edit({ components: [] });
-                            } else {
-                                throw e;
-                            }
-                        });
-                } else {
-                    const embed = new EmbedBuilder()
-                        .setDescription(
-                            'I do not have permission to send messages and embed links in the modlog channel you provided. Please update my permissions and try again.'
-                        )
-                        .setColor('Red');
-
-                    await m.reply({ embeds: [embed] });
+        await message
+            .awaitMessageComponent({ filter, time: 1000 * 60 * 5 })
+            .then(async (i) => {
+                if (!i.inCachedGuild()) {
+                    return logger.error('modlogView.renderChannelChange interaction was not in a cached guild.');
                 }
-            }
-        });
 
-        messageCollector.on('end', async (_, reason) => {
-            switch (reason) {
-                case 'completed':
-                case 'cancelled':
-                    break;
-                default: {
+                switch (i.customId) {
+                    case 'configModlogChangeChannelCancel':
+                        await ModlogView.render(i, filter);
+                        break;
+                    case 'configModlogChannelChangeChannelSelect': {
+                        if (!i.isChannelSelectMenu()) {
+                            return logger.error(
+                                `Expected channel select menu in modlogView.renderChannelChange, but got ${i.componentType}`
+                            );
+                        }
+
+                        const channel = i.channels.first();
+                        if (!channel || channel.type !== ChannelType.GuildText) {
+                            return logger.error(`Expected guild text channel in modlogView.renderChannelChange, but got ${channel?.type}`);
+                        }
+
+                        if (
+                            channel
+                                .permissionsFor(interaction.guild!.members.me!)
+                                .has([
+                                    PermissionsBitField.Flags.ViewChannel,
+                                    PermissionsBitField.Flags.SendMessages,
+                                    PermissionsBitField.Flags.EmbedLinks,
+                                ])
+                        ) {
+                            const config = await GuildConfigCache.fetchOrCreate(i.guildId!);
+                            config.modlogChannelId = channel.id;
+                            await config.save();
+
+                            const embed = new EmbedBuilder()
+                                .setDescription(`The modlog channel has been successfully updated to ${channel}.`)
+                                .setColor('Green');
+
+                            await ModlogView.renderChannelChangeResult(i, filter, embed, ModlogView.render);
+                        } else {
+                            const embed = new EmbedBuilder()
+                                .setDescription(
+                                    'I do not have permission to view, send messages and/or embed links in the modlog channel you provided. Please update my permissions and try again.'
+                                )
+                                .setColor('Red');
+
+                            await ModlogView.renderChannelChangeResult(i, filter, embed, ModlogView.renderChannelChange);
+                        }
+                    }
+                }
+            })
+            .catch(async (e) => {
+                if (e.name === 'Error [InteractionCollectorError]') {
                     const embed = new EmbedBuilder()
                         .setTitle('Modlog Channel Change Cancelled')
                         .setDescription('No channel was provided within the time limit, so no changes were made.')
                         .setColor('Red')
                         .setTimestamp();
                     await message.edit({ embeds: [embed], components: [] });
+                } else {
+                    throw e;
                 }
-            }
-        });
+            });
     }
 
-    static async parseChannel(guild: Guild, message: string): Promise<GuildBasedChannel | null> {
-        const matches = message.match(/^<#(\d+)>$/);
-        if (matches) {
-            const id = matches[1] as Snowflake;
-            const channel = await guild.channels.fetch(id).catch(() => null);
-            return channel;
-        } else {
-            await guild.channels.fetch();
-            const channel = guild.channels.cache.find((c) => c.name === message && !c.isThread());
-            if (channel) return channel;
-            else return null;
-        }
+    static async renderChannelChangeResult(
+        interaction: MessageComponentInteraction,
+        filter: (i: MessageComponentInteraction) => boolean,
+        embed: EmbedBuilder,
+        backFunction: (i: MessageComponentInteraction, filter: (i: MessageComponentInteraction) => boolean) => Promise<void>
+    ): Promise<void> {
+        const button = new ActionRowBuilder<ButtonBuilder>().addComponents(
+            new ButtonBuilder().setCustomId('configModlogChangeBack').setStyle(ButtonStyle.Secondary).setLabel('Back')
+        );
+
+        await interaction.update({ embeds: [embed], components: [button] });
+
+        const message = interaction.message;
+        await message
+            .awaitMessageComponent({ filter, componentType: ComponentType.Button, time: 1000 * 60 * 5 })
+            .then(async (i) => {
+                switch (i.customId) {
+                    case 'configModlogChangeBack':
+                        await backFunction(i, filter);
+                        break;
+                }
+            })
+            .catch(async (e) => {
+                if (e.name === 'Error [InteractionCollectorError]') {
+                    await message.edit({ components: [] });
+                } else {
+                    throw e;
+                }
+            });
     }
 }

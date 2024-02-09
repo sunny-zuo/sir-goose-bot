@@ -19,7 +19,7 @@ export class BotStats extends ChatCommand {
             cooldownSeconds: 5,
         });
 
-        this.latestCommit = process.env.GIT_COMMIT?.slice(7) ?? 'unknown';
+        this.latestCommit = process.env.GIT_COMMIT?.slice(0, 7) ?? 'unknown';
     }
 
     async execute(interaction: Message | ChatInputCommandInteraction): Promise<void> {

@@ -6,6 +6,7 @@ import {
     EmbedBuilder,
     PermissionsBitField,
     ChatInputCommandInteraction,
+    inlineCode,
 } from 'discord.js';
 import Client from '#src/Client';
 import { ChatCommand } from '../ChatCommand';
@@ -51,7 +52,13 @@ export class Prefix extends ChatCommand {
             const embed = new EmbedBuilder()
                 .setColor('Blue')
                 .setTitle('Bot Prefix')
-                .setDescription(`The current prefix is \`${guild?.prefix || '$'}\`. You can also use Discord slash commands!`)
+                .setDescription(
+                    `The current prefix is \`${
+                        guild?.prefix || '$'
+                    }\`. However, support for message commands will be removed soon. Please switch to using slash (${inlineCode(
+                        '/'
+                    )}) commands!`
+                )
                 .setTimestamp();
 
             await interaction.reply({ embeds: [embed] });
