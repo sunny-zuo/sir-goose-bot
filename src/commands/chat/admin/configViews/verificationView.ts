@@ -47,7 +47,7 @@ export class VerificationView {
                 .setLabel('Disable')
                 .setDisabled(!config.enableVerification),
             new ButtonBuilder().setCustomId('configVerificationViewRules').setStyle(ButtonStyle.Primary).setLabel('View Rules'),
-            new ButtonBuilder().setCustomId('configVerificationSetRules').setStyle(ButtonStyle.Primary).setLabel('Update Rules')
+            new ButtonBuilder().setCustomId('verifyRules').setStyle(ButtonStyle.Primary).setLabel('Update Rules')
         );
 
         const row2 = new ActionRowBuilder<ButtonBuilder>().addComponents(
