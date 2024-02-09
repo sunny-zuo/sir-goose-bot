@@ -79,7 +79,7 @@ export class Ban extends ChatCommand {
         await interaction.deferReply();
 
         const guild = interaction.guild;
-        if (!guild) return;
+        if (!guild || !interaction.inCachedGuild()) return;
 
         const modlogEmbeds: EmbedBuilder[] = [];
         const banReason = args.getString('reason') ?? 'No reason provided.';

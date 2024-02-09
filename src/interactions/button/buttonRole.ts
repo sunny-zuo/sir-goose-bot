@@ -1,4 +1,4 @@
-import { ButtonInteraction, GuildMember, EmbedBuilder, Snowflake, inlineCode } from 'discord.js';
+import { ButtonInteraction, EmbedBuilder, Snowflake, inlineCode } from 'discord.js';
 import { ButtonInteractionHandler } from './buttonInteractionHandler';
 import { Cooldown } from '#util/cooldown';
 import Client from '#src/Client';
@@ -21,8 +21,7 @@ export class ButtonRole implements ButtonInteractionHandler {
     }
 
     async execute(interaction: ButtonInteraction, args?: string): Promise<void> {
-        if (!args || !interaction.guild || !interaction.member) return;
-
+        if (!args || !interaction.inCachedGuild()) return;
         await interaction.deferReply({ ephemeral: true }); // defer as role assginment can take more than 3 seconds during peak times
 
         let argData: InteractionData;
@@ -51,7 +50,7 @@ export class ButtonRole implements ButtonInteractionHandler {
 
         if (role) {
             if (role.editable) {
-                const member = interaction.member as GuildMember;
+                const member = interaction.member;
                 if (member.roles.cache.has(role.id)) {
                     const embed = new EmbedBuilder()
                         .setDescription(`The role ${inlineCode(role.name)} was successfully removed.`)

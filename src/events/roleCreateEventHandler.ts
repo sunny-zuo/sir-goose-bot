@@ -1,7 +1,6 @@
 import { EventHandler } from './eventHandler';
 import Client from '#src/Client';
 import {
-    GuildMember,
     ActionRowBuilder,
     ButtonBuilder,
     MessageComponentInteraction,
@@ -69,7 +68,8 @@ export class RoleCreateEventHandler implements EventHandler {
             let validInteractionReceived = false;
 
             collector.on('collect', async (i) => {
-                const member = i.member as GuildMember;
+                if (!i.inCachedGuild()) return;
+                const member = i.member;
 
                 if (!member.permissions.has(PermissionFlagsBits.ManageGuild)) {
                     const embed = new EmbedBuilder()

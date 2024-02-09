@@ -3,7 +3,6 @@ import Client from '#src/Client';
 import {
     ChannelType,
     ComponentType,
-    GuildMember,
     ActionRowBuilder,
     ButtonBuilder,
     MessageComponentInteraction,
@@ -121,7 +120,8 @@ export class RoleUpdateEventHandler implements EventHandler {
             let validInteractionReceived = false;
 
             collector.on('collect', async (i) => {
-                const member = i.member as GuildMember;
+                if (!i.inCachedGuild()) return;
+                const member = i.member;
 
                 if (!member.permissions.has(PermissionsBitField.Flags.ManageGuild)) {
                     const embed = new EmbedBuilder()

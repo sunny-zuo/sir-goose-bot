@@ -1,5 +1,5 @@
 import Client from '#src/Client';
-import { GuildMember, EmbedBuilder, ModalSubmitInteraction, codeBlock, inlineCode, PermissionsBitField } from 'discord.js';
+import { EmbedBuilder, ModalSubmitInteraction, codeBlock, inlineCode, PermissionsBitField } from 'discord.js';
 import { ModalSubmitInteractionHandler } from './modalInteractionHandler';
 import { RoleData, VerificationImportV2, VerificationRule } from '#types/Verification';
 import { serializeVerificationRules } from '#util/verification';
@@ -14,8 +14,9 @@ export class VerifyRulesModal implements ModalSubmitInteractionHandler {
     }
 
     async execute(interaction: ModalSubmitInteraction): Promise<void> {
+        if (!interaction.inCachedGuild()) return;
         // TODO: refactor into more generic permission checker
-        const member = interaction.member as GuildMember;
+        const member = interaction.member;
         if (!member.permissions.has(PermissionsBitField.Flags.ManageGuild)) {
             await interaction.reply({
                 embeds: [new EmbedBuilder().setDescription('You must have the Manage Guild permission to use this modal.').setColor('Red')],
