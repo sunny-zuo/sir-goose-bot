@@ -60,7 +60,7 @@ export class RoleCreateEventHandler implements EventHandler {
                 new ButtonBuilder().setCustomId(ignoreId).setLabel('Ignore').setStyle(ButtonStyle.Danger)
             );
 
-            const message = await Modlog.logMessage(this.client, guild, { embeds: [embed], components: [row] });
+            const message = await Modlog.logMessage(guild, { embeds: [embed], components: [row] });
             if (!message) return;
 
             const filter = (i: MessageComponentInteraction) => i.member !== undefined;

@@ -67,7 +67,6 @@ export class RoleUpdateEventHandler implements EventHandler {
                 await config.save();
 
                 await Modlog.logInfoMessage(
-                    this.client,
                     guild,
                     'Verification Role Updated',
                     `The role \`${oldRole.name}\` is used for verification, and was renamed to \`${newRole.name}\`. The server's verification rules have automatically updated to reflect this change.`,
@@ -112,7 +111,7 @@ export class RoleUpdateEventHandler implements EventHandler {
                 new ButtonBuilder().setCustomId(ignoreId).setLabel('Ignore').setStyle(ButtonStyle.Danger)
             );
 
-            const message = await Modlog.logMessage(this.client, guild, { embeds: [embed], components: [row] });
+            const message = await Modlog.logMessage(guild, { embeds: [embed], components: [row] });
             if (!message) return;
 
             const filter = (i: MessageComponentInteraction) => i.member !== undefined;

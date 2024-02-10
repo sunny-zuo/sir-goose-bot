@@ -47,7 +47,6 @@ export class PinMessage extends ContextMenuCommand {
 
         if (pinResult.success) {
             await Modlog.logUserAction(
-                this.client,
                 interaction.guild,
                 this.getUser(interaction),
                 `${interaction.member} pinned [a message](${message.url}) using the pin command in ${message.channel}.`,
