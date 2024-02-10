@@ -76,10 +76,10 @@ export class Ban extends ChatCommand {
         interaction: ChatInputCommandInteraction,
         args: Omit<CommandInteractionOptionResolver, 'getMessage' | 'getFocused'>
     ): Promise<void> {
+        if (!interaction.inCachedGuild()) return;
         await interaction.deferReply();
 
         const guild = interaction.guild;
-        if (!guild) return;
 
         const modlogEmbeds: EmbedBuilder[] = [];
         const banReason = args.getString('reason') ?? 'No reason provided.';
@@ -205,7 +205,7 @@ export class Ban extends ChatCommand {
 
         // max embed limit is 10 per message - this lets us properly log when a user has >10 alt accounts
         for (const embeds of chunk(modlogEmbeds, 10)) {
-            await Modlog.logMessage(this.client, interaction.guild, { embeds });
+            await Modlog.logMessage(interaction.guild, { embeds });
         }
 
         logger.info({

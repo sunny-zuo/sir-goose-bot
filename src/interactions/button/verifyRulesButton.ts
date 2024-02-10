@@ -1,6 +1,5 @@
 import {
     ButtonInteraction,
-    GuildMember,
     ActionRowBuilder,
     EmbedBuilder,
     ModalBuilder,
@@ -24,8 +23,10 @@ export class VerifyRulesButton implements ButtonInteractionHandler {
     }
 
     async execute(interaction: ButtonInteraction): Promise<void> {
+        if (!interaction.inCachedGuild()) return;
+        const member = interaction.member;
+
         // TODO: refactor into more generic permission checker
-        const member = interaction.member as GuildMember;
         if (!member.permissions.has(PermissionsBitField.Flags.ManageGuild)) {
             await interaction.reply({
                 embeds: [

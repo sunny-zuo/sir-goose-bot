@@ -9,18 +9,11 @@ import {
     Message,
     ChannelType,
 } from 'discord.js';
-import Client from '#src/Client';
 import { GuildConfigCache } from './guildConfigCache';
 import { logger } from '#util/logger';
 
 export class Modlog {
-    static async logUserAction(
-        client: Client,
-        guild: Guild | null,
-        user: User,
-        message: string,
-        color: ColorResolvable = 'Blue'
-    ): Promise<Message | void> {
+    static async logUserAction(guild: Guild | null, user: User, message: string, color: ColorResolvable = 'Blue'): Promise<Message | void> {
         if (!guild || !guild.members.me) return;
 
         const channel = await this.fetchModlogChannel(guild);
@@ -36,7 +29,6 @@ export class Modlog {
     }
 
     static async logInfoMessage(
-        client: Client,
         guild: Guild | null,
         title: string,
         message: string,
@@ -56,7 +48,7 @@ export class Modlog {
         }
     }
 
-    static async logMessage(client: Client, guild: Guild | null, message: MessageCreateOptions): Promise<Message | void> {
+    static async logMessage(guild: Guild | null, message: MessageCreateOptions): Promise<Message | void> {
         if (!guild || !guild.members.me) return;
 
         const channel = await this.fetchModlogChannel(guild);

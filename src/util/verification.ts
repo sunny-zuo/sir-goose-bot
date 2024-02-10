@@ -147,7 +147,7 @@ export async function safeSendVerificationEmbed(
                 ? await sendEphemeralReply(interaction, { embeds: [embed] }, 60, options.isDeferred)
                 : await sendReply(interaction, { embeds: [embed] }, options.isDeferred);
 
-            await Modlog.logUserAction(client, interaction.guild, discordUser, `${discordUser} requested a verification link.`, 'Blue');
+            await Modlog.logUserAction(interaction.guild, discordUser, `${discordUser} requested a verification link.`, 'Blue');
         } else {
             await sendReply(interaction, verifyReply, options.isDeferred);
         }

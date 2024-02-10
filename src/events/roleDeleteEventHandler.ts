@@ -40,7 +40,6 @@ export class RoleDeleteEventHandler implements EventHandler {
                         );
 
                         await Modlog.logInfoMessage(
-                            this.client,
                             guild,
                             'Verification Role Deleted',
                             `The role \`${deletedRole.name}\` was setup to be one of the roles assigned in the server's verification rules, but is now deleted. Please update the verification rules!`,

@@ -30,7 +30,7 @@ export class PrefixView {
 
                 switch (i.customId) {
                     case 'configPrefixChange':
-                        await this.renderPrefixChange(i, filter);
+                        await PrefixView.renderPrefixChange(i, filter);
                         break;
                     case 'configPrefixBack':
                         await OverviewView.render(i, filter);
@@ -118,7 +118,7 @@ export class PrefixView {
 
                         switch (i.customId) {
                             case 'configPrefixChangeSuccessReturn':
-                                await this.render(i, filter);
+                                await PrefixView.render(i, filter);
                                 break;
                         }
                     })

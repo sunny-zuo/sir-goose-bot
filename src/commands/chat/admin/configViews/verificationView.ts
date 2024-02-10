@@ -47,7 +47,7 @@ export class VerificationView {
                 .setLabel('Disable')
                 .setDisabled(!config.enableVerification),
             new ButtonBuilder().setCustomId('configVerificationViewRules').setStyle(ButtonStyle.Primary).setLabel('View Rules'),
-            new ButtonBuilder().setCustomId('configVerificationSetRules').setStyle(ButtonStyle.Primary).setLabel('Update Rules')
+            new ButtonBuilder().setCustomId('verifyRules').setStyle(ButtonStyle.Primary).setLabel('Update Rules')
         );
 
         const row2 = new ActionRowBuilder<ButtonBuilder>().addComponents(
@@ -74,13 +74,13 @@ export class VerificationView {
                     config.enableVerification = true;
                     await config.save();
                     buttonCollector.stop('completed');
-                    await this.render(i, filter);
+                    await VerificationView.render(i, filter);
                     break;
                 case 'configVerificationDisable':
                     config.enableVerification = false;
                     await config.save();
                     buttonCollector.stop('completed');
-                    await this.render(i, filter);
+                    await VerificationView.render(i, filter);
                     break;
                 case 'configVerificationViewRules': {
                     const embed = new EmbedBuilder().setColor('Blue').setTitle('Verification Rules')

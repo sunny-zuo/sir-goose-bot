@@ -9,7 +9,6 @@ import {
     inlineCode,
     ChatInputCommandInteraction,
 } from 'discord.js';
-import Client from '#src/Client';
 import { PrefixView } from './prefixView';
 import { PinsView } from './pinsView';
 import { ModlogView } from './modlogView';
@@ -65,7 +64,7 @@ export class OverviewView {
         await this.listenForViewSelect(interaction.message, filter);
     }
 
-    static async initialRender(client: Client, interaction: ChatInputCommandInteraction | Message): Promise<void> {
+    static async initialRender(interaction: ChatInputCommandInteraction | Message): Promise<void> {
         const configMenu = await interaction.reply({
             embeds: [await this.generateConfigViewEmbed(interaction.guild!)],
             components: [this.optionSelectMenu],

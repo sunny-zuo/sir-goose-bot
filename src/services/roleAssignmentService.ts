@@ -109,7 +109,6 @@ export class RoleAssignmentService {
 
             if (userBan) {
                 await Modlog.logUserAction(
-                    this.client,
                     guild,
                     member.user,
                     `We attempted to verify ${member} but did not assign any roles as they are banned. ${
@@ -144,7 +143,6 @@ export class RoleAssignmentService {
                 await member.roles.set(rolesToSet, 'Verified via Sir Goose Bot');
                 if (params.log) {
                     await Modlog.logUserAction(
-                        this.client,
                         guild,
                         member.user,
                         `${member} successfully verified and was assigned the ${newRoles
@@ -156,7 +154,6 @@ export class RoleAssignmentService {
             } else if (user.verifyRequestedServerId === guild.id && newRoles.length === 0) {
                 if (params.log) {
                     await Modlog.logUserAction(
-                        this.client,
                         guild,
                         member.user,
                         `${member} successfully verified but was not assigned any roles due to the server configuration.`,
@@ -233,7 +230,6 @@ export class RoleAssignmentService {
         if (invalidRoles.length > 0) {
             if (log) {
                 await Modlog.logInfoMessage(
-                    this.client,
                     guild,
                     'Verification Role Assignment Error',
                     `We attempted to assign the role(s) ${invalidRoles.map((role) => `"${role.name}" (${role.id})`).join(', ')} to <@${

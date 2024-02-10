@@ -1,5 +1,5 @@
 import Client from '#src/Client';
-import { GuildMember, EmbedBuilder, ModalSubmitInteraction, codeBlock, inlineCode, PermissionsBitField } from 'discord.js';
+import { EmbedBuilder, ModalSubmitInteraction, codeBlock, inlineCode, PermissionsBitField } from 'discord.js';
 import { ModalSubmitInteractionHandler } from './modalInteractionHandler';
 import { RoleData, VerificationImportV2, VerificationRule } from '#types/Verification';
 import { serializeVerificationRules } from '#util/verification';
@@ -14,11 +14,13 @@ export class VerifyRulesModal implements ModalSubmitInteractionHandler {
     }
 
     async execute(interaction: ModalSubmitInteraction): Promise<void> {
+        if (!interaction.inCachedGuild()) return;
         // TODO: refactor into more generic permission checker
-        const member = interaction.member as GuildMember;
+        const member = interaction.member;
         if (!member.permissions.has(PermissionsBitField.Flags.ManageGuild)) {
             await interaction.reply({
                 embeds: [new EmbedBuilder().setDescription('You must have the Manage Guild permission to use this modal.').setColor('Red')],
+                ephemeral: true,
             });
             return;
         }
@@ -39,12 +41,12 @@ export class VerifyRulesModal implements ModalSubmitInteractionHandler {
 
             if (importedJSON?.v !== 2) throw new Error('Rule import was not v2');
         } catch (e) {
-            await interaction.reply({ embeds: [importErrorEmbed] });
+            await interaction.reply({ embeds: [importErrorEmbed], ephemeral: true });
             return;
         }
 
         if (!importedJSON.rules || importedJSON.rules.length === 0) {
-            await interaction.reply({ embeds: [importErrorEmbed] });
+            await interaction.reply({ embeds: [importErrorEmbed], ephemeral: true });
             return;
         }
 
@@ -64,7 +66,7 @@ export class VerifyRulesModal implements ModalSubmitInteractionHandler {
                     !['all', 'equal', 'upper', 'lower'].includes(importedRule.yearMatch) ||
                     !['anything', 'exact', 'begins', 'contains'].includes(importedRule.match)
                 ) {
-                    await interaction.reply({ embeds: [importErrorEmbed] });
+                    await interaction.reply({ embeds: [importErrorEmbed], ephemeral: true });
                     return;
                 }
 
@@ -79,7 +81,7 @@ export class VerifyRulesModal implements ModalSubmitInteractionHandler {
                             .setDescription(`The role "${roleName}" could not be found on this server.`)
                             .setColor('Red');
 
-                        await interaction.reply({ embeds: [errorEmbed] });
+                        await interaction.reply({ embeds: [errorEmbed], ephemeral: true });
                         return;
                     } else if (!role.editable) {
                         const errorEmbed = new EmbedBuilder()
@@ -89,7 +91,7 @@ export class VerifyRulesModal implements ModalSubmitInteractionHandler {
                             )
                             .setColor('Red');
 
-                        await interaction.reply({ embeds: [errorEmbed] });
+                        await interaction.reply({ embeds: [errorEmbed], ephemeral: true });
                         return;
                     } else {
                         roles.push({ id: role.id, name: role.name });

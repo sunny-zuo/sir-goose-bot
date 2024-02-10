@@ -57,11 +57,10 @@ export class Unban extends ChatCommand {
         interaction: ChatInputCommandInteraction,
         args: Omit<CommandInteractionOptionResolver, 'getMessage' | 'getFocused'>
     ): Promise<void> {
-        const guild = interaction.guild;
-        if (!guild) return;
-
+        if (!interaction.inCachedGuild()) return;
         await interaction.deferReply();
 
+        const guild = interaction.guild;
         const userIdToUnban = args.getString('user_id', true);
         const providedUnbanReason = args.getString('reason') ?? 'No reason provided.';
         const unbanReason = `Unbanned by ${interaction.user.tag} | Target unban user id: ${userIdToUnban} | ${providedUnbanReason}`;
@@ -128,7 +127,6 @@ export class Unban extends ChatCommand {
             });
 
             await Modlog.logUserAction(
-                this.client,
                 guild,
                 interaction.user,
                 `

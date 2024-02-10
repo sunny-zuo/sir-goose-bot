@@ -11,12 +11,8 @@ import {
     Role,
     ColorResolvable,
     CommandInteractionOptionResolver,
-    TextBasedChannel,
     GuildBasedChannel,
     ApplicationCommandOptionType,
-    GuildChannel,
-    NewsChannel,
-    TextChannel,
     UserContextMenuCommandInteraction,
     ChannelType,
 } from 'discord.js';
@@ -309,10 +305,7 @@ export abstract class Command {
                 const parentId = interaction.channel.parentId;
                 if (!parentId) return false; // should only be null if bot user can't view channel or bot user does not exist
 
-                // TODO: remove this cast - we cast because fetching a thread's parent can only be a NewsChannel or a TextChannel
-                const parentChannel = (await interaction.channel.guild.channels.fetch(parentId).catch(() => null)) as
-                    | NewsChannel
-                    | TextChannel;
+                const parentChannel = await interaction.channel.guild.channels.fetch(parentId).catch(() => null);
                 if (!parentChannel) return false;
 
                 return (
@@ -343,7 +336,7 @@ export abstract class Command {
 
     async checkMemberPermissions(
         member: GuildMember | null,
-        channel: GuildChannel,
+        channel: GuildBasedChannel,
         interaction: Message | ChatInputCommandInteraction | UserContextMenuCommandInteraction | null = null,
         ownerOverride = true
     ): Promise<boolean> {
@@ -374,7 +367,7 @@ export abstract class Command {
     }
 
     async checkClientPermissions(
-        channel: GuildChannel,
+        channel: GuildBasedChannel,
         interaction: Message | ChatInputCommandInteraction | UserContextMenuCommandInteraction | null = null
     ): Promise<boolean> {
         if (channel.guild.members.me === null) return false;
@@ -392,27 +385,6 @@ export abstract class Command {
         }
 
         return false;
-    }
-
-    getValidChannel(channel: TextBasedChannel | null): Promise<TextBasedChannel> {
-        return new Promise((resolve, reject) => {
-            if (channel !== null) {
-                if (channel.type === ChannelType.DM) {
-                    const dmChannel = channel;
-                    if (dmChannel.partial) {
-                        resolve(dmChannel.fetch());
-                    }
-                }
-
-                resolve(channel);
-            } else {
-                reject(
-                    new Error(
-                        `Command "${this.name}" failed to fetch valid channel - this is likely because a slash command was used without the bot user existing in a guild`
-                    )
-                );
-            }
-        });
     }
 
     sendSuccessEmbed(

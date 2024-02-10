@@ -1,7 +1,6 @@
 import { EventHandler } from './eventHandler';
 import Client from '#src/Client';
 import {
-    GuildMember,
     ActionRowBuilder,
     ButtonBuilder,
     MessageComponentInteraction,
@@ -61,7 +60,7 @@ export class RoleCreateEventHandler implements EventHandler {
                 new ButtonBuilder().setCustomId(ignoreId).setLabel('Ignore').setStyle(ButtonStyle.Danger)
             );
 
-            const message = await Modlog.logMessage(this.client, guild, { embeds: [embed], components: [row] });
+            const message = await Modlog.logMessage(guild, { embeds: [embed], components: [row] });
             if (!message) return;
 
             const filter = (i: MessageComponentInteraction) => i.member !== undefined;
@@ -69,7 +68,8 @@ export class RoleCreateEventHandler implements EventHandler {
             let validInteractionReceived = false;
 
             collector.on('collect', async (i) => {
-                const member = i.member as GuildMember;
+                if (!i.inCachedGuild()) return;
+                const member = i.member;
 
                 if (!member.permissions.has(PermissionFlagsBits.ManageGuild)) {
                     const embed = new EmbedBuilder()

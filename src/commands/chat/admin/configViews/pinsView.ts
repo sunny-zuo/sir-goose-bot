@@ -47,12 +47,12 @@ export class PinsView {
                     case 'configPinsEnable':
                         config.enablePins = true;
                         await config.save();
-                        await this.render(i, filter);
+                        await PinsView.render(i, filter);
                         break;
                     case 'configPinsDisable':
                         config.enablePins = false;
                         await config.save();
-                        await this.render(i, filter);
+                        await PinsView.render(i, filter);
                         break;
                     case 'configPinsBack':
                         await OverviewView.render(i, filter);
