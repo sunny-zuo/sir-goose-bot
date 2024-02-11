@@ -60,19 +60,21 @@ export class Unban extends ChatCommand {
         if (!interaction.inCachedGuild()) return;
         await interaction.deferReply();
 
+        let changesMade = false;
         const guild = interaction.guild;
         const userIdToUnban = args.getString('user_id', true);
         const providedUnbanReason = args.getString('reason') ?? 'No reason provided.';
         const unbanReason = `Unbanned by ${interaction.user.tag} | Target unban user id: ${userIdToUnban} | ${providedUnbanReason}`;
 
         const userInfo = await UserModel.findOne({ discordId: userIdToUnban });
-        const userIsVerified = userInfo && userInfo.uwid;
+        const userIsVerified = userInfo?.uwid !== undefined;
         const allAccountIds = userIsVerified
             ? await UserModel.find({ uwid: userInfo.uwid }).then((data) => data.map((user) => user.discordId))
             : [userIdToUnban];
 
         if (userIsVerified) {
-            await BanModel.updateMany({ discordId: [...allAccountIds] }, { unbanned: true });
+            const res = await BanModel.updateMany({ userId: [...allAccountIds] }, { unbanned: true });
+            if (res.modifiedCount > 0) changesMade = true;
         }
 
         const unbannedUserIds = [];
@@ -83,13 +85,14 @@ export class Unban extends ChatCommand {
                 try {
                     await guild.bans.remove(accountId, unbanReason);
                     unbannedUserIds.push(accountId);
+                    changesMade = true;
                 } catch (e) {
                     logger.warn(e, 'Failed to unban user when ban existed.');
                 }
             }
         }
 
-        if (unbannedUserIds.length === 0) {
+        if (!changesMade) {
             const userIdHelp = `It's also possible that you're using an invalid user id. User IDs are a long string of numbers, that look like ${inlineCode(
                 '1144955602704019500'
             )}. ${hyperlink(
