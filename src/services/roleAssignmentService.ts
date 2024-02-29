@@ -2,7 +2,6 @@ import fs from 'fs';
 import path from 'path';
 import { SHA256 } from 'crypto-js';
 import { Collection, Guild, GuildMember, PermissionsBitField, Role, Snowflake } from 'discord.js';
-import Client from '#src/Client';
 import { GuildConfigCache } from '#util/guildConfigCache';
 import UserModel, { User as UserInterface } from '#models/user.model';
 import GuildModel, { GuildConfig } from '#models/guildConfig.model';
@@ -11,15 +10,15 @@ import { Result } from '../types';
 import { Modlog } from '#util/modlog';
 import { RoleData } from '#types/Verification';
 import { logger } from '#util/logger';
+import Client from '#src/Client';
 
 type CustomFileImport = { type: 'hash' | 'uwid'; department: string | null; entranceYear: number | null; ids: string[] };
 type CustomValues = { departments: string[]; entranceYear: number | null };
-type AssignGuildRolesParams = { log?: boolean; returnMissing?: boolean; oldDepartment?: string };
+type AssignGuildRolesParams = { log?: boolean; returnMissing?: boolean; oldDepartment?: string; oldYear?: number };
 export type RoleAssignmentResult = { assignedRoles: Role[]; updatedName?: string };
 
 export class RoleAssignmentService {
     static customImport: Collection<string, CustomValues> = new Collection<string, CustomValues>();
-    client: Client;
     userId: Snowflake;
 
     static parseCustomImports(): void {
@@ -60,18 +59,17 @@ export class RoleAssignmentService {
         logger.info(`Successfully loaded custom departments/entrance years!`);
     }
 
-    constructor(client: Client, userId: Snowflake) {
-        this.client = client;
+    constructor(userId: Snowflake) {
         this.userId = userId;
     }
 
-    async assignAllRoles(oldDepartment?: string): Promise<void> {
+    async assignAllRoles(client: Client, oldDepartment?: string): Promise<void> {
         const guildModels = await GuildModel.find({ enableVerification: true });
 
         logger.info({ verification: 'assignAll', user: { id: this.userId } }, 'Assigning roles to user in all possible guilds');
         for (const guildModel of guildModels) {
             try {
-                const guild = this.client.guilds.cache.get(guildModel.guildId);
+                const guild = client.guilds.cache.get(guildModel.guildId);
                 if (guild) {
                     await this.assignGuildRoles(guild, { oldDepartment });
                 }
@@ -123,8 +121,12 @@ export class RoleAssignmentService {
             const newRoles = await this.getMatchingRoles(guild, user, params.log);
 
             let oldRoles: Role[] = [];
-            if (params.oldDepartment) {
-                oldRoles = await this.getMatchingRoles(guild, { ...user.toObject(), department: params.oldDepartment }, false);
+            if (params.oldDepartment || params.oldYear) {
+                const oldUserInfo = user.toObject();
+                if (params.oldDepartment) oldUserInfo.department = params.oldDepartment;
+                if (params.oldYear) oldUserInfo.o365CreatedDate = new Date(params.oldYear, 5);
+
+                oldRoles = await this.getMatchingRoles(guild, oldUserInfo, false);
             }
 
             const rolesToSet = member.roles.cache.clone();
@@ -209,7 +211,7 @@ export class RoleAssignmentService {
         return undefined;
     }
 
-    private async getMatchingRoles(guild: Guild, user: UserInterface, log = true): Promise<Role[]> {
+    async getMatchingRoles(guild: Guild, user: UserInterface, log = true): Promise<Role[]> {
         const config = await GuildConfigCache.fetchConfig(guild.id);
 
         const roleData = RoleAssignmentService.getMatchingRoleData(user, config);

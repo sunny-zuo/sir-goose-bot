@@ -14,7 +14,7 @@ export class VerifyAll extends ChatCommand {
             cooldownSeconds: 3600,
             cooldownMaxUses: 5,
             clientPermissions: [PermissionsBitField.Flags.ManageRoles],
-            userPermissions: [PermissionsBitField.Flags.ManageGuild],
+            userPermissions: [PermissionsBitField.Flags.ManageGuild, PermissionsBitField.Flags.ManageRoles],
         });
     }
 
@@ -69,7 +69,7 @@ export class VerifyAll extends ChatCommand {
 
         try {
             for (const member of members.values()) {
-                const service = new RoleAssignmentService(this.client, member.id);
+                const service = new RoleAssignmentService(member.id);
                 const roleAssignment = await service.assignGuildRoles(interaction.guild, { log: false });
                 progress++;
 

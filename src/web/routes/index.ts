@@ -88,8 +88,8 @@ router.get('/authorize', async (req, res) => {
             { upsert: true }
         );
 
-        const roleAssignmentService = new RoleAssignmentService(req.client, discordId as Snowflake);
-        await roleAssignmentService.assignAllRoles(oldDepartment);
+        const roleAssignmentService = new RoleAssignmentService(discordId as Snowflake);
+        await roleAssignmentService.assignAllRoles(req.client, oldDepartment);
 
         res.send("You've been verified successfully! You can close this window and return to Discord.");
     } catch (e: unknown) {
