@@ -27,6 +27,7 @@ export class VerifyRules extends ChatCommand {
     }
 
     async execute(interaction: Message | ChatInputCommandInteraction): Promise<void> {
+        // TODO: defer reply here
         const config = await GuildConfigCache.fetchConfig(interaction.guild!.id);
 
         const button = new ActionRowBuilder<ButtonBuilder>().addComponents(
