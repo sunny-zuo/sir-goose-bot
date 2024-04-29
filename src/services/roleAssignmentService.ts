@@ -133,10 +133,14 @@ export class RoleAssignmentService {
             oldRoles.map((role) => rolesToSet.delete(role.id));
             newRoles.map((role) => rolesToSet.set(role.id, role));
 
-            // custom rule for UWaterloo WiE guild to remove the "Unverified" role from users when they verify
+            // custom actions for specific servers that want behavior not supported by rules
             // todo: build this out into rules
             if (guild.id === '767143197813112833') {
+                // UWaterloo WiE server, remove the "Unverified" role
                 rolesToSet.delete('865768247366385664');
+            } else if (guild.id === '798546372038098984') {
+                // Co-op Connection server, remove the "Unverified" role
+                rolesToSet.delete('800477641978806334');
             }
 
             if (!rolesToSet.equals(member.roles.cache)) {
