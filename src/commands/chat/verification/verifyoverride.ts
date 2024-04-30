@@ -23,6 +23,7 @@ import { VerificationDefaultStartingYears, VerificationDepartmentList } from '#t
 import { RoleAssignmentService } from '#services/roleAssignmentService';
 import UserModel from '#models/user.model';
 import VerificationOverrideModel from '#models/verificationOverride.model';
+import { Modlog } from '#util/modlog';
 
 export class VerifyOverride extends ChatCommand {
     private static readonly options: ApplicationCommandOption[] = [
@@ -85,164 +86,175 @@ export class VerifyOverride extends ChatCommand {
             return;
         }
 
-        let users = [args.getUser('user', true)];
-        const customDept = args.getString('department');
-        const customYear = args.getNumber('entranceyear')?.toString() ?? null;
-        let selectedDept: string | null = customDept;
-        let selectedYear: string | null = customYear;
+        const users = [args.getUser('user', true)];
+        const customDept = args.getString('department') ?? undefined;
+        const customYear = args.getNumber('entranceyear')?.toString();
 
-        const embed = new EmbedBuilder().setColor('Blue').setTitle('Create Verification Override').setDescription(`
-                Manually set the department and/or entrance year of user(s) for verification purposes. You can use this feature to fix data inaccuracies or to manually verify a user for this guild.
+        await renderCreateOverrideScreen(interaction, interaction.user, users, customDept, customYear);
+    }
+}
 
-                This override will last until it is deleted, so commands like ${inlineCode(
-                    '/verifyall'
-                )} will use the overridden details and users will be verified with the overridden details if they rejoin the server.
+async function renderCreateOverrideScreen(
+    interaction: ChatInputCommandInteraction | ButtonInteraction,
+    creator: User,
+    targetUsers: User[],
+    selectedDept?: string,
+    selectedYear?: string
+) {
+    if (!interaction.deferred) await interaction.deferReply({ ephemeral: true });
 
-                To verify an unverified user, both the department and year must be set. If a field is not overridden, then it will fallback to using the user's info for the missing field.
+    const embed = new EmbedBuilder().setColor('Blue').setTitle('Create Verification Override').setDescription(`
+        Manually set the department and/or entrance year of user(s) for verification purposes. You can use this feature to fix data inaccuracies or to manually verify a user for this guild.
 
-                If you want to create an override with a department or year not in the list, please provide it when you use ${inlineCode(
-                    '/verifyoverride create'
-                )}.
-            `);
+        This override will last until it is deleted, so commands like ${inlineCode(
+            '/verifyall'
+        )} will use the overridden details and users will be verified with the overridden details if they rejoin the server.
 
-        const message = await interaction.editReply({
-            embeds: [embed],
-            components: renderSelectionComponents(users, customDept, selectedDept, customYear, selectedYear),
-        });
+        To verify an unverified user, both the department and year must be set. If a field is not overridden, then it will fallback to using the user's info for the missing field.
 
-        let finished = false;
-        while (!finished) {
-            await message
-                .awaitMessageComponent({ time: 1000 * 60 * 5 })
-                .then(async (i) => {
-                    if (['verifyoverrideDepartmentSelect', 'verifyoverrideYearSelect'].includes(i.customId)) {
-                        if (!i.isStringSelectMenu())
-                            throw new Error("verifyoverride received dept select interaction that wasn't a string select");
+        If you want to create an override with a department or year not in the list, please provide it when you use ${inlineCode(
+            '/verifyoverride create'
+        )}.
+    `);
 
-                        if (i.customId === 'verifyoverrideDepartmentSelect') {
-                            selectedDept = i.values[0];
-                        } else if (i.customId === 'verifyoverrideYearSelect') {
-                            selectedYear = i.values[0];
-                        }
+    const message = await interaction.editReply({
+        embeds: [embed],
+        components: renderSelectionComponents(targetUsers, selectedDept, selectedYear),
+    });
 
-                        await i.update({
-                            components: renderSelectionComponents(users, customDept, selectedDept, customYear, selectedYear),
-                        });
-                    } else if (i.customId === 'verifyoverrideUsersSelect') {
-                        if (!i.isUserSelectMenu())
-                            throw new Error("verifyoverride received user select interaction that wasn't a select menu");
+    let finished = false;
+    while (!finished) {
+        await message
+            .awaitMessageComponent({ time: 1000 * 60 * 20, filter: (i) => i.user.id === creator.id })
+            .then(async (i) => {
+                if (['verifyoverrideDepartmentSelect', 'verifyoverrideYearSelect'].includes(i.customId)) {
+                    if (!i.isStringSelectMenu())
+                        throw new Error("verifyoverride received dept select interaction that wasn't a string select");
 
-                        users = [...i.users.values()];
-                        await i.update({
-                            components: renderSelectionComponents(users, customDept, selectedDept, customYear, selectedYear),
-                        });
-                    } else if (i.customId === 'verifyoverrideCancel') {
-                        const embed = new EmbedBuilder()
-                            .setColor('Grey')
-                            .setDescription('This verification override creation was cancelled, so no changes were made.');
+                    if (i.customId === 'verifyoverrideDepartmentSelect') {
+                        selectedDept = i.values[0];
+                    } else if (i.customId === 'verifyoverrideYearSelect') {
+                        selectedYear = i.values[0];
+                    }
 
-                        await i.update({ embeds: [embed], components: [] });
-                        finished = true;
-                    } else if (i.customId === 'verifyoverrideContinue') {
-                        if (!i.isButton()) throw new Error("verifyoverride received continue button interaction that wasn't a button");
-                        if (selectedDept === null && selectedYear === null) throw new Error('verifyoverride creation with nothing set');
+                    await i.update({
+                        components: renderSelectionComponents(targetUsers, selectedDept, selectedYear),
+                    });
+                } else if (i.customId === 'verifyoverrideUsersSelect') {
+                    if (!i.isUserSelectMenu()) throw new Error("verifyoverride received user select interaction that wasn't a select menu");
 
-                        await i.deferUpdate();
+                    targetUsers = [...i.users.values()];
+                    await i.update({
+                        components: renderSelectionComponents(targetUsers, selectedDept, selectedYear),
+                    });
+                } else if (i.customId === 'verifyoverrideCancel') {
+                    const embed = new EmbedBuilder()
+                        .setColor('Grey')
+                        .setDescription('This verification override creation was cancelled, so no changes were made.');
 
-                        const existingOverrides = await VerificationOverrideModel.find({
-                            discordId: { $in: users.map((user) => user.id) },
-                            guildId: i.guild!.id,
-                        });
+                    await i.update({ embeds: [embed], components: [] });
+                    finished = true;
+                } else if (i.customId === 'verifyoverrideContinue') {
+                    if (!i.isButton()) throw new Error("verifyoverride received continue button interaction that wasn't a button");
+                    if (selectedDept === undefined && selectedYear === undefined)
+                        throw new Error('verifyoverride creation with nothing set');
 
-                        if (existingOverrides.length > 0) {
-                            const existingOverridesString = existingOverrides
-                                .map(
-                                    (override) =>
-                                        `* <@${override.discordId}> (dept ${inlineCode(
-                                            override.department ?? 'not set'
-                                        )}, year ${inlineCode(override.o365CreatedDate?.getFullYear().toString() ?? 'not set')})`
-                                )
-                                .join('\n');
+                    await i.deferUpdate();
 
-                            const embed = new EmbedBuilder().setColor('Red')
-                                .setDescription(`The following selected users already have an override in this guild:
+                    const existingOverrides = await VerificationOverrideModel.find({
+                        discordId: { $in: targetUsers.map((user) => user.id) },
+                        guildId: i.guild!.id,
+                    });
+
+                    if (existingOverrides.length > 0) {
+                        const existingOverridesString = existingOverrides
+                            .map(
+                                (override) =>
+                                    `* <@${override.discordId}> (dept ${inlineCode(override.department ?? 'not set')}, year ${inlineCode(
+                                        override.o365CreatedDate?.getFullYear().toString() ?? 'not set'
+                                    )})`
+                            )
+                            .join('\n');
+
+                        const embed = new EmbedBuilder().setColor('Red')
+                            .setDescription(`The following selected users already have an override in this guild:
                                 ${existingOverridesString}
                                 
                                 Please unselect the users with existing overrides and try again. If you want to modify an existing override, you must first delete it.`);
 
-                            await i.followUp({ embeds: [embed], ephemeral: true });
-                            return;
-                        }
+                        await i.followUp({ embeds: [embed], ephemeral: true });
+                        return;
+                    }
 
-                        if (selectedDept && selectedYear) {
-                            await renderOverrideConfirmationScreen(i, users, selectedDept, selectedYear);
+                    if (selectedDept && selectedYear) {
+                        await renderCreateOverrideConfirmationScreen(i, creator, targetUsers, selectedDept, selectedYear);
+                        finished = true;
+                        return;
+                    } else {
+                        const allUserIds = targetUsers.map((user) => user.id);
+                        const verifiedUsers = await UserModel.find({ verified: true, discordId: { $in: allUserIds } });
+
+                        if (verifiedUsers.length === allUserIds.length) {
+                            await renderCreateOverrideConfirmationScreen(i, creator, targetUsers, selectedDept, selectedYear);
                             finished = true;
                             return;
                         } else {
-                            const allUserIds = users.map((user) => user.id);
-                            const verifiedUsers = await UserModel.find({ verified: true, discordId: { $in: allUserIds } });
-
-                            if (verifiedUsers.length === allUserIds.length) {
-                                await renderOverrideConfirmationScreen(i, users, selectedDept, selectedYear);
-                                finished = true;
-                                return;
-                            } else {
-                                const unverifiedUsers = users.filter((user) => !verifiedUsers.some((vUser) => vUser.discordId === user.id));
-                                const errorEmbed = new EmbedBuilder().setColor('Red')
-                                    .setDescription(`The following selected users are not verified:
+                            const unverifiedUsers = targetUsers.filter(
+                                (user) => !verifiedUsers.some((vUser) => vUser.discordId === user.id)
+                            );
+                            const errorEmbed = new EmbedBuilder().setColor('Red')
+                                .setDescription(`The following selected users are not verified:
 
                                     ${unverifiedUsers.map((user) => `* <@${user.id}>`).join('\n')}
 
                                     To create an override for an unverified user, both the department and year must be set. Please select a department and year, or unselect the unverified users and try again.`);
 
-                                await i.followUp({ embeds: [errorEmbed], ephemeral: true });
-                            }
+                            await i.followUp({ embeds: [errorEmbed], ephemeral: true });
                         }
                     }
-                })
-                .catch(async (e) => {
-                    if (e.name === 'Error [InteractionCollectorError]') {
-                        const embed = new EmbedBuilder()
-                            .setColor('Grey')
-                            .setDescription('This verification override creation expired, so no changes were made.');
+                }
+            })
+            .catch(async (e) => {
+                if (e.name === 'Error [InteractionCollectorError]') {
+                    const embed = new EmbedBuilder()
+                        .setColor('Grey')
+                        .setDescription('This verification override creation expired, so no changes were made.');
 
-                        await message.edit({ embeds: [embed], components: [] });
-                        finished = true;
-                    } else {
-                        throw e;
-                    }
-                });
-        }
+                    await message.edit({ embeds: [embed], components: [] });
+                    finished = true;
+                } else {
+                    throw e;
+                }
+            });
     }
 }
-
-function createUsersSelectMenu(users: User[]): ActionRowBuilder<UserSelectMenuBuilder> {
+function createUsersSelectMenu(targetUsers: User[]): ActionRowBuilder<UserSelectMenuBuilder> {
     return new ActionRowBuilder<UserSelectMenuBuilder>().addComponents(
         new UserSelectMenuBuilder()
             .setCustomId('verifyoverrideUsersSelect')
             .setPlaceholder('Select user(s) to create override for.')
             .setMinValues(1)
             .setMaxValues(10)
-            .setDefaultUsers(users.map((user) => user.id))
+            .setDefaultUsers(targetUsers.map((user) => user.id))
     );
 }
 
-function createDepartmentSelectMenu(customDept: string | null, selected: string | null): ActionRowBuilder<StringSelectMenuBuilder> {
+function createDepartmentSelectMenu(selected?: string): ActionRowBuilder<StringSelectMenuBuilder> {
     const departmentOptionList = VerificationDepartmentList.map((dept) => {
         return new StringSelectMenuOptionBuilder()
             .setLabel(dept.name)
             .setValue(dept.name)
             .setDescription(dept.description)
             .setEmoji(dept.emoji)
-            .setDefault(selected !== null ? selected === dept.name : false);
+            .setDefault(selected !== undefined ? selected === dept.name : false);
     });
-    if (customDept !== null && VerificationDepartmentList.every((dept) => dept.name !== customDept)) {
+    if (selected !== undefined && VerificationDepartmentList.every((dept) => dept.name !== selected)) {
         departmentOptionList.splice(
             0,
             0,
             new StringSelectMenuOptionBuilder()
-                .setLabel(customDept)
-                .setValue(customDept)
+                .setLabel(selected)
+                .setValue(selected)
                 .setDescription('Department name manually entered for the command')
                 .setDefault(true)
         );
@@ -257,9 +269,9 @@ function createDepartmentSelectMenu(customDept: string | null, selected: string 
     );
 }
 
-function createYearSelectMenu(customYear: string | null, selected: string | null): ActionRowBuilder<StringSelectMenuBuilder> {
+function createYearSelectMenu(selected?: string): ActionRowBuilder<StringSelectMenuBuilder> {
     const yearArray = [...VerificationDefaultStartingYears].map((year) => year.toString());
-    if (customYear !== null) yearArray.push(customYear);
+    if (selected !== undefined && !yearArray.includes(selected)) yearArray.push(selected);
     yearArray.sort((a, b) => Number(a) - Number(b));
 
     const yearOptions = yearArray.map((year) => {
@@ -280,42 +292,37 @@ function createYearSelectMenu(customYear: string | null, selected: string | null
     );
 }
 
-function createConfirmCancelButtons(selectedDept: string | null, selectedYear: string | null): ActionRowBuilder<ButtonBuilder> {
+function createConfirmCancelButtons(selectedDept?: string, selectedYear?: string): ActionRowBuilder<ButtonBuilder> {
     return new ActionRowBuilder<ButtonBuilder>().addComponents(
         new ButtonBuilder()
             .setCustomId(`verifyoverrideContinue`)
             .setLabel('Continue')
             .setStyle(ButtonStyle.Primary)
-            .setDisabled(selectedDept === null && selectedYear === null),
+            .setDisabled(selectedDept === undefined && selectedYear === undefined),
         new ButtonBuilder().setCustomId(`verifyoverrideCancel`).setLabel('Cancel').setStyle(ButtonStyle.Danger)
     );
 }
 
-function renderSelectionComponents(
-    users: User[],
-    customDept: string | null,
-    selectedDept: string | null,
-    customYear: string | null,
-    selectedYear: string | null
-) {
+function renderSelectionComponents(targetUsers: User[], selectedDept?: string, selectedYear?: string) {
     return [
-        createUsersSelectMenu(users),
-        createDepartmentSelectMenu(customDept, selectedDept),
-        createYearSelectMenu(customYear, selectedYear),
+        createUsersSelectMenu(targetUsers),
+        createDepartmentSelectMenu(selectedDept),
+        createYearSelectMenu(selectedYear),
         createConfirmCancelButtons(selectedDept, selectedYear),
     ];
 }
 
-async function renderOverrideConfirmationScreen(
+async function renderCreateOverrideConfirmationScreen(
     i: ButtonInteraction,
+    creator: User,
     targetUsers: User[],
-    newDepartment: string | null,
-    newYear: string | null
+    newDepartment?: string,
+    newYear?: string
 ) {
     if (!i.inCachedGuild()) return;
     if (!i.deferred) await i.deferUpdate();
 
-    const roleChangePrediction = await predictOverrideRoleChangesString(i.guild!, targetUsers, newDepartment, newYear);
+    const roleChangePrediction = await predictOverrideRoleChangesString(i.guild, targetUsers, newDepartment, newYear);
 
     const embed = new EmbedBuilder().setColor('Orange').setTitle('Confirm Override Creation').setDescription(`
         You are creating an override for user${targetUsers.length > 1 ? 's' : ''} ${targetUsers.map((user) => user.toString()).join(', ')}.
@@ -328,19 +335,68 @@ async function renderOverrideConfirmationScreen(
         Old roles assigned from verification will be automatically cleaned up.
     `);
 
-    await i.editReply({ embeds: [embed], components: [] });
-    return;
+    const confirmButton = new ButtonBuilder().setCustomId('verifyoverrideConfirmCreate').setLabel('Create').setStyle(ButtonStyle.Primary);
+    const backButton = new ButtonBuilder().setCustomId('verifyoverrideConfirmBack').setLabel('Back').setStyle(ButtonStyle.Secondary);
+    const cancelButton = new ButtonBuilder().setCustomId('verifyoverrideConfirmCancel').setLabel('Cancel').setStyle(ButtonStyle.Danger);
+    const buttons = new ActionRowBuilder<ButtonBuilder>().addComponents(confirmButton, backButton, cancelButton);
+
+    const message = await i.editReply({ embeds: [embed], components: [buttons] });
+    await message.awaitMessageComponent({ time: 1000 * 60 * 20, filter: (i) => i.user.id === creator.id }).then(async (i) => {
+        await i.deferUpdate();
+        if (!i.isButton()) throw new Error("verifyoverride confirmation screen received interaction that wasn't a button");
+        if (!i.inCachedGuild()) throw new Error('verifyoverride confirmation screen received interaction that was not in a cached guild');
+
+        if (i.customId === 'verifyoverrideConfirmCancel') {
+            const embed = new EmbedBuilder()
+                .setColor('Grey')
+                .setDescription('This verification override creation was cancelled, so no changes were made.');
+            await i.update({ embeds: [embed], components: [] });
+        } else if (i.customId === 'verifyoverrideConfirmCreate') {
+            // create the overrides and create the roles
+            const newOverrides = targetUsers.map((user) => {
+                return new VerificationOverrideModel({
+                    discordId: user.id,
+                    guildId: i.guild.id,
+                    createdBy: i.user.id,
+                    department: newDepartment,
+                    o365CreatedDate: newYear !== undefined ? new Date(Number(newYear), 5) : undefined,
+                });
+            });
+
+            const created = await VerificationOverrideModel.insertMany(newOverrides);
+            for (const override of created) {
+                const user = await i.guild.members.fetch(override.discordId).catch(() => null);
+                if (user === null) continue;
+
+                await Modlog.logUserAction(
+                    i.guild,
+                    i.user,
+                    `Verification override created for ${user} by ${i.user}.\n
+                    New Department: ${newDepartment ?? 'not set'}
+                    New Start Year: ${newYear ?? 'not set'}`
+                );
+            }
+            for (const user of targetUsers) {
+                const service = new RoleAssignmentService(user.id);
+                await service.assignGuildRoles(i.guild);
+            }
+
+            // todo: show success embed
+        } else if (i.customId === 'verifyoverrideConfirmBack') {
+            await renderCreateOverrideScreen(i, creator, targetUsers, newDepartment, newYear);
+        }
+    });
 }
 
 async function predictOverrideRoleChangesString(
     guild: Guild,
     targetUsers: User[],
-    newDepartment: string | null,
-    newYear: string | null
+    newDepartment?: string,
+    newYear?: string
 ): Promise<string> {
     const config = await GuildConfigCache.fetchConfig(guild.id);
 
-    if (newDepartment !== null && newYear !== null) {
+    if (newDepartment !== undefined && newYear !== undefined) {
         // if both values are set, we know the exact roles that will be assigned regardless of the user's current state
         const newRoles = RoleAssignmentService.getMatchingRoleData(
             {
@@ -366,8 +422,8 @@ async function predictOverrideRoleChangesString(
             {
                 verified: true,
                 uwid: 'verifyoverride confirm screen',
-                o365CreatedDate: newYear !== null ? new Date(Number(newYear), 5) : existingUserInfo.o365CreatedDate,
-                department: newDepartment !== null ? newDepartment : existingUserInfo.department,
+                o365CreatedDate: newYear !== undefined ? new Date(Number(newYear), 5) : existingUserInfo.o365CreatedDate,
+                department: newDepartment !== undefined ? newDepartment : existingUserInfo.department,
             },
             config
         );
