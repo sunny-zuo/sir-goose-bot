@@ -119,6 +119,7 @@ export class RoleAssignmentService {
                 return { success: false, error: 'User is banned' };
             }
 
+            // TODO: deal with global/guild scopes
             const override = await VerificationOverrideModel.findOne({ discordId: this.userId, guildId: guild.id });
 
             const getNewUserRolesToAssign = async () => {

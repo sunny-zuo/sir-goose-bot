@@ -22,8 +22,9 @@ import { GuildConfigCache } from '#util/guildConfigCache';
 import { VerificationDefaultStartingYears, VerificationDepartmentList } from '#types/Verification';
 import { RoleAssignmentService } from '#services/roleAssignmentService';
 import UserModel from '#models/user.model';
-import VerificationOverrideModel from '#models/verificationOverride.model';
+import VerificationOverrideModel, { OverrideScope } from '#models/verificationOverride.model';
 import { Modlog } from '#util/modlog';
+import { logger } from '#util/logger';
 
 export class VerifyOverride extends ChatCommand {
     private static readonly options: ApplicationCommandOption[] = [
@@ -49,8 +50,21 @@ export class VerifyOverride extends ChatCommand {
                     description: 'The entrance year to set for the chosen user. Optional.',
                     type: ApplicationCommandOptionType.Number,
                     minValue: 2000,
-                    maxValue: 2026,
+                    maxValue: 2027,
                     required: false,
+                },
+            ],
+        },
+        {
+            name: 'view',
+            description: 'View the verification override for a specific user.',
+            type: ApplicationCommandOptionType.Subcommand,
+            options: [
+                {
+                    name: 'user',
+                    description: 'User to view override for.',
+                    type: ApplicationCommandOptionType.User,
+                    required: true,
                 },
             ],
         },
@@ -86,11 +100,27 @@ export class VerifyOverride extends ChatCommand {
             return;
         }
 
-        const users = [args.getUser('user', true)];
-        const customDept = args.getString('department') ?? undefined;
-        const customYear = args.getNumber('entranceyear')?.toString();
+        const subcommand = args.getSubcommand();
+        switch (subcommand) {
+            case 'create': {
+                const users = [args.getUser('user', true)];
+                const customDept = args.getString('department') ?? undefined;
+                const customYear = args.getNumber('entranceyear')?.toString();
 
-        await renderCreateOverrideScreen(interaction, interaction.user, users, customDept, customYear);
+                await renderCreateOverrideScreen(interaction, interaction.user, users, customDept, customYear);
+                break;
+            }
+            case 'view': {
+                // TODO: support this
+                break;
+            }
+            case 'list': {
+                // TODO: support this
+                break;
+            }
+            default:
+                logger.error(args.data, 'Invalid subcommand provided for verifyoverride');
+        }
     }
 }
 
@@ -202,8 +232,9 @@ async function renderCreateOverrideScreen(
                             const unverifiedUsers = targetUsers.filter(
                                 (user) => !verifiedUsers.some((vUser) => vUser.discordId === user.id)
                             );
-                            const errorEmbed = new EmbedBuilder().setColor('Red')
-                                .setDescription(`The following selected users are not verified:
+                            const errorEmbed = new EmbedBuilder().setColor('Red').setDescription(`The following ${
+                                unverifiedUsers.length
+                            } selected users are not verified:
 
                                     ${unverifiedUsers.map((user) => `* <@${user.id}>`).join('\n')}
 
@@ -352,7 +383,7 @@ async function renderCreateOverrideConfirmationScreen(
                 .setDescription('This verification override creation was cancelled, so no changes were made.');
             await i.update({ embeds: [embed], components: [] });
         } else if (i.customId === 'verifyoverrideConfirmCreate') {
-            // create the overrides and create the roles
+            // create the overrides and assign the roles
             const newOverrides = targetUsers.map((user) => {
                 return new VerificationOverrideModel({
                     discordId: user.id,
@@ -360,6 +391,7 @@ async function renderCreateOverrideConfirmationScreen(
                     createdBy: i.user.id,
                     department: newDepartment,
                     o365CreatedDate: newYear !== undefined ? new Date(Number(newYear), 5) : undefined,
+                    scope: OverrideScope.GUILD,
                 });
             });
 
@@ -381,8 +413,20 @@ async function renderCreateOverrideConfirmationScreen(
                 await service.assignGuildRoles(i.guild);
             }
 
-            // todo: show success embed
+            await i.update({
+                embeds: [
+                    new EmbedBuilder().setColor('Green')
+                        .setDescription(`Verification override(s) have been created successfully for the following users:\n
+                                        ${targetUsers.join(', ')}
+
+                                        New Department: ${newDepartment ?? 'not set'}
+                                        New Start Year: ${newYear ?? 'not set'}
+                                        
+                                        Their roles have been updated to reflect the overriden data.`),
+                ],
+            });
         } else if (i.customId === 'verifyoverrideConfirmBack') {
+            // todo: figure out if this works
             await renderCreateOverrideScreen(i, creator, targetUsers, newDepartment, newYear);
         }
     });

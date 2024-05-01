@@ -18,7 +18,7 @@
             "#models/*": ["src/models/*"],
             "#types/*": ["src/types/*"],
             "#util/*": ["src/util/*"],
-            "#services/*": ["src/services/*"],
+            "#services/*": ["src/services/*"]
         }
     }
 }
