@@ -7,6 +7,7 @@ import {
     PermissionsBitField,
     ChannelType,
     ApplicationCommandOptionType,
+    inlineCode,
 } from 'discord.js';
 import Client from '#src/Client';
 import { InvalidCommandInteractionOption } from '../types';
@@ -60,6 +61,19 @@ export class MessageCreateEventHandler implements EventHandler {
 
                 await message.reply({ embeds: [embed], components: [button] });
             }
+            return;
+        }
+        if (process.env.ENABLE_MESSAGE_COMMANDS !== 'true' && !command.ownerOnly) {
+            const embed = new EmbedBuilder()
+                .setDescription(
+                    `Text commands are no longer supported. Please use slash commands instead! (e.g. ${inlineCode(
+                        `/${command.name}`
+                    )} instead of ${inlineCode(prefix + command.name)}).
+                    If the slash command does not appear, ask a server administator to [grant slash command permissions](https://discord.com/api/oauth2/authorize?client_id=740653704683716699&scope=applications.commands) to the bot.`
+                )
+                .setColor('Yellow');
+
+            await message.reply({ embeds: [embed] });
             return;
         }
         if (message.guild && message.guild.available === false) return;

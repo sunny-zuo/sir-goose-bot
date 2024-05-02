@@ -389,64 +389,78 @@ async function renderCreateOverrideConfirmationScreen(
     const buttons = new ActionRowBuilder<ButtonBuilder>().addComponents(confirmButton, backButton, cancelButton);
 
     const message = await i.editReply({ embeds: [embed], components: [buttons] });
-    await message.awaitMessageComponent({ time: 1000 * 60 * 20, filter: (i) => i.user.id === creator.id }).then(async (i) => {
-        if (!i.isButton()) throw new Error("verifyoverride confirmation screen received interaction that wasn't a button");
-        if (!i.inCachedGuild()) throw new Error('verifyoverride confirmation screen received interaction that was not in a cached guild');
+    await message
+        .awaitMessageComponent({ time: 1000 * 60 * 20, filter: (i) => i.user.id === creator.id })
+        .then(async (i) => {
+            if (!i.isButton()) throw new Error("verifyoverride confirmation screen received interaction that wasn't a button");
+            if (!i.inCachedGuild())
+                throw new Error('verifyoverride confirmation screen received interaction that was not in a cached guild');
 
-        await i.deferUpdate();
-        if (i.customId === 'verifyoverrideConfirmCancel') {
-            const embed = new EmbedBuilder()
-                .setColor('Grey')
-                .setDescription('This verification override creation was cancelled, so no changes were made.');
-            await i.editReply({ embeds: [embed], components: [] });
-        } else if (i.customId === 'verifyoverrideConfirmCreate') {
-            // create the overrides and assign the roles
-            const newOverrides = targetUsers.map((user) => {
-                return new VerificationOverrideModel({
-                    discordId: user.id,
-                    guildId: i.guild.id,
-                    createdBy: i.user.id,
-                    department: newDepartment,
-                    o365CreatedDate: newYear !== undefined ? new Date(Number(newYear), 5) : undefined,
-                    scope: OverrideScope.GUILD,
+            await i.deferUpdate();
+            if (i.customId === 'verifyoverrideConfirmCancel') {
+                const embed = new EmbedBuilder()
+                    .setColor('Grey')
+                    .setDescription('This verification override creation was cancelled, so no changes were made.');
+                await i.editReply({ embeds: [embed], components: [] });
+            } else if (i.customId === 'verifyoverrideConfirmCreate') {
+                // create the overrides and assign the roles
+                const newOverrides = targetUsers.map((user) => {
+                    return new VerificationOverrideModel({
+                        discordId: user.id,
+                        guildId: i.guild.id,
+                        createdBy: i.user.id,
+                        department: newDepartment,
+                        o365CreatedDate: newYear !== undefined ? new Date(Number(newYear), 5) : undefined,
+                        scope: OverrideScope.GUILD,
+                    });
                 });
-            });
 
-            const created = await VerificationOverrideModel.insertMany(newOverrides);
-            for (const override of created) {
-                const user = await i.guild.members.fetch(override.discordId).catch(() => null);
-                if (user === null) continue;
+                const created = await VerificationOverrideModel.insertMany(newOverrides);
+                for (const override of created) {
+                    const user = await i.guild.members.fetch(override.discordId).catch(() => null);
+                    if (user === null) continue;
 
-                await Modlog.logUserAction(
-                    i.guild,
-                    i.user,
-                    `Verification override created for ${user} by ${i.user}.\n
+                    await Modlog.logUserAction(
+                        i.guild,
+                        i.user,
+                        `Verification override created for ${user} by ${i.user}.\n
                     New Department: ${inlineCode(newDepartment ?? 'not set')}
                     New Start Year: ${inlineCode(newYear ?? 'not set')}`
-                );
-            }
-            for (const user of targetUsers) {
-                const service = new RoleAssignmentService(user.id);
-                await service.assignGuildRoles(i.guild);
-            }
+                    );
+                }
+                for (const user of targetUsers) {
+                    const service = new RoleAssignmentService(user.id);
+                    await service.assignGuildRoles(i.guild);
+                }
 
-            await i.editReply({
-                embeds: [
-                    new EmbedBuilder().setColor('Green')
-                        .setDescription(`Verification override(s) have been created successfully for the following users:
+                await i.editReply({
+                    embeds: [
+                        new EmbedBuilder().setColor('Green')
+                            .setDescription(`Verification override(s) have been created successfully for the following users:
                                         ${targetUsers.join(', ')}
 
                                         New Department: ${inlineCode(newDepartment ?? 'not set')}
                                         New Start Year: ${inlineCode(newYear ?? 'not set')}
                                         
                                         Their roles have been updated to reflect the overriden data.`),
-                ],
-                components: [],
-            });
-        } else if (i.customId === 'verifyoverrideConfirmBack') {
-            await renderCreateOverrideScreen(i, creator, targetUsers, newDepartment, newYear);
-        }
-    });
+                    ],
+                    components: [],
+                });
+            } else if (i.customId === 'verifyoverrideConfirmBack') {
+                await renderCreateOverrideScreen(i, creator, targetUsers, newDepartment, newYear);
+            }
+        })
+        .catch(async (e) => {
+            if (e.name === 'Error [InteractionCollectorError]') {
+                const embed = new EmbedBuilder()
+                    .setColor('Grey')
+                    .setDescription('This verification override creation expired, so no changes were made.');
+
+                await message.edit({ embeds: [embed], components: [] });
+            } else {
+                throw e;
+            }
+        });
 }
 
 async function predictOverrideRoleChangesString(
