@@ -30,7 +30,7 @@ export class VerifyOverride extends ChatCommand {
     private static readonly options: ApplicationCommandOption[] = [
         {
             name: 'create',
-            description: 'Create a verification override.',
+            description: 'Override the department or year used for verification for selected users.',
             type: ApplicationCommandOptionType.Subcommand,
             options: [
                 {
@@ -41,13 +41,13 @@ export class VerifyOverride extends ChatCommand {
                 },
                 {
                     name: 'department',
-                    description: 'The verification department to set for the chosen user. Optional.',
+                    description: '[Optional] The verification department to set for the chosen user.',
                     type: ApplicationCommandOptionType.String,
                     required: false,
                 },
                 {
                     name: 'entranceyear',
-                    description: 'The entrance year to set for the chosen user. Optional.',
+                    description: '[Optional] The entrance year to set for the chosen user.',
                     type: ApplicationCommandOptionType.Number,
                     minValue: 2000,
                     maxValue: 2027,
@@ -57,7 +57,7 @@ export class VerifyOverride extends ChatCommand {
         },
         {
             name: 'view',
-            description: 'View the verification override for a specific user.',
+            description: 'View the existing verification override for a specific user.',
             type: ApplicationCommandOptionType.Subcommand,
             options: [
                 {
@@ -87,6 +87,24 @@ export class VerifyOverride extends ChatCommand {
         args: Omit<CommandInteractionOptionResolver, 'getMessage' | 'getFocused'>
     ): Promise<void> {
         await interaction.deferReply({ ephemeral: true });
+
+        const allowedGuilds = [
+            '694232686247542815', // SE 25
+            '811408878162935829', // big SE
+            '532052305982259210', // dev test server
+        ];
+        if (!interaction.guildId || !allowedGuilds.includes(interaction.guildId)) {
+            await interaction.editReply({
+                embeds: [
+                    new EmbedBuilder()
+                        .setColor('Yellow')
+                        .setDescription(
+                            'This feature is in private preview. Want early access? Ask in the [support server](https://discord.gg/KHByMmrrw2).'
+                        ),
+                ],
+            });
+            return;
+        }
 
         const config = await GuildConfigCache.fetchConfig(interaction.guild!.id);
         if (!config.enableVerification) {
@@ -151,7 +169,6 @@ async function renderCreateOverrideScreen(
         embeds: [embed],
         components: renderSelectionComponents(targetUsers, selectedDept, selectedYear),
     });
-
     let finished = false;
     while (!finished) {
         await message
@@ -373,15 +390,15 @@ async function renderCreateOverrideConfirmationScreen(
 
     const message = await i.editReply({ embeds: [embed], components: [buttons] });
     await message.awaitMessageComponent({ time: 1000 * 60 * 20, filter: (i) => i.user.id === creator.id }).then(async (i) => {
-        await i.deferUpdate();
         if (!i.isButton()) throw new Error("verifyoverride confirmation screen received interaction that wasn't a button");
         if (!i.inCachedGuild()) throw new Error('verifyoverride confirmation screen received interaction that was not in a cached guild');
 
+        await i.deferUpdate();
         if (i.customId === 'verifyoverrideConfirmCancel') {
             const embed = new EmbedBuilder()
                 .setColor('Grey')
                 .setDescription('This verification override creation was cancelled, so no changes were made.');
-            await i.update({ embeds: [embed], components: [] });
+            await i.editReply({ embeds: [embed], components: [] });
         } else if (i.customId === 'verifyoverrideConfirmCreate') {
             // create the overrides and assign the roles
             const newOverrides = targetUsers.map((user) => {
@@ -404,8 +421,8 @@ async function renderCreateOverrideConfirmationScreen(
                     i.guild,
                     i.user,
                     `Verification override created for ${user} by ${i.user}.\n
-                    New Department: ${newDepartment ?? 'not set'}
-                    New Start Year: ${newYear ?? 'not set'}`
+                    New Department: ${inlineCode(newDepartment ?? 'not set')}
+                    New Start Year: ${inlineCode(newYear ?? 'not set')}`
                 );
             }
             for (const user of targetUsers) {
@@ -413,20 +430,20 @@ async function renderCreateOverrideConfirmationScreen(
                 await service.assignGuildRoles(i.guild);
             }
 
-            await i.update({
+            await i.editReply({
                 embeds: [
                     new EmbedBuilder().setColor('Green')
-                        .setDescription(`Verification override(s) have been created successfully for the following users:\n
+                        .setDescription(`Verification override(s) have been created successfully for the following users:
                                         ${targetUsers.join(', ')}
 
-                                        New Department: ${newDepartment ?? 'not set'}
-                                        New Start Year: ${newYear ?? 'not set'}
+                                        New Department: ${inlineCode(newDepartment ?? 'not set')}
+                                        New Start Year: ${inlineCode(newYear ?? 'not set')}
                                         
                                         Their roles have been updated to reflect the overriden data.`),
                 ],
+                components: [],
             });
         } else if (i.customId === 'verifyoverrideConfirmBack') {
-            // todo: figure out if this works
             await renderCreateOverrideScreen(i, creator, targetUsers, newDepartment, newYear);
         }
     });
