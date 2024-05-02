@@ -1,4 +1,12 @@
-import { ActionRowBuilder, ButtonBuilder, MessageComponentInteraction, EmbedBuilder, ButtonStyle, ComponentType } from 'discord.js';
+import {
+    ActionRowBuilder,
+    ButtonBuilder,
+    MessageComponentInteraction,
+    EmbedBuilder,
+    ButtonStyle,
+    ComponentType,
+    inlineCode,
+} from 'discord.js';
 import { OverviewView } from './overviewView';
 import { GuildConfigCache } from '#util/guildConfigCache';
 
@@ -10,13 +18,17 @@ export class PrefixView {
             .setDescription(
                 `The prefix that the bot will respond to is currently set to \`${prefix}\`.
 
-                You can also use slash commands! (highly recommended)`
+                Prefix commands are no longer supported and will soon be removed entirely. Please use slash commands instead (with ${inlineCode(
+                    '/'
+                )} as the prefix).
+                
+                If slash commands do not appear, you'll need to [grant slash command permissions](https://discord.com/api/oauth2/authorize?client_id=740653704683716699&scope=applications.commands) to the bot.`
             )
             .setColor('Blue')
             .setTimestamp();
 
         const buttons = new ActionRowBuilder<ButtonBuilder>().addComponents(
-            new ButtonBuilder().setCustomId('configPrefixChange').setStyle(ButtonStyle.Primary).setLabel('Change Prefix'),
+            // new ButtonBuilder().setCustomId('configPrefixChange').setStyle(ButtonStyle.Primary).setLabel('Change Prefix'),
             new ButtonBuilder().setCustomId('configPrefixBack').setStyle(ButtonStyle.Secondary).setLabel('Back')
         );
 
