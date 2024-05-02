@@ -16,7 +16,7 @@ export class GuildMemberAddEventHandler implements EventHandler {
     async execute(member: GuildMember): Promise<void> {
         logger.info({ event: { name: this.eventName }, guild: { id: member.guild.id }, member: { id: member.id } });
 
-        const roleAssignmentService = new RoleAssignmentService(this.client, member.id);
+        const roleAssignmentService = new RoleAssignmentService(member.id);
         const roleAssignmentResult = await roleAssignmentService.assignGuildRoles(member.guild);
 
         if (roleAssignmentResult.success) {

@@ -60,6 +60,8 @@
     },
     "imports": {
         "#util/*": "./dist/util/*.js",
-        "#models/*": "./dist/models/*.js"
+        "#models/*": "./dist/models/*.js",
+        "#services/*": "./dist/services/*.js",
+        "#types/*": "./dist/types/*.js"
     }
 }

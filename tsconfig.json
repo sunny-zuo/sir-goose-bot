@@ -14,11 +14,11 @@
         "forceConsistentCasingInFileNames": true,
         "useUnknownInCatchVariables": false,
         "paths": {
-            "#root/*": ["*"],
             "#src/*": ["src/*"],
             "#models/*": ["src/models/*"],
             "#types/*": ["src/types/*"],
-            "#util/*": ["src/util/*"]
+            "#util/*": ["src/util/*"],
+            "#services/*": ["src/services/*"]
         }
     }
 }

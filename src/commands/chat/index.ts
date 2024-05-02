@@ -36,6 +36,7 @@ import { ReVerify } from './verification/reverify';
 import { Verify } from './verification/verify';
 import { VerifyAll } from './verification/verifyall';
 import { VerifyButton } from './verification/verifybutton';
+import { VerifyOverride } from './verification/verifyoverride';
 import { VerifyRules } from './verification/verifyrules';
 import { VerifyStats } from './verification/verifystats';
 
@@ -63,6 +64,7 @@ export default [
     Verify,
     VerifyAll,
     VerifyButton,
+    VerifyOverride,
     VerifyRules,
     VerifyStats,
 ];

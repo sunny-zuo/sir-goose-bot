@@ -50,3 +50,108 @@ export interface VerificationImportV2 {
     v: number;
     rules: VerificationRuleImportV2[];
 }
+
+export const VerificationDepartmentList = [
+    {
+        name: 'ART/Arts',
+        description: 'Faculty of Arts students, excluding AFM',
+        emoji: '📚',
+    },
+    {
+        name: 'ART/Arts Accounting and Finance',
+        description: 'AFM students',
+        emoji: '📈',
+    },
+    {
+        name: 'Alumni',
+        description: 'Alumni',
+        emoji: '🎓',
+    },
+    {
+        name: 'ENG/Architecture',
+        description: 'Architecture students',
+        emoji: '🏛️',
+    },
+    {
+        name: 'ENG/Architectural Engineering',
+        description: 'Architectural Engineering students',
+        emoji: '🏗️',
+    },
+    {
+        name: 'ENG/Chemical',
+        description: 'Chemical Engineering students',
+        emoji: '🧪',
+    },
+    {
+        name: 'ENG/Civil & Environmental',
+        description: 'Civil and Environmental Engineering students',
+        emoji: '🌍',
+    },
+    {
+        name: 'ENG/Electrical and Computer',
+        description: 'ECE students',
+        emoji: '💻',
+    },
+    {
+        name: 'ENG/Engineering',
+        description: 'BME, Nano and Geological engineering students',
+        emoji: '🔧',
+    },
+    {
+        name: 'ENG/MGMT Management Sciences',
+        description: 'Management Engineering',
+        emoji: '📊',
+    },
+    {
+        name: 'ENG/Mechanical & Mechatronics',
+        description: 'Mechanical and Tron students',
+        emoji: '🔩',
+    },
+    {
+        name: 'ENG/Systems Design',
+        description: 'SYDE students',
+        emoji: '🛠️',
+    },
+    {
+        name: 'VPA/Software Engineering',
+        description: 'Software Engineering students',
+        emoji: '💾',
+    },
+    {
+        name: 'ENV/Environment',
+        description: 'Environment students',
+        emoji: '🌿',
+    },
+    {
+        name: 'HLTH/Faculty of Health',
+        description: 'Faculty of Health students',
+        emoji: '🏥',
+    },
+    {
+        name: 'MAT/Mathematics',
+        description: 'Faculty of Math students, excluding CS',
+        emoji: '🧮',
+    },
+    {
+        name: 'MAT/Mathematics Computer Science',
+        description: 'CS students',
+        emoji: '🖥️',
+    },
+    {
+        name: 'SCI/Science',
+        description: 'Science students, excluding pharmacy and optometry',
+        emoji: '🔬',
+    },
+    {
+        name: 'SCI/Science Optometry',
+        description: 'Optometry students',
+        emoji: '👀',
+    },
+    {
+        name: 'SCI/Science Pharmacy',
+        description: 'Pharmacy students',
+        emoji: '💊',
+    },
+] as const;
+
+export const VerificationDefaultStartingYears: number[] = [2019, 2020, 2021, 2022, 2023, 2024, 2025] as const;

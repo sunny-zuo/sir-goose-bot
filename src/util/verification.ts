@@ -59,7 +59,7 @@ export async function sendVerificationReplies(
     const user = await UserModel.findOne({ discordId: discordUser.id });
 
     if (user?.verified && user?.department && user?.o365CreatedDate) {
-        const service = new RoleAssignmentService(client, discordUser.id);
+        const service = new RoleAssignmentService(discordUser.id);
         let assignedRoles: Role[] = [];
         if (interaction.guild) {
             const roleAssign = await service.assignGuildRoles(interaction.guild, { log: true, returnMissing: false });
@@ -81,7 +81,7 @@ export async function sendVerificationReplies(
                 return;
             }
         } else {
-            await service.assignAllRoles();
+            await service.assignAllRoles(client);
         }
 
         const assignmentResult =

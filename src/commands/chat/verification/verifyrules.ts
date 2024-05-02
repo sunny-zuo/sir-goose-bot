@@ -22,7 +22,7 @@ export class VerifyRules extends ChatCommand {
             category: 'Verification',
             guildOnly: true,
             clientPermissions: [PermissionsBitField.Flags.ManageRoles],
-            userPermissions: [PermissionsBitField.Flags.ManageGuild],
+            userPermissions: [PermissionsBitField.Flags.ManageGuild, PermissionsBitField.Flags.ManageRoles],
         });
     }
 

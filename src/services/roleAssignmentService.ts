@@ -1,8 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import { SHA256 } from 'crypto-js';
-import { Collection, Guild, GuildMember, PermissionsBitField, Role, Snowflake } from 'discord.js';
-import Client from '#src/Client';
+import { Collection, Guild, GuildMember, PermissionsBitField, Role, Snowflake, inlineCode } from 'discord.js';
 import { GuildConfigCache } from '#util/guildConfigCache';
 import UserModel, { User as UserInterface } from '#models/user.model';
 import GuildModel, { GuildConfig } from '#models/guildConfig.model';
@@ -11,15 +10,16 @@ import { Result } from '../types';
 import { Modlog } from '#util/modlog';
 import { RoleData } from '#types/Verification';
 import { logger } from '#util/logger';
+import Client from '#src/Client';
+import VerificationOverrideModel from '#models/verificationOverride.model';
 
 type CustomFileImport = { type: 'hash' | 'uwid'; department: string | null; entranceYear: number | null; ids: string[] };
 type CustomValues = { departments: string[]; entranceYear: number | null };
-type AssignGuildRolesParams = { log?: boolean; returnMissing?: boolean; oldDepartment?: string };
+type AssignGuildRolesParams = { log?: boolean; returnMissing?: boolean; oldDepartment?: string; oldYear?: number };
 export type RoleAssignmentResult = { assignedRoles: Role[]; updatedName?: string };
 
 export class RoleAssignmentService {
     static customImport: Collection<string, CustomValues> = new Collection<string, CustomValues>();
-    client: Client;
     userId: Snowflake;
 
     static parseCustomImports(): void {
@@ -60,18 +60,17 @@ export class RoleAssignmentService {
         logger.info(`Successfully loaded custom departments/entrance years!`);
     }
 
-    constructor(client: Client, userId: Snowflake) {
-        this.client = client;
+    constructor(userId: Snowflake) {
         this.userId = userId;
     }
 
-    async assignAllRoles(oldDepartment?: string): Promise<void> {
+    async assignAllRoles(client: Client, oldDepartment?: string): Promise<void> {
         const guildModels = await GuildModel.find({ enableVerification: true });
 
         logger.info({ verification: 'assignAll', user: { id: this.userId } }, 'Assigning roles to user in all possible guilds');
         for (const guildModel of guildModels) {
             try {
-                const guild = this.client.guilds.cache.get(guildModel.guildId);
+                const guild = client.guilds.cache.get(guildModel.guildId);
                 if (guild) {
                     await this.assignGuildRoles(guild, { oldDepartment });
                 }
@@ -120,11 +119,47 @@ export class RoleAssignmentService {
                 return { success: false, error: 'User is banned' };
             }
 
-            const newRoles = await this.getMatchingRoles(guild, user, params.log);
+            // TODO: deal with global/guild scopes
+            const override = await VerificationOverrideModel.findOne({ discordId: this.userId, guildId: guild.id });
 
-            let oldRoles: Role[] = [];
-            if (params.oldDepartment) {
-                oldRoles = await this.getMatchingRoles(guild, { ...user.toObject(), department: params.oldDepartment }, false);
+            const getNewUserRolesToAssign = async () => {
+                if (override) {
+                    const overriddenUser = user.toObject();
+                    if (override.department) overriddenUser.department = override.department;
+                    if (override.o365CreatedDate) overriddenUser.o365CreatedDate = override.o365CreatedDate;
+                    return this.getMatchingRoles(guild, overriddenUser);
+                } else {
+                    return this.getMatchingRoles(guild, user);
+                }
+            };
+            const getOldUserRolesToRemove = async () => {
+                if (params.oldDepartment || params.oldYear) {
+                    const oldUserInfo = user.toObject();
+                    if (params.oldDepartment) oldUserInfo.department = params.oldDepartment;
+                    if (params.oldYear) oldUserInfo.o365CreatedDate = new Date(params.oldYear, 5);
+
+                    return this.getMatchingRoles(guild, oldUserInfo, false);
+                } else if (override) {
+                    // if there is an override, we need to remove the roles that would have been assigned without the override
+                    return this.getMatchingRoles(guild, user, false);
+                } else {
+                    return [];
+                }
+            };
+
+            const newRoles = await getNewUserRolesToAssign();
+            const oldRoles = await getOldUserRolesToRemove();
+
+            if (params.oldDepartment || params.oldYear) {
+                const oldUserInfo = user.toObject();
+                if (params.oldDepartment) oldUserInfo.department = params.oldDepartment;
+                if (params.oldYear) oldUserInfo.o365CreatedDate = new Date(params.oldYear, 5);
+
+                const foundOldRoles = await this.getMatchingRoles(guild, oldUserInfo, false);
+                oldRoles.push(...foundOldRoles);
+            } else if (override) {
+                const foundOldRoles = await this.getMatchingRoles(guild, user, false);
+                oldRoles.push(...foundOldRoles);
             }
 
             const rolesToSet = member.roles.cache.clone();
@@ -143,6 +178,7 @@ export class RoleAssignmentService {
                 rolesToSet.delete('800477641978806334');
             }
 
+            const overrideString = override ? ` (overridden by <@${override.createdBy}> via ${inlineCode('/verifyoverride')})` : '';
             if (!rolesToSet.equals(member.roles.cache)) {
                 await member.roles.set(rolesToSet, 'Verified via Sir Goose Bot');
                 if (params.log) {
@@ -151,7 +187,7 @@ export class RoleAssignmentService {
                         member.user,
                         `${member} successfully verified and was assigned the ${newRoles
                             .map((role) => `\`${role.name}\``)
-                            .join(', ')} role(s).`,
+                            .join(', ')} role(s).${overrideString}`,
                         'Green'
                     );
                 }
@@ -160,7 +196,7 @@ export class RoleAssignmentService {
                     await Modlog.logUserAction(
                         guild,
                         member.user,
-                        `${member} successfully verified but was not assigned any roles due to the server configuration.`,
+                        `${member} successfully verified but was not assigned any roles due to the server configuration.${overrideString}`,
                         'Blue'
                     );
                 }
@@ -213,7 +249,7 @@ export class RoleAssignmentService {
         return undefined;
     }
 
-    private async getMatchingRoles(guild: Guild, user: UserInterface, log = true): Promise<Role[]> {
+    async getMatchingRoles(guild: Guild, user: UserInterface, log = true): Promise<Role[]> {
         const config = await GuildConfigCache.fetchConfig(guild.id);
 
         const roleData = RoleAssignmentService.getMatchingRoleData(user, config);
