@@ -5,11 +5,8 @@ import {
     Message,
     EmbedBuilder,
     ApplicationCommandOptionType,
-    codeBlock,
-    inlineCode,
 } from 'discord.js';
 import Client from '#src/Client';
-import { GuildConfigCache } from '#util/guildConfigCache';
 import { Category } from '#types/Command';
 import { ChatCommand } from '../ChatCommand';
 
