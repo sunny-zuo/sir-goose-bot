@@ -21,7 +21,7 @@ import { sendEphemeralReply } from '#util/message';
 import { logger } from '#util/logger';
 import { convertButtonActionRowToBuilder } from '#util/messageComponents';
 
-const BUTTON_ROLE_GUILD_LIMIT = 25;
+const BUTTON_ROLE_GUILD_LIMIT = 50;
 const BUTTON_ROLE_ROLE_LIMIT = 24;
 
 export class ButtonRole extends ChatCommand {
@@ -148,7 +148,7 @@ export class ButtonRole extends ChatCommand {
             await this.sendErrorEmbed(
                 interaction,
                 'Invalid Roles',
-                'No valid roles to assign were specified. Make sure the role is mentioned (or use slash commands) for role selection.'
+                'No valid roles to assign were specified. Make sure at least one role is selected when executing the command.'
             );
             return;
         }

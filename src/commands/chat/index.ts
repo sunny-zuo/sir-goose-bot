@@ -1,6 +1,5 @@
 /* Admin Commands */
 import { Config } from './admin/config';
-import { Prefix } from './admin/prefix';
 
 /* Fun Commands */
 import { Coinflip } from './fun/coinflip';
@@ -42,7 +41,6 @@ import { VerifyStats } from './verification/verifystats';
 
 export default [
     Config,
-    Prefix,
     Coinflip,
     Goose,
     Honk,

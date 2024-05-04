@@ -14,9 +14,7 @@ export class PinsView {
                     config.enablePins ? bold(`enabled`) : bold(`disabled`)
                 }.
             
-                Pinning gives all users the ability to pin messages, using the ${
-                    config.prefix
-                }pin command or via the right click menu under "Apps".`
+                Pinning gives all users the ability to pin messages using the \`/pin\` command or via the right click menu under "Apps".`
             )
             .setColor('Blue')
             .setTimestamp();

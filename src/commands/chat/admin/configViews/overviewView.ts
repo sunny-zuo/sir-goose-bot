@@ -9,7 +9,6 @@ import {
     inlineCode,
     ChatInputCommandInteraction,
 } from 'discord.js';
-import { PrefixView } from './prefixView';
 import { PinsView } from './pinsView';
 import { ModlogView } from './modlogView';
 import { VerificationView } from './verificationView';
@@ -27,12 +26,6 @@ export class OverviewView {
                 description: 'Display the value of every configuration option.',
                 emoji: '🔍',
                 default: true,
-            },
-            {
-                label: 'Prefix',
-                value: 'configPrefix',
-                description: 'View or modify the prefix that the bot will respond to.',
-                emoji: '👂',
             },
             {
                 label: 'Verification',
@@ -86,7 +79,7 @@ export class OverviewView {
     }
 
     static async generateConfigViewEmbed(guild: Guild): Promise<EmbedBuilder> {
-        const { prefix, enableModlog, modlogChannelId, enablePins, enableVerification } = await GuildConfigCache.fetchOrCreate(guild.id);
+        const { enableModlog, modlogChannelId, enablePins, enableVerification } = await GuildConfigCache.fetchOrCreate(guild.id);
 
         const maxInfoLabelLength = 15;
         const enabledString = `${Emojis.GreenCheck} Enabled`;
@@ -96,8 +89,7 @@ export class OverviewView {
             .setTitle(`Bot Config for ${guild.name}`)
             .setColor('Blue')
             .setDescription(
-                `${this.formatLabel('Prefix', maxInfoLabelLength)} ${prefix}
-                ${this.formatLabel('Verification', maxInfoLabelLength)} ${enableVerification ? enabledString : disabledString}
+                `${this.formatLabel('Verification', maxInfoLabelLength)} ${enableVerification ? enabledString : disabledString}
                 ${this.formatLabel('Modlog', maxInfoLabelLength)} ${enableModlog ? enabledString : disabledString}
                 ${this.formatLabel('Modlog Channel', maxInfoLabelLength)} ${modlogChannelId ? `<#${modlogChannelId}>` : 'no channel set'}
                 ${this.formatLabel('Pins', maxInfoLabelLength)} ${enablePins ? enabledString : disabledString}
@@ -124,9 +116,8 @@ export class OverviewView {
                     case 'configPins':
                         await PinsView.render(i, filter);
                         break;
-                    case 'configPrefix':
-                        await PrefixView.render(i, filter);
-                        break;
+                    default:
+                        throw new Error('Invalid config option selected');
                 }
             })
             .catch(async (e) => {

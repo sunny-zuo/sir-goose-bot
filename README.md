@@ -2,7 +2,7 @@
 
 Sir Goose Bot is a Discord bot built for University of Waterloo Discord servers. It offers a variety of features, including button roles (reaction roles but with buttons), moderation tools, and a highly customizable UWaterloo authentication/verification system that allows users to be assigned roles based on their program and/or year of study.
 
-Sir Goose is built using discord.js v13, with full support for slash commands and buttons!
+Sir Goose is built using discord.js v14, with full support for slash commands and buttons!
 
 ## Features
 

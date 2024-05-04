@@ -3,6 +3,7 @@ import Client from '#src/Client';
 import { logger } from '#util/logger';
 import { Gauge, register } from 'prom-client';
 import express from 'express';
+import { ActivityType } from 'discord.js';
 
 export class ReadyEventHandler implements EventHandler {
     readonly eventName = 'ready';
@@ -20,7 +21,7 @@ export class ReadyEventHandler implements EventHandler {
 
         client.webApp.init();
 
-        client.user!.setActivity('$help');
+        client.user!.setActivity('for /help', { type: ActivityType.Watching });
 
         const prom_app = express();
         prom_app.get('/metrics', async (req, res) => {

@@ -5,6 +5,8 @@ import {
     Message,
     EmbedBuilder,
     ApplicationCommandOptionType,
+    codeBlock,
+    inlineCode,
 } from 'discord.js';
 import Client from '#src/Client';
 import { GuildConfigCache } from '#util/guildConfigCache';
@@ -37,7 +39,6 @@ export class Help extends ChatCommand {
         args?: Omit<CommandInteractionOptionResolver, 'getMessage' | 'getFocused'>
     ): Promise<void> {
         const client = this.client;
-        const prefix = (await GuildConfigCache.fetchConfig(interaction?.guild?.id)).prefix;
 
         const commandQuery = args?.getString('command');
         if (commandQuery) {
@@ -48,7 +49,7 @@ export class Help extends ChatCommand {
             }
 
             const embed = new EmbedBuilder()
-                .setTitle(`Command: \`${`${prefix}${commandQuery.toLowerCase()}${Help.listArguments(command)}`.trim()}\``)
+                .setTitle(`Command: \`${`/${commandQuery.toLowerCase()}${Help.listArguments(command)}`.trim()}\``)
                 .setColor('Aqua')
                 .addFields(
                     { name: 'Description', value: command.description },
@@ -64,8 +65,8 @@ export class Help extends ChatCommand {
                         name: 'Examples',
                         value:
                             command.examples.length > 0
-                                ? command.examples.map((example) => `\`${prefix}${commandQuery.toLowerCase()} ${example}\``).join('\n')
-                                : `\`${prefix}${commandQuery.toLowerCase()}\``,
+                                ? command.examples.map((example) => `\`/${commandQuery.toLowerCase()} ${example}\``).join('\n')
+                                : `\`/${commandQuery.toLowerCase()}\``,
                         inline: true,
                     }
                 )
@@ -78,8 +79,8 @@ export class Help extends ChatCommand {
             const embed = new EmbedBuilder()
                 .setTitle('Command Help')
                 .setDescription(
-                    `In this server, the bot responds to the prefix \`${prefix}\`. You can also use slash commands!
-                    For more info on a specific command, type \`${prefix}help (command)\``
+                    `You can use slash commands to interact with me! Simply type \`/\` in the chat box followed by the command name.
+                    For more info on a specific command, use \`/help (command name)\`.`
                 )
                 .setColor('Aqua')
                 .setTimestamp();
