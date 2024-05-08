@@ -12,7 +12,7 @@ export class UserContextMenuCommandInteractionCreateEventHandler implements Even
     }
 
     async execute(interaction: Interaction): Promise<void> {
-        if (!interaction.isUserContextMenuCommand()) return;
+        if (!interaction.isContextMenuCommand()) return;
 
         const client = this.client;
         const command = client.contextMenuCommands.get(interaction.commandName);
