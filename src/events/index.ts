@@ -1,6 +1,6 @@
 import { ButtonInteractionCreateEventHandler } from './buttonInteractionCreateEventHandler';
 import { ChatInputCommandInteractionCreateEventHandler } from './chatInputCommandInteractionCreateEventHandler';
-import { UserContextMenuCommandInteractionCreateEventHandler } from './contextMenuInteractionCreateEventHandler';
+import { MessageContextMenuCommandInteractionCreateEventHandler } from './contextMenuInteractionCreateEventHandler';
 import { GuildCreateEventHandler } from './guildCreateEventHandler';
 import { GuildDeleteEventHandler } from './guildDeleteEventHandler';
 import { GuildMemberAddEventHandler } from './guildMemberAddEventHandler';
@@ -18,7 +18,7 @@ export default [
     GuildMemberAddEventHandler,
     ButtonInteractionCreateEventHandler,
     ChatInputCommandInteractionCreateEventHandler,
-    UserContextMenuCommandInteractionCreateEventHandler,
+    MessageContextMenuCommandInteractionCreateEventHandler,
     GuildCreateEventHandler,
     GuildDeleteEventHandler,
     MessageCreateEventHandler,

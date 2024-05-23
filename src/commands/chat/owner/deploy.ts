@@ -60,14 +60,14 @@ export class Deploy extends ChatCommand {
             }
         }
 
-        for (const [, command] of client.contextMenuCommands) {
+        for (const [, command] of client.messageContextMenuCommands) {
             data.push({
                 name: command.name,
                 type: ApplicationCommandType.Message,
             });
         }
 
-        if (args?.getSubcommand() === 'global') {
+        if (args?.getSubcommand(false) === 'global') {
             const application = await client.application!.fetch();
             await application.commands.set(data);
 

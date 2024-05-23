@@ -1,16 +1,16 @@
 import Discord, { ClientOptions, Collection, User } from 'discord.js';
 import { ChatCommand } from './commands/chat/ChatCommand';
-import { ContextMenuCommand } from './commands/contextMenu/ContextMenuCommand';
+import { MessageContextMenuCommand } from './commands/contextMenu/message/MessageContextMenuCommand';
 import Events from './events';
 import ChatCommands from './commands/chat';
-import MessageCommands from './commands/contextMenu/message';
+import MessageContextMenuCommands from './commands/contextMenu/message';
 import { logger } from '#util/logger';
 import { WebApp } from './web/app';
 
 export default class Client extends Discord.Client {
     chatCommands: Collection<string, ChatCommand>;
     chatAliases: Collection<string, ChatCommand>;
-    contextMenuCommands: Collection<string, ContextMenuCommand>;
+    messageContextMenuCommands: Collection<string, MessageContextMenuCommand>;
     webApp: WebApp;
 
     constructor(options: ClientOptions) {
@@ -20,7 +20,7 @@ export default class Client extends Discord.Client {
 
         this.chatCommands = new Collection<string, ChatCommand>();
         this.chatAliases = new Collection<string, ChatCommand>();
-        this.contextMenuCommands = new Collection<string, ContextMenuCommand>();
+        this.messageContextMenuCommands = new Collection<string, MessageContextMenuCommand>();
 
         this.loadEvents();
         this.loadCommands();
@@ -59,12 +59,12 @@ export default class Client extends Discord.Client {
             }
         }
 
-        for (const MessageCommand of MessageCommands) {
+        for (const MessageContextMenuCommand of MessageContextMenuCommands) {
             try {
-                const command = new MessageCommand(this);
-                logger.info({ event: { name: command.name } }, `Registering message command: ${command.name}`);
+                const command = new MessageContextMenuCommand(this);
+                logger.info({ event: { name: command.name } }, `Registering message context menu command: ${command.name}`);
 
-                this.contextMenuCommands.set(command.name, command);
+                this.messageContextMenuCommands.set(command.name, command);
             } catch (e) {
                 logger.error(e, e.message);
             }

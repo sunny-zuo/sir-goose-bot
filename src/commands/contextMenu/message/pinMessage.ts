@@ -1,12 +1,12 @@
-import { UserContextMenuCommandInteraction, EmbedBuilder, inlineCode, PermissionsBitField } from 'discord.js';
+import { EmbedBuilder, inlineCode, PermissionsBitField, MessageContextMenuCommandInteraction } from 'discord.js';
 import Client from '#src/Client';
 import { GuildConfigCache } from '#util/guildConfigCache';
 import { Modlog } from '#util/modlog';
-import { ContextMenuCommand } from '../ContextMenuCommand';
+import { MessageContextMenuCommand } from './MessageContextMenuCommand';
 import { attemptPin } from '#util/pin';
 import { logger } from '#util/logger';
 
-export class PinMessage extends ContextMenuCommand {
+export class PinMessage extends MessageContextMenuCommand {
     constructor(client: Client) {
         super(client, {
             name: 'Pin Message',
@@ -19,7 +19,7 @@ export class PinMessage extends ContextMenuCommand {
         });
     }
 
-    async execute(interaction: UserContextMenuCommandInteraction): Promise<void> {
+    async execute(interaction: MessageContextMenuCommandInteraction): Promise<void> {
         const message = interaction.options.getMessage('message');
         if (!message) return;
 

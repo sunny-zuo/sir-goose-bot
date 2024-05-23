@@ -3,7 +3,7 @@ import {
     CommandInteraction,
     InteractionReplyOptions,
     ButtonInteraction,
-    UserContextMenuCommandInteraction,
+    MessageContextMenuCommandInteraction,
     MessageReplyOptions,
 } from 'discord.js';
 
@@ -22,7 +22,7 @@ export async function sendReply(
 }
 
 export async function sendEphemeralReply(
-    interaction: Message | CommandInteraction | ButtonInteraction | UserContextMenuCommandInteraction,
+    interaction: Message | CommandInteraction | ButtonInteraction | MessageContextMenuCommandInteraction,
     message: InteractionReplyOptions & MessageReplyOptions,
     deletionSeconds = 30,
     isDeferred = false
@@ -42,7 +42,7 @@ export async function sendEphemeralReply(
 }
 
 export function isMessage(
-    interaction: Message | CommandInteraction | ButtonInteraction | UserContextMenuCommandInteraction
+    interaction: Message | CommandInteraction | ButtonInteraction | MessageContextMenuCommandInteraction
 ): interaction is Message {
     return (interaction as Message).author !== undefined;
 }
