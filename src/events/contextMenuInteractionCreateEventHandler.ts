@@ -3,7 +3,7 @@ import { EventHandler } from './eventHandler';
 import Client from '#src/Client';
 import { logger } from '#util/logger';
 
-export class UserContextMenuCommandInteractionCreateEventHandler implements EventHandler {
+export class MessageContextMenuCommandInteractionCreateEventHandler implements EventHandler {
     readonly eventName = 'interactionCreate';
     readonly client: Client;
 
@@ -12,10 +12,10 @@ export class UserContextMenuCommandInteractionCreateEventHandler implements Even
     }
 
     async execute(interaction: Interaction): Promise<void> {
-        if (!interaction.isContextMenuCommand()) return;
+        if (!interaction.isMessageContextMenuCommand()) return;
 
         const client = this.client;
-        const command = client.contextMenuCommands.get(interaction.commandName);
+        const command = client.messageContextMenuCommands.get(interaction.commandName);
 
         if (!command || !command.enabled) return;
         if (!command.isContextMenuCommand) return;

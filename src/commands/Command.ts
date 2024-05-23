@@ -13,8 +13,8 @@ import {
     CommandInteractionOptionResolver,
     GuildBasedChannel,
     ApplicationCommandOptionType,
-    UserContextMenuCommandInteraction,
     ChannelType,
+    MessageContextMenuCommandInteraction,
 } from 'discord.js';
 import { CommandOptions, Category } from '#types/Command';
 import Client from '#src/Client';
@@ -289,7 +289,7 @@ export abstract class Command {
     }
 
     async checkCommandPermissions(
-        interaction: Message | ChatInputCommandInteraction | UserContextMenuCommandInteraction
+        interaction: Message | ChatInputCommandInteraction | MessageContextMenuCommandInteraction
     ): Promise<boolean> {
         if (!interaction.channel) return false;
         if (interaction.channel.type === ChannelType.DM || interaction.member === null) return true;
@@ -337,7 +337,7 @@ export abstract class Command {
     async checkMemberPermissions(
         member: GuildMember | null,
         channel: GuildBasedChannel,
-        interaction: Message | ChatInputCommandInteraction | UserContextMenuCommandInteraction | null = null,
+        interaction: Message | ChatInputCommandInteraction | MessageContextMenuCommandInteraction | null = null,
         ownerOverride = true
     ): Promise<boolean> {
         if (member === null) return false;
@@ -368,7 +368,7 @@ export abstract class Command {
 
     async checkClientPermissions(
         channel: GuildBasedChannel,
-        interaction: Message | ChatInputCommandInteraction | UserContextMenuCommandInteraction | null = null
+        interaction: Message | ChatInputCommandInteraction | MessageContextMenuCommandInteraction | null = null
     ): Promise<boolean> {
         if (channel.guild.members.me === null) return false;
         const missingPermissions = channel.permissionsFor(channel.guild.members.me).missing(this.clientPermissions);
@@ -388,7 +388,7 @@ export abstract class Command {
     }
 
     sendSuccessEmbed(
-        interaction: Message | ChatInputCommandInteraction | UserContextMenuCommandInteraction,
+        interaction: Message | ChatInputCommandInteraction | MessageContextMenuCommandInteraction,
         title: string,
         description: string,
         ephemeral = false,
@@ -398,7 +398,7 @@ export abstract class Command {
     }
 
     sendNeutralEmbed(
-        interaction: Message | ChatInputCommandInteraction | UserContextMenuCommandInteraction,
+        interaction: Message | ChatInputCommandInteraction | MessageContextMenuCommandInteraction,
         title: string,
         description: string,
         ephemeral = false,
@@ -408,7 +408,7 @@ export abstract class Command {
     }
 
     sendErrorEmbed(
-        interaction: Message | ChatInputCommandInteraction | UserContextMenuCommandInteraction,
+        interaction: Message | ChatInputCommandInteraction | MessageContextMenuCommandInteraction,
         title: string,
         description: string,
         ephemeral = false,
@@ -418,7 +418,7 @@ export abstract class Command {
     }
 
     sendColorEmbed(
-        interaction: Message | ChatInputCommandInteraction | UserContextMenuCommandInteraction,
+        interaction: Message | ChatInputCommandInteraction | MessageContextMenuCommandInteraction,
         color: ColorResolvable,
         title: string,
         description: string,
