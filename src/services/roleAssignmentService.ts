@@ -15,7 +15,7 @@ import VerificationOverrideModel from '#models/verificationOverride.model';
 
 type CustomFileImport = { type: 'hash' | 'uwid'; department: string | null; entranceYear: number | null; ids: string[] };
 type CustomValues = { departments: string[]; entranceYear: number | null };
-type AssignGuildRolesParams = { log?: boolean; returnMissing?: boolean; oldDepartment?: string; oldYear?: number };
+type AssignGuildRolesParams = { log?: boolean; returnMissing?: boolean; oldDepartment?: string; oldYear?: number; oldConfig?: GuildConfig };
 export type RoleAssignmentResult = { assignedRoles: Role[]; updatedName?: string };
 
 export class RoleAssignmentService {
@@ -83,12 +83,12 @@ export class RoleAssignmentService {
     async assignGuildRoles(guild: Guild, params: AssignGuildRolesParams = {}): Promise<Result<RoleAssignmentResult, string>> {
         params = { log: true, returnMissing: true, ...params };
 
-        const guildModel = await GuildConfigCache.fetchConfig(guild.id);
+        const guildConfig = await GuildConfigCache.fetchConfig(guild.id);
         if (
-            !guildModel ||
-            !guildModel.enableVerification ||
-            !guildModel.verificationRules ||
-            guildModel.verificationRules.rules.length === 0
+            !guildConfig ||
+            !guildConfig.enableVerification ||
+            !guildConfig.verificationRules ||
+            guildConfig.verificationRules.rules.length === 0
         ) {
             return { success: false, error: 'No verification rules set' };
         }
@@ -127,21 +127,28 @@ export class RoleAssignmentService {
                     const overriddenUser = user.toObject();
                     if (override.department) overriddenUser.department = override.department;
                     if (override.o365CreatedDate) overriddenUser.o365CreatedDate = override.o365CreatedDate;
-                    return this.getMatchingRoles(guild, overriddenUser);
+                    return this.getMatchingRoles(guild, guildConfig, overriddenUser);
                 } else {
-                    return this.getMatchingRoles(guild, user);
+                    return this.getMatchingRoles(guild, guildConfig, user);
                 }
             };
             const getOldUserRolesToRemove = async () => {
-                if (params.oldDepartment || params.oldYear) {
+                if (params.oldDepartment || params.oldYear || override || params.oldConfig) {
+                    // build the old user info object that would have been used to assign roles
+                    // apply old user info before overrides if they exist, as this reflects how it works in practice
                     const oldUserInfo = user.toObject();
                     if (params.oldDepartment) oldUserInfo.department = params.oldDepartment;
                     if (params.oldYear) oldUserInfo.o365CreatedDate = new Date(params.oldYear, 5);
+                    if (override) {
+                        if (override.department) oldUserInfo.department = override.department;
+                        if (override.o365CreatedDate) oldUserInfo.o365CreatedDate = override.o365CreatedDate;
+                    }
 
-                    return this.getMatchingRoles(guild, oldUserInfo, false);
-                } else if (override) {
-                    // if there is an override, we need to remove the roles that would have been assigned without the override
-                    return this.getMatchingRoles(guild, user, false);
+                    if (params.oldConfig) {
+                        return this.getMatchingRoles(guild, params.oldConfig, oldUserInfo, false);
+                    } else {
+                        return this.getMatchingRoles(guild, guildConfig, oldUserInfo, false);
+                    }
                 } else {
                     return [];
                 }
@@ -149,18 +156,6 @@ export class RoleAssignmentService {
 
             const newRoles = await getNewUserRolesToAssign();
             const oldRoles = await getOldUserRolesToRemove();
-
-            if (params.oldDepartment || params.oldYear) {
-                const oldUserInfo = user.toObject();
-                if (params.oldDepartment) oldUserInfo.department = params.oldDepartment;
-                if (params.oldYear) oldUserInfo.o365CreatedDate = new Date(params.oldYear, 5);
-
-                const foundOldRoles = await this.getMatchingRoles(guild, oldUserInfo, false);
-                oldRoles.push(...foundOldRoles);
-            } else if (override) {
-                const foundOldRoles = await this.getMatchingRoles(guild, user, false);
-                oldRoles.push(...foundOldRoles);
-            }
 
             const rolesToSet = member.roles.cache.clone();
             const missingRoles = newRoles.filter((role) => !member.roles.cache.has(role.id));
@@ -205,8 +200,8 @@ export class RoleAssignmentService {
             const newNickname = await this.updateNickname(
                 member,
                 user,
-                guildModel.verificationRules?.renameType,
-                guildModel.verificationRules?.forceRename
+                guildConfig.verificationRules?.renameType,
+                guildConfig.verificationRules?.forceRename
             );
 
             return {
@@ -249,9 +244,7 @@ export class RoleAssignmentService {
         return undefined;
     }
 
-    async getMatchingRoles(guild: Guild, user: UserInterface, log = true): Promise<Role[]> {
-        const config = await GuildConfigCache.fetchConfig(guild.id);
-
+    async getMatchingRoles(guild: Guild, config: GuildConfig, user: UserInterface, log = true): Promise<Role[]> {
         const roleData = RoleAssignmentService.getMatchingRoleData(user, config);
 
         const validRoles = [];

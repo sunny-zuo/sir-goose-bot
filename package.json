@@ -45,9 +45,9 @@
     "dependencies": {
         "axios": "~1.6.3",
         "crypto-js": "~4.2.0",
-        "discord.js": "~14.14.1",
+        "discord.js": "~14.15.3",
         "dotenv": "~16.0.0",
-        "express": "~4.18.0",
+        "express": "~4.19.2",
         "graphql": "~16.8.1",
         "graphql-request": "~4.2.0",
         "luxon": "~2.5.2",
@@ -62,6 +62,8 @@
         "#util/*": "./dist/util/*.js",
         "#models/*": "./dist/models/*.js",
         "#services/*": "./dist/services/*.js",
-        "#types/*": "./dist/types/*.js"
+        "#types/*": "./dist/types/*.js",
+        "#commands/*": "./dist/commands/*.js",
+        "#src/*": "./dist/*.js"
     }
 }
