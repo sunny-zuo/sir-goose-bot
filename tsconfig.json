@@ -19,7 +19,7 @@
             "#util/*": ["src/util/*"],
             "#services/*": ["src/services/*"],
             "#commands/*": ["src/commands/*"],
-            "#src/*": ["src/*"],
+            "#src/*": ["src/*"]
         }
     }
 }
