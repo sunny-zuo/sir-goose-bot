@@ -1,9 +1,10 @@
-import { ChatInputCommandInteraction, Message, EmbedBuilder, PermissionsBitField } from 'discord.js';
+import { ButtonInteraction, ChatInputCommandInteraction, EmbedBuilder, PermissionsBitField } from 'discord.js';
 import Client from '#src/Client';
 import { ChatCommand } from '../ChatCommand';
 import { GuildConfigCache } from '#util/guildConfigCache';
-import { RoleAssignmentService } from '../../../services/roleAssignmentService';
+import { RoleAssignmentService } from '#services/roleAssignmentService';
 import { logger } from '#util/logger';
+import { GuildConfig } from '#src/models/guildConfig.model';
 
 export class VerifyAll extends ChatCommand {
     constructor(client: Client) {
@@ -13,12 +14,14 @@ export class VerifyAll extends ChatCommand {
             category: 'Verification',
             cooldownSeconds: 3600,
             cooldownMaxUses: 5,
+            isTextCommand: false,
+            isSlashCommand: true,
             clientPermissions: [PermissionsBitField.Flags.ManageRoles],
             userPermissions: [PermissionsBitField.Flags.ManageGuild, PermissionsBitField.Flags.ManageRoles],
         });
     }
 
-    async execute(interaction: Message | ChatInputCommandInteraction): Promise<void> {
+    async execute(interaction: ChatInputCommandInteraction): Promise<void> {
         if (!interaction.guild) return;
 
         const config = await GuildConfigCache.fetchConfig(interaction.guild.id);
@@ -52,8 +55,17 @@ export class VerifyAll extends ChatCommand {
             return;
         }
 
-        await interaction.guild.roles.fetch();
+        await VerifyAll.assignRolesWithProgressBar(interaction);
+    }
 
+    static async assignRolesWithProgressBar(
+        interaction: ChatInputCommandInteraction | ButtonInteraction,
+        oldConfig?: GuildConfig
+    ): Promise<void> {
+        if (!interaction.guild) throw new Error('Guild not found, this should never happen');
+        if (!interaction.deferred) await interaction.deferReply({ fetchReply: true });
+
+        await interaction.guild.roles.fetch();
         const members = await interaction.guild.members.fetch();
         const total = members.size;
         let progress = 0;
@@ -61,7 +73,7 @@ export class VerifyAll extends ChatCommand {
         const embed = this.generateProgressEmbed(progress, total);
 
         // This will always return a Message if the bot user is in the guild
-        const message = await interaction.reply({ embeds: [embed], fetchReply: true });
+        const message = await interaction.editReply({ embeds: [embed] });
 
         const updateInterval = setInterval(async () => {
             await message.edit({ embeds: [this.generateProgressEmbed(progress, total)] });
@@ -70,7 +82,7 @@ export class VerifyAll extends ChatCommand {
         try {
             for (const member of members.values()) {
                 const service = new RoleAssignmentService(member.id);
-                const roleAssignment = await service.assignGuildRoles(interaction.guild, { log: false });
+                const roleAssignment = await service.assignGuildRoles(interaction.guild, { log: false, oldConfig: oldConfig });
                 progress++;
 
                 if (roleAssignment.success && (roleAssignment.value.assignedRoles.length > 0 || roleAssignment.value.updatedName)) {
@@ -97,7 +109,7 @@ export class VerifyAll extends ChatCommand {
         await message.edit({ embeds: [this.generateProgressEmbed(progress, total)] });
     }
 
-    private generateProgressEmbed(progress: number, total: number): EmbedBuilder {
+    private static generateProgressEmbed(progress: number, total: number): EmbedBuilder {
         return new EmbedBuilder()
             .setTitle(progress !== total ? `Attempting to verify all ${total} users...` : `All ${total} users have been verified!`)
             .setDescription(
@@ -111,7 +123,7 @@ export class VerifyAll extends ChatCommand {
             .setColor(progress === total ? 'Green' : 'Blue');
     }
 
-    private generateProgressBar(progress: number, total: number): string {
+    private static generateProgressBar(progress: number, total: number): string {
         const width = 20;
         const complete = Math.floor((progress / total) * width);
         return `${'█'.repeat(complete)}${'░'.repeat(width - complete)} (${progress}/${total})`;

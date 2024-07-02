@@ -1,11 +1,21 @@
 import Client from '#src/Client';
-import { EmbedBuilder, ModalSubmitInteraction, codeBlock, inlineCode, PermissionsBitField } from 'discord.js';
+import {
+    EmbedBuilder,
+    ModalSubmitInteraction,
+    inlineCode,
+    PermissionsBitField,
+    ButtonBuilder,
+    ButtonStyle,
+    ActionRowBuilder,
+    ComponentType,
+} from 'discord.js';
 import { ModalSubmitInteractionHandler } from './modalInteractionHandler';
 import { RoleData, VerificationImportV2, VerificationRule } from '#types/Verification';
-import { serializeVerificationRules } from '#util/verification';
+import { v4 as uuidv4 } from 'uuid';
 import { GuildConfigCache } from '#util/guildConfigCache';
+import { VerifyAll } from '#commands/chat/verification/verifyall';
 
-export class VerifyRulesModal implements ModalSubmitInteractionHandler {
+export class VerifyRulesModalSubmitInteractionHandler implements ModalSubmitInteractionHandler {
     readonly client: Client;
     readonly customId = 'verifyRulesModal';
 
@@ -111,6 +121,7 @@ export class VerifyRulesModal implements ModalSubmitInteractionHandler {
         }
 
         const config = await GuildConfigCache.fetchOrCreate(interaction.guild!.id);
+        const oldConfig = { ...config.toObject() }; // save a copy of the old config for role replacement
 
         config.verificationRules = {
             baseYear: -1, // TODO: remove base year from code
@@ -119,12 +130,72 @@ export class VerifyRulesModal implements ModalSubmitInteractionHandler {
 
         await config.save();
 
-        const embed = new EmbedBuilder().setColor('Green').setTitle('Verification Rules Updated Successfully')
-            .setDescription(`Verification is ${
-            config.enableVerification ? 'enabled' : `disabled. Enable it using ${inlineCode('/config')}`
-        }. [Create a ruleset.](https://sebot.sunnyzuo.com/)
-                ${codeBlock(serializeVerificationRules(config.verificationRules))}`);
+        if (!config.enableVerification) {
+            const embed = new EmbedBuilder()
+                .setColor('Green')
+                .setDescription(
+                    `Verification rules have been successfully updated! However, verification on this server is disabled. Enable it using ${inlineCode(
+                        '/config'
+                    )} for verification to work.`
+                );
 
-        await interaction.reply({ embeds: [embed] });
+            await interaction.reply({ embeds: [embed] });
+        } else {
+            const embed = new EmbedBuilder().setColor('Green').setDescription(
+                `Verification rules have been successfully updated! By default, rule changes will only apply to new users: existing users' roles will not be modified.
+
+                To update existing users, click the button below. Roles assigned from the old rules (if applicable) will be removed and new roles will be assigned.`
+            );
+
+            const updateId = `verifyRulesModalSubmit|updateButton|${uuidv4()}`;
+            const ignoreId = `verifyRulesModalSubmit|ignoreButton|${uuidv4()}`;
+
+            const buttons = new ActionRowBuilder<ButtonBuilder>().addComponents(
+                new ButtonBuilder().setCustomId(updateId).setLabel("Update Existing Users' Roles").setStyle(ButtonStyle.Primary),
+                new ButtonBuilder().setCustomId(ignoreId).setLabel('Skip').setStyle(ButtonStyle.Secondary)
+            );
+
+            const message = await interaction.reply({ embeds: [embed], components: [buttons], fetchReply: true });
+
+            // function called when user skips role update or if no interaction is received after 30 minutes
+            const skipRoleUpdate = async () => {
+                const embed = new EmbedBuilder()
+                    .setColor('Green')
+                    .setDescription(
+                        "Verification rules have been successfully updated! By default, rule changes will only apply to new users: existing users' roles were not modified."
+                    );
+
+                return message.edit({ embeds: [embed], components: [] });
+            };
+
+            await message
+                .awaitMessageComponent({
+                    componentType: ComponentType.Button,
+                    time: 1000 * 60 * 30,
+                    filter: (i) => i.user.id === interaction.user.id,
+                })
+                .then(async (i) => {
+                    if (i.customId === updateId) {
+                        await i.deferReply({ fetchReply: true });
+
+                        const embed = new EmbedBuilder()
+                            .setColor('Green')
+                            .setDescription(
+                                "Verification rules have been successfully updated! Existing users' roles will be updated to reflect the new changes."
+                            );
+                        await message.edit({ embeds: [embed], components: [] });
+                        await VerifyAll.assignRolesWithProgressBar(i, oldConfig);
+                    } else if (i.customId === ignoreId) {
+                        await skipRoleUpdate();
+                    }
+                })
+                .catch(async (e) => {
+                    if (e.name === 'Error [InteractionCollectorError]') {
+                        await skipRoleUpdate();
+                    } else {
+                        throw e;
+                    }
+                });
+        }
     }
 }

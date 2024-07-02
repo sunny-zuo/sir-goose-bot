@@ -104,8 +104,8 @@ export class RoleUpdateEventHandler implements EventHandler {
                 )
                 .setTimestamp();
 
-            const updateId = uuidv4();
-            const ignoreId = uuidv4();
+            const updateId = `roleUpdate|updateButton|${uuidv4()}`;
+            const ignoreId = `roleUpdate|ignoreButton|${uuidv4()}`;
             const row = new ActionRowBuilder<ButtonBuilder>().addComponents(
                 new ButtonBuilder().setCustomId(updateId).setLabel('Update Roles').setStyle(ButtonStyle.Success),
                 new ButtonBuilder().setCustomId(ignoreId).setLabel('Ignore').setStyle(ButtonStyle.Danger)

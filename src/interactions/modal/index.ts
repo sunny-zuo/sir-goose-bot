@@ -1,3 +1,3 @@
-import { VerifyRulesModal } from './verifyRulesModal';
+import { VerifyRulesModalSubmitInteractionHandler } from './verifyRulesModalSubmitInteractionHandler';
 
-export default [VerifyRulesModal];
+export default [VerifyRulesModalSubmitInteractionHandler];
