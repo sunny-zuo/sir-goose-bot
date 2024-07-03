@@ -95,16 +95,33 @@ export class RoleAssignmentService {
 
         const member = await guild.members.fetch(this.userId).catch(() => undefined);
         const user = await UserModel.findOne({ discordId: this.userId });
+        // TODO: deal with global/guild scopes
+        const override = await VerificationOverrideModel.findOne({ discordId: this.userId, guildId: guild.id });
 
-        if (member && user && user.verified && user.department && user.o365CreatedDate) {
+        const userIsVerified = user && user.verified && user.department && user.o365CreatedDate;
+        // overrides can be used to verify users who are not verified as long as they are complete
+        const userHasValidOverride = override && override.department && override.o365CreatedDate;
+
+        if (member && (userIsVerified || userHasValidOverride)) {
             logger.info({ verification: 'assignOne', user: { id: member.id }, guild: { id: guild.id } });
 
-            const userBan = await BanModel.findOne({
-                guildId: guild.id,
-                uwid: user.uwid,
-                unbanned: false,
-                $or: [{ expiry: { $gte: new Date() } }, { expiry: { $exists: false } }],
-            });
+            const userBan = await (async () => {
+                if (user) {
+                    return BanModel.findOne({
+                        guildId: guild.id,
+                        uwid: user.uwid,
+                        unbanned: false,
+                        $or: [{ expiry: { $gte: new Date() } }, { expiry: { $exists: false } }],
+                    });
+                } else {
+                    return BanModel.findOne({
+                        guildId: guild.id,
+                        userId: this.userId,
+                        unbanned: false,
+                        $or: [{ expiry: { $gte: new Date() } }, { expiry: { $exists: false } }],
+                    });
+                }
+            })();
 
             if (userBan) {
                 await Modlog.logUserAction(
@@ -119,27 +136,32 @@ export class RoleAssignmentService {
                 return { success: false, error: 'User is banned' };
             }
 
-            // TODO: deal with global/guild scopes
-            const override = await VerificationOverrideModel.findOne({ discordId: this.userId, guildId: guild.id });
+            const defaultUserInfo =
+                user !== null
+                    ? user.toObject()
+                    : { department: undefined, o365CreatedDate: undefined, discordId: member.id, verified: true };
 
             const getNewUserRolesToAssign = async () => {
                 if (override) {
-                    const overriddenUser = user.toObject();
+                    const overriddenUser = { ...defaultUserInfo };
                     if (override.department) overriddenUser.department = override.department;
                     if (override.o365CreatedDate) overriddenUser.o365CreatedDate = override.o365CreatedDate;
                     return this.getMatchingRoles(guild, guildConfig, overriddenUser);
                 } else {
-                    return this.getMatchingRoles(guild, guildConfig, user);
+                    return this.getMatchingRoles(guild, guildConfig, defaultUserInfo);
                 }
             };
             const getOldUserRolesToRemove = async () => {
                 if (params.oldDepartment || params.oldYear || override || params.oldConfig) {
                     // build the old user info object that would have been used to assign roles
                     // apply old user info before overrides if they exist, as this reflects how it works in practice
-                    const oldUserInfo = user.toObject();
+                    const oldUserInfo = { ...defaultUserInfo };
                     if (params.oldDepartment) oldUserInfo.department = params.oldDepartment;
                     if (params.oldYear) oldUserInfo.o365CreatedDate = new Date(params.oldYear, 5);
-                    if (override) {
+                    if (override && params.oldConfig !== undefined) {
+                        // only apply the override if the config changed
+                        // if the config did not change, an override was likely just applied so we want to add the override associated roles
+                        // TODO: cleanup this logic
                         if (override.department) oldUserInfo.department = override.department;
                         if (override.o365CreatedDate) oldUserInfo.o365CreatedDate = override.o365CreatedDate;
                     }
@@ -186,7 +208,7 @@ export class RoleAssignmentService {
                         'Green'
                     );
                 }
-            } else if (user.verifyRequestedServerId === guild.id && newRoles.length === 0) {
+            } else if (user && user.verifyRequestedServerId === guild.id && newRoles.length === 0) {
                 if (params.log) {
                     await Modlog.logUserAction(
                         guild,
@@ -197,12 +219,19 @@ export class RoleAssignmentService {
                 }
             }
 
-            const newNickname = await this.updateNickname(
-                member,
-                user,
-                guildConfig.verificationRules?.renameType,
-                guildConfig.verificationRules?.forceRename
-            );
+            const newNickname = await (async () => {
+                // only try to rename users who are verified as we don't know the names of unverified users
+                if (user) {
+                    return this.updateNickname(
+                        member,
+                        user,
+                        guildConfig.verificationRules?.renameType,
+                        guildConfig.verificationRules?.forceRename
+                    );
+                } else {
+                    return undefined;
+                }
+            })();
 
             return {
                 success: true,
