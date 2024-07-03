@@ -484,7 +484,7 @@ async function predictOverrideRoleChangesString(
         );
         return newRoles.length > 0
             ? `This will result in the following roles being assigned: ${newRoles.map((role) => `<@&${role.id}>`).join(', ')}`
-            : 'This will result in no roles being assigned based on the current verification rules.';
+            : 'This will result in no roles being assigned based on the current verification rules and the chosen department/year.';
     } else if (targetUsers.length === 1) {
         // if only one user is selected, we can predict the roles that will be assigned as we can retrieve their current state
         const existingUserInfo = await UserModel.findOne({ discordId: targetUsers[0].id });
@@ -504,7 +504,7 @@ async function predictOverrideRoleChangesString(
         );
         return newRoles.length > 0
             ? `This will result in the following roles being assigned: ${newRoles.map((role) => `<@&${role.id}>`).join(', ')}`
-            : 'This will result in no roles being assigned based on the current verification rules.';
+            : 'This will result in no roles being assigned based on the current verification rules and the chosen department/year.';
     } else {
         return "The exact roles that will be assigned cannot be predicted as multiple users are selected and only one of the department or year is overridden. Thus, the roles assigned will also depend on the users' existing verification data.";
     }
