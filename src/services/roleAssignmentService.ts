@@ -146,7 +146,7 @@ export class RoleAssignmentService {
                     const overriddenUser = { ...defaultUserInfo };
                     if (override.department) overriddenUser.department = override.department;
                     if (override.o365CreatedDate) overriddenUser.o365CreatedDate = override.o365CreatedDate;
-                    return this.getMatchingRoles(guild, guildConfig, overriddenUser);
+                    return this.getMatchingRoles(guild, guildConfig, overriddenUser, true, true); // skip custom imports so that override takes precedence
                 } else {
                     return this.getMatchingRoles(guild, guildConfig, defaultUserInfo);
                 }
@@ -273,8 +273,8 @@ export class RoleAssignmentService {
         return undefined;
     }
 
-    async getMatchingRoles(guild: Guild, config: GuildConfig, user: UserInterface, log = true): Promise<Role[]> {
-        const roleData = RoleAssignmentService.getMatchingRoleData(user, config);
+    async getMatchingRoles(guild: Guild, config: GuildConfig, user: UserInterface, log = true, skipCustomImport = false): Promise<Role[]> {
+        const roleData = RoleAssignmentService.getMatchingRoleData(user, config, skipCustomImport);
 
         const validRoles = [];
         const invalidRoles = [];
@@ -326,7 +326,9 @@ export class RoleAssignmentService {
 
     static getMatchingRoleData(
         user: Pick<UserInterface, 'verified' | 'department' | 'o365CreatedDate' | 'uwid'> | null,
-        config: Pick<GuildConfig, 'enableVerification' | 'verificationRules'> | null
+        config: Pick<GuildConfig, 'enableVerification' | 'verificationRules'> | null,
+        // TODO: refactor to remove having to do this by creating a VerifiedUser class that wraps all of the different override types
+        skipCustomImport: boolean = false
     ): RoleData[] {
         if (
             !user ||
@@ -342,7 +344,7 @@ export class RoleAssignmentService {
             return [];
         }
 
-        const customValues = RoleAssignmentService.customImport.get(SHA256(user.uwid).toString());
+        const customValues = skipCustomImport ? undefined : RoleAssignmentService.customImport.get(SHA256(user.uwid).toString());
 
         let departments: string[] = [user.department];
         const customDepartments = customValues?.departments ?? [];

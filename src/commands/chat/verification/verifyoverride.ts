@@ -480,7 +480,8 @@ async function predictOverrideRoleChangesString(
                 o365CreatedDate: new Date(Number(newYear), 5),
                 department: newDepartment,
             },
-            config
+            config,
+            true
         );
         return newRoles.length > 0
             ? `This will result in the following roles being assigned: ${newRoles.map((role) => `<@&${role.id}>`).join(', ')}`
@@ -500,7 +501,8 @@ async function predictOverrideRoleChangesString(
                 o365CreatedDate: newYear !== undefined ? new Date(Number(newYear), 5) : existingUserInfo.o365CreatedDate,
                 department: newDepartment !== undefined ? newDepartment : existingUserInfo.department,
             },
-            config
+            config,
+            true
         );
         return newRoles.length > 0
             ? `This will result in the following roles being assigned: ${newRoles.map((role) => `<@&${role.id}>`).join(', ')}`
