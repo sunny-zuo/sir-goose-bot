@@ -30,7 +30,7 @@ export class ButtonRole implements ButtonInteractionHandler {
             argData = JSON.parse(args);
         } catch (e) {
             await interaction.editReply({
-                content: `This button role prompt is no longer valid.`,
+                embeds: [new EmbedBuilder().setColor('Red').setDescription(`This button role prompt is no longer valid.`)],
             });
             return logger.warn({ args }, 'Received invalid JSON from button role button interaction');
         }
@@ -41,9 +41,16 @@ export class ButtonRole implements ButtonInteractionHandler {
 
         if (!buttonRoleInfo || buttonRoleInfo.roles.every((roleData) => roleData.id !== argData.roleId)) {
             await interaction.editReply({
-                content: `This button role prompt is no longer valid.`,
+                embeds: [new EmbedBuilder().setColor('Red').setDescription(`This button role prompt is no longer valid.`)],
             });
             return logger.warn({ args }, 'Button role button interaction had invalid data');
+        }
+
+        if (buttonRoleInfo.guildId !== interaction.guild.id) {
+            await interaction.editReply({
+                embeds: [new EmbedBuilder().setColor('Red').setDescription(`This button role prompt was not created for this server.`)],
+            });
+            return logger.warn({ args }, 'Button role button interaction called in different guild (announcement channel?)');
         }
 
         const role = await interaction.guild.roles.fetch(argData.roleId);
