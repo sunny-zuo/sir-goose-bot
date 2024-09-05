@@ -140,7 +140,8 @@ export class ButtonRole extends ChatCommand {
             await this.sendErrorEmbed(
                 interaction,
                 'Invalid Roles',
-                `I do not have permission to assign the following roles: ${invalidRoles.map((r) => inlineCode(r.name)).join(', ')}`
+                `I do not have permission to assign the following roles: ${invalidRoles.map((r) => inlineCode(r.name)).join(', ')}`,
+                true
             );
             return;
         }
@@ -148,7 +149,8 @@ export class ButtonRole extends ChatCommand {
             await this.sendErrorEmbed(
                 interaction,
                 'Invalid Roles',
-                'No valid roles to assign were specified. Make sure at least one role is selected when executing the command.'
+                'No valid roles to assign were specified. Make sure at least one role is selected when executing the command.',
+                true
             );
             return;
         }
@@ -158,7 +160,8 @@ export class ButtonRole extends ChatCommand {
             await this.sendErrorEmbed(
                 interaction,
                 'Too Many Button Role Prompts',
-                `You cannot have more than ${BUTTON_ROLE_GUILD_LIMIT} button roles prompts. Please ask in the [support server](https://discord.gg/KHByMmrrw2) if you have a good reason to get this limit increased.`
+                `You cannot have more than ${BUTTON_ROLE_GUILD_LIMIT} button roles prompts. Please ask in the [support server](https://discord.gg/KHByMmrrw2) if you'd like to have this limit increased.`,
+                true
             );
             return;
         }
@@ -195,7 +198,17 @@ export class ButtonRole extends ChatCommand {
             .setColor('#2F3136');
 
         const channel = interaction.channel ?? (await interaction.guild?.channels.fetch(interaction.channelId).catch(() => null));
-        if (channel?.type !== ChannelType.GuildText) return;
+        if (channel?.type !== ChannelType.GuildText && channel?.type !== ChannelType.GuildAnnouncement) {
+            await interaction.reply({
+                embeds: [
+                    new EmbedBuilder()
+                        .setColor('Red')
+                        .setDescription('Button role prompts can only be created in regular text channels and announcement channels.'),
+                ],
+                ephemeral: true,
+            });
+            return;
+        }
 
         const message = await channel.send({ embeds: [embed], components });
         await interaction.reply({ content: 'Button role prompt successfully created!', ephemeral: true });
