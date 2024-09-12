@@ -47,7 +47,6 @@ export class MessageContextMenuCommandInteractionCreateEventHandler implements E
         if (!(await command.checkCommandPermissions(interaction))) {
             if (
                 interaction.channel &&
-                interaction.channel.isTextBased() &&
                 !interaction.channel.isDMBased() &&
                 interaction.channel.guild.members.me &&
                 !interaction.channel

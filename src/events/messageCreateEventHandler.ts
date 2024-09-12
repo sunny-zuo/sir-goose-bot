@@ -104,7 +104,6 @@ export class MessageCreateEventHandler implements EventHandler {
         }
         if (!(await command.checkCommandPermissions(message))) {
             if (
-                message.channel.isTextBased() &&
                 !message.channel.isDMBased() &&
                 message.channel.guild.members.me &&
                 !message.channel
