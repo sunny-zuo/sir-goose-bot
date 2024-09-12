@@ -1,4 +1,4 @@
-import { ChannelType, Message, PermissionsBitField } from 'discord.js';
+import { Message, PermissionsBitField } from 'discord.js';
 import { Result } from '../types';
 
 export type PinError = 'SYSTEM_MESSAGE' | 'CHANNEL_NOT_VIEWABLE' | 'ALREADY_PINNED' | 'MISSING_PERMISSIONS';
@@ -7,7 +7,7 @@ export async function attemptPin(message: Message, reason?: string): Promise<Res
     const { channel, system } = message;
 
     if (system) return { success: false, error: 'SYSTEM_MESSAGE' };
-    else if (channel.type === ChannelType.DM) return pin(message, reason);
+    else if (channel.isDMBased()) return pin(message, reason);
     else if (!channel.viewable) return { success: false, error: 'CHANNEL_NOT_VIEWABLE' };
     else if (!channel.permissionsFor(message.client.user!)?.has(PermissionsBitField.Flags.ManageMessages))
         return { success: false, error: 'MISSING_PERMISSIONS' };

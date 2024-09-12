@@ -11,7 +11,6 @@ import {
     Role,
     ApplicationCommandOptionType,
     ButtonStyle,
-    ChannelType,
     ComponentType,
     inlineCode,
     ChatInputCommandInteraction,
@@ -198,12 +197,10 @@ export class ButtonRole extends ChatCommand {
             .setColor('#2F3136');
 
         const channel = interaction.channel ?? (await interaction.guild?.channels.fetch(interaction.channelId).catch(() => null));
-        if (channel?.type !== ChannelType.GuildText && channel?.type !== ChannelType.GuildAnnouncement) {
+        if (!channel || !channel.isTextBased()) {
             await interaction.reply({
                 embeds: [
-                    new EmbedBuilder()
-                        .setColor('Red')
-                        .setDescription('Button role prompts can only be created in regular text channels and announcement channels.'),
+                    new EmbedBuilder().setColor('Red').setDescription('Button role prompts can only be created in text based channels.'),
                 ],
                 ephemeral: true,
             });
@@ -235,7 +232,7 @@ export class ButtonRole extends ChatCommand {
         }
 
         const channel = await interaction.guild?.channels.fetch(buttonRole.channelId).catch(() => null);
-        if (channel?.type !== ChannelType.GuildText) {
+        if (!channel || !channel.isTextBased()) {
             await this.sendErrorEmbed(
                 interaction,
                 'Invalid Channel',

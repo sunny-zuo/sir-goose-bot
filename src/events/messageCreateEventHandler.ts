@@ -5,7 +5,6 @@ import {
     EmbedBuilder,
     ButtonStyle,
     PermissionsBitField,
-    ChannelType,
     ApplicationCommandOptionType,
     inlineCode,
 } from 'discord.js';
@@ -105,7 +104,8 @@ export class MessageCreateEventHandler implements EventHandler {
         }
         if (!(await command.checkCommandPermissions(message))) {
             if (
-                message.channel.type === ChannelType.GuildText &&
+                message.channel.isTextBased() &&
+                !message.channel.isDMBased() &&
                 message.channel.guild.members.me &&
                 !message.channel
                     .permissionsFor(message.channel.guild.members.me)

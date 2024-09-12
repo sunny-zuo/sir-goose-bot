@@ -1,7 +1,6 @@
 import { EventHandler } from './eventHandler';
 import Client from '#src/Client';
 import {
-    ChannelType,
     ComponentType,
     ActionRowBuilder,
     ButtonBuilder,
@@ -233,7 +232,7 @@ export class RoleUpdateEventHandler implements EventHandler {
             await prompt.save();
 
             const promptChannel = await guild.channels.fetch(prompt.channelId).catch(() => null);
-            if (!promptChannel || promptChannel.type !== ChannelType.GuildText) continue;
+            if (!promptChannel || !promptChannel.isTextBased()) continue;
 
             const promptMessage = await promptChannel.messages.fetch(prompt.messageId);
             if (!promptMessage) continue;

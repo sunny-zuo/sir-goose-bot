@@ -1,4 +1,4 @@
-import { ChannelType, Interaction, PermissionsBitField } from 'discord.js';
+import { Interaction, PermissionsBitField } from 'discord.js';
 import { EventHandler } from './eventHandler';
 import Client from '#src/Client';
 import { logger } from '#util/logger';
@@ -47,7 +47,8 @@ export class MessageContextMenuCommandInteractionCreateEventHandler implements E
         if (!(await command.checkCommandPermissions(interaction))) {
             if (
                 interaction.channel &&
-                interaction.channel.type === ChannelType.GuildText &&
+                interaction.channel.isTextBased() &&
+                !interaction.channel.isDMBased() &&
                 interaction.channel.guild.members.me &&
                 !interaction.channel
                     .permissionsFor(interaction.channel.guild.members.me)

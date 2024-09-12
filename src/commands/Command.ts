@@ -13,7 +13,6 @@ import {
     CommandInteractionOptionResolver,
     GuildBasedChannel,
     ApplicationCommandOptionType,
-    ChannelType,
     MessageContextMenuCommandInteraction,
 } from 'discord.js';
 import { CommandOptions, Category } from '#types/Command';
@@ -292,7 +291,7 @@ export abstract class Command {
         interaction: Message | ChatInputCommandInteraction | MessageContextMenuCommandInteraction
     ): Promise<boolean> {
         if (!interaction.channel) return false;
-        if (interaction.channel.type === ChannelType.DM || interaction.member === null) return true;
+        if (interaction.channel.isDMBased() || interaction.member === null) return true;
         if (
             interaction.channel.guild.members.me &&
             !interaction.channel.permissionsFor(interaction.channel.guild.members.me).has(minimumClientPermissions)
