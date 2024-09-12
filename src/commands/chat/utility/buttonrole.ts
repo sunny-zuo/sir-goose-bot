@@ -275,7 +275,7 @@ export class ButtonRole extends ChatCommand {
             }
 
             const lowestUnfilledIndex = message.components.findIndex((c) => c.components.length < 5);
-            const lowestUnfilledRow = lowestUnfilledIndex !== -1 ? lowestUnfilledIndex + 1 : undefined;
+            const lowestUnfilledRow = lowestUnfilledIndex !== -1 ? lowestUnfilledIndex : undefined;
 
             const selectedRow = args.getNumber('row') ?? lowestUnfilledRow ?? message.components.length;
 
@@ -290,22 +290,27 @@ export class ButtonRole extends ChatCommand {
             }
 
             const newComponents: ActionRowBuilder<ButtonBuilder>[] = message.components.map(convertButtonActionRowToBuilder);
-
             const button = new ButtonBuilder()
                 .setCustomId(`buttonRole|{"roleId":"${role.id}","_id":"${buttonRole._id}"}`)
                 .setLabel(role.name)
                 .setStyle(ButtonStyle.Primary);
-            message.components[selectedRow]
-                ? newComponents[selectedRow].addComponents(button)
-                : newComponents.push(new ActionRowBuilder<ButtonBuilder>().addComponents(button));
+
+            if (selectedRow < newComponents.length) newComponents[selectedRow].addComponents(button);
+            else newComponents.push(new ActionRowBuilder<ButtonBuilder>().addComponents(button));
+            await message.edit({ components: newComponents });
 
             buttonRole.roles.push({ name: role.name, id: role.id });
-
             await buttonRole.save();
-            await message.edit({ components: message.components });
+
             await sendEphemeralReply(
                 interaction,
-                { content: `The role "${role.name}" has been successfully added to the button role prompt!` },
+                {
+                    embeds: [
+                        new EmbedBuilder()
+                            .setColor('Green')
+                            .setDescription(`The role "${role.name}" has been successfully added to the button role prompt!`),
+                    ],
+                },
                 20
             );
         } else if (args.getString('action', true) === 'remove') {
