@@ -1,6 +1,6 @@
 import { EventHandler } from './eventHandler';
 import Client from '#src/Client';
-import { ActionRowBuilder, ButtonBuilder, ChannelType, ComponentType, Role } from 'discord.js';
+import { ActionRowBuilder, ButtonBuilder, ComponentType, Role } from 'discord.js';
 import { Modlog } from '#util/modlog';
 import { GuildConfigCache } from '#util/guildConfigCache';
 import { logger } from '#util/logger';
@@ -63,7 +63,7 @@ export class RoleDeleteEventHandler implements EventHandler {
             await prompt.save();
 
             const promptChannel = await guild.channels.fetch(prompt.channelId).catch(() => null);
-            if (!promptChannel || promptChannel.type !== ChannelType.GuildText) continue;
+            if (!promptChannel || !promptChannel.isTextBased()) continue;
 
             const promptMessage = await promptChannel.messages.fetch(prompt.messageId);
             if (!promptMessage) continue;

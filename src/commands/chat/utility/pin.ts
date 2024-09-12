@@ -9,7 +9,6 @@ import {
     Snowflake,
     CommandInteractionOptionResolver,
     Channel,
-    ChannelType,
     ApplicationCommandOptionType,
     inlineCode,
 } from 'discord.js';
@@ -70,12 +69,12 @@ export class Pin extends ChatCommand {
             pinMessageId = args?.getString('message_id') as Snowflake;
             const fetchedChannel =
                 interaction.channel ?? (await interaction.guild?.channels.fetch(interaction?.channelId).catch(() => null));
-            if (fetchedChannel?.type === ChannelType.GuildText) {
+            if (fetchedChannel && fetchedChannel.isTextBased()) {
                 channel = fetchedChannel;
             }
         }
 
-        if (!channel || channel.type !== ChannelType.GuildText) return;
+        if (!channel || !channel.isTextBased()) return;
         if (!pinMessageId) {
             await this.sendErrorEmbed(
                 interaction,

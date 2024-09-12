@@ -6,7 +6,6 @@ import {
     ButtonBuilder,
     ApplicationCommandOption,
     CommandInteractionOptionResolver,
-    ChannelType,
     ApplicationCommandOptionType,
     ButtonStyle,
 } from 'discord.js';
@@ -57,7 +56,7 @@ export class VerifyButton extends ChatCommand {
             await interaction.channel.send({ content: content, components: [components] });
         } else {
             const channel = interaction.channel ?? (await interaction.guild?.channels.fetch(interaction.channelId).catch(() => null));
-            if (channel?.type !== ChannelType.GuildText) return;
+            if (!channel || !channel.isTextBased()) return;
 
             await channel.send({ content: content, components: [components] });
             await interaction.reply({ content: 'Verification button successfully created!', ephemeral: true });

@@ -131,7 +131,7 @@ export class ModlogView {
                         }
 
                         const channel = i.channels.first();
-                        if (!channel || channel.type !== ChannelType.GuildText) {
+                        if (!channel || !channel.isTextBased() || channel.isDMBased()) {
                             return logger.error(`Expected guild text channel in modlogView.renderChannelChange, but got ${channel?.type}`);
                         }
 

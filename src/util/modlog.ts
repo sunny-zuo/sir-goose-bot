@@ -3,11 +3,10 @@ import {
     Guild,
     EmbedBuilder,
     PermissionsBitField,
-    TextChannel,
     User,
     MessageCreateOptions,
     Message,
-    ChannelType,
+    GuildTextBasedChannel,
 } from 'discord.js';
 import { GuildConfigCache } from './guildConfigCache';
 import { logger } from '#util/logger';
@@ -70,12 +69,12 @@ export class Modlog {
         return embed;
     }
 
-    static async fetchModlogChannel(guild: Guild): Promise<TextChannel | null> {
+    static async fetchModlogChannel(guild: Guild): Promise<GuildTextBasedChannel | null> {
         const config = await GuildConfigCache.fetchConfig(guild.id);
         if (config.enableModlog && config.modlogChannelId) {
             try {
                 const channel = await guild.channels.fetch(config.modlogChannelId).catch(() => null);
-                if (channel && channel.type === ChannelType.GuildText) {
+                if (channel && channel.isTextBased() && !channel.isDMBased()) {
                     return channel;
                 } else {
                     return null;
