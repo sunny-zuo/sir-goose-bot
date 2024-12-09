@@ -1,8 +1,8 @@
 import { ChatCommand } from '../ChatCommand';
 import Client from '#src/Client';
-import { ChatInputCommandInteraction, Message, EmbedBuilder, InteractionReplyOptions, MessageReplyOptions } from 'discord.js';
-import axios from 'axios';
+import { ChatInputCommandInteraction, EmbedBuilder } from 'discord.js';
 import { logger } from '#util/logger';
+import { fetchGooseImage } from './goose';
 
 export class Honk extends ChatCommand {
     constructor(client: Client) {
@@ -15,20 +15,27 @@ export class Honk extends ChatCommand {
         });
     }
 
-    async execute(interaction: Message | ChatInputCommandInteraction): Promise<void> {
+    async execute(interaction: ChatInputCommandInteraction): Promise<void> {
+        await interaction.deferReply();
+
+        let gooseImageEmbed: EmbedBuilder | undefined;
         if (Math.random() < 0.4) {
-            let response: InteractionReplyOptions & MessageReplyOptions = { content: 'HONK HONK' };
             try {
-                const randomGoose = 'https://source.unsplash.com/random?goose,geese';
-                const imageUrl = await axios.get(randomGoose).then((r) => r.request.res.responseUrl);
-                response = { embeds: [new EmbedBuilder().setColor('Aqua').setTitle('HONK HONK').setImage(imageUrl)] };
+                const gooseImage = await fetchGooseImage();
+                gooseImageEmbed = new EmbedBuilder()
+                    .setColor('Aqua')
+                    .setTitle('HONK HONK')
+                    .setImage(gooseImage.urls.small)
+                    .setFooter({ text: `Photo by ${gooseImage.user.name} on Unsplash` });
             } catch (e) {
                 logger.error(e, e.message);
             }
+        }
 
-            await interaction.reply(response);
+        if (gooseImageEmbed) {
+            await interaction.editReply({ embeds: [gooseImageEmbed] });
         } else {
-            await interaction.reply({ content: 'HONK' });
+            await interaction.editReply({ content: 'HONK' });
         }
     }
 }
