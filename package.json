@@ -43,15 +43,15 @@
         "typescript": "~5.3.3"
     },
     "dependencies": {
-        "axios": "~1.6.3",
+        "axios": "~1.7.9",
         "crypto-js": "~4.2.0",
-        "discord.js": "~14.15.3",
+        "discord.js": "~14.16.3",
         "dotenv": "~16.0.0",
         "express": "~4.19.2",
         "graphql": "~16.8.1",
         "graphql-request": "~4.2.0",
         "luxon": "~2.5.2",
-        "mongoose": "~8.0.0",
+        "mongoose": "~8.8.4",
         "pino": "~8.14.2",
         "pino-http": "~8.3.3",
         "pino-loki": "~2.1.3",
