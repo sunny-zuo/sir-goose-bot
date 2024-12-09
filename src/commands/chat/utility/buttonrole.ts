@@ -197,7 +197,7 @@ export class ButtonRole extends ChatCommand {
             .setColor('#2F3136');
 
         const channel = interaction.channel ?? (await interaction.guild?.channels.fetch(interaction.channelId).catch(() => null));
-        if (!channel || !channel.isTextBased()) {
+        if (!channel || !channel.isSendable()) {
             await interaction.reply({
                 embeds: [
                     new EmbedBuilder().setColor('Red').setDescription('Button role prompts can only be created in text based channels.'),

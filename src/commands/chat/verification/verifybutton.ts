@@ -1,6 +1,4 @@
 import {
-    Message,
-    CommandInteraction,
     PermissionsBitField,
     ActionRowBuilder,
     ButtonBuilder,
@@ -8,6 +6,9 @@ import {
     CommandInteractionOptionResolver,
     ApplicationCommandOptionType,
     ButtonStyle,
+    EmbedBuilder,
+    Colors,
+    ChatInputCommandInteraction,
 } from 'discord.js';
 import { ChatCommand } from '../ChatCommand';
 import Client from '#src/Client';
@@ -37,9 +38,11 @@ export class VerifyButton extends ChatCommand {
     }
 
     async execute(
-        interaction: Message | CommandInteraction,
+        interaction: ChatInputCommandInteraction,
         args?: Omit<CommandInteractionOptionResolver, 'getMessage' | 'getFocused'>
     ): Promise<void> {
+        await interaction.deferReply({ ephemeral: true });
+
         const components = new ActionRowBuilder<ButtonBuilder>().addComponents(
             new ButtonBuilder().setCustomId('requestVerificationLink').setLabel('Request Verification Link').setStyle(ButtonStyle.Primary)
         );
@@ -51,15 +54,22 @@ export class VerifyButton extends ChatCommand {
         }
 
         const content = args?.getString('message') ?? 'Click the button below to request a verification link!';
-
-        if (this.isMessage(interaction)) {
-            await interaction.channel.send({ content: content, components: [components] });
-        } else {
-            const channel = interaction.channel ?? (await interaction.guild?.channels.fetch(interaction.channelId).catch(() => null));
-            if (!channel || !channel.isTextBased()) return;
-
-            await channel.send({ content: content, components: [components] });
-            await interaction.reply({ content: 'Verification button successfully created!', ephemeral: true });
+        const channel = interaction.channel ?? (await interaction.guild?.channels.fetch(interaction.channelId).catch(() => null));
+        if (!channel || !channel.isSendable()) {
+            await interaction.editReply({
+                embeds: [
+                    new EmbedBuilder().setColor(Colors.Red).setDescription(
+                        `Something went wrong trying to create the verification button. This might be because I do not have permissions to send messages in this channel.\n
+                            If everything looks correct on your end, consider asking for help in [the support server](https://discord.gg/KHByMmrrw2).`
+                    ),
+                ],
+            });
+            return;
         }
+
+        await channel.send({ content: content, components: [components] });
+        await interaction.editReply({
+            embeds: [new EmbedBuilder().setColor(Colors.Green).setDescription('Verification button successfully created!')],
+        });
     }
 }
