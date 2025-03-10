@@ -56,9 +56,7 @@ export class Course extends ChatCommand {
             const response = await request(uwflowEndpoint, uwflowQuery, variables);
 
             if (response.course.length < 1) {
-                const embed = new EmbedBuilder()
-                    .setColor('Red')
-                    .setDescription(`No course with the name '${courseName}' was found.`)
+                const embed = new EmbedBuilder().setColor('Red').setDescription(`No course with the name '${courseName}' was found.`);
 
                 await interaction.editReply({ embeds: [embed] });
                 return;
