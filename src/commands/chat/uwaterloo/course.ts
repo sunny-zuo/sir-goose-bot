@@ -58,11 +58,9 @@ export class Course extends ChatCommand {
             if (response.course.length < 1) {
                 const embed = new EmbedBuilder()
                     .setColor('Red')
-                    .setTitle('Error: No Course Found')
                     .setDescription(`No course with the name '${courseName}' was found.`)
-                    .setTimestamp();
 
-                await interaction.reply({ embeds: [embed] });
+                await interaction.editReply({ embeds: [embed] });
                 return;
             }
 
