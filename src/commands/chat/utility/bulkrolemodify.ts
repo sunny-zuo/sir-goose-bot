@@ -14,7 +14,7 @@ import Client from '#src/Client';
 import { ChatCommand } from '../ChatCommand';
 import { logger } from '#util/logger';
 
-export class RoleReplace extends ChatCommand {
+export class BulkRoleModify extends ChatCommand {
     constructor(client: Client) {
         super(client, {
             name: 'bulkrolemodify',
@@ -225,7 +225,7 @@ export class RoleReplace extends ChatCommand {
                             .setColor('Blue');
 
                         await i.update({ embeds: [embed], components: [] });
-                        await RoleReplace.bulkModifyRoles(i, members, removeRoles, addRoles);
+                        await BulkRoleModify.bulkModifyRoles(i, members, removeRoles, addRoles);
                         break;
                     }
                     case 'rolereplace_final_cancel':

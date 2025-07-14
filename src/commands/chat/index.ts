@@ -25,7 +25,7 @@ import { Reload } from './owner/reload';
 /* Utility Commands */
 import { ButtonRole } from './utility/buttonrole';
 import { Pin } from './utility/pin';
-import { RoleReplace } from './utility/rolereplace';
+import { BulkRoleModify } from './utility/bulkrolemodify';
 
 /* UWaterloo Commands */
 import { Course } from './uwaterloo/course';
@@ -57,7 +57,7 @@ export default [
     Reload,
     ButtonRole,
     Pin,
-    RoleReplace,
+    BulkRoleModify,
     Course,
     Countdown,
     ReVerify,
