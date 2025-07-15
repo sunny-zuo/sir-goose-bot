@@ -220,7 +220,7 @@ export class BulkRoleModify extends ChatCommand {
                                 `Starting bulk role modification...\n
                         This will impact approximately ${affectedCount} users ${
                                     filterRoles.length
-                                        ? 'that have the following roles: ' + filterRoles.map((r) => `<@&${r.id}>`).join(', ')
+                                        ? 'that have all of the following roles: ' + filterRoles.map((r) => `<@&${r.id}>`).join(', ')
                                         : '(all users in the server)'
                                 }
                         \n${actionSummary}
