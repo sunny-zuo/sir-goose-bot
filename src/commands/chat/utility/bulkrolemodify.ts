@@ -176,9 +176,13 @@ export class BulkRoleModify extends ChatCommand {
 
         let actionSummary = '';
         if (removeRoles.length > 0)
-            actionSummary += `The following role(s) will be removed from these users: ${removeRoles.map((r) => `<@&${r.id}>`).join(', ')}\n`;
-        if (addRoles.length > 0) actionSummary += `The following role(s) will be added to these users: ${addRoles.map((r) => `<@&${r.id}>`).join(', ')}\n`;
-        if (removeRoles.length === 0 && addRoles.length === 0) actionSummary = 'No role modifications were selected, so no changes will be made.\n';
+            actionSummary += `The following role(s) will be removed from these users: ${removeRoles
+                .map((r) => `<@&${r.id}>`)
+                .join(', ')}\n`;
+        if (addRoles.length > 0)
+            actionSummary += `The following role(s) will be added to these users: ${addRoles.map((r) => `<@&${r.id}>`).join(', ')}\n`;
+        if (removeRoles.length === 0 && addRoles.length === 0)
+            actionSummary = 'No role modifications were selected, so no changes will be made.\n';
 
         const confirmEmbed = new EmbedBuilder()
             .setTitle('Confirm Bulk Role Modification')
