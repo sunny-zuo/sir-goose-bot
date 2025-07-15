@@ -159,7 +159,7 @@ export class BulkRoleModify extends ChatCommand {
             if (role.position >= botMember!.roles.highest.position) {
                 const embed = new EmbedBuilder()
                     .setDescription(
-                        `I do not have permission to manage the role <@&${role.id}>. Please ensure the role hierarchy is correct and permissions are configured correctly, and then try again.`
+                        `I do not have permission to manage the role ${role}. Please ensure the role hierarchy is correct and permissions are configured correctly, and then try again.`
                     )
                     .setColor('Yellow');
                 await interaction.editReply({ embeds: [embed], components: [] });
@@ -176,11 +176,9 @@ export class BulkRoleModify extends ChatCommand {
 
         let actionSummary = '';
         if (removeRoles.length > 0)
-            actionSummary += `The following role(s) will be removed from these users: ${removeRoles
-                .map((r) => `<@&${r.id}>`)
-                .join(', ')}\n`;
+            actionSummary += `The following role(s) will be removed from these users: ${removeRoles.map((r) => `${r}`).join(', ')}\n`;
         if (addRoles.length > 0)
-            actionSummary += `The following role(s) will be added to these users: ${addRoles.map((r) => `<@&${r.id}>`).join(', ')}\n`;
+            actionSummary += `The following role(s) will be added to these users: ${addRoles.map((r) => `${r}`).join(', ')}\n`;
         if (removeRoles.length === 0 && addRoles.length === 0)
             actionSummary = 'No role modifications were selected, so no changes will be made.\n';
 
@@ -189,7 +187,7 @@ export class BulkRoleModify extends ChatCommand {
             .setDescription(
                 `You are about to modify roles for approximately **${affectedCount}** users ${
                     filterRoles.length
-                        ? 'that have the following roles: ' + filterRoles.map((r) => `<@&${r.id}>`).join(', ')
+                        ? 'that have the following roles: ' + filterRoles.map((r) => `${r}`).join(', ')
                         : '(all users in the server)'
                 }
                 
@@ -217,10 +215,10 @@ export class BulkRoleModify extends ChatCommand {
                     case 'rolereplaceFinalConfirm': {
                         const embed = new EmbedBuilder()
                             .setDescription(
-                                `Starting bulk role modification...\n
+                                `**Starting bulk role modifications...**\n
                         This will impact approximately ${affectedCount} users ${
                                     filterRoles.length
-                                        ? 'that have all of the following roles: ' + filterRoles.map((r) => `<@&${r.id}>`).join(', ')
+                                        ? 'that have all of the following roles: ' + filterRoles.map((r) => `${r}`).join(', ')
                                         : '(all users in the server)'
                                 }
                         \n${actionSummary}
