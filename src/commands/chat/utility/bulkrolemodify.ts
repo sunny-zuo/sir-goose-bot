@@ -35,17 +35,17 @@ export class BulkRoleModify extends ChatCommand {
 
         /* Create the bulk role modification interface */
         const filterMenu = new RoleSelectMenuBuilder()
-            .setCustomId('rolereplace_filter')
+            .setCustomId('rolereplaceFilter')
             .setPlaceholder('Select roles to filter users by')
             .setMinValues(1)
             .setMaxValues(25);
         const addMenu = new RoleSelectMenuBuilder()
-            .setCustomId('rolereplace_add')
+            .setCustomId('rolereplaceAdd')
             .setPlaceholder('Select roles to add (optional)')
             .setMinValues(0)
             .setMaxValues(25);
         const removeMenu = new RoleSelectMenuBuilder()
-            .setCustomId('rolereplace_remove')
+            .setCustomId('rolereplaceRemove')
             .setPlaceholder('Select roles to remove (optional)')
             .setMinValues(0)
             .setMaxValues(25);
@@ -53,14 +53,14 @@ export class BulkRoleModify extends ChatCommand {
         const actionRowFilter = new ActionRowBuilder<RoleSelectMenuBuilder>().addComponents(filterMenu);
         const actionRowAdd = new ActionRowBuilder<RoleSelectMenuBuilder>().addComponents(addMenu);
         const actionRowRemove = new ActionRowBuilder<RoleSelectMenuBuilder>().addComponents(removeMenu);
-        const getConfirmRow = () =>
+        const getContinueRow = () =>
             new ActionRowBuilder<ButtonBuilder>().addComponents(
                 new ButtonBuilder()
-                    .setCustomId('rolereplace_confirm')
-                    .setLabel('Confirm')
+                    .setCustomId('rolereplaceContinue')
+                    .setLabel('Continue')
                     .setStyle(ButtonStyle.Success)
                     .setDisabled(!(selectedFilter.length > 0 && (selectedAdd.length > 0 || selectedRemove.length > 0))),
-                new ButtonBuilder().setCustomId('rolereplace_cancel').setLabel('Cancel').setStyle(ButtonStyle.Danger)
+                new ButtonBuilder().setCustomId('rolereplaceCancel').setLabel('Cancel').setStyle(ButtonStyle.Danger)
             );
 
         let selectedFilter: string[] = []; // snowflake array of role IDs
@@ -83,7 +83,7 @@ export class BulkRoleModify extends ChatCommand {
 
         const message = await interaction.editReply({
             embeds: [embed],
-            components: [actionRowFilter, actionRowAdd, actionRowRemove, getConfirmRow()],
+            components: [actionRowFilter, actionRowAdd, actionRowRemove, getContinueRow()],
         });
 
         let finished = false;
@@ -91,15 +91,15 @@ export class BulkRoleModify extends ChatCommand {
             try {
                 const i = await message.awaitMessageComponent({
                     filter: (i) => i.user.id === interaction.user.id,
-                    time: 1000 * 60 * 10,
+                    time: 1000 * 60 * 5,
                 });
                 if (i.isRoleSelectMenu()) {
-                    if (i.customId === 'rolereplace_filter') selectedFilter = i.values;
-                    if (i.customId === 'rolereplace_add') selectedAdd = i.values;
-                    if (i.customId === 'rolereplace_remove') selectedRemove = i.values;
+                    if (i.customId === 'rolereplaceFilter') selectedFilter = i.values;
+                    if (i.customId === 'rolereplaceAdd') selectedAdd = i.values;
+                    if (i.customId === 'rolereplaceRemove') selectedRemove = i.values;
                     await i.update({
                         embeds: [
-                            embed.setDescription(`This tool allows you to bulk modify user roles.
+                            embed.setDescription(`This tool allows you to bulk modify user roles. Use if you want to change roles for multiple users at once.
 
                             **Selected filter roles:** ${
                                 selectedFilter.length ? selectedFilter.map((id) => `<@&${id}>`).join(', ') : 'None'
@@ -107,12 +107,12 @@ export class BulkRoleModify extends ChatCommand {
                             **Roles to add:** ${selectedAdd.length ? selectedAdd.map((id) => `<@&${id}>`).join(', ') : 'None'}
                             **Roles to remove:** ${selectedRemove.length ? selectedRemove.map((id) => `<@&${id}>`).join(', ') : 'None'}
 
-                            Click Confirm to preview and apply changes, or cancel to abort.`),
+                            Click continue to preview and apply changes, or cancel to abort.`),
                         ],
-                        components: [actionRowFilter, actionRowAdd, actionRowRemove, getConfirmRow()],
+                        components: [actionRowFilter, actionRowAdd, actionRowRemove, getContinueRow()],
                     });
                 } else if (i.isButton()) {
-                    if (i.customId === 'rolereplace_cancel') {
+                    if (i.customId === 'rolereplaceCancel') {
                         await i.update({
                             embeds: [
                                 new EmbedBuilder()
@@ -124,7 +124,7 @@ export class BulkRoleModify extends ChatCommand {
                         finished = true;
                         break;
                     }
-                    if (i.customId === 'rolereplace_confirm') {
+                    if (i.customId === 'rolereplaceContinue') {
                         await i.deferUpdate();
                         await this.handleConfirmation(i, selectedFilter, selectedAdd, selectedRemove);
                         finished = true;
@@ -155,11 +155,11 @@ export class BulkRoleModify extends ChatCommand {
 
         // Check bot can manage these roles
         const botMember = interaction.guild.members.me;
-        for (const role of [...filterRoles, ...addRoles, ...removeRoles]) {
+        for (const role of [...addRoles, ...removeRoles]) {
             if (role.position >= botMember!.roles.highest.position) {
                 const embed = new EmbedBuilder()
                     .setDescription(
-                        `I do not have permission to manage the role <@&${role.id}>. Please ensure the role hierarchy is correct and permissions are configured correctly.`
+                        `I do not have permission to manage the role <@&${role.id}>. Please ensure the role hierarchy is correct and permissions are configured correctly, and then try again.`
                     )
                     .setColor('Yellow');
                 await interaction.editReply({ embeds: [embed], components: [] });
@@ -176,9 +176,9 @@ export class BulkRoleModify extends ChatCommand {
 
         let actionSummary = '';
         if (removeRoles.length > 0)
-            actionSummary += `The following roles will be removed: ${removeRoles.map((r) => `<@&${r.id}>`).join(', ')}\n`;
-        if (addRoles.length > 0) actionSummary += `The following roles will be added: ${addRoles.map((r) => `<@&${r.id}>`).join(', ')}\n`;
-        if (removeRoles.length === 0 && addRoles.length === 0) actionSummary = 'No role changes will be made.';
+            actionSummary += `The following role(s) will be removed from these users: ${removeRoles.map((r) => `<@&${r.id}>`).join(', ')}\n`;
+        if (addRoles.length > 0) actionSummary += `The following role(s) will be added to these users: ${addRoles.map((r) => `<@&${r.id}>`).join(', ')}\n`;
+        if (removeRoles.length === 0 && addRoles.length === 0) actionSummary = 'No role modifications were selected, so no changes will be made.\n';
 
         const confirmEmbed = new EmbedBuilder()
             .setTitle('Confirm Bulk Role Modification')
@@ -193,8 +193,8 @@ export class BulkRoleModify extends ChatCommand {
             )
             .setColor('Orange');
         const confirmRow = new ActionRowBuilder<ButtonBuilder>().addComponents(
-            new ButtonBuilder().setCustomId('rolereplace_final_confirm').setLabel('Confirm').setStyle(ButtonStyle.Success),
-            new ButtonBuilder().setCustomId('rolereplace_final_cancel').setLabel('Cancel').setStyle(ButtonStyle.Danger)
+            new ButtonBuilder().setCustomId('rolereplaceFinalConfirm').setLabel('Confirm').setStyle(ButtonStyle.Success),
+            new ButtonBuilder().setCustomId('rolereplaceFinalCancel').setLabel('Cancel').setStyle(ButtonStyle.Danger)
         );
         const message = await interaction.editReply({ embeds: [confirmEmbed], components: [confirmRow] });
 
@@ -203,14 +203,14 @@ export class BulkRoleModify extends ChatCommand {
                 filter: (i) =>
                     i.isButton() &&
                     i.user.id === interaction.user.id &&
-                    ['rolereplace_final_confirm', 'rolereplace_final_cancel'].includes(i.customId),
-                time: 60000,
+                    ['rolereplaceFinalConfirm', 'rolereplaceFinalCancel'].includes(i.customId),
+                time: 60 * 1000 * 5,
             })
             .then(async (i) => {
                 if (!i.isButton()) return;
 
                 switch (i.customId) {
-                    case 'rolereplace_final_confirm': {
+                    case 'rolereplaceFinalConfirm': {
                         const embed = new EmbedBuilder()
                             .setDescription(
                                 `Starting bulk role modification...\n
@@ -228,7 +228,7 @@ export class BulkRoleModify extends ChatCommand {
                         await BulkRoleModify.bulkModifyRoles(i, members, removeRoles, addRoles);
                         break;
                     }
-                    case 'rolereplace_final_cancel':
+                    case 'rolereplaceFinalCancel':
                         await i.update({
                             embeds: [
                                 new EmbedBuilder()
@@ -266,15 +266,24 @@ export class BulkRoleModify extends ChatCommand {
             for (const member of members.values()) {
                 try {
                     let newRoles = member.roles.cache.map((r) => r.id);
+                    let changesMade = false;
+
                     if (removeRoles.length > 0) {
                         newRoles = newRoles.filter((id) => !removeRoles.some((r) => r.id === id));
+                        if (newRoles.length !== member.roles.cache.size) {
+                            changesMade = true;
+                        }
                     }
                     addRoles.forEach((role) => {
                         if (!newRoles.includes(role.id)) {
                             newRoles.push(role.id);
+                            changesMade = true;
                         }
                     });
-                    await member.roles.set(newRoles);
+
+                    if (changesMade) {
+                        await member.roles.set(newRoles);
+                    }
                 } catch (e) {
                     logger.error(e, `Failed to modify roles for ${member.user.tag}`);
                 }
