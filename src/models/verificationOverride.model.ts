@@ -12,6 +12,8 @@ export interface VerificationOverride {
     department?: string;
     o365CreatedDate?: Date;
     scope: OverrideScope;
+    createdAt: Date;
+    updatedAt: Date;
 }
 
 const schema = new Schema<VerificationOverride>(
