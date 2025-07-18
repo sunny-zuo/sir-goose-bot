@@ -106,7 +106,7 @@ export async function renderDeleteConfirmationScreen(
         const message = await interaction.editReply({ embeds: [embed], components: [buttons] });
 
         await message
-            .awaitMessageComponent({ time: 1000 * 60 * 5, filter: (i) => i.user.id === interaction.user.id })
+            .awaitMessageComponent({ time: 1000 * 60 * 10, filter: (i) => i.user.id === interaction.user.id })
             .then(async (i) => {
                 if (!i.isButton()) return;
 
@@ -146,6 +146,10 @@ export async function renderDeleteConfirmationScreen(
 async function predictRoleChangesAfterDeletion(guild: Guild, targetUser: User, override: VerificationOverride): Promise<string> {
     try {
         const guildConfig = await GuildConfigCache.fetchConfig(guild.id);
+        
+        if (!guildConfig || !guildConfig.verificationRules) {
+            return 'No roles will change as verification is not configured and enabled for this server.';
+        }
 
         const baseUser = await UserModel.findOne({ discordId: targetUser.id });
         const syntheticUserWithOverride = {

@@ -11,7 +11,7 @@ import {
 import { GuildConfigCache } from '#util/guildConfigCache';
 import { RoleAssignmentService } from '#services/roleAssignmentService';
 import UserModel from '#models/user.model';
-import VerificationOverrideModel, {  } from '#models/verificationOverride.model';
+import VerificationOverrideModel from '#models/verificationOverride.model';
 import { logger } from '#util/logger';
 import { renderDeleteConfirmationScreen } from './verifyOverrideDelete';
 
@@ -157,7 +157,7 @@ export async function handleViewOverride(interaction: ChatInputCommandInteractio
         const message = await interaction.editReply({ embeds: [embed], components: [buttonRow] });
 
         message
-            .awaitMessageComponent({ time: 1000 * 60 * 20, filter: (i) => i.user.id === interaction.user.id })
+            .awaitMessageComponent({ time: 1000 * 60 * 10, filter: (i) => i.user.id === interaction.user.id })
             .then(async (i) => {
                 if (!i.isButton()) return;
 

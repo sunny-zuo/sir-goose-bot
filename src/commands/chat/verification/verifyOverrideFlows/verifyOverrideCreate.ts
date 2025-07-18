@@ -49,7 +49,7 @@ export async function handleCreateOverride(
     let finished = false;
     while (!finished) {
         await message
-            .awaitMessageComponent({ time: 1000 * 60 * 20, filter: (i) => i.user.id === creator.id })
+            .awaitMessageComponent({ time: 1000 * 60 * 10, filter: (i) => i.user.id === creator.id })
             .then(async (i) => {
                 if (['verifyoverrideDepartmentSelect', 'verifyoverrideYearSelect'].includes(i.customId)) {
                     if (!i.isStringSelectMenu())
@@ -268,7 +268,7 @@ async function renderCreateOverrideConfirmationScreen(
 
     const message = await i.editReply({ embeds: [embed], components: [buttons] });
     await message
-        .awaitMessageComponent({ time: 1000 * 60 * 20, filter: (i) => i.user.id === creator.id })
+        .awaitMessageComponent({ time: 1000 * 60 * 10, filter: (i) => i.user.id === creator.id })
         .then(async (i) => {
             if (!i.isButton()) throw new Error("verifyoverride confirmation screen received interaction that wasn't a button");
             if (!i.inCachedGuild())
