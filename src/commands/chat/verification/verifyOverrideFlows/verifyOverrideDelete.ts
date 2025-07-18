@@ -146,7 +146,7 @@ export async function renderDeleteConfirmationScreen(
 async function predictRoleChangesAfterDeletion(guild: Guild, targetUser: User, override: VerificationOverride): Promise<string> {
     try {
         const guildConfig = await GuildConfigCache.fetchConfig(guild.id);
-        
+
         if (!guildConfig || !guildConfig.verificationRules) {
             return 'No roles will change as verification is not configured and enabled for this server.';
         }
@@ -218,7 +218,7 @@ async function performOverrideDeletion(
                 log: false,
                 oldDepartment: override.department,
                 oldYear: override.o365CreatedDate?.getFullYear(),
-                returnMissing: false // show all roles in this view, rather than just the newly assigned ones
+                returnMissing: false, // show all roles in this view, rather than just the newly assigned ones
             });
         }
 

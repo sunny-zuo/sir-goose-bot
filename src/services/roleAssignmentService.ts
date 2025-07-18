@@ -96,7 +96,11 @@ export class RoleAssignmentService {
         const member = await guild.members.fetch(this.userId).catch(() => undefined);
         const user = await UserModel.findOne({ discordId: this.userId });
         // TODO: deal with global/guild scopes
-        const override = await VerificationOverrideModel.findOne({ discordId: this.userId, guildId: guild.id, deleted: { $exists: false } });
+        const override = await VerificationOverrideModel.findOne({
+            discordId: this.userId,
+            guildId: guild.id,
+            deleted: { $exists: false },
+        });
 
         const userIsVerified = user && user.verified && user.department && user.o365CreatedDate;
         // overrides can be used to verify users who are not verified as long as they are complete
