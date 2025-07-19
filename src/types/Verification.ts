@@ -154,4 +154,6 @@ export const VerificationDepartmentList = [
     },
 ] as const;
 
-export const VerificationDefaultStartingYears: number[] = [2019, 2020, 2021, 2022, 2023, 2024, 2025] as const;
+// the default starting years is every year from 2019 up until the current year, plus 1
+const currentYear = new Date().getFullYear();
+export const VerificationDefaultStartingYears = Array.from({ length: currentYear - 2019 + 2 }, (_, i) => 2019 + i);

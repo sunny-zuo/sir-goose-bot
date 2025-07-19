@@ -88,7 +88,7 @@ export class VerifyOverride extends ChatCommand {
         interaction: ChatInputCommandInteraction,
         args: Omit<CommandInteractionOptionResolver, 'getMessage' | 'getFocused'>
     ): Promise<void> {
-        await interaction.deferReply({ ephemeral: true });
+        await interaction.deferReply();
 
         const allowedGuilds = [
             '694232686247542815', // SE 25

@@ -14,6 +14,7 @@ import UserModel from '#models/user.model';
 import VerificationOverrideModel from '#models/verificationOverride.model';
 import { logger } from '#util/logger';
 import { renderDeleteConfirmationScreen } from './verifyOverrideDelete';
+import { catchUnknownMessage } from '#util/message';
 
 export async function handleViewOverride(interaction: ChatInputCommandInteraction, targetUser: User, guild: Guild): Promise<void> {
     try {
@@ -28,7 +29,7 @@ export async function handleViewOverride(interaction: ChatInputCommandInteractio
         if (!override) {
             // Calculate roles from normal verification (without override) to display
 
-            let rolesFromVerificationInfo = 'None (user is unverified)';
+            let rolesFromVerificationInfo = '*None* (user is unverified)';
 
             if (guildConfig && guildConfig.verificationRules) {
                 const baseUser = await UserModel.findOne({ discordId: targetUser.id });
@@ -44,7 +45,7 @@ export async function handleViewOverride(interaction: ChatInputCommandInteractio
                         rolesFromVerificationInfo = roleData.map((role) => `<@&${role.id}>`).join(', ');
                     } else {
                         rolesFromVerificationInfo =
-                            'None (user is verified, but is not assigned any roles due to the verification rule configuration)';
+                            '*None* (user is verified, but is not assigned any roles due to the verification rule configuration)';
                     }
                 }
             }
@@ -143,7 +144,7 @@ export async function handleViewOverride(interaction: ChatInputCommandInteractio
             },
             {
                 name: 'Roles Assigned from Verification',
-                value: assignedRoles.length > 0 ? assignedRoles.join(', ') : 'None assigned',
+                value: assignedRoles.length > 0 ? assignedRoles.join(', ') : '*None assigned*',
                 inline: false,
             }
         );
@@ -163,21 +164,29 @@ export async function handleViewOverride(interaction: ChatInputCommandInteractio
 
                 if (i.customId === `verifyoverrideViewDelete_${targetUser.id}`) {
                     // start delete confirmation flow
+                    await i.deferReply();
+                    await interaction.editReply({ components: [] }).catch(catchUnknownMessage);
                     await renderDeleteConfirmationScreen(i, targetUser, guild, override);
                 }
             })
-            .catch(() => {
-                message.edit({ components: [] }).catch(() => {});
+            .catch(async (e) => {
+                if (e.name === 'Error [InteractionCollectorError]') {
+                    await interaction.editReply({ components: [] }).catch(catchUnknownMessage);
+                } else {
+                    throw e;
+                }
             });
     } catch (error) {
         logger.error(error, 'Error in handleViewSubcommand');
 
-        await interaction.editReply({
-            embeds: [
-                new EmbedBuilder()
-                    .setColor('Red')
-                    .setDescription('An error occurred while viewing the verification override. Please try again later.'),
-            ],
-        });
+        await interaction
+            .editReply({
+                embeds: [
+                    new EmbedBuilder()
+                        .setColor('Red')
+                        .setDescription('An error occurred while viewing the verification override. Please try again later.'),
+                ],
+            })
+            .catch(catchUnknownMessage);
     }
 }

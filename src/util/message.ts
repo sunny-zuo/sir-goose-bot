@@ -5,6 +5,7 @@ import {
     ButtonInteraction,
     MessageContextMenuCommandInteraction,
     MessageReplyOptions,
+    DiscordAPIError,
 } from 'discord.js';
 
 export async function sendReply(
@@ -45,4 +46,14 @@ export function isMessage(
     interaction: Message | CommandInteraction | ButtonInteraction | MessageContextMenuCommandInteraction
 ): interaction is Message {
     return (interaction as Message).author !== undefined;
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function catchUnknownMessage(e: any) {
+    if (e instanceof DiscordAPIError && e.message === 'Unknown Message') {
+        // do nothing if we get an "Unknown Message", this is probably caused by the message
+        // being deleted by the user so it doesn't matter that the edit failed
+    } else {
+        throw e;
+    }
 }

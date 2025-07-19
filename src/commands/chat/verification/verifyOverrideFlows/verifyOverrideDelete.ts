@@ -16,6 +16,7 @@ import VerificationOverrideModel, { VerificationOverride } from '#models/verific
 import { Modlog } from '#util/modlog';
 import { logger } from '#util/logger';
 import { Document } from 'mongoose';
+import { catchUnknownMessage } from '#util/message';
 
 export async function handleDeleteOverride(interaction: ChatInputCommandInteraction, targetUser: User, guild: Guild): Promise<void> {
     try {
@@ -38,7 +39,7 @@ export async function handleDeleteOverride(interaction: ChatInputCommandInteract
                     inline: false,
                 });
 
-            await interaction.editReply({ embeds: [embed] });
+            await interaction.editReply({ embeds: [embed] }).catch(catchUnknownMessage);
             return;
         }
 
@@ -46,13 +47,15 @@ export async function handleDeleteOverride(interaction: ChatInputCommandInteract
     } catch (error) {
         logger.error(error, 'Error in handleDeleteOverride');
 
-        await interaction.editReply({
-            embeds: [
-                new EmbedBuilder()
-                    .setColor('Red')
-                    .setDescription('An error occurred while processing the delete request. Please try again later.'),
-            ],
-        });
+        await interaction
+            .editReply({
+                embeds: [
+                    new EmbedBuilder()
+                        .setColor('Red')
+                        .setDescription('An error occurred while processing the delete request. Please try again later.'),
+                ],
+            })
+            .catch(catchUnknownMessage);
     }
 }
 
@@ -63,7 +66,7 @@ export async function renderDeleteConfirmationScreen(
     override: VerificationOverride & Document
 ): Promise<void> {
     try {
-        if (!interaction.deferred) await interaction.deferReply({ ephemeral: true });
+        if (!interaction.deferred) await interaction.deferReply();
 
         const roleChangePrediction = await predictRoleChangesAfterDeletion(guild, targetUser, override);
 
@@ -77,10 +80,8 @@ export async function renderDeleteConfirmationScreen(
             .addFields(
                 {
                     name: 'Current Override',
-                    value: `**Department:** ${
-                        override.department ? inlineCode(override.department) : 'Not overridden'
-                    }\n**Entrance Year:** ${
-                        override.o365CreatedDate ? inlineCode(override.o365CreatedDate.getFullYear().toString()) : 'Not overridden'
+                    value: `Department: ${override.department ? inlineCode(override.department) : '*Not overridden*'}\nEntrance Year: ${
+                        override.o365CreatedDate ? inlineCode(override.o365CreatedDate.getFullYear().toString()) : '*Not overridden*'
                     }`,
                     inline: false,
                 },
@@ -128,7 +129,7 @@ export async function renderDeleteConfirmationScreen(
                         .setColor('Grey')
                         .setDescription('Override deletion timed out. No changes were made.');
 
-                    await message.edit({ embeds: [timeoutEmbed], components: [] });
+                    await interaction.editReply({ embeds: [timeoutEmbed], components: [] }).catch(catchUnknownMessage);
                 } else {
                     throw e;
                 }
@@ -137,7 +138,7 @@ export async function renderDeleteConfirmationScreen(
         logger.error(error, 'Error in renderDeleteConfirmationScreen');
 
         await interaction.editReply({
-            embeds: [new EmbedBuilder().setColor('Red').setDescription('An unexpected error occured. Please try again later.')],
+            embeds: [new EmbedBuilder().setColor('Red').setDescription('An unexpected error occurred. Please try again later.')],
             components: [],
         });
     }
@@ -172,19 +173,15 @@ async function predictRoleChangesAfterDeletion(guild: Guild, targetUser: User, o
             return 'No role changes will occur.';
         }
 
-        let changeDescription = '';
-        if (rolesToRemove.length > 0) {
-            changeDescription += `**Roles to be removed:** ${rolesToRemove.map((role) => `<@&${role.id}>`).join(', ')}\n`;
-        }
-        if (rolesToAdd.length > 0) {
-            changeDescription += `**Roles to be added:** ${rolesToAdd.map((role) => `<@&${role.id}>`).join(', ')}\n`;
-        }
+        let changeDescription = `Roles to be added: ${
+            rolesToAdd.length > 0 ? rolesToAdd.map((role) => `<@&${role.id}>`).join(', ') : '*None*'
+        }\n Roles to be removed: ${rolesToRemove.length > 0 ? rolesToRemove.map((role) => `<@&${role.id}>`).join(', ') : '*None*'}\n`;
 
         // Special case: if user has no normal verification data
         if (!baseUser || !baseUser.verified || !baseUser.department || !baseUser.o365CreatedDate) {
             if (currentRoles.length > 0) {
                 changeDescription +=
-                    '\n⚠️ **Warning:** User is unverified. Thus, all verification roles will be removed after the override is deleted.';
+                    '\n‼️ **Note:** This user is unverified. Thus, all verification roles will be removed after the override is deleted.';
             }
         }
 
@@ -244,8 +241,8 @@ async function performOverrideDeletion(
             .setDescription(`The verification override for ${targetUser} has been deleted.`)
             .addFields({
                 name: 'Deleted Override',
-                value: `**Department:** ${override.department ? inlineCode(override.department) : 'Not overridden'}\n**Entrance Year:** ${
-                    override.o365CreatedDate ? inlineCode(override.o365CreatedDate.getFullYear().toString()) : 'Not overridden'
+                value: `Department: ${override.department ? inlineCode(override.department) : '*Not overridden*'}\nEntrance Year: ${
+                    override.o365CreatedDate ? inlineCode(override.o365CreatedDate.getFullYear().toString()) : '*Not overridden*'
                 }`,
                 inline: false,
             });
@@ -272,6 +269,8 @@ async function performOverrideDeletion(
                 value: `⚠️ Override was deleted but role update failed due to an unexpected error.`,
                 inline: false,
             });
+
+            logger.warn('performOverrideDeletion deleted override but role update failed with error: ' + roleUpdateResult.error);
         }
 
         await interaction.editReply({ embeds: [successEmbed], components: [] });

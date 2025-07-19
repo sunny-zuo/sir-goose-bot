@@ -18,6 +18,7 @@ import { RoleAssignmentService } from '#services/roleAssignmentService';
 import UserModel from '#models/user.model';
 import VerificationOverrideModel, { OverrideScope } from '#models/verificationOverride.model';
 import { Modlog } from '#util/modlog';
+import { catchUnknownMessage } from '#util/message';
 
 export async function handleCreateOverride(
     interaction: ChatInputCommandInteraction | ButtonInteraction,
@@ -26,10 +27,10 @@ export async function handleCreateOverride(
     selectedDept?: string,
     selectedYear?: string
 ) {
-    if (!interaction.deferred) await interaction.deferReply({ ephemeral: true });
+    if (!interaction.deferred) await interaction.deferReply();
 
     const embed = new EmbedBuilder().setColor('Blue').setTitle('Create Verification Override').setDescription(`
-        Manually set the department and/or entrance year of user(s) for verification purposes. You can use this feature to fix data inaccuracies or to manually verify a user for this guild.
+        Manually set the department and/or entrance year of user(s) for verification purposes. You can use this feature to fix data inaccuracies or to manually verify a user in this server.
 
         This override will last until it is deleted, so commands like ${inlineCode(
             '/verifyall'
@@ -49,7 +50,7 @@ export async function handleCreateOverride(
     let finished = false;
     while (!finished) {
         await message
-            .awaitMessageComponent({ time: 1000 * 60 * 10, filter: (i) => i.user.id === creator.id })
+            .awaitMessageComponent({ time: 1000 * 60 * 1, filter: (i) => i.user.id === creator.id })
             .then(async (i) => {
                 if (['verifyoverrideDepartmentSelect', 'verifyoverrideYearSelect'].includes(i.customId)) {
                     if (!i.isStringSelectMenu())
@@ -95,9 +96,9 @@ export async function handleCreateOverride(
                         const existingOverridesString = existingOverrides
                             .map(
                                 (override) =>
-                                    `* <@${override.discordId}> (dept ${inlineCode(override.department ?? 'not set')}, year ${inlineCode(
-                                        override.o365CreatedDate?.getFullYear().toString() ?? 'not set'
-                                    )})`
+                                    `* <@${override.discordId}> (department ${inlineCode(
+                                        override.department ?? 'not set'
+                                    )}, year ${inlineCode(override.o365CreatedDate?.getFullYear().toString() ?? 'not set')})`
                             )
                             .join('\n');
 
@@ -105,9 +106,9 @@ export async function handleCreateOverride(
                             .setDescription(`The following selected users already have an override in this guild:
                                 ${existingOverridesString}
                                 
-                                Please unselect the users with existing overrides and try again. If you want to modify an existing override, you must first delete it.`);
+\nPlease unselect the users with existing overrides and try again. If you want to modify an existing override, you must first delete it.`);
 
-                        await i.followUp({ embeds: [embed], ephemeral: true });
+                        await i.followUp({ embeds: [embed] });
                         return;
                     }
 
@@ -135,7 +136,7 @@ export async function handleCreateOverride(
 
                                     To create an override for an unverified user, both the department and year must be set. Please select a department and year, or unselect the unverified users and try again.`);
 
-                            await i.followUp({ embeds: [errorEmbed], ephemeral: true });
+                            await i.followUp({ embeds: [errorEmbed] });
                         }
                     }
                 }
@@ -146,7 +147,7 @@ export async function handleCreateOverride(
                         .setColor('Grey')
                         .setDescription('This verification override creation expired, so no changes were made.');
 
-                    await message.edit({ embeds: [embed], components: [] });
+                    await interaction.editReply({ embeds: [embed], components: [] }).catch(catchUnknownMessage);
                     finished = true;
                 } else {
                     throw e;
@@ -239,16 +240,16 @@ function renderSelectionComponents(targetUsers: User[], selectedDept?: string, s
 }
 
 async function renderCreateOverrideConfirmationScreen(
-    i: ButtonInteraction,
+    interaction: ButtonInteraction,
     creator: User,
     targetUsers: User[],
     newDepartment?: string,
     newYear?: string
 ) {
-    if (!i.inCachedGuild()) return;
-    if (!i.deferred) await i.deferUpdate();
+    if (!interaction.inCachedGuild()) return;
+    if (!interaction.deferred) await interaction.deferUpdate();
 
-    const roleChangePrediction = await predictOverrideRoleChangesString(i.guild, targetUsers, newDepartment, newYear);
+    const roleChangePrediction = await predictOverrideRoleChangesString(interaction.guild, targetUsers, newDepartment, newYear);
 
     const embed = new EmbedBuilder().setColor('Orange').setTitle('Confirm Override Creation').setDescription(`
         You are creating an override for user${targetUsers.length > 1 ? 's' : ''} ${targetUsers.map((user) => user.toString()).join(', ')}.
@@ -258,7 +259,7 @@ async function renderCreateOverrideConfirmationScreen(
 
         ${roleChangePrediction}
 
-        Old roles assigned from verification will be automatically cleaned up.
+        Previous roles assigned from verification will be automatically cleaned up.
     `);
 
     const confirmButton = new ButtonBuilder().setCustomId('verifyoverrideConfirmCreate').setLabel('Create').setStyle(ButtonStyle.Primary);
@@ -266,7 +267,7 @@ async function renderCreateOverrideConfirmationScreen(
     const cancelButton = new ButtonBuilder().setCustomId('verifyoverrideConfirmCancel').setLabel('Cancel').setStyle(ButtonStyle.Danger);
     const buttons = new ActionRowBuilder<ButtonBuilder>().addComponents(confirmButton, backButton, cancelButton);
 
-    const message = await i.editReply({ embeds: [embed], components: [buttons] });
+    const message = await interaction.editReply({ embeds: [embed], components: [buttons] });
     await message
         .awaitMessageComponent({ time: 1000 * 60 * 10, filter: (i) => i.user.id === creator.id })
         .then(async (i) => {
@@ -334,7 +335,7 @@ async function renderCreateOverrideConfirmationScreen(
                     .setColor('Grey')
                     .setDescription('This verification override creation expired, so no changes were made.');
 
-                await message.edit({ embeds: [embed], components: [] });
+                await interaction.editReply({ embeds: [embed], components: [] }).catch(catchUnknownMessage);
             } else {
                 throw e;
             }

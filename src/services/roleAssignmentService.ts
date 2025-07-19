@@ -107,7 +107,13 @@ export class RoleAssignmentService {
         const userHasValidOverride = override && override.department && override.o365CreatedDate;
 
         if (member && (userIsVerified || userHasValidOverride)) {
-            logger.info({ verification: 'assignOne', user: { id: member.id }, guild: { id: guild.id } });
+            logger.info({
+                verification: 'assignOne',
+                user: { id: member.id },
+                guild: { id: guild.id },
+                overrideId: override?._id ?? 'none',
+                path: 'regular',
+            });
 
             const userBan = await (async () => {
                 if (user) {
@@ -143,7 +149,13 @@ export class RoleAssignmentService {
             const defaultUserInfo =
                 user !== null
                     ? user.toObject()
-                    : { department: undefined, o365CreatedDate: undefined, discordId: member.id, verified: true };
+                    : {
+                          department: undefined,
+                          o365CreatedDate: undefined,
+                          discordId: member.id,
+                          uwid: 'role-assignment-with-override',
+                          verified: true,
+                      };
 
             const getNewUserRolesToAssign = async () => {
                 if (override) {
@@ -244,6 +256,28 @@ export class RoleAssignmentService {
                     updatedName: newNickname,
                 },
             };
+        } else if (member && !userIsVerified && params.oldDepartment && params.oldYear) {
+            logger.info({
+                verification: 'assignOne',
+                user: { id: member.id },
+                guild: { id: guild.id },
+                overrideId: override?._id ?? 'none',
+                path: 'unassign',
+            });
+
+            // this flow is triggered via verification override being deleted for an unverified user
+            // in this scenario, the only thing we should do is unassign the roles that were assigned previously
+            const mockUserInfo = {
+                department: params.oldDepartment,
+                o365CreatedDate: new Date(params.oldYear, 5),
+                discordId: member.id,
+                uwid: 'role-assignment-delete-override',
+                verified: true,
+            };
+            const rolesToRemove = await this.getMatchingRoles(guild, guildConfig, mockUserInfo, false);
+            await member.roles.remove(rolesToRemove);
+
+            return { success: true, value: { assignedRoles: [] } };
         }
 
         return { success: false, error: 'User is not verified' };
