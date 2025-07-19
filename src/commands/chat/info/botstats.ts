@@ -1,6 +1,6 @@
 import { ChatCommand } from '../ChatCommand';
 import Client from '#src/Client';
-import { ChatInputCommandInteraction, Message, EmbedBuilder, hyperlink, codeBlock } from 'discord.js';
+import { ChatInputCommandInteraction, EmbedBuilder, hyperlink, codeBlock } from 'discord.js';
 import { Duration } from 'luxon';
 import { cpus } from 'os';
 
