@@ -2,7 +2,6 @@ import { AES } from 'crypto-js';
 import {
     ButtonInteraction,
     InteractionReplyOptions,
-    Message,
     ActionRowBuilder,
     ButtonBuilder,
     EmbedBuilder,
@@ -16,9 +15,7 @@ import UserModel from '#models/user.model';
 import Client from '#src/Client';
 import { RoleAssignmentService } from '../services/roleAssignmentService';
 import { Modlog } from './modlog';
-import { sendEphemeralReply, sendReply } from './message';
 import { VerificationRuleImportV2, VerificationRules } from '#types/Verification';
-import { isMessage } from '#util/message';
 
 export function getVerificationResponse(user: User, isReverify = false): InteractionReplyOptions & MessageReplyOptions {
     if (!process.env.AES_PASSPHRASE || !process.env.SERVER_URI) {
@@ -46,16 +43,9 @@ export function getVerificationResponse(user: User, isReverify = false): Interac
 
 export async function sendVerificationReplies(
     client: Client,
-    interaction: Message | ChatInputCommandInteraction | ButtonInteraction,
-    discordUser: User,
-    isEphemeral = false,
-    isDeferred = false
+    interaction: ChatInputCommandInteraction | ButtonInteraction,
+    discordUser: User
 ): Promise<void> {
-    if (isDeferred && !isMessage(interaction) && !interaction.deferred) {
-        if (isEphemeral) await interaction.deferReply({ ephemeral: true });
-        else await interaction.deferReply();
-    }
-
     const user = await UserModel.findOne({ discordId: discordUser.id });
 
     if (user?.verified && user?.department && user?.o365CreatedDate) {
@@ -74,10 +64,7 @@ export async function sendVerificationReplies(
                     .setColor('Red')
                     .setTimestamp();
 
-                isEphemeral
-                    ? await sendEphemeralReply(interaction, { embeds: [embed] }, 60, isDeferred)
-                    : await sendReply(interaction, { embeds: [embed] }, isDeferred);
-
+                await interaction.editReply({ embeds: [embed] });
                 return;
             }
         } else {
@@ -95,9 +82,8 @@ export async function sendVerificationReplies(
             .setColor('Green')
             .setTimestamp();
 
-        isEphemeral
-            ? await sendEphemeralReply(interaction, { embeds: [embed] }, 60, isDeferred)
-            : await sendReply(interaction, { embeds: [embed] }, isDeferred);
+        await interaction.editReply({ embeds: [embed] });
+        return;
     } else {
         if (user) {
             user.verifyRequestedAt = new Date();
@@ -112,25 +98,17 @@ export async function sendVerificationReplies(
             });
         }
 
-        await safeSendVerificationEmbed(client, interaction, discordUser, { isEphemeral, isDeferred });
+        await safeSendVerificationEmbed(interaction, discordUser);
     }
 }
 
-type SafeSendVerificationEmbedOptions = { isEphemeral?: boolean; isReverify?: boolean; isDeferred?: boolean };
+type SafeSendVerificationEmbedOptions = { isReverify?: boolean };
 
 export async function safeSendVerificationEmbed(
-    client: Client,
-    interaction: ChatInputCommandInteraction | ButtonInteraction | Message,
+    interaction: ChatInputCommandInteraction | ButtonInteraction,
     discordUser: User,
     options: SafeSendVerificationEmbedOptions = {}
 ) {
-    options = { isEphemeral: false, isReverify: false, isDeferred: false, ...options };
-
-    if (options.isDeferred && !isMessage(interaction) && !interaction.deferred) {
-        if (options.isEphemeral) await interaction.deferReply({ ephemeral: true });
-        else await interaction.deferReply();
-    }
-
     const verifyReply = getVerificationResponse(discordUser, options.isReverify);
 
     try {
@@ -143,26 +121,22 @@ export async function safeSendVerificationEmbed(
                 .setColor('Blue')
                 .setTimestamp();
 
-            options.isEphemeral
-                ? await sendEphemeralReply(interaction, { embeds: [embed] }, 60, options.isDeferred)
-                : await sendReply(interaction, { embeds: [embed] }, options.isDeferred);
+            await interaction.editReply({ embeds: [embed] });
 
             await Modlog.logUserAction(interaction.guild, discordUser, `${discordUser} requested a verification link.`, 'Blue');
         } else {
-            await sendReply(interaction, verifyReply, options.isDeferred);
+            await interaction.editReply(verifyReply);
         }
     } catch (err) {
         const embed = new EmbedBuilder()
             .setTitle('Unable to Send Verification Link')
             .setDescription(
-                'We were unable to DM you a verification link. Please [temporarily change your privacy settings](https://cdn.discordapp.com/attachments/811741914340393000/820114337514651658/permissions.png) to allow direct messages from server members in order to verify.'
+                'We were unable to DM you a verification link. Please temporarily [change your privacy settings](https://support.discord.com/hc/en-us/articles/217916488-Blocking-Privacy-Settings) to allow direct messages from server members in order to verify, or DM me with the `/verify` command directly.'
             )
             .setColor('Red')
             .setTimestamp();
 
-        options.isEphemeral
-            ? await sendEphemeralReply(interaction, { embeds: [embed] }, 60, options.isDeferred)
-            : await sendReply(interaction, { embeds: [embed] }, options.isDeferred);
+        await interaction.editReply({ embeds: [embed] });
     }
 }
 

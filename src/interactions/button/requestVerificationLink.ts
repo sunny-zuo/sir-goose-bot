@@ -16,6 +16,7 @@ export class RequestVerificationLink implements ButtonInteractionHandler {
     }
 
     async execute(interaction: ButtonInteraction): Promise<void> {
-        await sendVerificationReplies(this.client, interaction, interaction.user, true, true);
+        await interaction.deferReply({ ephemeral: true });
+        await sendVerificationReplies(this.client, interaction, interaction.user);
     }
 }

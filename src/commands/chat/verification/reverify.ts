@@ -1,4 +1,4 @@
-import { ChatInputCommandInteraction } from 'discord.js';
+import { ChatInputCommandInteraction, EmbedBuilder } from 'discord.js';
 import Client from '#src/Client';
 import { ChatCommand } from '../ChatCommand';
 import { GuildConfigCache } from '#util/guildConfigCache';
@@ -22,21 +22,17 @@ export class ReVerify extends ChatCommand {
 
         const config = await GuildConfigCache.fetchConfig(interaction.guild?.id);
         if (interaction.guild && config.enableVerification === false) {
-            await this.sendErrorEmbed(interaction, 'Verification Not Enabled', 'This server does not have verification enabled.');
+            const embed = new EmbedBuilder().setDescription('This server does not have verification enabled.').setColor('Yellow');
+            await interaction.editReply({ embeds: [embed] });
             return;
         }
 
-        const discordUser = this.getUser(interaction);
-        const user = await UserModel.findOne({ discordId: discordUser.id });
+        const user = await UserModel.findOne({ discordId: interaction.user.id });
 
         if (!user || !user.verified) {
-            await sendVerificationReplies(this.client, interaction, discordUser, true, true);
+            await sendVerificationReplies(this.client, interaction, interaction.user);
         } else {
-            await safeSendVerificationEmbed(this.client, interaction, discordUser, {
-                isEphemeral: true,
-                isReverify: true,
-                isDeferred: true,
-            });
+            await safeSendVerificationEmbed(interaction, interaction.user, { isReverify: true });
         }
     }
 }
