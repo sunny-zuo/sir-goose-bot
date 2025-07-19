@@ -13,7 +13,6 @@ import { PinsView } from './pinsView';
 import { ModlogView } from './modlogView';
 import { VerificationView } from './verificationView';
 import { Emojis } from '#util/constants';
-import { getUser } from '#util/user';
 import { GuildConfigCache } from '#util/guildConfigCache';
 import { logger } from '#util/logger';
 
@@ -57,15 +56,15 @@ export class OverviewView {
         await this.listenForViewSelect(interaction.message, filter);
     }
 
-    static async initialRender(interaction: ChatInputCommandInteraction | Message): Promise<void> {
-        const configMenu = await interaction.reply({
+    static async initialRender(interaction: ChatInputCommandInteraction): Promise<void> {
+        await interaction.deferReply();
+        const configMenu = await interaction.editReply({
             embeds: [await this.generateConfigViewEmbed(interaction.guild!)],
             components: [this.optionSelectMenu],
-            fetchReply: true,
         });
 
         const filter = (i: MessageComponentInteraction) => {
-            if (i.user.id === getUser(interaction).id) return true;
+            if (i.user.id === interaction.user.id) return true;
             else {
                 i.reply({
                     embeds: [new EmbedBuilder().setDescription("This dropdown isn't for you!").setColor('Red')],

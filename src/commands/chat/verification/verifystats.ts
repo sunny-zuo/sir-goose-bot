@@ -1,6 +1,6 @@
 import { ChatCommand } from '../ChatCommand';
 import Client from '#src/Client';
-import { Message, ChatInputCommandInteraction, EmbedBuilder, Snowflake, Role, inlineCode } from 'discord.js';
+import { ChatInputCommandInteraction, EmbedBuilder, Snowflake, Role, inlineCode } from 'discord.js';
 import { GuildConfigCache } from '#util/guildConfigCache';
 import UserModel from '#models/user.model';
 
@@ -12,13 +12,17 @@ export class VerifyStats extends ChatCommand {
             category: 'Verification',
             aliases: ['verificationstats', 'serverstats', 'vs'],
             guildOnly: true,
+            isTextCommand: false,
             cooldownSeconds: 60,
         });
     }
 
-    async execute(interaction: Message | ChatInputCommandInteraction): Promise<void> {
+    async execute(interaction: ChatInputCommandInteraction): Promise<void> {
         const { guild } = interaction;
         if (!guild) return;
+
+        await interaction.deferReply();
+
         const config = await GuildConfigCache.fetchConfig(guild.id);
 
         if (!config.enableVerification) {
@@ -78,7 +82,7 @@ export class VerifyStats extends ChatCommand {
         const guildIconURL = guild.iconURL();
         guildIconURL ? embed.setThumbnail(guildIconURL) : null;
 
-        await interaction.reply({ embeds: [embed] });
+        await interaction.editReply({ embeds: [embed] });
     }
 
     formatLabel(label: string, length: number): string {

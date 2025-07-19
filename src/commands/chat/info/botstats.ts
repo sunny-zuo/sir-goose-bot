@@ -1,6 +1,6 @@
 import { ChatCommand } from '../ChatCommand';
 import Client from '#src/Client';
-import { ChatInputCommandInteraction, Message, EmbedBuilder, hyperlink, codeBlock } from 'discord.js';
+import { ChatInputCommandInteraction, EmbedBuilder, hyperlink, codeBlock } from 'discord.js';
 import { Duration } from 'luxon';
 import { cpus } from 'os';
 
@@ -15,6 +15,7 @@ export class BotStats extends ChatCommand {
             name: 'botstats',
             description: 'View statistics related to Sir Goose.',
             category: 'Info',
+            isTextCommand: false,
             aliases: ['botinfo', 'bs'],
             cooldownSeconds: 5,
         });
@@ -22,7 +23,9 @@ export class BotStats extends ChatCommand {
         this.latestCommit = process.env.GIT_COMMIT?.slice(0, 7) ?? 'unknown';
     }
 
-    async execute(interaction: Message | ChatInputCommandInteraction): Promise<void> {
+    async execute(interaction: ChatInputCommandInteraction): Promise<void> {
+        await interaction.deferReply();
+
         const fieldMaxLength = 10;
 
         const uptimeDuration = Duration.fromMillis(this.client.uptime ?? 0).shiftTo('days', 'hours');
@@ -91,7 +94,7 @@ export class BotStats extends ChatCommand {
             },
         ]);
 
-        await interaction.reply({ embeds: [embed] });
+        await interaction.editReply({ embeds: [embed] });
     }
 
     formatValue(value: string, length: number): string {

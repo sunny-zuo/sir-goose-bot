@@ -10,7 +10,7 @@ export class Config extends ChatCommand {
             description: "View and edit the server's bot configuration.",
             category: 'Admin',
             isSlashCommand: true,
-            isTextCommand: true,
+            isTextCommand: false,
             guildOnly: true,
             userPermissions: [PermissionsBitField.Flags.ManageGuild],
         });
