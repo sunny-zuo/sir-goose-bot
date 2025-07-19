@@ -31,7 +31,7 @@ export class VerifyStats extends ChatCommand {
                 .setDescription("Verification is not enabled on this server, so I can't display any stats.")
                 .setColor('Yellow')
                 .setTimestamp();
-            await interaction.reply({ embeds: [embed] });
+            await interaction.editReply({ embeds: [embed] });
             return;
         }
 
