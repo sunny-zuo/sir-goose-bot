@@ -1,6 +1,5 @@
 import {
     ChatInputCommandInteraction,
-    Message,
     ActionRowBuilder,
     ButtonBuilder,
     EmbedBuilder,
@@ -21,24 +20,25 @@ export class VerifyRules extends ChatCommand {
             description: 'Set or see verification rules. Create a ruleset here: https://sebot.sunnyzuo.com/',
             category: 'Verification',
             guildOnly: true,
+            isTextCommand: false,
             clientPermissions: [PermissionsBitField.Flags.ManageRoles],
             userPermissions: [PermissionsBitField.Flags.ManageGuild, PermissionsBitField.Flags.ManageRoles],
         });
     }
 
-    async execute(interaction: Message | ChatInputCommandInteraction): Promise<void> {
-        // TODO: defer reply here
+    async execute(interaction: ChatInputCommandInteraction): Promise<void> {
+        await interaction.deferReply();
+
         const config = await GuildConfigCache.fetchConfig(interaction.guild!.id);
 
         const button = new ActionRowBuilder<ButtonBuilder>().addComponents(
             new ButtonBuilder().setCustomId(`verifyRules`).setLabel('Update Rules').setStyle(ButtonStyle.Primary)
         );
-
         const embed = new EmbedBuilder().setColor('Blue').setTitle('Verification Rules').setDescription(`Verification is ${
             config.enableVerification ? 'enabled ' : `disabled. Enable it using ${inlineCode('/config')}`
         }. [Create a ruleset.](https://sebot.sunnyzuo.com/)
                 ${codeBlock(serializeVerificationRules(config.verificationRules))}`);
 
-        await interaction.reply({ embeds: [embed], components: [button] });
+        await interaction.editReply({ embeds: [embed], components: [button] });
     }
 }

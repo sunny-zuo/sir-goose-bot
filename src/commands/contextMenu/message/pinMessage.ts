@@ -23,8 +23,9 @@ export class PinMessage extends MessageContextMenuCommand {
         const message = interaction.options.getMessage('message');
         if (!message) return;
 
-        const config = await GuildConfigCache.fetchConfig(interaction.guild!.id);
+        await interaction.deferReply({ ephemeral: true });
 
+        const config = await GuildConfigCache.fetchConfig(interaction.guild!.id);
         if (!config.enablePins) {
             await this.sendErrorEmbed(
                 interaction,
@@ -53,16 +54,15 @@ export class PinMessage extends MessageContextMenuCommand {
                 'Blue'
             );
 
-            await interaction.reply({
+            await interaction.editReply({
                 embeds: [new EmbedBuilder().setDescription('Message Successfully Pinned').setColor('Green')],
-                ephemeral: true,
             });
         } else {
             let errorDescription;
 
             switch (pinResult.error) {
                 case 'ALREADY_PINNED':
-                    errorDescription = 'The message is already pinned.';
+                    errorDescription = 'The message is already pinned. Please ask a moderator if you would like to unpin a message.';
                     break;
                 case 'CHANNEL_NOT_VIEWABLE':
                     errorDescription = 'I do not have access to view the channel containing the message you are trying to pin.';
@@ -79,7 +79,7 @@ export class PinMessage extends MessageContextMenuCommand {
             }
 
             const embed = new EmbedBuilder().setDescription(errorDescription).setColor('Red');
-            await interaction.reply({ embeds: [embed], ephemeral: true });
+            await interaction.editReply({ embeds: [embed] });
         }
     }
 }
