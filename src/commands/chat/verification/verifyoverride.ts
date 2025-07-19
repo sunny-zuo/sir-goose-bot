@@ -92,6 +92,7 @@ export class VerifyOverride extends ChatCommand {
 
         const allowedGuilds = [
             '694232686247542815', // SE 25
+            '1348807287254552657', // SE 30
             '811408878162935829', // big SE
             '532052305982259210', // dev test server
         ];
