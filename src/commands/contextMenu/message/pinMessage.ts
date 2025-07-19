@@ -27,14 +27,15 @@ export class PinMessage extends MessageContextMenuCommand {
 
         const config = await GuildConfigCache.fetchConfig(interaction.guild!.id);
         if (!config.enablePins) {
-            await this.sendErrorEmbed(
-                interaction,
-                'Pinning Disabled',
-                `The pin command is not enabled on this server. If you have server moderation permissions, use ${inlineCode(
-                    '/config'
-                )} to enable pins.`,
-                true
-            );
+            const embed = new EmbedBuilder()
+                .setDescription(
+                    `The pin command is not enabled on this server. If you have server moderation permissions, use ${inlineCode(
+                        '/config'
+                    )} to allow all users to pin messages.`
+                )
+                .setColor('Red');
+
+            await interaction.editReply({ embeds: [embed] });
             return;
         }
 
