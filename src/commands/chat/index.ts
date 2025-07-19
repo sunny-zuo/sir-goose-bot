@@ -29,7 +29,6 @@ import { BulkRoleModify } from './utility/bulkrolemodify';
 
 /* UWaterloo Commands */
 import { Course } from './uwaterloo/course';
-import { Countdown } from './uwaterloo/countdown';
 
 /* Verification Commands */
 import { ReVerify } from './verification/reverify';
@@ -59,7 +58,6 @@ export default [
     Pin,
     BulkRoleModify,
     Course,
-    Countdown,
     ReVerify,
     Verify,
     VerifyAll,
