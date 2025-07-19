@@ -12,6 +12,10 @@ export interface VerificationOverride {
     department?: string;
     o365CreatedDate?: Date;
     scope: OverrideScope;
+    deleted?: Date;
+    deletedBy?: Snowflake;
+    createdAt: Date;
+    updatedAt: Date;
 }
 
 const schema = new Schema<VerificationOverride>(
@@ -22,6 +26,8 @@ const schema = new Schema<VerificationOverride>(
         scope: { type: String, required: true },
         department: String,
         o365CreatedDate: Date,
+        deleted: Date,
+        deletedBy: String,
     },
     {
         timestamps: true,
