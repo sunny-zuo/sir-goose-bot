@@ -48,8 +48,7 @@ export function isMessage(
     return (interaction as Message).author !== undefined;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function catchUnknownMessage(e: any) {
+export function catchUnknownMessage(e: unknown) {
     if (e instanceof DiscordAPIError && e.message === 'Unknown Message') {
         // do nothing if we get an "Unknown Message", this is probably caused by the message
         // being deleted by the user so it doesn't matter that the edit failed

@@ -128,15 +128,13 @@ export async function handleCreateOverride(
                             const unverifiedUsers = targetUsers.filter(
                                 (user) => !verifiedUsers.some((vUser) => vUser.discordId === user.id)
                             );
-                            const errorEmbed = new EmbedBuilder().setColor('Red').setDescription(`The following ${
-                                unverifiedUsers.length
-                            } selected users are not verified:
-
+                            const warnEmbed = new EmbedBuilder().setColor('Red')
+                                .setDescription(`The following selected users are not verified:
                                     ${unverifiedUsers.map((user) => `* <@${user.id}>`).join('\n')}
 
                                     To create an override for an unverified user, both the department and year must be set. Please select a department and year, or unselect the unverified users and try again.`);
 
-                            await i.followUp({ embeds: [errorEmbed] });
+                            await i.followUp({ embeds: [warnEmbed], ephemeral: true });
                         }
                     }
                 }
