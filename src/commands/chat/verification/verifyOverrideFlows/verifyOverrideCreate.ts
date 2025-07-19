@@ -108,7 +108,7 @@ export async function handleCreateOverride(
                                 
 \nPlease unselect the users with existing overrides and try again. If you want to modify an existing override, you must first delete it.`);
 
-                        await i.followUp({ embeds: [embed] });
+                        await i.followUp({ embeds: [embed], ephemeral: true });
                         return;
                     }
 
@@ -262,7 +262,7 @@ async function renderCreateOverrideConfirmationScreen(
         Previous roles assigned from verification will be automatically cleaned up.
     `);
 
-    const confirmButton = new ButtonBuilder().setCustomId('verifyoverrideConfirmCreate').setLabel('Create').setStyle(ButtonStyle.Primary);
+    const confirmButton = new ButtonBuilder().setCustomId('verifyoverrideConfirmCreate').setLabel('Create').setStyle(ButtonStyle.Success);
     const backButton = new ButtonBuilder().setCustomId('verifyoverrideConfirmBack').setLabel('Back').setStyle(ButtonStyle.Secondary);
     const cancelButton = new ButtonBuilder().setCustomId('verifyoverrideConfirmCancel').setLabel('Cancel').setStyle(ButtonStyle.Danger);
     const buttons = new ActionRowBuilder<ButtonBuilder>().addComponents(confirmButton, backButton, cancelButton);
