@@ -7,6 +7,7 @@ import {
     inlineCode,
     User,
     Guild,
+    StringSelectMenuInteraction,
 } from 'discord.js';
 import { GuildConfigCache } from '#util/guildConfigCache';
 import { RoleAssignmentService } from '#services/roleAssignmentService';
@@ -16,8 +17,18 @@ import { logger } from '#util/logger';
 import { renderDeleteConfirmationScreen } from './verifyOverrideDelete';
 import { catchUnknownMessage } from '#util/message';
 
-export async function handleViewOverride(interaction: ChatInputCommandInteraction, targetUser: User, guild: Guild): Promise<void> {
+export async function handleViewOverride(
+    interaction: ChatInputCommandInteraction | StringSelectMenuInteraction,
+    targetUser: User,
+    guild: Guild
+): Promise<void> {
     try {
+        if (!interaction.deferred) {
+            // this method should generally only be called by a method that first defers the reply
+            // and decides if it should be ephemeral, but try deferring the reply if needed anyway
+            await interaction.deferReply();
+        }
+
         const guildConfig = await GuildConfigCache.fetchConfig(guild.id);
 
         const override = await VerificationOverrideModel.findOne({

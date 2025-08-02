@@ -12,6 +12,7 @@ import { GuildConfigCache } from '#util/guildConfigCache';
 import { handleViewOverride } from './verifyOverrideFlows/verifyOverrideView';
 import { handleDeleteOverride } from './verifyOverrideFlows/verifyOverrideDelete';
 import { handleCreateOverride } from './verifyOverrideFlows/verifyOverrideCreate';
+import { handleListOverrides } from './verifyOverrideFlows/verifyOverrideList';
 import { logger } from '#util/logger';
 
 export class VerifyOverride extends ChatCommand {
@@ -70,6 +71,11 @@ export class VerifyOverride extends ChatCommand {
                 },
             ],
         },
+        {
+            name: 'list',
+            description: 'List all verification overrides in this server.',
+            type: ApplicationCommandOptionType.Subcommand,
+        },
     ];
 
     constructor(client: Client) {
@@ -111,13 +117,15 @@ export class VerifyOverride extends ChatCommand {
 
         const config = await GuildConfigCache.fetchConfig(interaction.guild!.id);
         if (!config.enableVerification) {
-            await this.sendErrorEmbed(
-                interaction,
-                'Verification Not Enabled',
-                `This server does not have verification enabled.
-
-                Looking to enable verification? [Read the guide.](https://sir-goose.notion.site/sir-goose/Setting-Up-Verification-0f309b2a00fc4e198b5f2182d2452fcd)`
-            );
+            await interaction.editReply({
+                embeds: [
+                    new EmbedBuilder()
+                        .setColor('Red')
+                        .setDescription(
+                            'Verification is not enabled in this server.\n\nLooking to enable verification? [Read the guide.](https://sir-goose.notion.site/sir-goose/Setting-Up-Verification-0f309b2a00fc4e198b5f2182d2452fcd)'
+                        ),
+                ],
+            });
             return;
         }
 
@@ -142,7 +150,7 @@ export class VerifyOverride extends ChatCommand {
                 break;
             }
             case 'list': {
-                // TODO: support this
+                await handleListOverrides(interaction, interaction.guild!);
                 break;
             }
             default:

@@ -23,17 +23,19 @@ export class VerifyAll extends ChatCommand {
 
     async execute(interaction: ChatInputCommandInteraction): Promise<void> {
         if (!interaction.guild) return;
+        await interaction.deferReply();
 
         const config = await GuildConfigCache.fetchConfig(interaction.guild.id);
-        if (interaction.guild && config.enableVerification === false) {
-            await this.sendErrorEmbed(
-                interaction,
-                'Verification Not Enabled',
-                `This server does not have verification enabled.
-
-                Looking to enable verification? [Read the guide.](https://sir-goose.notion.site/sir-goose/Setting-Up-Verification-0f309b2a00fc4e198b5f2182d2452fcd)`
-            );
-
+        if (!config.enableVerification) {
+            await interaction.editReply({
+                embeds: [
+                    new EmbedBuilder()
+                        .setColor('Red')
+                        .setDescription(
+                            'Verification is not enabled in this server.\n\nLooking to enable verification? [Read the guide.](https://sir-goose.notion.site/sir-goose/Setting-Up-Verification-0f309b2a00fc4e198b5f2182d2452fcd)'
+                        ),
+                ],
+            });
             return;
         }
 
