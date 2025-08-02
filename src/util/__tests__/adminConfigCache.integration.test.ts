@@ -13,7 +13,6 @@ describe('AdminConfigCache Integration', () => {
         await connect(mongoUri);
     });
 
-
     afterAll(async () => {
         // Clean up and disconnect
         await AdminConfigModel.deleteMany({});
@@ -30,15 +29,15 @@ describe('AdminConfigCache Integration', () => {
     it('should persist configs to database and load from cache', async () => {
         // Set a config through cache
         await AdminConfigCache.setConfig('testKey', 'testValue', 'test comment');
-        
+
         // Verify it's in the database
         const dbConfig = await AdminConfigModel.findOne();
         expect(dbConfig).toBeTruthy();
         expect(dbConfig!.configs.get('testKey')).toMatchObject({
             value: 'testValue',
-            comment: 'test comment'
+            comment: 'test comment',
         });
-        
+
         // Reload cache and verify it loads from database
         await AdminConfigCache.reloadCache();
         const cachedValue = await AdminConfigCache.getConfig('testKey');
@@ -51,12 +50,12 @@ describe('AdminConfigCache Integration', () => {
         configMap.set('hookTest', {
             value: 'hookValue',
             comment: 'created via model',
-            updatedAt: new Date()
+            updatedAt: new Date(),
         });
-        
+
         const adminConfig = new AdminConfigModel({ configs: configMap });
         await adminConfig.save();
-        
+
         // Cache should be updated via post-save hook
         const cachedValue = await AdminConfigCache.getConfig('hookTest');
         expect(cachedValue).toBe('hookValue');
@@ -66,16 +65,16 @@ describe('AdminConfigCache Integration', () => {
         // Set multiple configs
         await AdminConfigCache.setConfig('key1', 'value1');
         await AdminConfigCache.setConfig('key2', 'value2', 'comment2');
-        
+
         // Delete one config
         await AdminConfigCache.deleteConfig('key1');
-        
+
         // Verify database state
         const dbConfig = await AdminConfigModel.findOne();
         expect(dbConfig!.configs.has('key1')).toBe(false);
         expect(dbConfig!.configs.has('key2')).toBe(true);
         expect(dbConfig!.configs.get('key2')!.value).toBe('value2');
-        
+
         // Verify cache state
         const allConfigs = await AdminConfigCache.getAllConfigs();
         expect(allConfigs).not.toHaveProperty('key1');

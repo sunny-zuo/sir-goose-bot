@@ -12,7 +12,7 @@ export class AdminConfigCache {
      */
     static async getConfig(key: string): Promise<string | null> {
         await this.ensureCacheLoaded();
-        
+
         const entry = this._cache.get(key);
         return entry ? entry.value : null;
     }
@@ -23,12 +23,12 @@ export class AdminConfigCache {
      */
     static async getAllConfigs(): Promise<Record<string, AdminConfigEntry>> {
         await this.ensureCacheLoaded();
-        
+
         const configs: Record<string, AdminConfigEntry> = {};
         this._cache.forEach((entry, key) => {
             configs[key] = entry;
         });
-        
+
         return configs;
     }
 
@@ -42,7 +42,7 @@ export class AdminConfigCache {
         const entry: AdminConfigEntry = {
             value,
             comment,
-            updatedAt: new Date()
+            updatedAt: new Date(),
         };
 
         // Update cache immediately
@@ -76,13 +76,13 @@ export class AdminConfigCache {
      */
     static updateCache(adminConfig: AdminConfig): void {
         this._cache.clear();
-        
+
         if (adminConfig.configs) {
             adminConfig.configs.forEach((entry, key) => {
                 this._cache.set(key, entry);
             });
         }
-        
+
         this._isLoaded = true;
     }
 
@@ -101,13 +101,13 @@ export class AdminConfigCache {
     private static async loadFromDatabase(): Promise<void> {
         try {
             const adminConfig = await AdminConfigModel.findOne();
-            
+
             if (adminConfig && adminConfig.configs) {
                 adminConfig.configs.forEach((entry, key) => {
                     this._cache.set(key, entry);
                 });
             }
-            
+
             this._isLoaded = true;
         } catch (error) {
             console.error('Failed to load admin configs from database:', error);
@@ -125,11 +125,7 @@ export class AdminConfigCache {
                 configsMap.set(key, entry);
             });
 
-            await AdminConfigModel.findOneAndUpdate(
-                {},
-                { configs: configsMap },
-                { upsert: true, new: true }
-            );
+            await AdminConfigModel.findOneAndUpdate({}, { configs: configsMap }, { upsert: true, new: true });
         } catch (error) {
             console.error('Failed to update admin configs in database:', error);
             throw error;
