@@ -34,10 +34,15 @@ const adminConfigSchema = new Schema<AdminConfig>(
     }
 );
 
-// Post-save hook for cache updates - will be implemented when AdminConfigCache is created
-adminConfigSchema.post('save', function () {
-    // TODO: Add cache update when AdminConfigCache is implemented
-    // AdminConfigCache.updateCache(this);
+// Post-save hook for cache updates
+adminConfigSchema.post('save', async function () {
+    // Dynamic import to avoid circular dependency
+    try {
+        const { AdminConfigCache } = await import('#util/adminConfigCache');
+        AdminConfigCache.updateCache(this);
+    } catch (error) {
+        console.error('Failed to update admin config cache:', error);
+    }
 });
 
 const AdminConfigModel = model<AdminConfig>('AdminConfig', adminConfigSchema);
