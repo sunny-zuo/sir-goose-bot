@@ -18,7 +18,7 @@ import { handleViewOverride } from './verifyOverrideView';
 
 const ITEMS_PER_PAGE = 5;
 
-export async function handleListOverrides(interaction: ChatInputCommandInteraction | ButtonInteraction, guild: Guild): Promise<void> {
+export async function handleListOverrides(interaction: ChatInputCommandInteraction, guild: Guild): Promise<void> {
     try {
         if (!interaction.deferred) {
             await interaction.deferReply();
@@ -53,6 +53,48 @@ export async function handleListOverrides(interaction: ChatInputCommandInteracti
             })
             .catch(catchUnknownMessage);
     }
+}
+
+async function renderListPage(
+    interaction: ChatInputCommandInteraction,
+    guild: Guild,
+    allOverrides: VerificationOverride[],
+    currentPage: number
+): Promise<void> {
+    const { embed, components } = createListPageContent(allOverrides, currentPage);
+    const message = await interaction.editReply({ embeds: [embed], components });
+
+    // Set up component collector only once
+    const collector = message.createMessageComponentCollector({
+        time: 1000 * 60 * 10, // 10 minutes
+        filter: (i) => i.user.id === interaction.user.id,
+    });
+
+    collector.on('collect', async (i) => {
+        try {
+            if (i.isButton()) {
+                currentPage = await handlePaginationButton(i, allOverrides, currentPage, Math.ceil(allOverrides.length / ITEMS_PER_PAGE));
+            } else if (i.isStringSelectMenu() && i.customId === 'verifyoverrideListSelect') {
+                await handleUserSelection(i, guild);
+            }
+        } catch (error) {
+            logger.error(error, 'Error handling list interaction');
+            await i
+                .reply({
+                    embeds: [
+                        new EmbedBuilder()
+                            .setColor('Red')
+                            .setDescription('An error occurred while processing your request. Please try again.'),
+                    ],
+                    ephemeral: true,
+                })
+                .catch(catchUnknownMessage);
+        }
+    });
+
+    collector.on('end', async () => {
+        await interaction.editReply({ components: [] }).catch(catchUnknownMessage);
+    });
 }
 
 function createListPageContent(
@@ -119,48 +161,6 @@ function createListPageContent(
     }
 
     return { embed, components };
-}
-
-async function renderListPage(
-    interaction: ChatInputCommandInteraction | ButtonInteraction,
-    guild: Guild,
-    allOverrides: VerificationOverride[],
-    currentPage: number
-): Promise<void> {
-    const { embed, components } = createListPageContent(allOverrides, currentPage);
-    const message = await interaction.editReply({ embeds: [embed], components });
-
-    // Set up component collector only once
-    const collector = message.createMessageComponentCollector({
-        time: 1000 * 60 * 1, // 10 minutes
-        filter: (i) => i.user.id === interaction.user.id,
-    });
-
-    collector.on('collect', async (i) => {
-        try {
-            if (i.isButton()) {
-                currentPage = await handlePaginationButton(i, allOverrides, currentPage, Math.ceil(allOverrides.length / ITEMS_PER_PAGE));
-            } else if (i.isStringSelectMenu() && i.customId === 'verifyoverrideListSelect') {
-                await handleUserSelection(i, guild);
-            }
-        } catch (error) {
-            logger.error(error, 'Error handling list interaction');
-            await i
-                .reply({
-                    embeds: [
-                        new EmbedBuilder()
-                            .setColor('Red')
-                            .setDescription('An error occurred while processing your request. Please try again.'),
-                    ],
-                    ephemeral: true,
-                })
-                .catch(catchUnknownMessage);
-        }
-    });
-
-    collector.on('end', async () => {
-        await interaction.editReply({ components: [] }).catch(catchUnknownMessage);
-    });
 }
 
 async function updateListPage(interaction: ButtonInteraction, allOverrides: VerificationOverride[], newPage: number): Promise<void> {
