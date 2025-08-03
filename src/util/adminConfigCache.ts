@@ -45,10 +45,7 @@ export class AdminConfigCache {
             updatedAt: new Date(),
         };
 
-        // Update cache immediately
         this._cache.set(key, entry);
-
-        // Update database
         await this.updateDatabase();
     }
 
@@ -57,8 +54,8 @@ export class AdminConfigCache {
      * @param key The configuration key to delete
      */
     static async deleteConfig(key: string): Promise<void> {
-        this._cache.delete(key); // remove from cache
-        await this.updateDatabase();
+        const exists = this._cache.delete(key);
+        if (exists) await this.updateDatabase();
     }
 
     /**
@@ -90,7 +87,7 @@ export class AdminConfigCache {
      * Ensures the cache is loaded from database if empty
      */
     private static async ensureCacheLoaded(): Promise<void> {
-        if (!this._isLoaded || this._cache.size === 0) {
+        if (!this._isLoaded) {
             await this.loadFromDatabase();
         }
     }
