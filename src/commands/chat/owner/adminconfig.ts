@@ -147,7 +147,7 @@ export class AdminConfig extends ChatCommand {
         const value = args.getString('value', true);
         const comment = args.getString('comment', false);
 
-        // validate key format (alphanumeric, underscores, hyphens, dots)
+        // validate key format (alphanumeric, underscores, hyphens)
         if (!/^[a-zA-Z0-9_-]+$/.test(key)) {
             await interaction.editReply({
                 embeds: [
