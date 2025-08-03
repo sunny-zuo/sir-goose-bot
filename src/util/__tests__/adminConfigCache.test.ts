@@ -1,9 +1,12 @@
 import { AdminConfigCache } from '../adminConfigCache';
 import AdminConfigModel, { AdminConfig } from '#models/adminConfig.model';
+import { logger } from '#util/logger';
 
-// Mock the AdminConfigModel
+// Mock the AdminConfigModel and logger
 jest.mock('#models/adminConfig.model');
+jest.mock('#util/logger');
 const mockAdminConfigModel = AdminConfigModel as jest.Mocked<typeof AdminConfigModel>;
+const mockLogger = logger as jest.Mocked<typeof logger>;
 
 describe('AdminConfigCache', () => {
     beforeEach(() => {
@@ -57,14 +60,11 @@ describe('AdminConfigCache', () => {
 
         it('should handle database errors gracefully', async () => {
             mockAdminConfigModel.findOne.mockRejectedValue(new Error('Database error'));
-            const consoleSpy = jest.spyOn(console, 'error').mockImplementation();
 
             const result = await AdminConfigCache.getConfig('testKey');
 
             expect(result).toBeNull();
-            expect(consoleSpy).toHaveBeenCalledWith('Failed to load admin configs from database:', expect.any(Error));
-
-            consoleSpy.mockRestore();
+            expect(mockLogger.error).toHaveBeenCalledWith(expect.any(Error), 'Failed to load admin configs from database');
         });
     });
 
@@ -129,12 +129,9 @@ describe('AdminConfigCache', () => {
 
         it('should handle database update errors', async () => {
             mockAdminConfigModel.findOneAndUpdate.mockRejectedValue(new Error('Database error'));
-            const consoleSpy = jest.spyOn(console, 'error').mockImplementation();
 
             await expect(AdminConfigCache.setConfig('key', 'value')).rejects.toThrow('Database error');
-            expect(consoleSpy).toHaveBeenCalledWith('Failed to update admin configs in database:', expect.any(Error));
-
-            consoleSpy.mockRestore();
+            expect(mockLogger.error).toHaveBeenCalledWith(expect.any(Error), 'Failed to update admin configs in database');
         });
 
         it('should set config with comment', async () => {
@@ -290,19 +287,15 @@ describe('AdminConfigCache', () => {
     describe('error handling', () => {
         it('should handle database connection errors during load', async () => {
             mockAdminConfigModel.findOne.mockRejectedValue(new Error('Connection failed'));
-            const consoleSpy = jest.spyOn(console, 'error').mockImplementation();
 
             const result = await AdminConfigCache.getConfig('testKey');
 
             expect(result).toBeNull();
-            expect(consoleSpy).toHaveBeenCalled();
-
-            consoleSpy.mockRestore();
+            expect(mockLogger.error).toHaveBeenCalledWith(expect.any(Error), 'Failed to load admin configs from database');
         });
 
         it('should maintain cache consistency on database update failure', async () => {
             mockAdminConfigModel.findOneAndUpdate.mockRejectedValue(new Error('Update failed'));
-            const consoleSpy = jest.spyOn(console, 'error').mockImplementation();
 
             await expect(AdminConfigCache.setConfig('key', 'value')).rejects.toThrow();
 
@@ -310,7 +303,7 @@ describe('AdminConfigCache', () => {
             const result = await AdminConfigCache.getConfig('key');
             expect(result).toBe('value');
 
-            consoleSpy.mockRestore();
+            expect(mockLogger.error).toHaveBeenCalledWith(expect.any(Error), 'Failed to update admin configs in database');
         });
     });
 });

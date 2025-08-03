@@ -1,5 +1,6 @@
 import { Collection } from 'discord.js';
 import AdminConfigModel, { AdminConfig, AdminConfigEntry } from '#models/adminConfig.model';
+import { logger } from '#util/logger';
 
 export class AdminConfigCache {
     private static _cache = new Collection<string, AdminConfigEntry>();
@@ -107,8 +108,8 @@ export class AdminConfigCache {
 
             this._isLoaded = true;
         } catch (error) {
-            console.error('Failed to load admin configs from database:', error);
-            // Keep cache as-is if database load fails
+            logger.error(error, 'Failed to load admin configs from database');
+            // keep cache as-is if database load fails
         }
     }
 
@@ -124,7 +125,7 @@ export class AdminConfigCache {
 
             await AdminConfigModel.findOneAndUpdate({}, { configs: configsMap }, { upsert: true, new: true });
         } catch (error) {
-            console.error('Failed to update admin configs in database:', error);
+            logger.error(error, 'Failed to update admin configs in database');
             throw error;
         }
     }
