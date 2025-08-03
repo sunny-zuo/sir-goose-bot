@@ -18,6 +18,7 @@ import { Ban } from './moderation/ban';
 import { Unban } from './moderation/unban';
 
 /* Owner Commands */
+import { AdminConfig } from './owner/adminconfig';
 import { Deploy } from './owner/deploy';
 import { GuildList } from './owner/guildlist';
 import { Reload } from './owner/reload';
@@ -51,6 +52,7 @@ export default [
     Ping,
     Ban,
     Unban,
+    AdminConfig,
     Deploy,
     GuildList,
     Reload,
