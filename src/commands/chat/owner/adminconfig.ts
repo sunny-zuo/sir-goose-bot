@@ -4,6 +4,7 @@ import {
     ChatInputCommandInteraction,
     CommandInteractionOptionResolver,
     EmbedBuilder,
+    inlineCode,
 } from 'discord.js';
 import Client from '#src/Client';
 import { ChatCommand } from '../ChatCommand';
@@ -96,7 +97,10 @@ export class AdminConfig extends ChatCommand {
             logger.error(error, `Error executing adminconfig ${subcommand} command`);
             const errorMessage = error instanceof Error ? error.message : 'An unexpected error occurred.';
 
-            await interaction.followUp({ content: `Error: ${errorMessage}`, ephemeral: true });
+            await interaction.followUp({
+                embeds: [new EmbedBuilder().setColor('Red').setDescription(`Unexpected Error: ${errorMessage}`)],
+                ephemeral: true,
+            });
         }
     }
 
@@ -144,11 +148,15 @@ export class AdminConfig extends ChatCommand {
         const comment = args.getString('comment', false);
 
         // validate key format (alphanumeric, underscores, hyphens, dots)
-        if (!/^[a-zA-Z0-9_.-]+$/.test(key)) {
+        if (!/^[a-zA-Z0-9_-]+$/.test(key)) {
             await interaction.editReply({
                 embeds: [
                     new EmbedBuilder()
-                        .setDescription('Configuration key must contain only alphanumeric characters, underscores, hyphens, and dots.')
+                        .setDescription(
+                            `The key ${inlineCode(
+                                key
+                            )} is invalid. Configuration key must contain only alphanumeric characters, underscores, and hyphens.`
+                        )
                         .setColor('Red'),
                 ],
             });
