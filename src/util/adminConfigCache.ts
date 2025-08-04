@@ -2,20 +2,33 @@ import { Collection } from 'discord.js';
 import AdminConfigModel, { AdminConfig, AdminConfigEntry } from '#models/adminConfig.model';
 import { logger } from '#util/logger';
 
+// known admin config cache flags and their uses
+export enum FLAGS {
+    // true/false string that controls whether or not to apply guild whitelist for verification overrides
+    VERIFY_OVERRIDE_PREVIEW = 'verify-override-preview',
+    // comma separated list of guilds with access to verification overrides
+    VERIFY_OVERRIDE_GUILDS = 'verify-override-guilds',
+}
+
 export class AdminConfigCache {
+    static FLAGS = FLAGS;
+
     private static _cache = new Collection<string, AdminConfigEntry>();
     private static _isLoaded = false;
 
     /**
      * Retrieves a single configuration value by key
      * @param key The configuration key to retrieve
+     * @param def Optional default value if not found
      * @returns The configuration value as a string, or null if not found
      */
-    static async getConfig(key: string): Promise<string | null> {
+    static async getConfig(key: string): Promise<string | null>;
+    static async getConfig(key: string, def?: string): Promise<string>;
+    static async getConfig(key: string, def?: string): Promise<string | null> {
         await this.ensureCacheLoaded();
 
         const entry = this._cache.get(key);
-        return entry ? entry.value : null;
+        return entry ? entry.value : def ?? null;
     }
 
     /**

@@ -1,9 +1,11 @@
 import { EventHandler } from './eventHandler';
 import Client from '#src/Client';
+import { AdminConfigCache } from '#util/adminConfigCache';
 import { logger } from '#util/logger';
 import { Gauge, register } from 'prom-client';
 import express from 'express';
 import { ActivityType } from 'discord.js';
+import { GuildConfigCache } from '#util/guildConfigCache';
 
 export class ReadyEventHandler implements EventHandler {
     readonly eventName = 'ready';
@@ -13,7 +15,6 @@ export class ReadyEventHandler implements EventHandler {
         this.client = client;
     }
 
-    // eslint-disable-next-line @typescript-eslint/require-await
     async execute(): Promise<void> {
         const client = this.client;
         // the user will never be null after the ready event is emitted
@@ -39,6 +40,14 @@ export class ReadyEventHandler implements EventHandler {
                 logger.warn({ event: { name: this.eventName } }, `Admin guild with ID ${process.env.ADMIN_GUILD_ID} not found!`);
             }
         }
+
+        Promise.all([AdminConfigCache.reloadCache(), GuildConfigCache.reloadCache()])
+            .then(() => {
+                logger.info({ event: { name: this.eventName } }, 'Admin and guild config caches loaded');
+            })
+            .catch((err) => {
+                logger.error({ event: { name: this.eventName }, err }, 'Error loading admin and guild config caches');
+            });
 
         const prom_app = express();
         prom_app.get('/metrics', async (req, res) => {

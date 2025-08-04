@@ -13,6 +13,7 @@ import { handleViewOverride } from './verifyOverrideFlows/verifyOverrideView';
 import { handleDeleteOverride } from './verifyOverrideFlows/verifyOverrideDelete';
 import { handleCreateOverride } from './verifyOverrideFlows/verifyOverrideCreate';
 import { handleListOverrides } from './verifyOverrideFlows/verifyOverrideList';
+import { AdminConfigCache } from '#util/adminConfigCache';
 import { logger } from '#util/logger';
 
 export class VerifyOverride extends ChatCommand {
@@ -96,25 +97,6 @@ export class VerifyOverride extends ChatCommand {
     ): Promise<void> {
         await interaction.deferReply();
 
-        const allowedGuilds = [
-            '694232686247542815', // SE 25
-            '1348807287254552657', // SE 30
-            '811408878162935829', // big SE
-            '532052305982259210', // dev test server
-        ];
-        if (!interaction.guildId || !allowedGuilds.includes(interaction.guildId)) {
-            await interaction.editReply({
-                embeds: [
-                    new EmbedBuilder()
-                        .setColor('Yellow')
-                        .setDescription(
-                            'This feature is in private preview. Want early access? Ask in the [support server](https://discord.gg/KHByMmrrw2).'
-                        ),
-                ],
-            });
-            return;
-        }
-
         const config = await GuildConfigCache.fetchConfig(interaction.guild!.id);
         if (!config.enableVerification) {
             await interaction.editReply({
@@ -127,6 +109,28 @@ export class VerifyOverride extends ChatCommand {
                 ],
             });
             return;
+        }
+
+        const inPreview = (await AdminConfigCache.getConfig(AdminConfigCache.FLAGS.VERIFY_OVERRIDE_PREVIEW, 'false')) === 'true';
+        if (inPreview) {
+            const allowedGuildsRaw = await AdminConfigCache.getConfig(AdminConfigCache.FLAGS.VERIFY_OVERRIDE_GUILDS, '');
+            const allowedGuildIds = allowedGuildsRaw
+                .split(',')
+                .map((id) => id.trim())
+                .filter((id) => id.length > 0);
+
+            if (!interaction.guildId || !allowedGuildIds.includes(interaction.guildId)) {
+                await interaction.editReply({
+                    embeds: [
+                        new EmbedBuilder()
+                            .setColor('Yellow')
+                            .setDescription(
+                                'This feature is in private preview. Want early access? Ask in the [support server](https://discord.gg/KHByMmrrw2).'
+                            ),
+                    ],
+                });
+                return;
+            }
         }
 
         const subcommand = args.getSubcommand();
