@@ -49,6 +49,15 @@ export class GuildConfigCache {
         this._cache.set(guildId, guildConfig);
     }
 
+    static async reloadCache() {
+        this._cache.clear();
+
+        const configs = await GuildConfigModel.find({});
+        for (const config of configs) {
+            GuildConfigCache.updateCache(config);
+        }
+    }
+
     private static getDefaultConfig(guildId: Snowflake): GuildConfig {
         return {
             guildId: guildId,

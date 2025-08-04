@@ -1,6 +1,5 @@
 import Client from '#src/Client';
 import { ChatCommand } from '../ChatCommand';
-import GuildConfigModel from '#models/guildConfig.model';
 import { GuildConfigCache } from '#util/guildConfigCache';
 import { AdminConfigCache } from '#util/adminConfigCache';
 import { ChatInputCommandInteraction } from 'discord.js';
@@ -21,13 +20,8 @@ export class Reload extends ChatCommand {
     async execute(interaction: ChatInputCommandInteraction): Promise<void> {
         await interaction.deferReply();
 
-        // reload guild configs
-        const configs = await GuildConfigModel.find({});
-        for (const config of configs) {
-            GuildConfigCache.updateCache(config);
-        }
-
-        // reload admin configs
+        // reload admin and guild configs
+        await GuildConfigCache.reloadCache();
         await AdminConfigCache.reloadCache();
 
         await interaction.editReply({ content: 'All guild and admin settings have been successfully reloaded!' });
