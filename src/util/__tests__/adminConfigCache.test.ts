@@ -24,6 +24,13 @@ describe('AdminConfigCache', () => {
             expect(result).toBeNull();
         });
 
+        it('should return default for non-existent config when default set', async () => {
+            mockAdminConfigModel.findOne.mockResolvedValue(null);
+
+            const result = await AdminConfigCache.getConfig('nonexistent', 'default-value');
+            expect(result).toBe('default-value');
+        });
+
         it('should return config value when it exists', async () => {
             const mockConfig: AdminConfig = {
                 configs: new Map([['testKey', { value: 'testValue', updatedAt: new Date() }]]),
@@ -31,8 +38,10 @@ describe('AdminConfigCache', () => {
             mockAdminConfigModel.findOne.mockResolvedValue(mockConfig);
 
             const result = await AdminConfigCache.getConfig('testKey');
-
             expect(result).toBe('testValue');
+
+            const result2 = await AdminConfigCache.getConfig('testKey', 'some-unused-default');
+            expect(result2).toBe('testValue');
         });
 
         it('should load from database when cache is empty', async () => {
