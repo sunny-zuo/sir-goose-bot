@@ -30,6 +30,6 @@ export class Reload extends ChatCommand {
         // reload admin configs
         await AdminConfigCache.reloadCache();
 
-        await interaction.editReply({ content: 'All guild settings have been successfully reloaded!' });
+        await interaction.editReply({ content: 'All guild and admin settings have been successfully reloaded!' });
     }
 }

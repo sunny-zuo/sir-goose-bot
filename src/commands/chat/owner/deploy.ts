@@ -59,7 +59,6 @@ export class Deploy extends ChatCommand {
 
                 logger.info(`Loaded application commands globally`);
                 await interaction.editReply('Application commands have been loaded globally!');
-
                 break;
             }
             case 'guild': {
@@ -72,7 +71,6 @@ export class Deploy extends ChatCommand {
                 } else {
                     await interaction.editReply("Can't deploy guild commands in DMs! Did you mean to deploy commands globally?");
                 }
-
                 break;
             }
             case 'owner': {
@@ -90,6 +88,7 @@ export class Deploy extends ChatCommand {
 
                 await client.deployOwnerOnlyCommands(adminGuild);
                 await interaction.editReply('Owner-only commands have been loaded!');
+                break;
             }
         }
     }
