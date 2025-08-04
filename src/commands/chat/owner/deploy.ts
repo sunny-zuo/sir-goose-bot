@@ -4,9 +4,8 @@ import {
     ApplicationCommandOptionData,
     ApplicationCommandOptionType,
     ApplicationCommandType,
-    CommandInteraction,
+    ChatInputCommandInteraction,
     CommandInteractionOptionResolver,
-    Message,
 } from 'discord.js';
 import Client from '#src/Client';
 import { ChatCommand } from '../ChatCommand';
@@ -24,6 +23,11 @@ export class Deploy extends ChatCommand {
             description: 'Deploy all commands globally',
             type: ApplicationCommandOptionType.Subcommand,
         },
+        {
+            name: 'owner',
+            description: 'Deploy owner-only commands',
+            type: ApplicationCommandOptionType.Subcommand,
+        },
     ];
     constructor(client: Client) {
         super(client, {
@@ -31,18 +35,66 @@ export class Deploy extends ChatCommand {
             description: 'Deploys application commands in current guild or globally',
             category: 'Owner',
             options: Deploy.options,
-            isSlashCommand: false,
-            isTextCommand: true,
+            isSlashCommand: true,
+            isTextCommand: false,
             ownerOnly: true,
             displayHelp: false,
         });
     }
 
     async execute(
-        interaction: Message | CommandInteraction,
-        args?: Omit<CommandInteractionOptionResolver, 'getMessage' | 'getFocused'>
+        interaction: ChatInputCommandInteraction,
+        args: Omit<CommandInteractionOptionResolver, 'getMessage' | 'getFocused'>
     ): Promise<void> {
+        await interaction.deferReply();
+
         const client = this.client;
+        const option = args.getSubcommand();
+
+        switch (option) {
+            case 'global': {
+                const commandData = [...this.getChatCommandData(client), ...this.getMessageContextCommandData(client)];
+                const application = await client.application!.fetch();
+                await application.commands.set(commandData);
+
+                logger.info(`Loaded application commands globally`);
+                await interaction.editReply('Application commands have been loaded globally!');
+
+                break;
+            }
+            case 'guild': {
+                if (interaction.guild) {
+                    const commandData = [...this.getChatCommandData(client), ...this.getMessageContextCommandData(client)];
+                    await interaction.guild.commands.set(commandData);
+
+                    logger.info(`Loaded application commands in guild ${interaction.guild.name}`);
+                    await interaction.editReply('Application commands have been loaded in this guild!');
+                } else {
+                    await interaction.editReply("Can't deploy guild commands in DMs! Did you mean to deploy commands globally?");
+                }
+
+                break;
+            }
+            case 'owner': {
+                const adminGuildId = process.env.ADMIN_GUILD_ID;
+                if (!adminGuildId) {
+                    await interaction.editReply('ADMIN_GUILD_ID not set, skipping owner-only command deployment');
+                    return;
+                }
+
+                const adminGuild = await client.guilds.fetch(adminGuildId);
+                if (!adminGuild) {
+                    await interaction.editReply(`Admin guild with ID ${adminGuildId} not found, skipping owner-only command deployment`);
+                    return;
+                }
+
+                await client.deployOwnerOnlyCommands(adminGuild);
+                await interaction.editReply('Owner-only commands have been loaded!');
+            }
+        }
+    }
+
+    getChatCommandData(client: Client): ApplicationCommandData[] {
         const data: ApplicationCommandData[] = [];
 
         for (const [, command] of client.chatCommands) {
@@ -53,12 +105,19 @@ export class Deploy extends ChatCommand {
                     /*
                         Type assertion here is not optimal, but ApplicationCommandOption is very similar to ApplicationCommandOptionData
                         and it's more convenient to use the former in the rest of the code at the moment
+                        TODO: stop relying on this
                     */
                     options: command.options as ApplicationCommandOptionData[],
                     type: ApplicationCommandType.ChatInput,
                 });
             }
         }
+
+        return data;
+    }
+
+    getMessageContextCommandData(client: Client): ApplicationCommandData[] {
+        const data: ApplicationCommandData[] = [];
 
         for (const [, command] of client.messageContextMenuCommands) {
             data.push({
@@ -67,19 +126,6 @@ export class Deploy extends ChatCommand {
             });
         }
 
-        if (args?.getSubcommand(false) === 'global') {
-            const application = await client.application!.fetch();
-            await application.commands.set(data);
-
-            logger.info(`Loaded application commands globally`);
-            await interaction.reply('Application commands have been loaded globally!');
-        } else if (interaction.guild) {
-            await interaction.guild.commands.set(data);
-
-            logger.info(`Loaded application commands in guild ${interaction.guild.name}`);
-            await interaction.reply('Application commands have been loaded in this guild!');
-        } else {
-            await interaction.reply("Can't deploy guild commands in DMs! Did you mean to deploy commands globally?");
-        }
+        return data;
     }
 }
