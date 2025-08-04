@@ -113,8 +113,11 @@ export class VerifyOverride extends ChatCommand {
 
         const inPreview = (await AdminConfigCache.getConfig(AdminConfigCache.FLAGS.VERIFY_OVERRIDE_PREVIEW, 'false')) === 'true';
         if (inPreview) {
-            const allowedGuildsRaw = await AdminConfigCache.getConfig(AdminConfigCache.FLAGS.VERIFY_OVERRIDE_GUILDS);
-            const allowedGuildIds = allowedGuildsRaw ? allowedGuildsRaw.split(',') : [];
+            const allowedGuildsRaw = await AdminConfigCache.getConfig(AdminConfigCache.FLAGS.VERIFY_OVERRIDE_GUILDS, '');
+            const allowedGuildIds = allowedGuildsRaw
+                .split(',')
+                .map((id) => id.trim())
+                .filter((id) => id.length > 0);
 
             if (!interaction.guildId || !allowedGuildIds.includes(interaction.guildId)) {
                 await interaction.editReply({
