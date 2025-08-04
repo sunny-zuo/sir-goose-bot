@@ -1,4 +1,12 @@
-import Discord, { ClientOptions, Collection, User } from 'discord.js';
+import Discord, {
+    ApplicationCommandData,
+    ApplicationCommandOptionData,
+    ApplicationCommandType,
+    ClientOptions,
+    Collection,
+    Guild,
+    User,
+} from 'discord.js';
 import { ChatCommand } from './commands/chat/ChatCommand';
 import { MessageContextMenuCommand } from './commands/contextMenu/message/MessageContextMenuCommand';
 import Events from './events';
@@ -73,5 +81,23 @@ export default class Client extends Discord.Client {
 
     isOwner(user: User): boolean {
         return user.id === process.env.OWNER_ID;
+    }
+
+    async deployOwnerOnlyCommands(guild: Guild) {
+        const data: ApplicationCommandData[] = [];
+
+        for (const [, command] of this.chatCommands) {
+            if (command.isSlashCommand && command.ownerOnly) {
+                data.push({
+                    name: command.name,
+                    description: command.description,
+                    options: command.options as ApplicationCommandOptionData[],
+                    type: ApplicationCommandType.ChatInput,
+                });
+            }
+        }
+
+        await guild.commands.set(data);
+        logger.info(`Deployed owner-only commands in admin guild ${guild.name}`);
     }
 }

@@ -2,26 +2,34 @@ import Client from '#src/Client';
 import { ChatCommand } from '../ChatCommand';
 import GuildConfigModel from '#models/guildConfig.model';
 import { GuildConfigCache } from '#util/guildConfigCache';
-import { Message, CommandInteraction } from 'discord.js';
+import { AdminConfigCache } from '#util/adminConfigCache';
+import { ChatInputCommandInteraction } from 'discord.js';
 
 export class Reload extends ChatCommand {
     constructor(client: Client) {
         super(client, {
             name: 'reload',
-            description: 'Reloads all server configs and updates cache',
+            description: 'Reloads all configs from database and updates cache',
             category: 'Owner',
             ownerOnly: true,
+            isSlashCommand: true,
+            isTextCommand: false,
             displayHelp: false,
         });
     }
 
-    async execute(interaction: Message | CommandInteraction): Promise<void> {
-        const configs = await GuildConfigModel.find({});
+    async execute(interaction: ChatInputCommandInteraction): Promise<void> {
+        await interaction.deferReply();
 
+        // reload guild configs
+        const configs = await GuildConfigModel.find({});
         for (const config of configs) {
             GuildConfigCache.updateCache(config);
         }
 
-        await interaction.reply({ content: 'All guild settings have been successfully reloaded!' });
+        // reload admin configs
+        await AdminConfigCache.reloadCache();
+
+        await interaction.editReply({ content: 'All guild and admin settings have been successfully reloaded!' });
     }
 }

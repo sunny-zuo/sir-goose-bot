@@ -23,6 +23,23 @@ export class ReadyEventHandler implements EventHandler {
 
         client.user!.setActivity('for /help', { type: ActivityType.Watching });
 
+        // check if admin commands are deployed in the specified ADMIN_GUILD_ID and deploy them
+        // if not; this prevents being stuck in a scenario where there is no way to deploy commands
+        if (process.env.ADMIN_GUILD_ID) {
+            const adminGuild = client.guilds.cache.get(process.env.ADMIN_GUILD_ID);
+            if (adminGuild) {
+                const existingCommands = await adminGuild.commands.fetch();
+
+                if (!existingCommands.map((c) => c.name).includes('deploy')) {
+                    await client.deployOwnerOnlyCommands(adminGuild);
+                } else {
+                    logger.info({ event: { name: this.eventName } }, `Skipping owner-only command deployment, commands already deployed`);
+                }
+            } else {
+                logger.warn({ event: { name: this.eventName } }, `Admin guild with ID ${process.env.ADMIN_GUILD_ID} not found!`);
+            }
+        }
+
         const prom_app = express();
         prom_app.get('/metrics', async (req, res) => {
             res.set('Content-Type', register.contentType);
