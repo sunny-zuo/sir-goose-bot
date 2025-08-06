@@ -3,6 +3,7 @@ import { Schema, model } from 'mongoose';
 
 export enum OverrideScope {
     GUILD = 'GUILD',
+    GLOBAL = 'GLOBAL',
 }
 
 export interface VerificationOverride {

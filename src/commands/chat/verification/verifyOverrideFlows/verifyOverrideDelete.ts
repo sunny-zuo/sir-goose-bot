@@ -12,7 +12,7 @@ import {
 import { GuildConfigCache } from '#util/guildConfigCache';
 import { RoleAssignmentService } from '#services/roleAssignmentService';
 import UserModel from '#models/user.model';
-import VerificationOverrideModel, { VerificationOverride } from '#models/verificationOverride.model';
+import VerificationOverrideModel, { VerificationOverride, OverrideScope } from '#models/verificationOverride.model';
 import { Modlog } from '#util/modlog';
 import { logger } from '#util/logger';
 import { Document } from 'mongoose';
@@ -20,9 +20,11 @@ import { catchUnknownMessage } from '#util/message';
 
 export async function handleDeleteOverride(interaction: ChatInputCommandInteraction, targetUser: User, guild: Guild): Promise<void> {
     try {
+        // fetch only GUILD scoped overrides as global overrides are managed separately
         const override = await VerificationOverrideModel.findOne({
             discordId: targetUser.id,
             guildId: guild.id,
+            scope: OverrideScope.GUILD,
             deleted: { $exists: false },
         });
 

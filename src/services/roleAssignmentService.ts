@@ -11,7 +11,7 @@ import { Modlog } from '#util/modlog';
 import { RoleData } from '#types/Verification';
 import { logger } from '#util/logger';
 import Client from '#src/Client';
-import VerificationOverrideModel from '#models/verificationOverride.model';
+import VerificationOverrideModel, { OverrideScope } from '#models/verificationOverride.model';
 
 type CustomFileImport = { type: 'hash' | 'uwid'; department: string | null; entranceYear: number | null; ids: string[] };
 type CustomValues = { departments: string[]; entranceYear: number | null };
@@ -95,18 +95,21 @@ export class RoleAssignmentService {
 
         const member = await guild.members.fetch(this.userId).catch(() => undefined);
         const user = await UserModel.findOne({ discordId: this.userId });
-        // TODO: deal with global/guild scopes
-        const override = await VerificationOverrideModel.findOne({
+        // Fetch both global and guild overrides, with guild taking precedence
+        const overrides = await VerificationOverrideModel.find({
             discordId: this.userId,
-            guildId: guild.id,
+            $or: [{ guildId: guild.id, scope: 'GUILD' }, { scope: 'GLOBAL' }],
             deleted: { $exists: false },
-        });
+        }).sort({ createdAt: -1 }); // sort by creation date, newest first
+
+        // Find the most recent guild override, or fall back to most recent global override
+        const override = overrides.find((o) => o.scope === OverrideScope.GUILD) || overrides.find((o) => o.scope === OverrideScope.GLOBAL);
 
         const userIsVerified = user && user.verified && user.department && user.o365CreatedDate;
         // overrides can be used to verify users who are not verified as long as they are complete
-        const userHasValidOverride = override && override.department && override.o365CreatedDate;
+        const userHasFullOverride = override && override.department && override.o365CreatedDate;
 
-        if (member && (userIsVerified || userHasValidOverride)) {
+        if (member && (userIsVerified || userHasFullOverride)) {
             logger.info({
                 verification: 'assignOne',
                 user: { id: member.id },

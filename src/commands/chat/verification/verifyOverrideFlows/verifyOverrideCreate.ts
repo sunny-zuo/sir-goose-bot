@@ -89,6 +89,7 @@ export async function handleCreateOverride(
                     const existingOverrides = await VerificationOverrideModel.find({
                         discordId: { $in: targetUsers.map((user) => user.id) },
                         guildId: i.guild!.id,
+                        scope: OverrideScope.GUILD, // only look for GUILD overrides as GLOBAL is meant to be invisible to server owners
                         deleted: { $exists: false },
                     });
 

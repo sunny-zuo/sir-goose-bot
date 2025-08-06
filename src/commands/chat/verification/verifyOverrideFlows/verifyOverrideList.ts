@@ -11,7 +11,7 @@ import {
     ButtonInteraction,
     StringSelectMenuInteraction,
 } from 'discord.js';
-import VerificationOverrideModel, { VerificationOverride } from '#models/verificationOverride.model';
+import VerificationOverrideModel, { VerificationOverride, OverrideScope } from '#models/verificationOverride.model';
 import { logger } from '#util/logger';
 import { catchUnknownMessage } from '#util/message';
 import { handleViewOverride } from './verifyOverrideView';
@@ -26,6 +26,7 @@ export async function handleListOverrides(interaction: ChatInputCommandInteracti
 
         const overrides = await VerificationOverrideModel.find({
             guildId: guild.id,
+            scope: OverrideScope.GUILD,
             deleted: { $exists: false },
         }).sort({ createdAt: -1 });
 
