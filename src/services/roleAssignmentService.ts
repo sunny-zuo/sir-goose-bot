@@ -98,23 +98,37 @@ export class RoleAssignmentService {
         // Fetch both global and guild overrides, with guild taking precedence
         const overrides = await VerificationOverrideModel.find({
             discordId: this.userId,
-            $or: [{ guildId: guild.id, scope: 'GUILD' }, { scope: 'GLOBAL' }],
+            $or: [{ guildId: guild.id, scope: OverrideScope.GUILD }, { scope: OverrideScope.GLOBAL }],
             deleted: { $exists: false },
-        }).sort({ createdAt: -1 }); // sort by creation date, newest first
+        })
+            .sort({ createdAt: -1 })
+            .lean(); // sort by creation date, newest first
 
-        // Find the most recent guild override, or fall back to most recent global override
-        const override = overrides.find((o) => o.scope === OverrideScope.GUILD) || overrides.find((o) => o.scope === OverrideScope.GLOBAL);
+        // find the most recent guild override, or fall back to most recent global override
+        const guildOverride = overrides.find((o) => o.scope === OverrideScope.GUILD);
+        const globalOverride = overrides.find((o) => o.scope === OverrideScope.GLOBAL);
+        const overrideToApply = guildOverride ?? globalOverride;
+
+        // if both overrides exist with the guild override being incomplete, attempt to fill missing data from global override
+        if (guildOverride && globalOverride && overrideToApply) {
+            if (!guildOverride.department) {
+                overrideToApply.department = globalOverride.department;
+            }
+            if (!guildOverride.o365CreatedDate) {
+                overrideToApply.o365CreatedDate = globalOverride.o365CreatedDate;
+            }
+        }
 
         const userIsVerified = user && user.verified && user.department && user.o365CreatedDate;
         // overrides can be used to verify users who are not verified as long as they are complete
-        const userHasFullOverride = override && override.department && override.o365CreatedDate;
+        const userHasFullOverride = overrideToApply && overrideToApply.department && overrideToApply.o365CreatedDate;
 
         if (member && (userIsVerified || userHasFullOverride)) {
             logger.info({
                 verification: 'assignOne',
                 user: { id: member.id },
                 guild: { id: guild.id },
-                overrideId: override?._id ?? 'none',
+                overrideId: overrideToApply?._id ?? 'none',
                 path: 'regular',
             });
 
@@ -150,7 +164,7 @@ export class RoleAssignmentService {
             }
 
             const defaultUserInfo =
-                user !== null
+                user !== null && user.verified && user.uwid
                     ? user.toObject()
                     : {
                           department: undefined,
@@ -161,28 +175,33 @@ export class RoleAssignmentService {
                       };
 
             const getNewUserRolesToAssign = async () => {
-                if (override) {
+                if (overrideToApply) {
                     const overriddenUser = { ...defaultUserInfo };
-                    if (override.department) overriddenUser.department = override.department;
-                    if (override.o365CreatedDate) overriddenUser.o365CreatedDate = override.o365CreatedDate;
+                    if (overrideToApply.department) overriddenUser.department = overrideToApply.department;
+                    if (overrideToApply.o365CreatedDate) overriddenUser.o365CreatedDate = overrideToApply.o365CreatedDate;
                     return this.getMatchingRoles(guild, guildConfig, overriddenUser, true, true); // skip custom imports so that override takes precedence
                 } else {
                     return this.getMatchingRoles(guild, guildConfig, defaultUserInfo);
                 }
             };
             const getOldUserRolesToRemove = async () => {
-                if (params.oldDepartment || params.oldYear || override || params.oldConfig) {
+                // TODO: possibly try to refactor this logic to be cleaner?
+                if (params.oldDepartment || params.oldYear || overrideToApply || params.oldConfig) {
                     // build the old user info object that would have been used to assign roles
                     // apply old user info before overrides if they exist, as this reflects how it works in practice
                     const oldUserInfo = { ...defaultUserInfo };
                     if (params.oldDepartment) oldUserInfo.department = params.oldDepartment;
                     if (params.oldYear) oldUserInfo.o365CreatedDate = new Date(params.oldYear, 5);
-                    if (override && params.oldConfig !== undefined) {
-                        // only apply the override if the config changed
-                        // if the config did not change, an override was likely just applied so we want to add the override associated roles
-                        // TODO: cleanup this logic
-                        if (override.department) oldUserInfo.department = override.department;
-                        if (override.o365CreatedDate) oldUserInfo.o365CreatedDate = override.o365CreatedDate;
+                    if (overrideToApply && params.oldConfig !== undefined) {
+                        // only apply the override to calculate role removal if the config changed
+                        // if the config did not change, an override was likely just applied so we want to remove the user's regular roles
+                        if (overrideToApply.department) oldUserInfo.department = overrideToApply.department;
+                        if (overrideToApply.o365CreatedDate) oldUserInfo.o365CreatedDate = overrideToApply.o365CreatedDate;
+                    } else if (overrideToApply && guildOverride && globalOverride && guildOverride.createdAt > globalOverride.createdAt) {
+                        // if the guild override exists and is newer than the global override, use the data from global
+                        // override to determine what roles to remove as it more accurately represents the user's previous state
+                        if (globalOverride.department) oldUserInfo.department = globalOverride.department;
+                        if (globalOverride.o365CreatedDate) oldUserInfo.o365CreatedDate = globalOverride.o365CreatedDate;
                     }
 
                     if (params.oldConfig) {
@@ -197,6 +216,7 @@ export class RoleAssignmentService {
 
             const newRoles = await getNewUserRolesToAssign();
             const oldRoles = await getOldUserRolesToRemove();
+            console.log(newRoles);
 
             const rolesToSet = member.roles.cache.clone();
             const missingRoles = newRoles.filter((role) => !member.roles.cache.has(role.id));
@@ -214,7 +234,9 @@ export class RoleAssignmentService {
                 rolesToSet.delete('800477641978806334');
             }
 
-            const overrideString = override ? ` (overridden by <@${override.createdBy}> via ${inlineCode('/verifyoverride')})` : '';
+            // only print override info to logs if the override is a GUILD override
+            // this is because GLOBAL overrides are meant to be invisible to admins
+            const overrideString = guildOverride ? ` (overridden by <@${guildOverride.createdBy}> via ${inlineCode('/verifyoverride')})` : '';
             if (!rolesToSet.equals(member.roles.cache)) {
                 await member.roles.set(rolesToSet, 'Verified via Sir Goose Bot');
                 if (params.log) {
@@ -264,7 +286,7 @@ export class RoleAssignmentService {
                 verification: 'assignOne',
                 user: { id: member.id },
                 guild: { id: guild.id },
-                overrideId: override?._id ?? 'none',
+                overrideId: overrideToApply?._id ?? 'none',
                 path: 'unassign',
             });
 
