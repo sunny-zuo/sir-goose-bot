@@ -42,7 +42,7 @@ export class VerifyRulesModalSubmitInteractionHandler implements ModalSubmitInte
         const importErrorEmbed = new EmbedBuilder()
             .setTitle('Import Error')
             .setDescription(
-                'You provided an invalid rule import. Please make sure you copy and pasted correctly from the [rule creation tool.](https://sebot.sunnyzuo.com/).'
+                'You provided an invalid rule import. Please make sure you copy and pasted correctly from the [rule creation tool](https://sebot.sunnyzuo.com/).'
             )
             .setColor('Red');
 

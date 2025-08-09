@@ -290,7 +290,7 @@ export class BulkRoleModify extends ChatCommand {
                     logger.error(e, `Failed to modify roles for ${member.user.tag}`);
                 }
                 progress++;
-                await new Promise((res) => setTimeout(res, 1000));
+                await new Promise((res) => setTimeout(res, 3000));
             }
         } catch (e) {
             clearInterval(updateInterval);

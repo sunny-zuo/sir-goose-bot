@@ -12,7 +12,7 @@ import {
 import { GuildConfigCache } from '#util/guildConfigCache';
 import { RoleAssignmentService } from '#services/roleAssignmentService';
 import UserModel from '#models/user.model';
-import VerificationOverrideModel from '#models/verificationOverride.model';
+import VerificationOverrideModel, { OverrideScope } from '#models/verificationOverride.model';
 import { logger } from '#util/logger';
 import { renderDeleteConfirmationScreen } from './verifyOverrideDelete';
 import { catchUnknownMessage } from '#util/message';
@@ -31,9 +31,11 @@ export async function handleViewOverride(
 
         const guildConfig = await GuildConfigCache.fetchConfig(guild.id);
 
+        // fetch only GUILD scoped overrides as global overrides are managed separately
         const override = await VerificationOverrideModel.findOne({
             discordId: targetUser.id,
             guildId: guild.id,
+            scope: OverrideScope.GUILD,
             deleted: { $exists: false },
         });
 
