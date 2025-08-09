@@ -88,7 +88,7 @@ export class VerifyAll extends ChatCommand {
                 progress++;
 
                 if (roleAssignment.success && (roleAssignment.value.assignedRoles.length > 0 || roleAssignment.value.updatedName)) {
-                    await new Promise((resolve) => setTimeout(resolve, 2000));
+                    await new Promise((resolve) => setTimeout(resolve, 3000));
                 }
             }
         } catch (e) {
@@ -116,7 +116,7 @@ export class VerifyAll extends ChatCommand {
             .setTitle(progress !== total ? `Attempting to verify all ${total} users...` : `All ${total} users have been verified!`)
             .setDescription(
                 `
-                This could take up to ${total * 2} seconds.
+                This could take up to ${total * 3} seconds.
 
                 **Progress:**
                 ${this.generateProgressBar(progress, total)}
