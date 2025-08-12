@@ -3,7 +3,7 @@ import path from 'path';
 import { SHA256 } from 'crypto-js';
 import { Collection, Guild, GuildMember, PermissionsBitField, Role, Snowflake, inlineCode } from 'discord.js';
 import { GuildConfigCache } from '#util/guildConfigCache';
-import UserModel, { User as UserInterface } from '#models/user.model';
+import UserModel, { User as UserInterface, UserRequiredForVerification } from '#models/user.model';
 import GuildModel, { GuildConfig } from '#models/guildConfig.model';
 import BanModel from '#models/ban.model';
 import { Result } from '../types';
@@ -216,7 +216,6 @@ export class RoleAssignmentService {
 
             const newRoles = await getNewUserRolesToAssign();
             const oldRoles = await getOldUserRolesToRemove();
-            console.log(newRoles);
 
             const rolesToSet = member.roles.cache.clone();
             const missingRoles = newRoles.filter((role) => !member.roles.cache.has(role.id));
@@ -236,7 +235,9 @@ export class RoleAssignmentService {
 
             // only print override info to logs if the override is a GUILD override
             // this is because GLOBAL overrides are meant to be invisible to admins
-            const overrideString = guildOverride ? ` (overridden by <@${guildOverride.createdBy}> via ${inlineCode('/verifyoverride')})` : '';
+            const overrideString = guildOverride
+                ? ` (overridden by <@${guildOverride.createdBy}> via ${inlineCode('/verifyoverride')})`
+                : '';
             if (!rolesToSet.equals(member.roles.cache)) {
                 await member.roles.set(rolesToSet, 'Verified via Sir Goose Bot');
                 if (params.log) {
@@ -388,7 +389,7 @@ export class RoleAssignmentService {
     }
 
     static getMatchingRoleData(
-        user: Pick<UserInterface, 'verified' | 'department' | 'o365CreatedDate' | 'uwid'> | null,
+        user: UserRequiredForVerification | null,
         config: Pick<GuildConfig, 'enableVerification' | 'verificationRules'> | null,
         // TODO: refactor to remove having to do this by creating a VerifiedUser class that wraps all of the different override types
         skipCustomImport: boolean = false

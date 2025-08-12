@@ -16,6 +16,9 @@ export interface User {
     verifiedClickedAt?: Date;
 }
 
+// specific fields required for user verification to be processed
+export type UserRequiredForVerification = Pick<User, 'verified' | 'department' | 'o365CreatedDate' | 'uwid'>;
+
 const schema = new Schema<User>(
     {
         discordId: { type: String, required: true },

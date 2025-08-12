@@ -11,7 +11,7 @@ import {
 } from 'discord.js';
 import { GuildConfigCache } from '#util/guildConfigCache';
 import { RoleAssignmentService } from '#services/roleAssignmentService';
-import UserModel from '#models/user.model';
+import UserModel, { UserRequiredForVerification } from '#models/user.model';
 import VerificationOverrideModel, { VerificationOverride, OverrideScope } from '#models/verificationOverride.model';
 import { Modlog } from '#util/modlog';
 import { logger } from '#util/logger';
@@ -146,6 +146,17 @@ export async function renderDeleteConfirmationScreen(
     }
 }
 
+/**
+ * Function to predict what roles will be changed after deletion of a verification override.
+ * This is done by simulating the role assignment process with the current override removed.
+ * At this time, this function assumes the override being deleted is a GUILD override and
+ * does not support predicting GLOBAL override deletion changes.
+ *
+ * @param guild The guild to predict role changes for
+ * @param targetUser The user to predict role changes for
+ * @param override The GUILD override to be deleted
+ * @returns A string describing the role changes that will occur after override deletion
+ */
 async function predictRoleChangesAfterDeletion(guild: Guild, targetUser: User, override: VerificationOverride): Promise<string> {
     try {
         const guildConfig = await GuildConfigCache.fetchConfig(guild.id);
@@ -154,7 +165,24 @@ async function predictRoleChangesAfterDeletion(guild: Guild, targetUser: User, o
             return 'No roles will change as verification is not configured and enabled for this server.';
         }
 
-        const baseUser = await UserModel.findOne({ discordId: targetUser.id });
+        const globalOverride = await VerificationOverrideModel.findOne({
+            discordId: targetUser.id,
+            scope: OverrideScope.GLOBAL,
+            deleted: { $exists: false },
+        }).lean();
+
+        // query only for a verified user here as unverified user data is not useful in this scenario; it can cause more complications
+        // due to missing fields (ie uwid) that we would need to fix for verification role calculation to work correctly
+        const baseUser: UserRequiredForVerification = (await UserModel.findOne({ discordId: targetUser.id, verified: true }).lean()) ?? {
+            uwid: 'delete-prediction',
+            verified: false,
+        };
+        if (globalOverride) {
+            if (globalOverride.department) baseUser.department = globalOverride.department;
+            if (globalOverride.o365CreatedDate) baseUser.o365CreatedDate = globalOverride.o365CreatedDate;
+            if (baseUser.department && baseUser.o365CreatedDate) baseUser.verified = true;
+        }
+
         const syntheticUserWithOverride = {
             verified: true,
             uwid: baseUser?.uwid || 'delete-prediction',
@@ -163,13 +191,13 @@ async function predictRoleChangesAfterDeletion(guild: Guild, targetUser: User, o
         };
 
         const currentRoles = RoleAssignmentService.getMatchingRoleData(syntheticUserWithOverride, guildConfig, true);
-        const normalRoles = RoleAssignmentService.getMatchingRoleData(baseUser, guildConfig, false);
+        const futureRoles = RoleAssignmentService.getMatchingRoleData(baseUser, guildConfig, false);
 
         const currentRoleIds = new Set(currentRoles.map((role) => role.id));
-        const normalRoleIds = new Set(normalRoles.map((role) => role.id));
+        const futureRoleIds = new Set(futureRoles.map((role) => role.id));
 
-        const rolesToRemove = currentRoles.filter((role) => !normalRoleIds.has(role.id));
-        const rolesToAdd = normalRoles.filter((role) => !currentRoleIds.has(role.id));
+        const rolesToRemove = currentRoles.filter((role) => !futureRoleIds.has(role.id));
+        const rolesToAdd = futureRoles.filter((role) => !currentRoleIds.has(role.id));
 
         if (rolesToRemove.length === 0 && rolesToAdd.length === 0) {
             return 'No role changes will occur.';
