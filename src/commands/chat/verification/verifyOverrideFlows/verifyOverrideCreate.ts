@@ -15,7 +15,7 @@ import {
 import { GuildConfigCache } from '#util/guildConfigCache';
 import { VerificationDefaultStartingYears, VerificationDepartmentList } from '#types/Verification';
 import { RoleAssignmentService } from '#services/roleAssignmentService';
-import UserModel from '#models/user.model';
+import UserModel, { UserRequiredForVerification } from '#models/user.model';
 import VerificationOverrideModel, { OverrideScope } from '#models/verificationOverride.model';
 import { Modlog } from '#util/modlog';
 import { catchUnknownMessage } from '#util/message';
@@ -129,13 +129,34 @@ export async function handleCreateOverride(
                             const unverifiedUsers = targetUsers.filter(
                                 (user) => !verifiedUsers.some((vUser) => vUser.discordId === user.id)
                             );
-                            const warnEmbed = new EmbedBuilder().setColor('Red')
-                                .setDescription(`The following selected users are not verified:
+
+                            const existingFullGlobalOverrideUsers = (
+                                await VerificationOverrideModel.find({
+                                    discordId: { $in: unverifiedUsers.map((user) => user.id) },
+                                    o365CreatedDate: { $exists: true },
+                                    department: { $exists: true },
+                                    scope: OverrideScope.GLOBAL,
+                                    deleted: { $exists: false },
+                                }).lean()
+                            ).map((override) => override.discordId);
+
+                            const unverifiedUsersMissingFullOverride = unverifiedUsers.filter(
+                                (user) => !existingFullGlobalOverrideUsers.includes(user.id)
+                            );
+
+                            if (unverifiedUsersMissingFullOverride.length > 0) {
+                                const warnEmbed = new EmbedBuilder().setColor('Red')
+                                    .setDescription(`The following selected users are not verified:
                                     ${unverifiedUsers.map((user) => `* <@${user.id}>`).join('\n')}
 
                                     To create an override for an unverified user, both the department and year must be set. Please select a department and year, or unselect the unverified users and try again.`);
 
-                            await i.followUp({ embeds: [warnEmbed], ephemeral: true });
+                                await i.followUp({ embeds: [warnEmbed], ephemeral: true });
+                            } else {
+                                await renderCreateOverrideConfirmationScreen(i, creator, targetUsers, selectedDept, selectedYear);
+                                finished = true;
+                                return;
+                            }
                         }
                     }
                 }
@@ -253,8 +274,8 @@ async function renderCreateOverrideConfirmationScreen(
     const embed = new EmbedBuilder().setColor('Orange').setTitle('Confirm Override Creation').setDescription(`
         You are creating an override for user${targetUsers.length > 1 ? 's' : ''} ${targetUsers.map((user) => user.toString()).join(', ')}.
 
-        **Overridden Department:** ${newDepartment ? inlineCode(newDepartment) : inlineCode('not overridden')}
-        **Overridden Year:** ${newYear ? inlineCode(newYear) : inlineCode('not overridden')}
+        **Overridden Department:** ${inlineCode(newDepartment ?? '<not overriden>')}
+        **Overridden Year:** ${inlineCode(newYear ?? '<not overriden>')}
 
         ${roleChangePrediction}
 
@@ -366,8 +387,28 @@ async function predictOverrideRoleChangesString(
             : 'This will result in no roles being assigned based on the current verification rules and the chosen department/year.';
     } else if (targetUsers.length === 1) {
         // if only one user is selected, we can predict the roles that will be assigned as we can retrieve their current state
-        const existingUserInfo = await UserModel.findOne({ discordId: targetUsers[0].id });
-        if (existingUserInfo === null) throw new Error('Partial override creation attempt for user not found in database');
+        const existingUserInfo: UserRequiredForVerification = (await UserModel.findOne({
+            discordId: targetUsers[0].id,
+            verified: true,
+        }).lean()) ?? {
+            verified: false,
+            uwid: 'create-prediction',
+        };
+
+        // if the user is missing some fields that would make them verified, try to fill that info from a global override first
+        if (!existingUserInfo.o365CreatedDate || !existingUserInfo.department) {
+            const existingOverrideInfo = await VerificationOverrideModel.findOne({
+                discordId: targetUsers[0].id,
+                scope: OverrideScope.GLOBAL,
+                deleted: { $exists: false },
+            }).lean();
+
+            if (existingOverrideInfo?.o365CreatedDate) existingUserInfo.o365CreatedDate = existingOverrideInfo.o365CreatedDate;
+            if (existingOverrideInfo?.department) existingUserInfo.department = existingOverrideInfo.department;
+            if (existingUserInfo?.o365CreatedDate && existingUserInfo?.department) existingUserInfo.verified = true;
+        }
+
+        // then, check to see if this would be a valid partial override creation
         if (existingUserInfo.o365CreatedDate === undefined || existingUserInfo.department === undefined) {
             throw new Error('Partial override creation attempt for user with missing verification data');
         }

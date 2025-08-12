@@ -133,12 +133,12 @@ export async function handleViewOverride(
             },
             {
                 name: 'Department',
-                value: override.department ? inlineCode(override.department) : 'Not overridden',
+                value: inlineCode(override.department ?? '<not overriden>'),
                 inline: true,
             },
             {
                 name: 'Entrance Year',
-                value: override.o365CreatedDate ? inlineCode(override.o365CreatedDate.getFullYear().toString()) : 'Not overridden',
+                value: inlineCode(override.o365CreatedDate?.getFullYear().toString() ?? '<not overriden>'),
                 inline: true,
             }
         );

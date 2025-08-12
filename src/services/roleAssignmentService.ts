@@ -185,33 +185,47 @@ export class RoleAssignmentService {
                 }
             };
             const getOldUserRolesToRemove = async () => {
-                // TODO: possibly try to refactor this logic to be cleaner?
-                if (params.oldDepartment || params.oldYear || overrideToApply || params.oldConfig) {
-                    // build the old user info object that would have been used to assign roles
-                    // apply old user info before overrides if they exist, as this reflects how it works in practice
-                    const oldUserInfo = { ...defaultUserInfo };
-                    if (params.oldDepartment) oldUserInfo.department = params.oldDepartment;
-                    if (params.oldYear) oldUserInfo.o365CreatedDate = new Date(params.oldYear, 5);
-                    if (overrideToApply && params.oldConfig !== undefined) {
-                        // only apply the override to calculate role removal if the config changed
-                        // if the config did not change, an override was likely just applied so we want to remove the user's regular roles
-                        if (overrideToApply.department) oldUserInfo.department = overrideToApply.department;
-                        if (overrideToApply.o365CreatedDate) oldUserInfo.o365CreatedDate = overrideToApply.o365CreatedDate;
-                    } else if (overrideToApply && guildOverride && globalOverride && guildOverride.createdAt > globalOverride.createdAt) {
-                        // if the guild override exists and is newer than the global override, use the data from global
-                        // override to determine what roles to remove as it more accurately represents the user's previous state
-                        if (globalOverride.department) oldUserInfo.department = globalOverride.department;
-                        if (globalOverride.o365CreatedDate) oldUserInfo.o365CreatedDate = globalOverride.o365CreatedDate;
-                    }
+                if (params.oldConfig) {
+                    // if an old config exists, this means that the server config has changed and we want to
+                    // remove the roles that would be assigned under the old config
+                    const userInfo = { ...defaultUserInfo };
 
-                    if (params.oldConfig) {
-                        return this.getMatchingRoles(guild, params.oldConfig, oldUserInfo, false);
+                    // apply overrides if they exist, since they would have existed under the old config
+                    if (overrideToApply?.department) userInfo.department = overrideToApply.department;
+                    if (overrideToApply?.o365CreatedDate) userInfo.o365CreatedDate = overrideToApply.o365CreatedDate;
+
+                    return this.getMatchingRoles(guild, params.oldConfig, userInfo, false);
+                } else if (params.oldYear || params.oldDepartment) {
+                    // if an oldYear or oldDepartment exist, this means that at least one of the user's year or
+                    // department have changed since so we need to remove the roles associated with the old info
+                    const userInfo = { ...defaultUserInfo };
+
+                    // first, apply overrides if they exist as they would be part of the "base" user information
+                    if (overrideToApply?.department) userInfo.department = overrideToApply.department;
+                    if (overrideToApply?.o365CreatedDate) userInfo.o365CreatedDate = overrideToApply.o365CreatedDate;
+
+                    // then, apply the old year and department if they exist so that they are the source of truth
+                    if (params.oldYear) userInfo.o365CreatedDate = new Date(params.oldYear, 5);
+                    if (params.oldDepartment) userInfo.department = params.oldDepartment;
+
+                    return this.getMatchingRoles(guild, guildConfig, userInfo, false);
+                } else if (overrideToApply) {
+                    // finally, if no parameters are passed in but an override exists, remove the
+                    //  roles associated with the user data before the override was created
+                    const userInfo = { ...defaultUserInfo };
+
+                    // apply the global override if both a guild and global override exist, with the guild override being newer
+                    if (guildOverride && globalOverride && guildOverride.createdAt > globalOverride.createdAt) {
+                        if (globalOverride.department) userInfo.department = globalOverride.department;
+                        if (globalOverride.o365CreatedDate) userInfo.o365CreatedDate = globalOverride.o365CreatedDate;
+                        return this.getMatchingRoles(guild, guildConfig, userInfo, false);
                     } else {
-                        return this.getMatchingRoles(guild, guildConfig, oldUserInfo, false);
+                        // otherwise, just remove roles using the user's regular info
+                        return this.getMatchingRoles(guild, guildConfig, userInfo, false);
                     }
-                } else {
-                    return [];
                 }
+
+                return [];
             };
 
             const newRoles = await getNewUserRolesToAssign();

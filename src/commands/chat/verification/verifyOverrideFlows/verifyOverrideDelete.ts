@@ -82,9 +82,9 @@ export async function renderDeleteConfirmationScreen(
             .addFields(
                 {
                     name: 'Current Override',
-                    value: `Department: ${override.department ? inlineCode(override.department) : '*Not overridden*'}\nEntrance Year: ${
-                        override.o365CreatedDate ? inlineCode(override.o365CreatedDate.getFullYear().toString()) : '*Not overridden*'
-                    }`,
+                    value: `Department: ${inlineCode(override.department ?? '<not overriden>')}\nEntrance Year: ${inlineCode(
+                        override.o365CreatedDate?.getFullYear().toString() ?? '<not overriden>'
+                    )}`,
                     inline: false,
                 },
                 {
@@ -254,8 +254,8 @@ async function performOverrideDeletion(
             interaction.user,
             `Verification override deleted for ${targetUser} by ${interaction.user}.\n\n` +
                 `**Removed Override:**\n` +
-                `Department: ${inlineCode(override.department ?? 'not set')}\n` +
-                `Entrance Year: ${inlineCode(override.o365CreatedDate?.getFullYear().toString() ?? 'not set')}\n\n` +
+                `Department: ${inlineCode(override.department ?? '<not overriden>')}\n` +
+                `Entrance Year: ${inlineCode(override.o365CreatedDate?.getFullYear().toString() ?? '<not overriden>')}\n\n` +
                 `${
                     member
                         ? 'User roles have been updated to reflect normal verification data.'
@@ -271,9 +271,9 @@ async function performOverrideDeletion(
             .setDescription(`The verification override for ${targetUser} has been deleted.`)
             .addFields({
                 name: 'Deleted Override',
-                value: `Department: ${override.department ? inlineCode(override.department) : '*Not overridden*'}\nEntrance Year: ${
-                    override.o365CreatedDate ? inlineCode(override.o365CreatedDate.getFullYear().toString()) : '*Not overridden*'
-                }`,
+                value: `Department: ${inlineCode(override.department ?? '<not overriden>')}\nEntrance Year: ${inlineCode(
+                    override.o365CreatedDate?.getFullYear().toString() ?? '<not overriden>'
+                )}`,
                 inline: false,
             });
 
