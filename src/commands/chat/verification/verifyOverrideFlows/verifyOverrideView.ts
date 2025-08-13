@@ -11,7 +11,7 @@ import {
 } from 'discord.js';
 import { GuildConfigCache } from '#util/guildConfigCache';
 import { RoleAssignmentService } from '#services/roleAssignmentService';
-import UserModel from '#models/user.model';
+import UserModel, { findUserVerificationData } from '#models/user.model';
 import VerificationOverrideModel, { OverrideScope } from '#models/verificationOverride.model';
 import { logger } from '#util/logger';
 import { renderDeleteConfirmationScreen } from './verifyOverrideDelete';
@@ -41,15 +41,14 @@ export async function handleViewOverride(
 
         if (!override) {
             // Calculate roles from normal verification (without override) to display
-
             let rolesFromVerificationInfo = '*None* (user is unverified)';
 
             if (guildConfig && guildConfig.verificationRules) {
-                const baseUser = await UserModel.findOne({ discordId: targetUser.id });
+                const userInfo = await findUserVerificationData(targetUser.id);
 
-                if (baseUser && baseUser.verified && baseUser.department && baseUser.o365CreatedDate) {
+                if (userInfo && userInfo.verified && userInfo.department && userInfo.o365CreatedDate) {
                     const roleData = RoleAssignmentService.getMatchingRoleData(
-                        baseUser,
+                        userInfo,
                         guildConfig,
                         false // don't skip custom imports for normal verification
                     );
@@ -83,29 +82,21 @@ export async function handleViewOverride(
         }
 
         // calculate roles based on override
-        let assignedRoles: string[] = [];
+        const assignedRoles: string[] = [];
 
         if (guildConfig && guildConfig.verificationRules) {
-            const baseUser = await UserModel.findOne({ discordId: targetUser.id });
-
-            // create synthetic user object with override data applied
-            const syntheticUser = {
-                verified: true,
-                uwid: baseUser?.uwid || 'override-view',
-                department: override.department || baseUser?.department,
-                o365CreatedDate: override.o365CreatedDate || baseUser?.o365CreatedDate,
-            };
+            const userInfo = await findUserVerificationData(targetUser.id, guild.id);
 
             // only calculate roles if we have the required data
-            if (syntheticUser.department && syntheticUser.o365CreatedDate) {
+            if (userInfo.verified && userInfo.department && userInfo.o365CreatedDate) {
                 const roleData = RoleAssignmentService.getMatchingRoleData(
-                    syntheticUser,
+                    userInfo,
                     guildConfig,
                     true // skip custom imports so override takes precedence
                 );
 
                 // convert role data to role mentions
-                assignedRoles = roleData.map((role) => `<@&${role.id}>`);
+                assignedRoles.push(...roleData.map((role) => `<@&${role.id}>`));
             }
         }
 
