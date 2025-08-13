@@ -98,8 +98,8 @@ export async function handleCreateOverride(
                             .map(
                                 (override) =>
                                     `* <@${override.discordId}> (department ${inlineCode(
-                                        override.department ?? '<not overriden>'
-                                    )}, year ${inlineCode(override.o365CreatedDate?.getFullYear().toString() ?? '<not overriden>')})`
+                                        override.department ?? '<not overridden>'
+                                    )}, year ${inlineCode(override.o365CreatedDate?.getFullYear().toString() ?? '<not overridden>')})`
                             )
                             .join('\n');
 
@@ -147,7 +147,7 @@ export async function handleCreateOverride(
                             if (usersMissingOverride.length > 0) {
                                 const warnEmbed = new EmbedBuilder().setColor('Red')
                                     .setDescription(`The following selected users are not verified:
-                                    ${unverifiedUsers.map((user) => `* <@${user.id}>`).join('\n')}
+                                    ${usersMissingOverride.map((user) => `* <@${user.id}>`).join('\n')}
 
                                     To create an override for an unverified user, both the department and year must be set. Please select a department and year, or unselect the unverified users and try again.`);
 
@@ -323,8 +323,8 @@ async function renderCreateOverrideConfirmationScreen(
                         i.guild,
                         i.user,
                         `Verification override created for ${user} by ${i.user}.\n
-                    New Department: ${inlineCode(newDepartment ?? '<not overriden>')}
-                    New Start Year: ${inlineCode(newYear ?? '<not overriden>')}`
+                    New Department: ${inlineCode(newDepartment ?? '<not overridden>')}
+                    New Start Year: ${inlineCode(newYear ?? '<not overridden>')}`
                     );
                 }
                 for (const user of targetUsers) {
@@ -338,8 +338,8 @@ async function renderCreateOverrideConfirmationScreen(
                             .setDescription(`Verification override(s) have been created successfully for the following users:
                                         ${targetUsers.join(', ')}
 
-                                        New Department: ${inlineCode(newDepartment ?? '<not overriden>')}
-                                        New Start Year: ${inlineCode(newYear ?? '<not overriden>')}
+                                        New Department: ${inlineCode(newDepartment ?? '<not overridden>')}
+                                        New Start Year: ${inlineCode(newYear ?? '<not overridden>')}
                                         
                                         Their roles have been updated to reflect the overridden data.`),
                     ],
