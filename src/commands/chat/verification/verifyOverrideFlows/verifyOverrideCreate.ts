@@ -274,8 +274,8 @@ async function renderCreateOverrideConfirmationScreen(
     const embed = new EmbedBuilder().setColor('Orange').setTitle('Confirm Override Creation').setDescription(`
         You are creating an override for user${targetUsers.length > 1 ? 's' : ''} ${targetUsers.map((user) => user.toString()).join(', ')}.
 
-        **Overridden Department:** ${inlineCode(newDepartment ?? '<not overriden>')}
-        **Overridden Year:** ${inlineCode(newYear ?? '<not overriden>')}
+        **Overridden Department:** ${inlineCode(newDepartment ?? '<not overridden>')}
+        **Overridden Year:** ${inlineCode(newYear ?? '<not overridden>')}
 
         ${roleChangePrediction}
 
@@ -341,7 +341,7 @@ async function renderCreateOverrideConfirmationScreen(
                                         New Department: ${inlineCode(newDepartment ?? 'not set')}
                                         New Start Year: ${inlineCode(newYear ?? 'not set')}
                                         
-                                        Their roles have been updated to reflect the overriden data.`),
+                                        Their roles have been updated to reflect the overridden data.`),
                     ],
                     components: [],
                 });

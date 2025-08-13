@@ -82,8 +82,8 @@ export async function renderDeleteConfirmationScreen(
             .addFields(
                 {
                     name: 'Current Override',
-                    value: `Department: ${inlineCode(override.department ?? '<not overriden>')}\nEntrance Year: ${inlineCode(
-                        override.o365CreatedDate?.getFullYear().toString() ?? '<not overriden>'
+                    value: `Department: ${inlineCode(override.department ?? '<not overridden>')}\nEntrance Year: ${inlineCode(
+                        override.o365CreatedDate?.getFullYear().toString() ?? '<not overridden>'
                     )}`,
                     inline: false,
                 },
@@ -254,8 +254,8 @@ async function performOverrideDeletion(
             interaction.user,
             `Verification override deleted for ${targetUser} by ${interaction.user}.\n\n` +
                 `**Removed Override:**\n` +
-                `Department: ${inlineCode(override.department ?? '<not overriden>')}\n` +
-                `Entrance Year: ${inlineCode(override.o365CreatedDate?.getFullYear().toString() ?? '<not overriden>')}\n\n` +
+                `Department: ${inlineCode(override.department ?? '<not overridden>')}\n` +
+                `Entrance Year: ${inlineCode(override.o365CreatedDate?.getFullYear().toString() ?? '<not overridden>')}\n\n` +
                 `${
                     member
                         ? 'User roles have been updated to reflect normal verification data.'
@@ -271,8 +271,8 @@ async function performOverrideDeletion(
             .setDescription(`The verification override for ${targetUser} has been deleted.`)
             .addFields({
                 name: 'Deleted Override',
-                value: `Department: ${inlineCode(override.department ?? '<not overriden>')}\nEntrance Year: ${inlineCode(
-                    override.o365CreatedDate?.getFullYear().toString() ?? '<not overriden>'
+                value: `Department: ${inlineCode(override.department ?? '<not overridden>')}\nEntrance Year: ${inlineCode(
+                    override.o365CreatedDate?.getFullYear().toString() ?? '<not overridden>'
                 )}`,
                 inline: false,
             });
