@@ -11,8 +11,8 @@ import {
 } from 'discord.js';
 import { GuildConfigCache } from '#util/guildConfigCache';
 import { RoleAssignmentService } from '#services/roleAssignmentService';
-import UserModel from '#models/user.model';
-import VerificationOverrideModel from '#models/verificationOverride.model';
+import { findUserVerificationData } from '#models/user.model';
+import VerificationOverrideModel, { OverrideScope } from '#models/verificationOverride.model';
 import { logger } from '#util/logger';
 import { renderDeleteConfirmationScreen } from './verifyOverrideDelete';
 import { catchUnknownMessage } from '#util/message';
@@ -31,23 +31,24 @@ export async function handleViewOverride(
 
         const guildConfig = await GuildConfigCache.fetchConfig(guild.id);
 
+        // fetch only GUILD scoped overrides as global overrides are managed separately
         const override = await VerificationOverrideModel.findOne({
             discordId: targetUser.id,
             guildId: guild.id,
+            scope: OverrideScope.GUILD,
             deleted: { $exists: false },
         });
 
         if (!override) {
             // Calculate roles from normal verification (without override) to display
-
             let rolesFromVerificationInfo = '*None* (user is unverified)';
 
             if (guildConfig && guildConfig.verificationRules) {
-                const baseUser = await UserModel.findOne({ discordId: targetUser.id });
+                const userInfo = await findUserVerificationData(targetUser.id);
 
-                if (baseUser && baseUser.verified && baseUser.department && baseUser.o365CreatedDate) {
+                if (userInfo && userInfo.verified && userInfo.department && userInfo.o365CreatedDate) {
                     const roleData = RoleAssignmentService.getMatchingRoleData(
-                        baseUser,
+                        userInfo,
                         guildConfig,
                         false // don't skip custom imports for normal verification
                     );
@@ -81,29 +82,21 @@ export async function handleViewOverride(
         }
 
         // calculate roles based on override
-        let assignedRoles: string[] = [];
+        const assignedRoles: string[] = [];
 
         if (guildConfig && guildConfig.verificationRules) {
-            const baseUser = await UserModel.findOne({ discordId: targetUser.id });
-
-            // create synthetic user object with override data applied
-            const syntheticUser = {
-                verified: true,
-                uwid: baseUser?.uwid || 'override-view',
-                department: override.department || baseUser?.department,
-                o365CreatedDate: override.o365CreatedDate || baseUser?.o365CreatedDate,
-            };
+            const userInfo = await findUserVerificationData(targetUser.id, guild.id);
 
             // only calculate roles if we have the required data
-            if (syntheticUser.department && syntheticUser.o365CreatedDate) {
+            if (userInfo.verified && userInfo.department && userInfo.o365CreatedDate) {
                 const roleData = RoleAssignmentService.getMatchingRoleData(
-                    syntheticUser,
+                    userInfo,
                     guildConfig,
                     true // skip custom imports so override takes precedence
                 );
 
                 // convert role data to role mentions
-                assignedRoles = roleData.map((role) => `<@&${role.id}>`);
+                assignedRoles.push(...roleData.map((role) => `<@&${role.id}>`));
             }
         }
 
@@ -131,12 +124,12 @@ export async function handleViewOverride(
             },
             {
                 name: 'Department',
-                value: override.department ? inlineCode(override.department) : 'Not overridden',
+                value: inlineCode(override.department ?? '<not overridden>'),
                 inline: true,
             },
             {
                 name: 'Entrance Year',
-                value: override.o365CreatedDate ? inlineCode(override.o365CreatedDate.getFullYear().toString()) : 'Not overridden',
+                value: inlineCode(override.o365CreatedDate?.getFullYear().toString() ?? '<not overridden>'),
                 inline: true,
             }
         );
@@ -155,7 +148,7 @@ export async function handleViewOverride(
             },
             {
                 name: 'Roles Assigned from Verification',
-                value: assignedRoles.length > 0 ? assignedRoles.join(', ') : '*None assigned*',
+                value: assignedRoles.length > 0 ? assignedRoles.join(', ') : '*none assigned*',
                 inline: false,
             }
         );

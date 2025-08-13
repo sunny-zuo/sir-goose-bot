@@ -11,8 +11,8 @@ import {
 } from 'discord.js';
 import { GuildConfigCache } from '#util/guildConfigCache';
 import { RoleAssignmentService } from '#services/roleAssignmentService';
-import UserModel from '#models/user.model';
-import VerificationOverrideModel, { VerificationOverride } from '#models/verificationOverride.model';
+import { findUserVerificationData } from '#models/user.model';
+import VerificationOverrideModel, { VerificationOverride, OverrideScope } from '#models/verificationOverride.model';
 import { Modlog } from '#util/modlog';
 import { logger } from '#util/logger';
 import { Document } from 'mongoose';
@@ -20,9 +20,11 @@ import { catchUnknownMessage } from '#util/message';
 
 export async function handleDeleteOverride(interaction: ChatInputCommandInteraction, targetUser: User, guild: Guild): Promise<void> {
     try {
+        // fetch only GUILD scoped overrides as global overrides are managed separately
         const override = await VerificationOverrideModel.findOne({
             discordId: targetUser.id,
             guildId: guild.id,
+            scope: OverrideScope.GUILD,
             deleted: { $exists: false },
         });
 
@@ -80,9 +82,9 @@ export async function renderDeleteConfirmationScreen(
             .addFields(
                 {
                     name: 'Current Override',
-                    value: `Department: ${override.department ? inlineCode(override.department) : '*Not overridden*'}\nEntrance Year: ${
-                        override.o365CreatedDate ? inlineCode(override.o365CreatedDate.getFullYear().toString()) : '*Not overridden*'
-                    }`,
+                    value: `Department: ${inlineCode(override.department ?? '<not overridden>')}\nEntrance Year: ${inlineCode(
+                        override.o365CreatedDate?.getFullYear().toString() ?? '<not overridden>'
+                    )}`,
                     inline: false,
                 },
                 {
@@ -144,6 +146,17 @@ export async function renderDeleteConfirmationScreen(
     }
 }
 
+/**
+ * Function to predict what roles will be changed after deletion of a verification override.
+ * This is done by simulating the role assignment process with the current override removed.
+ * At this time, this function assumes the override being deleted is a GUILD override and
+ * does not support predicting GLOBAL override deletion changes.
+ *
+ * @param guild The guild to predict role changes for
+ * @param targetUser The user to predict role changes for
+ * @param override The GUILD override to be deleted
+ * @returns A string describing the role changes that will occur after override deletion
+ */
 async function predictRoleChangesAfterDeletion(guild: Guild, targetUser: User, override: VerificationOverride): Promise<string> {
     try {
         const guildConfig = await GuildConfigCache.fetchConfig(guild.id);
@@ -152,22 +165,25 @@ async function predictRoleChangesAfterDeletion(guild: Guild, targetUser: User, o
             return 'No roles will change as verification is not configured and enabled for this server.';
         }
 
-        const baseUser = await UserModel.findOne({ discordId: targetUser.id });
-        const syntheticUserWithOverride = {
-            verified: true,
-            uwid: baseUser?.uwid || 'delete-prediction',
-            department: override.department || baseUser?.department,
-            o365CreatedDate: override.o365CreatedDate || baseUser?.o365CreatedDate,
-        };
+        // fetch base user verification data (only applying global overrides) to determine future roles
+        const baseUser = await findUserVerificationData(targetUser.id);
+
+        // fetch current user verification data to determine current roles
+        const syntheticUserWithOverride = { ...baseUser };
+        if (override.department) syntheticUserWithOverride.department = override.department;
+        if (override.o365CreatedDate) syntheticUserWithOverride.o365CreatedDate = override.o365CreatedDate;
+        if (syntheticUserWithOverride.department && syntheticUserWithOverride.o365CreatedDate) {
+            syntheticUserWithOverride.verified = true;
+        }
 
         const currentRoles = RoleAssignmentService.getMatchingRoleData(syntheticUserWithOverride, guildConfig, true);
-        const normalRoles = RoleAssignmentService.getMatchingRoleData(baseUser, guildConfig, false);
+        const futureRoles = RoleAssignmentService.getMatchingRoleData(baseUser, guildConfig, false);
 
         const currentRoleIds = new Set(currentRoles.map((role) => role.id));
-        const normalRoleIds = new Set(normalRoles.map((role) => role.id));
+        const futureRoleIds = new Set(futureRoles.map((role) => role.id));
 
-        const rolesToRemove = currentRoles.filter((role) => !normalRoleIds.has(role.id));
-        const rolesToAdd = normalRoles.filter((role) => !currentRoleIds.has(role.id));
+        const rolesToRemove = currentRoles.filter((role) => !futureRoleIds.has(role.id));
+        const rolesToAdd = futureRoles.filter((role) => !currentRoleIds.has(role.id));
 
         if (rolesToRemove.length === 0 && rolesToAdd.length === 0) {
             return 'No role changes will occur.';
@@ -224,8 +240,8 @@ async function performOverrideDeletion(
             interaction.user,
             `Verification override deleted for ${targetUser} by ${interaction.user}.\n\n` +
                 `**Removed Override:**\n` +
-                `Department: ${inlineCode(override.department ?? 'not set')}\n` +
-                `Entrance Year: ${inlineCode(override.o365CreatedDate?.getFullYear().toString() ?? 'not set')}\n\n` +
+                `Department: ${inlineCode(override.department ?? '<not overridden>')}\n` +
+                `Entrance Year: ${inlineCode(override.o365CreatedDate?.getFullYear().toString() ?? '<not overridden>')}\n\n` +
                 `${
                     member
                         ? 'User roles have been updated to reflect normal verification data.'
@@ -241,9 +257,9 @@ async function performOverrideDeletion(
             .setDescription(`The verification override for ${targetUser} has been deleted.`)
             .addFields({
                 name: 'Deleted Override',
-                value: `Department: ${override.department ? inlineCode(override.department) : '*Not overridden*'}\nEntrance Year: ${
-                    override.o365CreatedDate ? inlineCode(override.o365CreatedDate.getFullYear().toString()) : '*Not overridden*'
-                }`,
+                value: `Department: ${inlineCode(override.department ?? '<not overridden>')}\nEntrance Year: ${inlineCode(
+                    override.o365CreatedDate?.getFullYear().toString() ?? '<not overridden>'
+                )}`,
                 inline: false,
             });
 

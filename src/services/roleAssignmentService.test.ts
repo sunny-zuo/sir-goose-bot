@@ -1,5 +1,5 @@
 import { GuildConfig } from '#models/guildConfig.model';
-import { User } from '#models/user.model';
+import { User, UserRequiredForVerification } from '#models/user.model';
 import { RoleAssignmentService } from './roleAssignmentService';
 import { SHA256 } from 'crypto-js';
 
@@ -131,7 +131,7 @@ describe('roleAssignmentService', () => {
             };
 
             const uwid = 'abc12efg';
-            let user: Required<Pick<User, 'verified' | 'department' | 'o365CreatedDate' | 'uwid'>>;
+            let user: Required<UserRequiredForVerification>;
             let config: Pick<GuildConfig, 'enableVerification' | 'verificationRules'>;
 
             beforeEach(() => {

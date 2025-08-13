@@ -11,7 +11,7 @@ import {
     ButtonInteraction,
     StringSelectMenuInteraction,
 } from 'discord.js';
-import VerificationOverrideModel, { VerificationOverride } from '#models/verificationOverride.model';
+import VerificationOverrideModel, { VerificationOverride, OverrideScope } from '#models/verificationOverride.model';
 import { logger } from '#util/logger';
 import { catchUnknownMessage } from '#util/message';
 import { handleViewOverride } from './verifyOverrideView';
@@ -26,6 +26,7 @@ export async function handleListOverrides(interaction: ChatInputCommandInteracti
 
         const overrides = await VerificationOverrideModel.find({
             guildId: guild.id,
+            scope: OverrideScope.GUILD,
             deleted: { $exists: false },
         }).sort({ createdAt: -1 });
 
@@ -117,8 +118,8 @@ function createListPageContent(
         const override = pageOverrides[i];
         const itemNumber = startIndex + i + 1;
 
-        const department = override.department || 'Not set';
-        const year = override.o365CreatedDate ? override.o365CreatedDate.getFullYear().toString() : 'Not set';
+        const department = override.department || '<not overridden>';
+        const year = override.o365CreatedDate ? override.o365CreatedDate.getFullYear().toString() : '<not overridden>';
 
         description += `**${itemNumber}.** <@${override.discordId}> (Discord ID: ${override.discordId})\n`;
         description += `> Department: ${inlineCode(department)} | Year: ${inlineCode(year)}\n`;
@@ -134,8 +135,8 @@ function createListPageContent(
 
         const selectOptions = pageOverrides.map((override, index) => {
             const itemNumber = startIndex + index + 1;
-            const department = override.department || 'Not set';
-            const year = override.o365CreatedDate ? override.o365CreatedDate.getFullYear().toString() : 'Not set';
+            const department = override.department || '<not overridden>';
+            const year = override.o365CreatedDate ? override.o365CreatedDate.getFullYear().toString() : '<not overridden>';
 
             return new StringSelectMenuOptionBuilder()
                 .setLabel(`${itemNumber}. User ${override.discordId}`)
