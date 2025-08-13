@@ -6,6 +6,7 @@ import {
     MessageContextMenuCommandInteraction,
     MessageReplyOptions,
     DiscordAPIError,
+    UserContextMenuCommandInteraction,
 } from 'discord.js';
 
 export async function sendReply(
@@ -43,7 +44,7 @@ export async function sendEphemeralReply(
 }
 
 export function isMessage(
-    interaction: Message | CommandInteraction | ButtonInteraction | MessageContextMenuCommandInteraction
+    interaction: Message | CommandInteraction | ButtonInteraction | MessageContextMenuCommandInteraction | UserContextMenuCommandInteraction
 ): interaction is Message {
     return (interaction as Message).author !== undefined;
 }

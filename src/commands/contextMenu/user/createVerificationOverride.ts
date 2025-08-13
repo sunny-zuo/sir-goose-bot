@@ -20,7 +20,7 @@ export class CreateVerificationOverride extends UserContextMenuCommand {
         if (!interaction.inCachedGuild()) return;
         await interaction.deferReply({ ephemeral: true });
 
-        // Check if verification is enabled in this server
+        // exit early if verification is not enabled
         const config = await GuildConfigCache.fetchConfig(interaction.guild.id);
         if (!config.enableVerification) {
             await interaction.editReply({
@@ -35,7 +35,7 @@ export class CreateVerificationOverride extends UserContextMenuCommand {
             return;
         }
 
-        // Check preview mode restrictions
+        // also exit if verification overrides are still in preview mode and this guild is excluded
         const inPreview = (await AdminConfigCache.getConfig(AdminConfigCache.FLAGS.VERIFY_OVERRIDE_PREVIEW, 'false')) === 'true';
         if (inPreview) {
             const allowedGuildsRaw = await AdminConfigCache.getConfig(AdminConfigCache.FLAGS.VERIFY_OVERRIDE_GUILDS, '');

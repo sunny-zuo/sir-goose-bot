@@ -51,7 +51,7 @@ export async function handleCreateOverride(
     let finished = false;
     while (!finished) {
         await message
-            .awaitMessageComponent({ time: 1000 * 60 * 1, filter: (i) => i.user.id === creator.id })
+            .awaitMessageComponent({ time: 1000 * 60 * 10, filter: (i) => i.user.id === creator.id })
             .then(async (i) => {
                 if (['verifyoverrideDepartmentSelect', 'verifyoverrideYearSelect'].includes(i.customId)) {
                     if (!i.isStringSelectMenu())

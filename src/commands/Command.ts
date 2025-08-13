@@ -361,12 +361,27 @@ export abstract class Command {
         if (missingPermissions.length === 0) return true;
 
         if (interaction) {
-            await this.sendErrorEmbed(
-                interaction,
-                'Missing Permissions',
-                `You must have the following permissions to use this command:
-                ${missingPermissions.map((p) => `\`${p}\``).join(', ')}`
-            );
+            if (isMessage(interaction)) {
+                await this.sendErrorEmbed(
+                    interaction,
+                    'Missing Permissions',
+                    `You must have the following permissions to use this command:
+                    ${missingPermissions.map((p) => `\`${p}\``).join(', ')}`
+                );
+            } else {
+                await interaction.reply({
+                    embeds: [
+                        new EmbedBuilder()
+                            .setDescription(
+                                `You must have the following permissions to use this command:\n${missingPermissions
+                                    .map((p) => `\`${p}\``)
+                                    .join(', ')}`
+                            )
+                            .setColor('Red'),
+                    ],
+                    ephemeral: true,
+                });
+            }
         }
 
         return false;
@@ -387,12 +402,27 @@ export abstract class Command {
         if (missingPermissions.length === 0) return true;
 
         if (interaction) {
-            await this.sendErrorEmbed(
-                interaction,
-                'Bot Missing Permissions',
-                `The bot requires the following permissions to run this command:
-                ${missingPermissions.map((p) => `\`${p}\``).join(', ')}`
-            );
+            if (isMessage(interaction)) {
+                await this.sendErrorEmbed(
+                    interaction,
+                    'Bot Missing Permissions',
+                    `The bot requires the following permissions to run this command:
+                    ${missingPermissions.map((p) => `\`${p}\``).join(', ')}`
+                );
+            } else {
+                await interaction.reply({
+                    embeds: [
+                        new EmbedBuilder()
+                            .setDescription(
+                                `The bot requires the following permissions to run this command:\n${missingPermissions
+                                    .map((p) => `\`${p}\``)
+                                    .join(', ')}`
+                            )
+                            .setColor('Red'),
+                    ],
+                    ephemeral: true,
+                });
+            }
         }
 
         return false;
