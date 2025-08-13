@@ -95,7 +95,8 @@ export class RoleAssignmentService {
 
         const member = await guild.members.fetch(this.userId).catch(() => undefined);
         const user = await UserModel.findOne({ discordId: this.userId });
-        // Fetch both global and guild overrides, with guild taking precedence
+        
+        // fetch both global and guild overrides, with guild taking precedence
         const overrides = await VerificationOverrideModel.find({
             discordId: this.userId,
             $or: [{ guildId: guild.id, scope: OverrideScope.GUILD }, { scope: OverrideScope.GLOBAL }],

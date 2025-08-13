@@ -15,7 +15,7 @@ import {
 import { GuildConfigCache } from '#util/guildConfigCache';
 import { VerificationDefaultStartingYears, VerificationDepartmentList } from '#types/Verification';
 import { RoleAssignmentService } from '#services/roleAssignmentService';
-import UserModel, { UserRequiredForVerification } from '#models/user.model';
+import UserModel, { findUserVerificationData, UserRequiredForVerification } from '#models/user.model';
 import VerificationOverrideModel, { OverrideScope } from '#models/verificationOverride.model';
 import { Modlog } from '#util/modlog';
 import { catchUnknownMessage } from '#util/message';
@@ -387,39 +387,18 @@ async function predictOverrideRoleChangesString(
             : 'This will result in no roles being assigned based on the current verification rules and the chosen department/year.';
     } else if (targetUsers.length === 1) {
         // if only one user is selected, we can predict the roles that will be assigned as we can retrieve their current state
-        const existingUserInfo: UserRequiredForVerification = (await UserModel.findOne({
-            discordId: targetUsers[0].id,
-            verified: true,
-        }).lean()) ?? {
-            verified: false,
-            uwid: 'create-prediction',
-        };
-
-        // if the user is missing some fields that would make them verified, try to fill that info from a global override first
-        if (!existingUserInfo.o365CreatedDate || !existingUserInfo.department) {
-            const existingOverrideInfo = await VerificationOverrideModel.findOne({
-                discordId: targetUsers[0].id,
-                scope: OverrideScope.GLOBAL,
-                deleted: { $exists: false },
-            }).lean();
-
-            if (existingOverrideInfo?.o365CreatedDate) existingUserInfo.o365CreatedDate = existingOverrideInfo.o365CreatedDate;
-            if (existingOverrideInfo?.department) existingUserInfo.department = existingOverrideInfo.department;
-            if (existingUserInfo?.o365CreatedDate && existingUserInfo?.department) existingUserInfo.verified = true;
-        }
+        const userInfo: UserRequiredForVerification = await findUserVerificationData(targetUsers[0].id);
+        if (newYear) userInfo.o365CreatedDate = new Date(Number(newYear), 5);
+        if (newDepartment) userInfo.department = newDepartment;
+        if (userInfo.department && userInfo.o365CreatedDate) userInfo.verified = true;
 
         // then, check to see if this would be a valid partial override creation
-        if (existingUserInfo.o365CreatedDate === undefined || existingUserInfo.department === undefined) {
+        if (userInfo.o365CreatedDate === undefined || userInfo.department === undefined) {
             throw new Error('Partial override creation attempt for user with missing verification data');
         }
 
         const newRoles = RoleAssignmentService.getMatchingRoleData(
-            {
-                verified: true,
-                uwid: 'verifyoverride confirm screen',
-                o365CreatedDate: newYear !== undefined ? new Date(Number(newYear), 5) : existingUserInfo.o365CreatedDate,
-                department: newDepartment !== undefined ? newDepartment : existingUserInfo.department,
-            },
+            userInfo,
             config,
             true
         );

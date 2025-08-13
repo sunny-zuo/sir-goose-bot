@@ -11,7 +11,7 @@ import {
 } from 'discord.js';
 import { GuildConfigCache } from '#util/guildConfigCache';
 import { RoleAssignmentService } from '#services/roleAssignmentService';
-import UserModel, { findUserVerificationData } from '#models/user.model';
+import { findUserVerificationData } from '#models/user.model';
 import VerificationOverrideModel, { OverrideScope } from '#models/verificationOverride.model';
 import { logger } from '#util/logger';
 import { renderDeleteConfirmationScreen } from './verifyOverrideDelete';

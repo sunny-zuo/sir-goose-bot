@@ -11,7 +11,7 @@ import {
 } from 'discord.js';
 import { GuildConfigCache } from '#util/guildConfigCache';
 import { RoleAssignmentService } from '#services/roleAssignmentService';
-import UserModel, { UserRequiredForVerification } from '#models/user.model';
+import { findUserVerificationData } from '#models/user.model';
 import VerificationOverrideModel, { VerificationOverride, OverrideScope } from '#models/verificationOverride.model';
 import { Modlog } from '#util/modlog';
 import { logger } from '#util/logger';
@@ -165,30 +165,16 @@ async function predictRoleChangesAfterDeletion(guild: Guild, targetUser: User, o
             return 'No roles will change as verification is not configured and enabled for this server.';
         }
 
-        const globalOverride = await VerificationOverrideModel.findOne({
-            discordId: targetUser.id,
-            scope: OverrideScope.GLOBAL,
-            deleted: { $exists: false },
-        }).lean();
+        // fetch base user verification data (only applying global overrides) to determine future roles
+        const baseUser = await findUserVerificationData(targetUser.id);
 
-        // query only for a verified user here as unverified user data is not useful in this scenario; it can cause more complications
-        // due to missing fields (ie uwid) that we would need to fix for verification role calculation to work correctly
-        const baseUser: UserRequiredForVerification = (await UserModel.findOne({ discordId: targetUser.id, verified: true }).lean()) ?? {
-            uwid: 'delete-prediction',
-            verified: false,
-        };
-        if (globalOverride) {
-            if (globalOverride.department) baseUser.department = globalOverride.department;
-            if (globalOverride.o365CreatedDate) baseUser.o365CreatedDate = globalOverride.o365CreatedDate;
-            if (baseUser.department && baseUser.o365CreatedDate) baseUser.verified = true;
+        // fetch current user verification data to determine current roles
+        const syntheticUserWithOverride = { ...baseUser };
+        if (override.department) syntheticUserWithOverride.department = override.department;
+        if (override.o365CreatedDate) syntheticUserWithOverride.o365CreatedDate = override.o365CreatedDate;
+        if (syntheticUserWithOverride.department && syntheticUserWithOverride.o365CreatedDate) {
+            syntheticUserWithOverride.verified = true;
         }
-
-        const syntheticUserWithOverride = {
-            verified: true,
-            uwid: baseUser?.uwid || 'delete-prediction',
-            department: override.department || baseUser?.department,
-            o365CreatedDate: override.o365CreatedDate || baseUser?.o365CreatedDate,
-        };
 
         const currentRoles = RoleAssignmentService.getMatchingRoleData(syntheticUserWithOverride, guildConfig, true);
         const futureRoles = RoleAssignmentService.getMatchingRoleData(baseUser, guildConfig, false);
