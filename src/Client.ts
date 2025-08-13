@@ -9,9 +9,11 @@ import Discord, {
 } from 'discord.js';
 import { ChatCommand } from './commands/chat/ChatCommand';
 import { MessageContextMenuCommand } from './commands/contextMenu/message/MessageContextMenuCommand';
+import { UserContextMenuCommand } from './commands/contextMenu/user/UserContextMenuCommand';
 import Events from './events';
 import ChatCommands from './commands/chat';
 import MessageContextMenuCommands from './commands/contextMenu/message';
+import UserContextMenuCommands from './commands/contextMenu/user';
 import { logger } from '#util/logger';
 import { WebApp } from './web/app';
 
@@ -19,6 +21,7 @@ export default class Client extends Discord.Client {
     chatCommands: Collection<string, ChatCommand>;
     chatAliases: Collection<string, ChatCommand>;
     messageContextMenuCommands: Collection<string, MessageContextMenuCommand>;
+    userContextMenuCommands: Collection<string, UserContextMenuCommand>;
     webApp: WebApp;
 
     constructor(options: ClientOptions) {
@@ -29,6 +32,7 @@ export default class Client extends Discord.Client {
         this.chatCommands = new Collection<string, ChatCommand>();
         this.chatAliases = new Collection<string, ChatCommand>();
         this.messageContextMenuCommands = new Collection<string, MessageContextMenuCommand>();
+        this.userContextMenuCommands = new Collection<string, UserContextMenuCommand>();
 
         this.loadEvents();
         this.loadCommands();
@@ -73,6 +77,17 @@ export default class Client extends Discord.Client {
                 logger.info({ event: { name: command.name } }, `Registering message context menu command: ${command.name}`);
 
                 this.messageContextMenuCommands.set(command.name, command);
+            } catch (e) {
+                logger.error(e, e.message);
+            }
+        }
+
+        for (const UserContextMenuCommand of UserContextMenuCommands) {
+            try {
+                const command = new UserContextMenuCommand(this);
+                logger.info({ event: { name: command.name } }, `Registering user context menu command: ${command.name}`);
+
+                this.userContextMenuCommands.set(command.name, command);
             } catch (e) {
                 logger.error(e, e.message);
             }

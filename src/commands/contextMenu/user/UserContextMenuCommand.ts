@@ -1,16 +1,16 @@
-import { MessageContextMenuCommandInteraction } from 'discord.js';
+import { UserContextMenuCommandInteraction } from 'discord.js';
 import Client from '#src/Client';
 import { ContextMenuCommandOptions } from '#types/Command';
 import { Command } from '../../Command';
 
-export abstract class MessageContextMenuCommand extends Command {
+export abstract class UserContextMenuCommand extends Command {
     isSlashCommand = false;
     isTextCommand = false;
-    isMessageContextMenuCommand = true;
+    isUserContextMenuCommand = true;
 
     constructor(client: Client, options: ContextMenuCommandOptions) {
         super(client, { ...options });
     }
 
-    abstract execute(interaction: MessageContextMenuCommandInteraction): Promise<void>;
+    abstract execute(interaction: UserContextMenuCommandInteraction): Promise<void>;
 }

@@ -11,6 +11,7 @@ import {
     ButtonInteraction,
     UserSelectMenuBuilder,
     Guild,
+    UserContextMenuCommandInteraction,
 } from 'discord.js';
 import { GuildConfigCache } from '#util/guildConfigCache';
 import { VerificationDefaultStartingYears, VerificationDepartmentList } from '#types/Verification';
@@ -21,7 +22,7 @@ import { Modlog } from '#util/modlog';
 import { catchUnknownMessage } from '#util/message';
 
 export async function handleCreateOverride(
-    interaction: ChatInputCommandInteraction | ButtonInteraction,
+    interaction: ChatInputCommandInteraction | ButtonInteraction | UserContextMenuCommandInteraction,
     creator: User,
     targetUsers: User[],
     selectedDept?: string,

@@ -1,4 +1,4 @@
-import { Interaction, PermissionsBitField } from 'discord.js';
+import { EmbedBuilder, Interaction, PermissionsBitField } from 'discord.js';
 import { EventHandler } from './eventHandler';
 import Client from '#src/Client';
 import { logger } from '#util/logger';
@@ -18,16 +18,16 @@ export class MessageContextMenuCommandInteractionCreateEventHandler implements E
         const command = client.messageContextMenuCommands.get(interaction.commandName);
 
         if (!command || !command.enabled) return;
-        if (!command.isContextMenuCommand) return;
+        if (!command.isMessageContextMenuCommand) return;
         if (interaction.guild && interaction.guild.available === false) return;
         if (command.isRateLimited(interaction.user.id)) {
             logger.info(
                 {
-                    ratelimit: { type: 'contextMenu', name: command.name },
+                    ratelimit: { type: 'messageContextMenu', name: command.name },
                     guild: { id: interaction.guild?.id ?? 'none' },
                     user: { id: interaction.user.id },
                 },
-                'User was ratelimited on a context menu command interaction'
+                'User was ratelimited on a message context menu command interaction'
             );
 
             await interaction.reply({
@@ -37,11 +37,13 @@ export class MessageContextMenuCommandInteractionCreateEventHandler implements E
             return;
         }
         if (command.guildOnly && !interaction.guild) {
-            await command.sendErrorEmbed(
-                interaction,
-                'Command is Server Only',
-                'This command can only be used inside Discord servers and not DMs.'
-            );
+            await interaction.reply({
+                embeds: [
+                    new EmbedBuilder().setColor('Red').setDescription('This command can only be used inside Discord servers and not DMs.'),
+                ],
+                ephemeral: true,
+            });
+
             return;
         }
         if (!(await command.checkCommandPermissions(interaction))) {
