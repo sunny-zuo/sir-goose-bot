@@ -168,8 +168,8 @@ export class RoleAssignmentService {
                 user !== null && user.verified && user.uwid
                     ? user.toObject()
                     : {
-                          department: undefined,
-                          o365CreatedDate: undefined,
+                          department: user?.department,
+                          o365CreatedDate: user?.o365CreatedDate,
                           discordId: member.id,
                           uwid: 'role-assignment-with-override',
                           verified: true,
