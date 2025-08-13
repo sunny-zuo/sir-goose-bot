@@ -46,6 +46,7 @@ export interface ChatCommandOptions {
 
 export interface ContextMenuCommandOptions {
     name: string; // name of command, used to trigger command
+    category: Category; // category (used for help messages) used for command
     isSlashCommand?: false; // whether or not the command should be a slash command
     isTextCommand?: false; // whether or not the command should be a message (old-fashioned) command
     isContextMenuCommand?: true; // whether or not the command should be a message (context menu) command

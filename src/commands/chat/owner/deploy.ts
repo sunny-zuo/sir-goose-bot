@@ -53,7 +53,11 @@ export class Deploy extends ChatCommand {
 
         switch (option) {
             case 'global': {
-                const commandData = [...this.getChatCommandData(client), ...this.getMessageContextCommandData(client)];
+                const commandData = [
+                    ...this.getChatCommandData(client),
+                    ...this.getMessageContextCommandData(client),
+                    ...this.getUserContextCommandData(client),
+                ];
                 const application = await client.application!.fetch();
                 await application.commands.set(commandData);
 
@@ -63,7 +67,11 @@ export class Deploy extends ChatCommand {
             }
             case 'guild': {
                 if (interaction.guild) {
-                    const commandData = [...this.getChatCommandData(client), ...this.getMessageContextCommandData(client)];
+                    const commandData = [
+                        ...this.getChatCommandData(client),
+                        ...this.getMessageContextCommandData(client),
+                        ...this.getUserContextCommandData(client),
+                    ];
                     await interaction.guild.commands.set(commandData);
 
                     logger.info(`Loaded application commands in guild ${interaction.guild.name}`);
@@ -122,6 +130,19 @@ export class Deploy extends ChatCommand {
             data.push({
                 name: command.name,
                 type: ApplicationCommandType.Message,
+            });
+        }
+
+        return data;
+    }
+
+    getUserContextCommandData(client: Client): ApplicationCommandData[] {
+        const data: ApplicationCommandData[] = [];
+
+        for (const [, command] of client.userContextMenuCommands) {
+            data.push({
+                name: command.name,
+                type: ApplicationCommandType.User,
             });
         }
 

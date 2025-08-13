@@ -14,6 +14,7 @@ import {
     GuildBasedChannel,
     ApplicationCommandOptionType,
     MessageContextMenuCommandInteraction,
+    UserContextMenuCommandInteraction,
 } from 'discord.js';
 import { CommandOptions, Category } from '#types/Command';
 import Client from '#src/Client';
@@ -37,7 +38,8 @@ export abstract class Command {
     category?: Category;
     isSlashCommand?: boolean;
     isTextCommand?: boolean;
-    isContextMenuCommand?: boolean;
+    isMessageContextMenuCommand?: boolean;
+    isUserContextMenuCommand?: boolean;
     aliases: string[] = [];
     options: ApplicationCommandOption[] = [];
     guildOnly = false;
@@ -288,7 +290,7 @@ export abstract class Command {
     }
 
     async checkCommandPermissions(
-        interaction: Message | ChatInputCommandInteraction | MessageContextMenuCommandInteraction
+        interaction: Message | ChatInputCommandInteraction | MessageContextMenuCommandInteraction | UserContextMenuCommandInteraction
     ): Promise<boolean> {
         if (!interaction.channel) return false;
         if (interaction.channel.isDMBased() || interaction.member === null) return true;
@@ -336,7 +338,12 @@ export abstract class Command {
     async checkMemberPermissions(
         member: GuildMember | null,
         channel: GuildBasedChannel,
-        interaction: Message | ChatInputCommandInteraction | MessageContextMenuCommandInteraction | null = null,
+        interaction:
+            | Message
+            | ChatInputCommandInteraction
+            | MessageContextMenuCommandInteraction
+            | UserContextMenuCommandInteraction
+            | null = null,
         ownerOverride = true
     ): Promise<boolean> {
         if (member === null) return false;
@@ -367,7 +374,12 @@ export abstract class Command {
 
     async checkClientPermissions(
         channel: GuildBasedChannel,
-        interaction: Message | ChatInputCommandInteraction | MessageContextMenuCommandInteraction | null = null
+        interaction:
+            | Message
+            | ChatInputCommandInteraction
+            | MessageContextMenuCommandInteraction
+            | UserContextMenuCommandInteraction
+            | null = null
     ): Promise<boolean> {
         if (channel.guild.members.me === null) return false;
         const missingPermissions = channel.permissionsFor(channel.guild.members.me).missing(this.clientPermissions);
@@ -387,7 +399,7 @@ export abstract class Command {
     }
 
     sendSuccessEmbed(
-        interaction: Message | ChatInputCommandInteraction | MessageContextMenuCommandInteraction,
+        interaction: Message | ChatInputCommandInteraction | MessageContextMenuCommandInteraction | UserContextMenuCommandInteraction,
         title: string,
         description: string,
         ephemeral = false,
@@ -397,7 +409,7 @@ export abstract class Command {
     }
 
     sendNeutralEmbed(
-        interaction: Message | ChatInputCommandInteraction | MessageContextMenuCommandInteraction,
+        interaction: Message | ChatInputCommandInteraction | MessageContextMenuCommandInteraction | UserContextMenuCommandInteraction,
         title: string,
         description: string,
         ephemeral = false,
@@ -407,7 +419,7 @@ export abstract class Command {
     }
 
     sendErrorEmbed(
-        interaction: Message | ChatInputCommandInteraction | MessageContextMenuCommandInteraction,
+        interaction: Message | ChatInputCommandInteraction | MessageContextMenuCommandInteraction | UserContextMenuCommandInteraction,
         title: string,
         description: string,
         ephemeral = false,
@@ -417,7 +429,7 @@ export abstract class Command {
     }
 
     sendColorEmbed(
-        interaction: Message | ChatInputCommandInteraction | MessageContextMenuCommandInteraction,
+        interaction: Message | ChatInputCommandInteraction | MessageContextMenuCommandInteraction | UserContextMenuCommandInteraction,
         color: ColorResolvable,
         title: string,
         description: string,
