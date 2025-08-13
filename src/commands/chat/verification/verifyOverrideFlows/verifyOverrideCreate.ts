@@ -397,11 +397,7 @@ async function predictOverrideRoleChangesString(
             throw new Error('Partial override creation attempt for user with missing verification data');
         }
 
-        const newRoles = RoleAssignmentService.getMatchingRoleData(
-            userInfo,
-            config,
-            true
-        );
+        const newRoles = RoleAssignmentService.getMatchingRoleData(userInfo, config, true);
         return newRoles.length > 0
             ? `This will result in the following roles being assigned: ${newRoles.map((role) => `<@&${role.id}>`).join(', ')}`
             : 'This will result in no roles being assigned based on the current verification rules and the chosen department/year.';
