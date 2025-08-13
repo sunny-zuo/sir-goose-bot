@@ -157,7 +157,7 @@ export async function handleViewOverride(
             },
             {
                 name: 'Roles Assigned from Verification',
-                value: assignedRoles.length > 0 ? assignedRoles.join(', ') : '*None assigned*',
+                value: assignedRoles.length > 0 ? assignedRoles.join(', ') : '*none assigned*',
                 inline: false,
             }
         );

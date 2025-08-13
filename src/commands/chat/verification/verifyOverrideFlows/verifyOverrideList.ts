@@ -118,8 +118,8 @@ function createListPageContent(
         const override = pageOverrides[i];
         const itemNumber = startIndex + i + 1;
 
-        const department = override.department || 'Not set';
-        const year = override.o365CreatedDate ? override.o365CreatedDate.getFullYear().toString() : 'Not set';
+        const department = override.department || '<not overriden>';
+        const year = override.o365CreatedDate ? override.o365CreatedDate.getFullYear().toString() : '<not overriden>';
 
         description += `**${itemNumber}.** <@${override.discordId}> (Discord ID: ${override.discordId})\n`;
         description += `> Department: ${inlineCode(department)} | Year: ${inlineCode(year)}\n`;
@@ -135,8 +135,8 @@ function createListPageContent(
 
         const selectOptions = pageOverrides.map((override, index) => {
             const itemNumber = startIndex + index + 1;
-            const department = override.department || 'Not set';
-            const year = override.o365CreatedDate ? override.o365CreatedDate.getFullYear().toString() : 'Not set';
+            const department = override.department || '<not overriden>';
+            const year = override.o365CreatedDate ? override.o365CreatedDate.getFullYear().toString() : '<not overriden>';
 
             return new StringSelectMenuOptionBuilder()
                 .setLabel(`${itemNumber}. User ${override.discordId}`)
