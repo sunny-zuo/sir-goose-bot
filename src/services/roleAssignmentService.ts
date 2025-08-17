@@ -185,11 +185,6 @@ export class RoleAssignmentService {
                       };
 
             const getNewUserRolesToAssign = async () => {
-                // If no verification rules are configured, return empty array
-                if (!hasVerificationRules) {
-                    return [];
-                }
-
                 if (overrideToApply) {
                     const overriddenUser = { ...defaultUserInfo };
                     if (overrideToApply.department) overriddenUser.department = overrideToApply.department;
@@ -256,7 +251,7 @@ export class RoleAssignmentService {
             newRoles.map((role) => rolesToSet.set(role.id, role)); // lastly, assign the new roles
 
             // custom actions for specific servers that want behavior not supported by rules
-            // TODO: migrate these servers to use the "Unverified" roles feature once it is available
+            // TODO: migrate these servers to use the "Unverified" roles feature once it is generally available
             if (guild.id === '767143197813112833') {
                 // UWaterloo WiE server, remove the "Unverified" role
                 rolesToSet.delete('865768247366385664');
@@ -290,14 +285,7 @@ export class RoleAssignmentService {
                         { verification: 'assignOne', user: { id: member.id }, guild: { id: guild.id }, error },
                         'Failed to set roles for verified user'
                     );
-                    if (params.log) {
-                        await Modlog.logUserAction(
-                            guild,
-                            member.user,
-                            `Failed to update roles for ${member} during verification. Check bot permissions and role hierarchy.`,
-                            'Red'
-                        );
-                    }
+
                     return { success: false, error: 'Failed to set roles due to unexpected error' };
                 }
             } else if (user && user.verifyRequestedServerId === guild.id && newRoles.length === 0) {
@@ -313,7 +301,7 @@ export class RoleAssignmentService {
 
             const newNickname = await (async () => {
                 // only try to rename users who are verified as we don't know the names of unverified users
-                if (user) {
+                if (user && user.givenName && user.surname) {
                     return this.updateNickname(
                         member,
                         user,
