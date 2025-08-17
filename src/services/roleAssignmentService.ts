@@ -16,7 +16,7 @@ import VerificationOverrideModel, { OverrideScope } from '#models/verificationOv
 type CustomFileImport = { type: 'hash' | 'uwid'; department: string | null; entranceYear: number | null; ids: string[] };
 type CustomValues = { departments: string[]; entranceYear: number | null };
 type AssignGuildRolesParams = { log?: boolean; returnMissing?: boolean; oldDepartment?: string; oldYear?: number; oldConfig?: GuildConfig };
-export type RoleAssignmentResult = { assignedRoles: Role[]; updatedName?: string };
+export type RoleAssignmentResult = { assignedRoles: Role[]; isVerified: boolean; updatedName?: string };
 
 export class RoleAssignmentService {
     static customImport: Collection<string, CustomValues> = new Collection<string, CustomValues>();
@@ -84,16 +84,24 @@ export class RoleAssignmentService {
         params = { log: true, returnMissing: true, ...params };
 
         const guildConfig = await GuildConfigCache.fetchConfig(guild.id);
-        if (
-            !guildConfig ||
-            !guildConfig.enableVerification ||
-            !guildConfig.verificationRules ||
-            guildConfig.verificationRules.rules.length === 0
-        ) {
-            return { success: false, error: 'No verification rules set' };
+        if (!guildConfig || !guildConfig.enableVerification) {
+            return { success: false, error: 'Verification not enabled' };
+        }
+
+        // check if we have either verification rules or unverified roles configured
+        const hasVerificationRules = guildConfig.verificationRules?.rules && guildConfig.verificationRules.rules.length > 0;
+        const hasUnverifiedRoles =
+            guildConfig.verificationRules?.unverified?.roles && guildConfig.verificationRules.unverified.roles.length > 0;
+
+        if (!hasVerificationRules && !hasUnverifiedRoles) {
+            return { success: false, error: 'No verification rules or unverified roles configured' };
         }
 
         const member = await guild.members.fetch(this.userId).catch(() => undefined);
+        if (!member) {
+            return { success: false, error: 'Member not found in guild' };
+        }
+
         const user = await UserModel.findOne({ discordId: this.userId });
 
         // fetch both global and guild overrides, with guild taking precedence
@@ -124,7 +132,8 @@ export class RoleAssignmentService {
         // overrides can be used to verify users who are not verified as long as they are complete
         const userHasFullOverride = overrideToApply && overrideToApply.department && overrideToApply.o365CreatedDate;
 
-        if (member && (userIsVerified || userHasFullOverride)) {
+        // handle verified users or users that become verified via a full override
+        if (userIsVerified || userHasFullOverride) {
             logger.info({
                 verification: 'assignOne',
                 user: { id: member.id },
@@ -176,6 +185,11 @@ export class RoleAssignmentService {
                       };
 
             const getNewUserRolesToAssign = async () => {
+                // If no verification rules are configured, return empty array
+                if (!hasVerificationRules) {
+                    return [];
+                }
+
                 if (overrideToApply) {
                     const overriddenUser = { ...defaultUserInfo };
                     if (overrideToApply.department) overriddenUser.department = overrideToApply.department;
@@ -235,11 +249,14 @@ export class RoleAssignmentService {
             const rolesToSet = member.roles.cache.clone();
             const missingRoles = newRoles.filter((role) => !member.roles.cache.has(role.id));
 
-            oldRoles.map((role) => rolesToSet.delete(role.id));
-            newRoles.map((role) => rolesToSet.set(role.id, role));
+            // remove unverified roles if they exist and user is now verified
+            const unverifiedRolesToRemove = await this.getUnverifiedRoles(guild, guildConfig);
+            unverifiedRolesToRemove.forEach((role) => rolesToSet.delete(role.id));
+            oldRoles.map((role) => rolesToSet.delete(role.id)); // then, remove any old roles
+            newRoles.map((role) => rolesToSet.set(role.id, role)); // lastly, assign the new roles
 
             // custom actions for specific servers that want behavior not supported by rules
-            // todo: build this out into rules
+            // TODO: migrate these servers to use the "Unverified" roles feature once it is available
             if (guild.id === '767143197813112833') {
                 // UWaterloo WiE server, remove the "Unverified" role
                 rolesToSet.delete('865768247366385664');
@@ -254,16 +271,34 @@ export class RoleAssignmentService {
                 ? ` (overridden by <@${guildOverride.createdBy}> via ${inlineCode('/verifyoverride')})`
                 : '';
             if (!rolesToSet.equals(member.roles.cache)) {
-                await member.roles.set(rolesToSet, 'Verified via Sir Goose Bot');
-                if (params.log) {
-                    await Modlog.logUserAction(
-                        guild,
-                        member.user,
-                        `${member} successfully verified and was assigned the ${newRoles
-                            .map((role) => `\`${role.name}\``)
-                            .join(', ')} role(s).${overrideString}`,
-                        'Green'
+                try {
+                    await member.roles.set(rolesToSet, 'Verified via Sir Goose Bot');
+                    if (params.log) {
+                        const roleMessage =
+                            newRoles.length > 0
+                                ? `${member} successfully verified and was assigned the ${newRoles
+                                      .map((role) => `\`${role.name}\``)
+                                      .join(', ')} role(s).${overrideString}`
+                                : `${member} successfully verified. ${
+                                      unverifiedRolesToRemove.length > 0 ? 'Unverified roles were removed.' : ''
+                                  }${overrideString}`;
+
+                        await Modlog.logUserAction(guild, member.user, roleMessage, 'Green');
+                    }
+                } catch (error) {
+                    logger.error(
+                        { verification: 'assignOne', user: { id: member.id }, guild: { id: guild.id }, error },
+                        'Failed to set roles for verified user'
                     );
+                    if (params.log) {
+                        await Modlog.logUserAction(
+                            guild,
+                            member.user,
+                            `Failed to update roles for ${member} during verification. Check bot permissions and role hierarchy.`,
+                            'Red'
+                        );
+                    }
+                    return { success: false, error: 'Failed to set roles due to unexpected error' };
                 }
             } else if (user && user.verifyRequestedServerId === guild.id && newRoles.length === 0) {
                 if (params.log) {
@@ -294,10 +329,13 @@ export class RoleAssignmentService {
                 success: true,
                 value: {
                     assignedRoles: params.returnMissing ? missingRoles : newRoles,
+                    isVerified: true,
                     updatedName: newNickname,
                 },
             };
-        } else if (member && !userIsVerified && params.oldDepartment && params.oldYear) {
+        } else if (member && !userIsVerified && !userHasFullOverride && params.oldDepartment && params.oldYear) {
+            // this flow is triggered via verification override being deleted for an unverified user
+            // in this scenario, the only thing we should do is unassign the roles that were assigned previously
             logger.info({
                 verification: 'assignOne',
                 user: { id: member.id },
@@ -306,8 +344,6 @@ export class RoleAssignmentService {
                 path: 'unassign',
             });
 
-            // this flow is triggered via verification override being deleted for an unverified user
-            // in this scenario, the only thing we should do is unassign the roles that were assigned previously
             const mockUserInfo = {
                 department: params.oldDepartment,
                 o365CreatedDate: new Date(params.oldYear, 5),
@@ -318,10 +354,111 @@ export class RoleAssignmentService {
             const rolesToRemove = await this.getMatchingRoles(guild, guildConfig, mockUserInfo, false);
             await member.roles.remove(rolesToRemove);
 
-            return { success: true, value: { assignedRoles: [] } };
+            // then, assign any unverified roles that exist
+            return this.assignUnverifiedRoles(guild, member, guildConfig, params);
+        } else {
+            return this.assignUnverifiedRoles(guild, member, guildConfig, params);
+        }
+    }
+
+    private async assignUnverifiedRoles(
+        guild: Guild,
+        member: GuildMember,
+        guildConfig: GuildConfig,
+        params: AssignGuildRolesParams
+    ): Promise<Result<RoleAssignmentResult, string>> {
+        // Check if unverified roles are configured
+        if (!guildConfig.verificationRules?.unverified?.roles || guildConfig.verificationRules.unverified.roles.length === 0) {
+            return { success: false, error: 'No unverified roles configured' };
         }
 
-        return { success: false, error: 'User is not verified' };
+        logger.info({
+            verification: 'assignUnverified',
+            user: { id: member.id },
+            guild: { id: guild.id },
+            path: 'unverified',
+        });
+
+        const unverifiedRoles = await this.getUnverifiedRoles(guild, guildConfig);
+        const rolesToSet = member.roles.cache.clone();
+        const missingRoles = unverifiedRoles.filter((role) => !member.roles.cache.has(role.id));
+
+        // Add unverified roles to the member's role set
+        unverifiedRoles.forEach((role) => rolesToSet.set(role.id, role));
+
+        if (!rolesToSet.equals(member.roles.cache)) {
+            try {
+                await member.roles.set(rolesToSet, 'Assigned unverified roles via Sir Goose Bot');
+                if (params.log) {
+                    await Modlog.logUserAction(
+                        guild,
+                        member.user,
+                        `${member} joined the server and was assigned unverified role(s): ${unverifiedRoles
+                            .map((role) => `\`${role.name}\``)
+                            .join(', ')}.`,
+                        'Blue'
+                    );
+                }
+            } catch (error) {
+                logger.error(
+                    { verification: 'assignUnverified', user: { id: member.id }, guild: { id: guild.id }, error },
+                    'Failed to assign unverified roles'
+                );
+                if (params.log) {
+                    await Modlog.logUserAction(
+                        guild,
+                        member.user,
+                        `Failed to assign unverified roles to ${member}. Check bot permissions and role hierarchy.`,
+                        'Red'
+                    );
+                }
+                return { success: false, error: 'Failed to assign unverified roles' };
+            }
+        }
+
+        return {
+            success: true,
+            value: {
+                assignedRoles: params.returnMissing ? missingRoles : unverifiedRoles,
+                isVerified: false,
+            },
+        };
+    }
+
+    // TODO: refactor to avoid needing this function and using getMatchingRoles for everything?
+    // possibly as part of a larger role assignment logic refactor to simplify + add tests
+    private async getUnverifiedRoles(guild: Guild, guildConfig: GuildConfig): Promise<Role[]> {
+        if (!guildConfig.verificationRules?.unverified?.roles) {
+            return [];
+        }
+
+        const validRoles = [];
+        const invalidRoles = [];
+
+        for (const roleDatum of guildConfig.verificationRules.unverified.roles) {
+            const role = guild.roles.cache.get(roleDatum.id);
+
+            if (role && role.editable) {
+                validRoles.push(role);
+            } else {
+                invalidRoles.push(roleDatum);
+            }
+        }
+
+        if (invalidRoles.length > 0) {
+            await Modlog.logInfoMessage(
+                guild,
+                'Unverified Role Assignment Error',
+                `We attempted to assign the unverified role(s) ${invalidRoles
+                    .map((role) => `"${role.name}" (${role.id})`)
+                    .join(', ')} to <@${
+                    this.userId
+                }>, but the role was not found or could not be assigned due to hierarchy or permissions issues. Make sure my role has the Manage Roles permission and is above all roles you want to assign.`,
+                'Red'
+            );
+        }
+
+        return validRoles;
     }
 
     private async updateNickname(
@@ -388,15 +525,23 @@ export class RoleAssignmentService {
         if (!config?.verificationRules?.rules || config.verificationRules.rules.length === 0) return [];
 
         await guild.roles.fetch();
-
         const invalidRoles = [];
 
+        // check regular verification rules for invalid roles
         for (const rule of config.verificationRules.rules) {
             for (const roleDatum of rule.roles) {
                 const role = guild.roles.cache.get(roleDatum.id);
                 if (!role || !role.editable) {
                     invalidRoles.push(roleDatum);
                 }
+            }
+        }
+
+        // additionally, check unverified roles if they exist
+        for (const roleDatum of config.verificationRules.unverified?.roles ?? []) {
+            const role = guild.roles.cache.get(roleDatum.id);
+            if (!role || !role.editable) {
+                invalidRoles.push(roleDatum);
             }
         }
 

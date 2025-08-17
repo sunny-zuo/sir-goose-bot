@@ -11,6 +11,8 @@ export interface GuildConfig {
     enablePins: boolean;
     enableVerification: boolean;
     verificationRules?: VerificationRules;
+    createdAt?: Date;
+    updatedAt?: Date;
 }
 
 const guildConfigSchema = new Schema<GuildConfig>(
@@ -39,6 +41,14 @@ const guildConfigSchema = new Schema<GuildConfig>(
                     year: Number,
                 },
             ],
+            unverified: {
+                roles: [
+                    {
+                        name: String,
+                        id: String,
+                    },
+                ],
+            },
         },
     },
     {
