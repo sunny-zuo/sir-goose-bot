@@ -14,7 +14,8 @@ import { VerificationImportV2, VerificationRule, UnverifiedConfig } from '#types
 import { v4 as uuidv4 } from 'uuid';
 import { GuildConfigCache } from '#util/guildConfigCache';
 import { VerifyAll } from '#commands/chat/verification/verifyall';
-import { parseRoles, parseRule } from '#util/verification';
+import { parseRule } from '#util/verification';
+import { parseRoles } from '#util/verificationRoles';
 
 export class VerifyRulesModalSubmitInteractionHandler implements ModalSubmitInteractionHandler {
     readonly client: Client;
