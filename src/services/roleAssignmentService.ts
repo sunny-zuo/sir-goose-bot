@@ -377,16 +377,6 @@ export class RoleAssignmentService {
         if (!rolesToSet.equals(member.roles.cache)) {
             try {
                 await member.roles.set(rolesToSet, 'Assigned unverified roles via Sir Goose Bot');
-                if (params.log) {
-                    await Modlog.logUserAction(
-                        guild,
-                        member.user,
-                        `${member} joined the server and was assigned unverified role(s): ${unverifiedRoles
-                            .map((role) => `\`${role.name}\``)
-                            .join(', ')}.`,
-                        'Blue'
-                    );
-                }
             } catch (error) {
                 logger.error(
                     { verification: 'assignUnverified', user: { id: member.id }, guild: { id: guild.id }, error },
