@@ -263,7 +263,7 @@ async function performOverrideDeletion(
                 inline: false,
             });
 
-        if (member && roleUpdateResult?.success) {
+        if (member && roleUpdateResult?.success && roleUpdateResult.value.isVerified) {
             const assignedRoles = roleUpdateResult.value.assignedRoles;
             successEmbed.addFields({
                 name: 'Role Updates',
@@ -271,6 +271,16 @@ async function performOverrideDeletion(
                     assignedRoles.length > 0
                         ? `Assigned roles from normal verification: ${assignedRoles.map((role) => `<@&${role.id}>`).join(', ')}`
                         : 'No roles assigned from normal verification.',
+                inline: false,
+            });
+        } else if (member && roleUpdateResult?.success && !roleUpdateResult.value.isVerified) {
+            const assignedRoles = roleUpdateResult.value.assignedRoles;
+            successEmbed.addFields({
+                name: 'Role Updates',
+                value:
+                    assignedRoles.length > 0
+                        ? `Assigned unverified roles: ${assignedRoles.map((role) => `<@&${role.id}>`).join(', ')}`
+                        : 'Roles assigned from the override have been removed.',
                 inline: false,
             });
         } else if (!member) {

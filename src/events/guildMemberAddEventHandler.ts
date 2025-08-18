@@ -19,7 +19,7 @@ export class GuildMemberAddEventHandler implements EventHandler {
         const roleAssignmentService = new RoleAssignmentService(member.id);
         const roleAssignmentResult = await roleAssignmentService.assignGuildRoles(member.guild);
 
-        if (roleAssignmentResult.success) {
+        if (roleAssignmentResult.success && roleAssignmentResult.value.isVerified) {
             const { assignedRoles } = roleAssignmentResult.value;
 
             if (assignedRoles.length > 0) {
@@ -36,7 +36,23 @@ export class GuildMemberAddEventHandler implements EventHandler {
                                 ),
                         ],
                     })
-                    .catch(() => undefined); // we ignore errors since the user likely has DMs closed, so we just silently fail
+                    .catch((e) => {
+                        if (e.message === 'Cannot send messages to this user') {
+                            logger.info({
+                                event: { name: this.eventName },
+                                guild: { id: member.guild.id },
+                                member: { id: member.id },
+                                message: 'User has DMs closed, skipping sending verification message',
+                            });
+                        } else {
+                            logger.error({
+                                event: { name: this.eventName },
+                                guild: { id: member.guild.id },
+                                member: { id: member.id },
+                                error: e,
+                            });
+                        }
+                    });
             } else if ((await GuildConfigCache.fetchConfig(member.guild.id)).enableVerification) {
                 await member
                     .send({
@@ -49,7 +65,23 @@ export class GuildMemberAddEventHandler implements EventHandler {
                                 ),
                         ],
                     })
-                    .catch(() => undefined); // we ignore errors since the user likely has DMs closed, so we just silently fail
+                    .catch((e) => {
+                        if (e.message === 'Cannot send messages to this user') {
+                            logger.info({
+                                event: { name: this.eventName },
+                                guild: { id: member.guild.id },
+                                member: { id: member.id },
+                                message: 'User has DMs closed, skipping sending verification message',
+                            });
+                        } else {
+                            logger.error({
+                                event: { name: this.eventName },
+                                guild: { id: member.guild.id },
+                                member: { id: member.id },
+                                error: e,
+                            });
+                        }
+                    });
             }
         }
     }

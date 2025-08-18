@@ -10,6 +10,7 @@ export interface VerificationRules {
     renameType?: RenameType;
     forceRename?: boolean;
     rules: VerificationRule[];
+    unverified?: UnverifiedConfig;
 }
 
 export interface VerificationRule {
@@ -18,6 +19,10 @@ export interface VerificationRule {
     matchType: string;
     yearMatch: string;
     year?: number;
+}
+
+export interface UnverifiedConfig {
+    roles: RoleData[];
 }
 
 export interface RoleData {
@@ -49,6 +54,11 @@ export interface VerificationRuleImportV2 {
 export interface VerificationImportV2 {
     v: number;
     rules: VerificationRuleImportV2[];
+    unverified?: UnverifiedConfigImport;
+}
+
+export interface UnverifiedConfigImport {
+    roles: string[]; // names of roles
 }
 
 export const VerificationDepartmentList = [
