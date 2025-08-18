@@ -15,7 +15,7 @@ import UserModel from '#models/user.model';
 import Client from '#src/Client';
 import { RoleAssignmentService } from '../services/roleAssignmentService';
 import { Modlog } from './modlog';
-import { VerificationRuleImportV2, VerificationRules } from '#types/Verification';
+import { VerificationRuleImportV2, VerificationRules, VerificationImportV2 } from '#types/Verification';
 
 export function getVerificationResponse(user: User, isReverify = false): InteractionReplyOptions & MessageReplyOptions {
     if (!process.env.AES_PASSPHRASE || !process.env.SERVER_URI) {
@@ -159,5 +159,14 @@ export function serializeVerificationRules(verificationRules: VerificationRules 
         serializedRules.push(serializedRule);
     }
 
-    return JSON.stringify({ v: 2, rules: serializedRules });
+    const exportData: VerificationImportV2 = { v: 2, rules: serializedRules };
+
+    // include unverified roles if they exist
+    if (verificationRules.unverified?.roles && verificationRules.unverified.roles.length > 0) {
+        exportData.unverified = {
+            roles: verificationRules.unverified.roles.map((role) => role.name),
+        };
+    }
+
+    return JSON.stringify(exportData);
 }
