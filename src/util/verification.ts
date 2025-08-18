@@ -11,15 +11,15 @@ import {
     ButtonStyle,
     ChatInputCommandInteraction,
     Collection,
-    inlineCode,
     Snowflake,
 } from 'discord.js';
 import UserModel from '#models/user.model';
 import Client from '#src/Client';
 import { RoleAssignmentService } from '../services/roleAssignmentService';
 import { Modlog } from './modlog';
-import { VerificationRuleImportV2, VerificationRules, VerificationImportV2, VerificationRule, RoleData } from '#types/Verification';
+import { VerificationRuleImportV2, VerificationRules, VerificationImportV2, VerificationRule } from '#types/Verification';
 import { Result } from '#types/index';
+import { parseRoles } from './verificationRoles';
 
 export function getVerificationResponse(user: User, isReverify = false): InteractionReplyOptions & MessageReplyOptions {
     if (!process.env.AES_PASSPHRASE || !process.env.SERVER_URI) {
@@ -173,44 +173,6 @@ export function serializeVerificationRules(verificationRules: VerificationRules 
     }
 
     return JSON.stringify(exportData);
-}
-/**
- * Parse an imported list of role names into a list of RoleData objects
- * @param rawRoleNames the raw role names to parse from the rule creation tool
- * @param guildRoles the roles available on the guild that the rule is being created for
- * @returns
- */
-export function parseRoles(rawRoleNames: string[], guildRoles: Collection<Snowflake, Role>): Result<RoleData[], string> {
-    const roleNames = new Set(rawRoleNames.map((name) => name.trim()));
-    if (roleNames.size !== rawRoleNames.length) {
-        return {
-            success: false,
-            error: `The same role name appears multiple times in the roles to be assigned from this rule.`,
-        };
-    }
-
-    const parsedRoles: RoleData[] = [];
-    for (const roleName of roleNames) {
-        const role = guildRoles.find((role) => role.name === roleName);
-
-        if (!role) {
-            return {
-                success: false,
-                error: `The role "${roleName}" could not be found on this server. Please confirm the role exists, and then try again.`,
-            };
-        } else if (!role.editable) {
-            return {
-                success: false,
-                error: `I do not have permission to assign the "${roleName}" role. Make sure I have the ${inlineCode(
-                    'Manage Roles'
-                )} permission and that my role is placed above all roles that you want to assign.`,
-            };
-        } else {
-            parsedRoles.push({ id: role.id, name: role.name });
-        }
-    }
-
-    return { success: true, value: parsedRoles };
 }
 
 /**
