@@ -2,6 +2,7 @@ import { serializeVerificationRules, parseRule } from '../verification';
 import * as VerificationRoleUtil from '../verificationRoles';
 import { VerificationRules, VerificationImportV2, VerificationRuleImportV2 } from '#types/Verification';
 import { Collection, Role, Snowflake } from 'discord.js';
+import { bigSERules } from './testData/sampleRules';
 
 describe('verification utilities', () => {
     describe('serializeVerificationRules', () => {
@@ -485,6 +486,33 @@ describe('verification utilities', () => {
             expect(result.success).toBe(true);
             if (result.success) {
                 expect(result.value.year).toBe(-2023);
+            }
+        });
+    });
+
+    describe('parse sample rulesets', () => {
+        // test parsing various "real world" rulesets that exist
+
+        let mockGuildRoles: Collection<Snowflake, Role>;
+        let parseRolesSpy = jest.spyOn(VerificationRoleUtil, 'parseRoles');
+
+        beforeEach(() => {
+            mockGuildRoles = new Collection();
+            parseRolesSpy = jest.spyOn(VerificationRoleUtil, 'parseRoles');
+        });
+
+        afterEach(() => {
+            // restore the original function implementation after each test
+            jest.restoreAllMocks();
+        });
+
+        it('should parse the sample ruleset without failures', () => {
+            const mockRoleData = [{ id: '123', name: 'Student' }];
+            parseRolesSpy.mockReturnValue({ success: true, value: mockRoleData });
+
+            for (const rule of bigSERules) {
+                const result = parseRule(rule, mockGuildRoles);
+                expect(result.success).toBe(true);
             }
         });
     });

@@ -36,7 +36,7 @@ export class ModalSubmitInteractionCreateEventHandler implements EventHandler {
 
         if (handler) {
             try {
-                if (handler.userPermissions.length > 0 && interaction.memberPermissions?.has(handler.userPermissions)) {
+                if (handler.userPermissions.length > 0 && !interaction.memberPermissions?.has(handler.userPermissions)) {
                     const missingPerms = interaction.memberPermissions?.missing(handler.userPermissions);
 
                     // the only scenario we expect memberPermissions to be undefined is if this occurs outside of a guild

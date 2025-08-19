@@ -59,9 +59,9 @@ export class VerifyRulesModalSubmitInteractionHandler implements ModalSubmitInte
             if (parsed.success) {
                 newRules.push(parsed.value);
             } else {
-                const errorMessage = `Error parsing rule #${idx + 1}: ${parsed.error}`;
+                const errorMessage = `**Error parsing rule #${idx + 1}**: ${parsed.error}`;
                 await interaction.editReply({
-                    embeds: [new EmbedBuilder().setColor('Red').setDescription(errorMessage).setTitle('Import Error')],
+                    embeds: [new EmbedBuilder().setColor('Red').setDescription(errorMessage).setTitle('Verification Rule Import Error')],
                 });
                 return;
             }
@@ -75,7 +75,9 @@ export class VerifyRulesModalSubmitInteractionHandler implements ModalSubmitInte
                 unverifiedConfig = { roles: parsedRoles.value };
             } else {
                 await interaction.editReply({
-                    embeds: [new EmbedBuilder().setColor('Red').setDescription(parsedRoles.error).setTitle('Import Error')],
+                    embeds: [
+                        new EmbedBuilder().setColor('Red').setDescription(parsedRoles.error).setTitle('Verification Rule Import Error'),
+                    ],
                 });
                 return;
             }
