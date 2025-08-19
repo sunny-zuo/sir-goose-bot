@@ -26,10 +26,10 @@ export class RoleCreateEventHandler implements EventHandler {
     }
 
     async execute(newRole: Role): Promise<void> {
-        await this.checkVerificationRules(newRole);
+        await RoleCreateEventHandler.checkNewRoleRuleUpdate(this.eventName, newRole);
     }
 
-    async checkVerificationRules(newRole: Role): Promise<void> {
+    static async checkNewRoleRuleUpdate(eventName: string, newRole: Role): Promise<void> {
         const guild = newRole.guild;
         const config = await GuildConfigCache.fetchConfig(guild.id);
 
@@ -56,7 +56,7 @@ export class RoleCreateEventHandler implements EventHandler {
             .setTitle('New Role Created')
             .setColor('Blue')
             .setDescription(
-                `The newly created role named \`${newRole.name}\` matches the name of a role set in verification rules. Would you like to automatically update the verification rules to assign the newly created role when the rule(s) match?`
+                `The newly created role named ${inlineCode(newRole.name)} matches the name of a role set in verification rules. Would you like to automatically update the verification rules to assign the newly created role when the rule(s) match?`
             )
             .setTimestamp();
 
@@ -107,13 +107,13 @@ export class RoleCreateEventHandler implements EventHandler {
                             .setTitle('Newly Created Role Detected')
                             .setColor('Green')
                             .setDescription(
-                                `The newly created role named \`${newRole.name}\` was updated to be the role assigned in verification rules by ${i.member}.`
+                                `The newly created role named ${inlineCode(newRole.name)} was updated to be the role assigned in verification rules by ${i.member}.`
                             )
                             .setTimestamp();
 
                         await i.editReply({ embeds: [updatedEmbed], components: [] });
                         logger.info(
-                            { event: { name: this.eventName }, role: { id: newRole.id, name: newRole.name }, guild: { id: guild.id } },
+                            { event: { name: eventName }, role: { id: newRole.id, name: newRole.name }, guild: { id: guild.id } },
                             'Newly created role matching verification rules was automatically updated'
                         );
                     } else {
@@ -128,7 +128,7 @@ export class RoleCreateEventHandler implements EventHandler {
 
                         await i.editReply({ embeds: [updatedEmbed], components: [] });
                         logger.info(
-                            { event: { name: this.eventName }, role: { id: newRole.id, name: newRole.name }, guild: { id: guild.id } },
+                            { event: { name: eventName }, role: { id: newRole.id, name: newRole.name }, guild: { id: guild.id } },
                             'Newly created role matching verification rules update selected but no matches found'
                         );
                     }
@@ -137,14 +137,14 @@ export class RoleCreateEventHandler implements EventHandler {
                         .setTitle('Newly Created Role Detected')
                         .setColor('Yellow')
                         .setDescription(
-                            `${i.member} selected to not update the verification rules to assign the newly created role \`${newRole.name}\` when rules dictate that a role named \`${newRole.name}\` should be assigned. This could mean that your verification rule configuration will not behave as expected.`
+                            `${i.member} selected to not update the verification rules to assign the newly created role ${inlineCode(newRole.name)} when rules dictate that a role named ${inlineCode(newRole.name)} should be assigned. This could mean that your verification rule configuration will not behave as expected.`
                         )
                         .setTimestamp();
 
                     await i.editReply({ embeds: [updatedEmbed], components: [] });
 
                     logger.info(
-                        { event: { name: this.eventName }, role: { id: newRole.id, name: newRole.name }, guild: { id: guild.id } },
+                        { event: { name: eventName }, role: { id: newRole.id, name: newRole.name }, guild: { id: guild.id } },
                         'Newly created role matching verification rules was set to not automatically update'
                     );
                 }
@@ -152,7 +152,7 @@ export class RoleCreateEventHandler implements EventHandler {
             .catch(async (e) => {
                 if (e.name === 'Error [InteractionCollectorError]') {
                     logger.info(
-                        { event: { name: this.eventName }, role: { id: newRole.id, name: newRole.name }, guild: { id: guild.id } },
+                        { event: { name: eventName }, role: { id: newRole.id, name: newRole.name }, guild: { id: guild.id } },
                         'Prompt to update newly created role matching verification rules was ignored'
                     );
 
@@ -160,7 +160,7 @@ export class RoleCreateEventHandler implements EventHandler {
                         .setTitle('Newly Created Role Detected')
                         .setColor('Blue')
                         .setDescription(
-                            `The newly created role named \`${newRole.name}\` matches the name of a role set in verification rules. No one responded to the prompt asking if verification rules should be automatically updated to reflect this new role, so the server's verification rule configuration may not behave as expected.`
+                            `The newly created role named ${inlineCode(newRole.name)} matches the name of a role set in verification rules. No one responded to the prompt asking if verification rules should be automatically updated to reflect this new role, so the server's verification rule configuration may not behave as expected.`
                         )
                         .setTimestamp();
 
