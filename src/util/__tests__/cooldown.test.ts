@@ -1,4 +1,4 @@
-import { Cooldown } from './cooldown';
+import { Cooldown } from '../cooldown';
 import { Snowflake } from 'discord.js';
 
 describe('cooldown', () => {

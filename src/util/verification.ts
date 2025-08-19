@@ -10,12 +10,16 @@ import {
     User,
     ButtonStyle,
     ChatInputCommandInteraction,
+    Collection,
+    Snowflake,
 } from 'discord.js';
 import UserModel from '#models/user.model';
 import Client from '#src/Client';
 import { RoleAssignmentService } from '../services/roleAssignmentService';
 import { Modlog } from './modlog';
-import { VerificationRuleImportV2, VerificationRules } from '#types/Verification';
+import { VerificationRuleImportV2, VerificationRules, VerificationImportV2, VerificationRule } from '#types/Verification';
+import { Result } from '#types/index';
+import { parseRoles } from './verificationRoles';
 
 export function getVerificationResponse(user: User, isReverify = false): InteractionReplyOptions & MessageReplyOptions {
     if (!process.env.AES_PASSPHRASE || !process.env.SERVER_URI) {
@@ -159,5 +163,65 @@ export function serializeVerificationRules(verificationRules: VerificationRules 
         serializedRules.push(serializedRule);
     }
 
-    return JSON.stringify({ v: 2, rules: serializedRules });
+    const exportData: VerificationImportV2 = { v: 2, rules: serializedRules };
+
+    // include unverified roles if they exist
+    if (verificationRules.unverified?.roles && verificationRules.unverified.roles.length > 0) {
+        exportData.unverified = {
+            roles: verificationRules.unverified.roles.map((role) => role.name),
+        };
+    }
+
+    return JSON.stringify(exportData);
+}
+
+/**
+ * Parse an imported rule into a VerificationRule object
+ * @param rule the raw, imported rule to parse
+ * @returns the parsed rule if successful, otherwise a user readable error message
+ */
+export function parseRule(
+    importedRule: VerificationRuleImportV2,
+    guildRoles: Collection<Snowflake, Role>
+): Result<VerificationRule, string> {
+    const copyPasteNote = 'Please ensure you are copy and pasting correctly from the [rule creation tool](https://sebot.sunnyzuo.com/).';
+
+    if (!importedRule.roles || importedRule.roles.length === 0) {
+        return { success: false, error: `No roles to be assigned are specified for this rule. ${copyPasteNote}` };
+    } else if (!importedRule.department) {
+        return { success: false, error: `The department to match with is missing from this rule. ${copyPasteNote}` };
+    } else if (!importedRule.match || !['anything', 'exact', 'begins', 'contains'].includes(importedRule.match)) {
+        return { success: false, error: `The specified department match type is invalid. ${copyPasteNote}` };
+    } else if (!importedRule.yearMatch || !['all', 'equal', 'upper', 'lower'].includes(importedRule.yearMatch)) {
+        return { success: false, error: `The specified year match type is invalid. ${copyPasteNote}` };
+    }
+
+    const roleParseResult = parseRoles(importedRule.roles, guildRoles);
+    if (!roleParseResult.success) return roleParseResult;
+
+    const parsedRule: VerificationRule = {
+        roles: roleParseResult.value,
+        department: String(importedRule.department),
+        matchType: String(importedRule.match),
+        yearMatch: String(importedRule.yearMatch),
+    };
+
+    if (importedRule.yearMatch !== 'all') {
+        const numYear = Number(importedRule.year);
+        if (isNaN(numYear)) {
+            return {
+                success: false,
+                error: `The specified year to match is not a valid number. ${copyPasteNote}`,
+            };
+        } else if (!Number.isInteger(numYear)) {
+            return {
+                success: false,
+                error: `The specified year to match is not an integer. ${copyPasteNote}`,
+            };
+        } else {
+            parsedRule.year = numYear;
+        }
+    }
+
+    return { success: true, value: parsedRule };
 }
