@@ -16,6 +16,7 @@ import { GuildConfigCache } from '#util/guildConfigCache';
 import { VerifyAll } from '#commands/chat/verification/verifyall';
 import { parseRule } from '#util/verification';
 import { parseRoles } from '#util/verificationRoles';
+import { AdminConfigCache } from '#util/adminConfigCache';
 
 export class VerifyRulesModalSubmitInteractionHandler implements ModalSubmitInteractionHandler {
     readonly client: Client;
@@ -68,8 +69,10 @@ export class VerifyRulesModalSubmitInteractionHandler implements ModalSubmitInte
         }
 
         // then, parse the unverified configuration if it exists
+        // temporarily control access under ENABLE_UNVERIFIED_RULE flag
+        const isAvailable = (await AdminConfigCache.getConfig(AdminConfigCache.FLAGS.ENABLE_UNVERIFIED_RULES, 'false')) === 'true';
         let unverifiedConfig: UnverifiedConfig | undefined = undefined;
-        if (Array.isArray(importedJSON.unverified?.roles) && importedJSON.unverified.roles.length > 0) {
+        if (isAvailable && Array.isArray(importedJSON.unverified?.roles) && importedJSON.unverified.roles.length > 0) {
             const parsedRoles = parseRoles(importedJSON.unverified.roles, guildRoles);
             if (parsedRoles.success) {
                 unverifiedConfig = { roles: parsedRoles.value };

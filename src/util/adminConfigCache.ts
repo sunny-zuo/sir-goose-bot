@@ -8,6 +8,8 @@ export enum FLAGS {
     VERIFY_OVERRIDE_PREVIEW = 'verify-override-preview',
     // comma separated list of guilds with access to verification overrides
     VERIFY_OVERRIDE_GUILDS = 'verify-override-guilds',
+    // true/false string that controls whether imports of unverified rules should be allowed
+    ENABLE_UNVERIFIED_RULES = 'enable-unverified-rules',
 }
 
 export class AdminConfigCache {
