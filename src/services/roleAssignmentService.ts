@@ -355,8 +355,11 @@ export class RoleAssignmentService {
         guildConfig: GuildConfig,
         params: AssignGuildRolesParams
     ): Promise<Result<RoleAssignmentResult, string>> {
-        // Check if unverified roles are configured
-        if (!guildConfig.verificationRules?.unverified?.roles || guildConfig.verificationRules.unverified.roles.length === 0) {
+        // check if unverified roles are configured in either the current ruleset or the previous one (if applicable)
+        if (
+            (!guildConfig.verificationRules?.unverified?.roles || guildConfig.verificationRules.unverified.roles.length === 0) &&
+            (!params.oldConfig?.verificationRules?.unverified?.roles || params.oldConfig.verificationRules.unverified.roles.length === 0)
+        ) {
             return { success: false, error: 'No unverified roles configured' };
         }
 
@@ -367,11 +370,16 @@ export class RoleAssignmentService {
             path: 'unverified',
         });
 
+        // fetch the unverified roles to assign to this user
         const unverifiedRoles = await this.getUnverifiedRoles(guild, guildConfig);
+        // if the config changes, remove a user's old unverified role (if it exists)
+        const unverifiedRolesToRemove = params.oldConfig ? await this.getUnverifiedRoles(guild, params.oldConfig) : [];
+
         const rolesToSet = member.roles.cache.clone();
         const missingRoles = unverifiedRoles.filter((role) => !member.roles.cache.has(role.id));
 
-        // Add unverified roles to the member's role set
+        // remove old unverified rules, then add unverified roles to the member's role set
+        unverifiedRolesToRemove.forEach((role) => rolesToSet.delete(role.id));
         unverifiedRoles.forEach((role) => rolesToSet.set(role.id, role));
 
         if (!rolesToSet.equals(member.roles.cache)) {
