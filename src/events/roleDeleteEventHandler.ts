@@ -20,35 +20,42 @@ export class RoleDeleteEventHandler implements EventHandler {
         await this.updateButtonRolePrompts(deletedRole);
     }
 
+    /**
+     * Check if a deleted role is used for verification rules and notify the server moderators if so.
+     */
     async checkVerificationRules(deletedRole: Role): Promise<void> {
         const guild = deletedRole.guild;
         const config = await GuildConfigCache.fetchConfig(guild.id);
+        if (!config || !config.enableVerification) return;
 
-        if (config.enableVerification && config.verificationRules?.rules && config.verificationRules.rules.length > 0) {
-            const verificationRules = config.verificationRules.rules;
-
-            for (const rule of verificationRules) {
-                for (const role of rule.roles) {
-                    if (role.id === deletedRole.id) {
-                        logger.info(
-                            {
-                                event: { name: this.eventName },
-                                role: { id: deletedRole.id, name: deletedRole.name },
-                                guild: { id: guild.id },
-                            },
-                            'A role used for verification was deleted.'
-                        );
-
-                        await Modlog.logInfoMessage(
-                            guild,
-                            'Verification Role Deleted',
-                            `The role \`${deletedRole.name}\` was setup to be one of the roles assigned in the server's verification rules, but is now deleted. Please update the verification rules!`,
-                            'Red'
-                        );
-                        return;
-                    }
-                }
+        // see if the deleted role's id exists in either regular rules or unverified config
+        let doesRoleNameMatch = false;
+        for (const rule of config.verificationRules?.rules ?? []) {
+            if (!doesRoleNameMatch) {
+                doesRoleNameMatch = rule.roles.some((role) => role.id === deletedRole.id);
             }
+        }
+        if (config.verificationRules?.unverified?.roles.some((role) => role.id === deletedRole.id)) {
+            doesRoleNameMatch = true;
+        }
+
+        // notify the modlog channel if a match exists
+        if (doesRoleNameMatch) {
+            logger.info(
+                {
+                    event: { name: this.eventName },
+                    role: { id: deletedRole.id, name: deletedRole.name },
+                    guild: { id: guild.id },
+                },
+                'A role used for verification was deleted.'
+            );
+
+            await Modlog.logInfoMessage(
+                guild,
+                'Verification Role Deleted',
+                `The role \`${deletedRole.name}\` was setup to be one of the roles assigned in the server's verification rules, but is now deleted. Please update the verification rules!`,
+                'Red'
+            );
         }
     }
 
