@@ -175,6 +175,8 @@ export class RoleCreateEventHandler implements EventHandler {
                         .setTimestamp();
 
                     await message.edit({ embeds: [embed], components: [] });
+                } else {
+                    throw e;
                 }
             });
     }
