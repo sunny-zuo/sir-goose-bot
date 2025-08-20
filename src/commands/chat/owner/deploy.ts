@@ -30,6 +30,10 @@ export class Deploy extends ChatCommand {
             type: ApplicationCommandOptionType.Subcommand,
         },
     ];
+
+    private static readonly guildOnlyContext = [InteractionContextType.Guild];
+    private static readonly allContext = [InteractionContextType.Guild, InteractionContextType.BotDM, InteractionContextType.PrivateChannel];
+
     constructor(client: Client) {
         super(client, {
             name: 'deploy',
@@ -103,9 +107,6 @@ export class Deploy extends ChatCommand {
     }
 
     getChatCommandData(client: Client): ApplicationCommandData[] {
-        const guildOnlyContext = [InteractionContextType.Guild];
-        const allContext = [InteractionContextType.Guild, InteractionContextType.BotDM, InteractionContextType.PrivateChannel];
-
         const data: ApplicationCommandData[] = [];
 
         for (const [, command] of client.chatCommands) {
@@ -121,7 +122,7 @@ export class Deploy extends ChatCommand {
                     options: command.options as ApplicationCommandOptionData[],
                     type: ApplicationCommandType.ChatInput,
                     defaultMemberPermissions: command.userPermissions.length > 0 ? command.userPermissions : null,
-                    contexts: command.guildOnly ? guildOnlyContext : allContext,
+                    contexts: command.guildOnly ? Deploy.guildOnlyContext : Deploy.allContext,
                 };
 
                 data.push(commandInfo);
@@ -132,9 +133,6 @@ export class Deploy extends ChatCommand {
     }
 
     getMessageContextCommandData(client: Client): ApplicationCommandData[] {
-        const guildOnlyContext = [InteractionContextType.Guild];
-        const allContext = [InteractionContextType.Guild, InteractionContextType.BotDM, InteractionContextType.PrivateChannel];
-
         const data: ApplicationCommandData[] = [];
 
         for (const [, command] of client.messageContextMenuCommands) {
@@ -142,7 +140,7 @@ export class Deploy extends ChatCommand {
                 name: command.name,
                 type: ApplicationCommandType.Message,
                 defaultMemberPermissions: command.userPermissions.length > 0 ? command.userPermissions : null,
-                contexts: command.guildOnly ? guildOnlyContext : allContext,
+                contexts: command.guildOnly ? Deploy.guildOnlyContext : Deploy.allContext,
             });
         }
 
@@ -150,9 +148,6 @@ export class Deploy extends ChatCommand {
     }
 
     getUserContextCommandData(client: Client): ApplicationCommandData[] {
-        const guildOnlyContext = [InteractionContextType.Guild];
-        const allContext = [InteractionContextType.Guild, InteractionContextType.BotDM, InteractionContextType.PrivateChannel];
-
         const data: ApplicationCommandData[] = [];
 
         for (const [, command] of client.userContextMenuCommands) {
@@ -160,7 +155,7 @@ export class Deploy extends ChatCommand {
                 name: command.name,
                 type: ApplicationCommandType.User,
                 defaultMemberPermissions: command.userPermissions.length > 0 ? command.userPermissions : null,
-                contexts: command.guildOnly ? guildOnlyContext : allContext,
+                contexts: command.guildOnly ? Deploy.guildOnlyContext : Deploy.allContext,
             });
         }
 
