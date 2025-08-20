@@ -83,7 +83,7 @@ export class VerifyOverride extends ChatCommand {
         super(client, {
             name: 'verifyoverride',
             description: 'Manually override the department and/or entrance year of a user for verification purposes.',
-            category: 'Verification',
+            category: 'Admin',
             options: VerifyOverride.options,
             guildOnly: true,
             clientPermissions: [PermissionsBitField.Flags.ManageRoles],

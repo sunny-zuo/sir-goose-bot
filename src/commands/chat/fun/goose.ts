@@ -21,7 +21,6 @@ class Goose extends ChatCommand {
             name: 'goose',
             description: 'Get a random goose image!',
             category: 'Fun',
-            aliases: ['geese'],
             cooldownSeconds: 10,
             cooldownMaxUses: 3,
         });

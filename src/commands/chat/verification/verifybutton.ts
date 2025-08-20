@@ -30,7 +30,7 @@ export class VerifyButton extends ChatCommand {
         super(client, {
             name: 'verifybutton',
             description: 'Create a button that users can press to request a verification link',
-            category: 'Verification',
+            category: 'Admin',
             options: VerifyButton.options,
             guildOnly: true,
             userPermissions: [PermissionsBitField.Flags.ManageGuild],

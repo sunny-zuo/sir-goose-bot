@@ -26,7 +26,6 @@ export class Course extends ChatCommand {
             name: 'course',
             description: 'Get info about a UWaterloo course',
             category: 'UWaterloo',
-            aliases: ['class'],
             options: Course.options,
             examples: ['math135'],
             cooldownSeconds: 30,

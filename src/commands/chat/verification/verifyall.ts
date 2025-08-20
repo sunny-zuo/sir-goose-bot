@@ -11,11 +11,12 @@ export class VerifyAll extends ChatCommand {
         super(client, {
             name: 'verifyall',
             description: 'Verify all existing users in the server that would be verified',
-            category: 'Verification',
+            category: 'Admin',
             cooldownSeconds: 3600,
             cooldownMaxUses: 5,
             isTextCommand: false,
             isSlashCommand: true,
+            guildOnly: true,
             clientPermissions: [PermissionsBitField.Flags.ManageRoles],
             userPermissions: [PermissionsBitField.Flags.ManageGuild, PermissionsBitField.Flags.ManageRoles],
         });

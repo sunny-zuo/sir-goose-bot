@@ -8,7 +8,6 @@ export class Coinflip extends ChatCommand {
             name: 'coinflip',
             description: 'Flip a coin.',
             category: 'Fun',
-            aliases: ['flipcoin', 'flip', 'coin'],
             cooldownSeconds: 2,
         });
     }

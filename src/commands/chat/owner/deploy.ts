@@ -6,6 +6,7 @@ import {
     ApplicationCommandType,
     ChatInputCommandInteraction,
     CommandInteractionOptionResolver,
+    InteractionContextType,
 } from 'discord.js';
 import Client from '#src/Client';
 import { ChatCommand } from '../ChatCommand';
@@ -29,6 +30,14 @@ export class Deploy extends ChatCommand {
             type: ApplicationCommandOptionType.Subcommand,
         },
     ];
+
+    private static readonly guildOnlyContext = [InteractionContextType.Guild];
+    private static readonly allContext = [
+        InteractionContextType.Guild,
+        InteractionContextType.BotDM,
+        InteractionContextType.PrivateChannel,
+    ];
+
     constructor(client: Client) {
         super(client, {
             name: 'deploy',
@@ -106,7 +115,7 @@ export class Deploy extends ChatCommand {
 
         for (const [, command] of client.chatCommands) {
             if (command.isSlashCommand && !command.ownerOnly) {
-                data.push({
+                const commandInfo: ApplicationCommandData = {
                     name: command.name,
                     description: command.description,
                     /*
@@ -116,7 +125,11 @@ export class Deploy extends ChatCommand {
                     */
                     options: command.options as ApplicationCommandOptionData[],
                     type: ApplicationCommandType.ChatInput,
-                });
+                    defaultMemberPermissions: command.userPermissions.length > 0 ? command.userPermissions : null,
+                    contexts: command.guildOnly ? Deploy.guildOnlyContext : Deploy.allContext,
+                };
+
+                data.push(commandInfo);
             }
         }
 
@@ -130,6 +143,8 @@ export class Deploy extends ChatCommand {
             data.push({
                 name: command.name,
                 type: ApplicationCommandType.Message,
+                defaultMemberPermissions: command.userPermissions.length > 0 ? command.userPermissions : null,
+                contexts: command.guildOnly ? Deploy.guildOnlyContext : Deploy.allContext,
             });
         }
 
@@ -143,6 +158,8 @@ export class Deploy extends ChatCommand {
             data.push({
                 name: command.name,
                 type: ApplicationCommandType.User,
+                defaultMemberPermissions: command.userPermissions.length > 0 ? command.userPermissions : null,
+                contexts: command.guildOnly ? Deploy.guildOnlyContext : Deploy.allContext,
             });
         }
 

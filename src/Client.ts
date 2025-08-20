@@ -19,7 +19,6 @@ import { WebApp } from './web/app';
 
 export default class Client extends Discord.Client {
     chatCommands: Collection<string, ChatCommand>;
-    chatAliases: Collection<string, ChatCommand>;
     messageContextMenuCommands: Collection<string, MessageContextMenuCommand>;
     userContextMenuCommands: Collection<string, UserContextMenuCommand>;
     webApp: WebApp;
@@ -30,7 +29,6 @@ export default class Client extends Discord.Client {
         this.webApp = new WebApp(this);
 
         this.chatCommands = new Collection<string, ChatCommand>();
-        this.chatAliases = new Collection<string, ChatCommand>();
         this.messageContextMenuCommands = new Collection<string, MessageContextMenuCommand>();
         this.userContextMenuCommands = new Collection<string, UserContextMenuCommand>();
 
@@ -65,7 +63,6 @@ export default class Client extends Discord.Client {
                 logger.info({ event: { name: command.name } }, `Registering chat command: ${command.name}`);
 
                 this.chatCommands.set(command.name, command);
-                command.aliases.forEach((alias) => this.chatAliases.set(alias, command));
             } catch (e) {
                 logger.error(e, e.message);
             }
