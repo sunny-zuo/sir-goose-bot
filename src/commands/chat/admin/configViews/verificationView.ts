@@ -83,9 +83,10 @@ export class VerificationView {
                     await VerificationView.render(i, filter);
                     break;
                 case 'configVerificationViewRules': {
+                    const refreshedConfig = await GuildConfigCache.fetchOrCreate(i.guildId!);
                     const embed = new EmbedBuilder().setColor('Blue').setTitle('Verification Rules')
-                        .setDescription(`[Create a new ruleset](https://sebot.sunnyzuo.com/). Current rules:
-                            ${codeBlock(serializeVerificationRules(config.verificationRules))}`);
+                        .setDescription(`[Click here to create or modify a new ruleset](https://sebot.sunnyzuo.com/). Current rules:
+                            ${codeBlock(serializeVerificationRules(refreshedConfig.verificationRules))}`);
 
                     await i.reply({ embeds: [embed], ephemeral: true });
                     break;

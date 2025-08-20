@@ -35,8 +35,8 @@ export class VerifyRules extends ChatCommand {
             new ButtonBuilder().setCustomId(`verifyRules`).setLabel('Update Rules').setStyle(ButtonStyle.Primary)
         );
         const embed = new EmbedBuilder().setColor('Blue').setTitle('Verification Rules').setDescription(`Verification is ${
-            config.enableVerification ? 'enabled ' : `disabled. Enable it using ${inlineCode('/config')}`
-        }. [Create a ruleset.](https://sebot.sunnyzuo.com/)
+            config.enableVerification ? 'enabled' : `disabled. Enable it using ${inlineCode('/config')}`
+        }. [Click here to create or modify a ruleset.](https://sebot.sunnyzuo.com/)
                 ${codeBlock(serializeVerificationRules(config.verificationRules))}`);
 
         await interaction.editReply({ embeds: [embed], components: [button] });
