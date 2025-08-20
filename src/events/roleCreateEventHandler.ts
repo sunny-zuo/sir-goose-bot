@@ -56,7 +56,9 @@ export class RoleCreateEventHandler implements EventHandler {
             .setTitle('Newly Created Role Detected')
             .setColor('Blue')
             .setDescription(
-                `The newly created role named ${inlineCode(newRole.name)} matches the name of a role set in verification rules. Would you like to automatically update the verification rules to assign the newly created role when the rule(s) match?`
+                `The newly created role named ${inlineCode(
+                    newRole.name
+                )} matches the name of a role set in verification rules. Would you like to automatically update the verification rules to assign the newly created role when the rule(s) match?`
             )
             .setTimestamp();
 
@@ -107,7 +109,9 @@ export class RoleCreateEventHandler implements EventHandler {
                             .setTitle('Newly Created Role Detected')
                             .setColor('Green')
                             .setDescription(
-                                `The newly created role named ${inlineCode(newRole.name)} was updated to be the role assigned in verification rules by ${i.member}.`
+                                `The newly created role named ${inlineCode(
+                                    newRole.name
+                                )} was updated to be the role assigned in verification rules by ${i.member}.`
                             )
                             .setTimestamp();
 
@@ -137,7 +141,11 @@ export class RoleCreateEventHandler implements EventHandler {
                         .setTitle('Newly Created Role Detected')
                         .setColor('Yellow')
                         .setDescription(
-                            `${i.member} selected to not update the verification rules to assign the newly created role ${inlineCode(newRole.name)} when rules dictate that a role named ${inlineCode(newRole.name)} should be assigned. This could mean that your verification rule configuration will not behave as expected.`
+                            `${i.member} selected to not update the verification rules to assign the newly created role ${inlineCode(
+                                newRole.name
+                            )} when rules dictate that a role named ${inlineCode(
+                                newRole.name
+                            )} should be assigned. This could mean that your verification rule configuration will not behave as expected.`
                         )
                         .setTimestamp();
 
@@ -160,7 +168,9 @@ export class RoleCreateEventHandler implements EventHandler {
                         .setTitle('Newly Created Role Detected')
                         .setColor('Blue')
                         .setDescription(
-                            `The newly created role named ${inlineCode(newRole.name)} matches the name of a role set in verification rules. No one responded to the prompt asking if verification rules should be automatically updated to reflect this new role, so the server's verification rule configuration may not behave as expected.`
+                            `The newly created role named ${inlineCode(
+                                newRole.name
+                            )} matches the name of a role set in verification rules. No one responded to the prompt asking if verification rules should be automatically updated to reflect this new role, so the server's verification rule configuration may not behave as expected.`
                         )
                         .setTimestamp();
 

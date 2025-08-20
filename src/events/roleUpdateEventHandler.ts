@@ -1,13 +1,6 @@
 import { EventHandler } from './eventHandler';
 import Client from '#src/Client';
-import {
-    ComponentType,
-    ActionRowBuilder,
-    ButtonBuilder,
-    Role,
-    ButtonStyle,
-    inlineCode,
-} from 'discord.js';
+import { ComponentType, ActionRowBuilder, ButtonBuilder, Role, ButtonStyle, inlineCode } from 'discord.js';
 import { Modlog } from '#util/modlog';
 import GuildConfigModel from '#models/guildConfig.model';
 import ButtonRoleModel from '#models/buttonRole.model';
@@ -69,7 +62,9 @@ export class RoleUpdateEventHandler implements EventHandler {
             await Modlog.logInfoMessage(
                 guild,
                 'Verification Role Updated',
-                `The role ${inlineCode(oldRole.name)} is used for verification, and was renamed to ${inlineCode(newRole.name)}. The server's verification rules have automatically updated to reflect this change.`,
+                `The role ${inlineCode(oldRole.name)} is used for verification, and was renamed to ${inlineCode(
+                    newRole.name
+                )}. The server's verification rules have automatically updated to reflect this change.`,
                 'Green'
             );
         }
