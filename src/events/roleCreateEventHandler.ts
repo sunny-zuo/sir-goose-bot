@@ -53,7 +53,7 @@ export class RoleCreateEventHandler implements EventHandler {
 
         // prompt server admins if they want to automatically update verification rules to use the new role
         const embed = new EmbedBuilder()
-            .setTitle('New Role Created')
+            .setTitle('Newly Created Role Detected')
             .setColor('Blue')
             .setDescription(
                 `The newly created role named ${inlineCode(newRole.name)} matches the name of a role set in verification rules. Would you like to automatically update the verification rules to assign the newly created role when the rule(s) match?`
