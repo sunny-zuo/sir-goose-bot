@@ -40,7 +40,6 @@ export abstract class Command {
     isTextCommand?: boolean;
     isMessageContextMenuCommand?: boolean;
     isUserContextMenuCommand?: boolean;
-    aliases: string[] = [];
     options: ApplicationCommandOption[] = [];
     guildOnly = false;
     ownerOnly = false;

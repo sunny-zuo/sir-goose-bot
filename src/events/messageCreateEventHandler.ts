@@ -39,7 +39,7 @@ export class MessageCreateEventHandler implements EventHandler {
         const commandName = messageContent.shift()?.toLowerCase();
         if (commandName === undefined) return;
 
-        const command = client.chatCommands.get(commandName) || client.chatAliases.get(commandName);
+        const command = client.chatCommands.get(commandName);
         if (!command || !command.enabled) return;
         if (!command.isTextCommand) {
             if (command.isSlashCommand) {

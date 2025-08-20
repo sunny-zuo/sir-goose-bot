@@ -10,7 +10,6 @@ export class VerifyStats extends ChatCommand {
             name: 'verifystats',
             description: "Shows stats relating to verification in the guild you're in.",
             category: 'Verification',
-            aliases: ['verificationstats', 'serverstats', 'vs'],
             guildOnly: true,
             isTextCommand: false,
             cooldownSeconds: 60,

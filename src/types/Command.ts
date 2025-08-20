@@ -7,7 +7,6 @@ export interface CommandOptions {
     isSlashCommand?: boolean; // whether or not the command should be a slash command
     isTextCommand?: boolean; // whether or not the command should be a message (old-fashioned) command
     isContextMenuCommand?: boolean; // whether or not the command should be a message (context menu) command
-    aliases?: string[]; // alternative ways of triggering command
     options?: ApplicationCommandOption[]; // arguments for a command
     guildOnly?: boolean; // if the command can only be used in guilds
     ownerOnly?: boolean; // if the command can only be used by the bot owner
@@ -29,7 +28,6 @@ export interface ChatCommandOptions {
     isSlashCommand?: boolean; // whether or not the command should be a slash command
     isTextCommand?: boolean; // whether or not the command should be a message (old-fashioned) command
     isContextMenuCommand?: false; // whether or not the command should be a message (context menu) command
-    aliases?: string[]; // alternative ways of triggering command
     options?: ApplicationCommandOption[]; // arguments for a command
     guildOnly?: boolean; // if the command can only be used in guilds
     ownerOnly?: boolean; // if the command can only be used by the bot owner

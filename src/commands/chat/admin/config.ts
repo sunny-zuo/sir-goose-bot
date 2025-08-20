@@ -12,7 +12,7 @@ export class Config extends ChatCommand {
             isSlashCommand: true,
             isTextCommand: false,
             guildOnly: true,
-            userPermissions: [PermissionsBitField.Flags.ManageGuild],
+            userPermissions: [PermissionsBitField.Flags.ManageGuild, PermissionsBitField.Flags.ManageRoles],
         });
     }
 

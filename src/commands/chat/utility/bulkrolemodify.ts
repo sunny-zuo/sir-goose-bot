@@ -24,6 +24,7 @@ export class BulkRoleModify extends ChatCommand {
             cooldownMaxUses: 6,
             isTextCommand: false,
             isSlashCommand: true,
+            guildOnly: true,
             clientPermissions: [PermissionsBitField.Flags.ManageRoles],
             userPermissions: [PermissionsBitField.Flags.Administrator],
         });

@@ -5,6 +5,8 @@ import {
     Message,
     EmbedBuilder,
     ApplicationCommandOptionType,
+    inlineCode,
+    PermissionsBitField,
 } from 'discord.js';
 import Client from '#src/Client';
 import { Category } from '#types/Command';
@@ -39,11 +41,13 @@ export class Help extends ChatCommand {
 
         const commandQuery = args?.getString('command');
         if (commandQuery) {
-            const command = client.chatCommands.get(commandQuery.toLowerCase()) || client.chatAliases.get(commandQuery.toLowerCase());
+            const command = client.chatCommands.get(commandQuery.toLowerCase());
             if (!command) {
                 await this.sendErrorEmbed(interaction, 'Command Not Found', `The command \`${commandQuery}\` was not found.`);
                 return;
             }
+
+            const permissionsBitField = new PermissionsBitField(command.userPermissions);
 
             const embed = new EmbedBuilder()
                 .setTitle(`Command: \`${`/${commandQuery.toLowerCase()}${Help.listArguments(command)}`.trim()}\``)
@@ -51,11 +55,14 @@ export class Help extends ChatCommand {
                 .addFields(
                     { name: 'Description', value: command.description },
                     {
-                        name: 'Aliases',
-                        value: [command.name]
-                            .concat(command.aliases)
-                            .map((alias) => `\`${alias}\``)
-                            .join(' '),
+                        name: 'Permissions Required',
+                        value:
+                            command.userPermissions.length > 0
+                                ? permissionsBitField
+                                      .toArray()
+                                      .map((p) => inlineCode(p))
+                                      .join(', ')
+                                : 'None',
                         inline: true,
                     },
                     {
@@ -76,8 +83,13 @@ export class Help extends ChatCommand {
             const embed = new EmbedBuilder()
                 .setTitle('Command Help')
                 .setDescription(
-                    `You can use slash commands to interact with me! Simply type \`/\` in the chat box followed by the command name.
-                    For more info on a specific command, use \`/help (command name)\`.`
+                    `You can use slash commands to interact with me! Simply type ${inlineCode(
+                        '/'
+                    )} in the chat box followed by the command name.
+
+                    Some commands may only be available in servers and may have permission requirements to be used.
+                    
+                    For more info on a specific command, use ${inlineCode('/help (command name)')}.`
                 )
                 .setColor('Aqua')
                 .setTimestamp();

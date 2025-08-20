@@ -18,7 +18,7 @@ export class VerifyRules extends ChatCommand {
         super(client, {
             name: 'verifyrules',
             description: 'Set or see verification rules. Create a ruleset here: https://sebot.sunnyzuo.com/',
-            category: 'Verification',
+            category: 'Admin',
             guildOnly: true,
             isTextCommand: false,
             clientPermissions: [PermissionsBitField.Flags.ManageRoles],

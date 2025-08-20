@@ -16,7 +16,6 @@ export class BotStats extends ChatCommand {
             description: 'View statistics related to Sir Goose.',
             category: 'Info',
             isTextCommand: false,
-            aliases: ['botinfo', 'bs'],
             cooldownSeconds: 5,
         });
 
