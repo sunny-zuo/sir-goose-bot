@@ -32,7 +32,11 @@ export class Deploy extends ChatCommand {
     ];
 
     private static readonly guildOnlyContext = [InteractionContextType.Guild];
-    private static readonly allContext = [InteractionContextType.Guild, InteractionContextType.BotDM, InteractionContextType.PrivateChannel];
+    private static readonly allContext = [
+        InteractionContextType.Guild,
+        InteractionContextType.BotDM,
+        InteractionContextType.PrivateChannel,
+    ];
 
     constructor(client: Client) {
         super(client, {
