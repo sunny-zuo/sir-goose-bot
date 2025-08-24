@@ -6,10 +6,14 @@ import { logger } from '#util/logger';
 export enum FLAGS {
     // true/false string that controls whether or not to apply guild whitelist for verification overrides
     VERIFY_OVERRIDE_PREVIEW = 'verify-override-preview',
-    // comma separated list of guilds with access to verification overrides
+    // comma separated list of guild ids with access to verification overrides
     VERIFY_OVERRIDE_GUILDS = 'verify-override-guilds',
     // true/false string that controls whether imports of unverified rules should be allowed
     ENABLE_UNVERIFIED_RULES = 'enable-unverified-rules',
+    // true/false string that controls whether to use fallback OAuth credentials instead of primary
+    USE_OAUTH_FALLBACK = 'use-oauth-fallback',
+    // comma separated list of user ids that should be given the fallback OAuth flow regardless of other configs
+    FORCE_FALLBACK_FLOW_USERS = 'force-fallback-flow-users',
 }
 
 export class AdminConfigCache {
@@ -31,6 +35,22 @@ export class AdminConfigCache {
 
         const entry = this._cache.get(key);
         return entry ? entry.value : def ?? null;
+    }
+
+    /**
+     * Retrieves a single configuration value by key, and parses a comma separated value into an array
+     * @param key The configuration key to retrieve
+     * @returns The configuration values as a string array, or an empty array if no values exist
+     */
+    static async getConfigAsArray(key: string): Promise<string[]> {
+        // TODO: generate unit tests
+        const rawString = await this.getConfig(key, '');
+        const parsed = rawString
+            .split(',')
+            .map((id) => id.trim())
+            .filter((id) => id.length > 0);
+
+        return parsed;
     }
 
     /**

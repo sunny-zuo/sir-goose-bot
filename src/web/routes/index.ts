@@ -2,69 +2,50 @@ import express from 'express';
 import axios from 'axios';
 import path from 'path';
 import { AES, enc } from 'crypto-js';
-import { URLSearchParams } from 'url';
 import UserModel from '#models/user.model';
 import { RoleAssignmentService } from '../../services/roleAssignmentService';
+import { OAuthService, OAuthSource } from '../../services/oauthService';
 import { Snowflake } from 'discord.js';
 
 const router = express.Router();
 
-router.get('/', (req, res) => {
-    res.sendFile(path.join(process.cwd(), 'src', 'web', 'public', 'index.html'));
-});
-
-router.get('/authorize', async (req, res) => {
+/**
+ * Shared authorization logic for both primary and fallback OAuth flows
+ */
+async function handleAuthorization(req: express.Request, res: express.Response, source: OAuthSource) {
     const { code, state } = req.query;
 
     if (!code || !state || typeof state !== 'string' || typeof code !== 'string') {
-        res.send('Error: The link you followed appears to be malformed. Try verifying again.');
-        return;
+        return res.send('Error: The link you followed appears to be malformed. Try verifying again.');
     }
-    if (!process.env.AES_PASSPHRASE || !process.env.CLIENT_ID || !process.env.CLIENT_SECRET || !process.env.SERVER_URI) {
-        res.send(
+    if (!process.env.AES_PASSPHRASE || !OAuthService.validateEnvironmentVariables(source)) {
+        return res.send(
             `The bot configuration was not setup correctly. Please notify the support server (https://discord.gg/KHByMmrrw2) so that it can be fixed.`
         );
-        return;
     }
 
-    let decodedUID: string;
+    let discordId: string;
     try {
-        decodedUID = AES.decrypt(state.replace(/_/g, '/').replace(/-/g, '+'), process.env.AES_PASSPHRASE).toString(enc.Utf8);
-
+        const decodedUID = AES.decrypt(req.params.encodedId.replace(/_/g, '/').replace(/-/g, '+'), process.env.AES_PASSPHRASE).toString(
+            enc.Utf8
+        );
         if (!decodedUID.endsWith('-sebot')) throw new Error('Malformed verification link');
+
+        discordId = decodedUID.replace('-sebot', '');
+        // TODO: check if discord id is numeric (snowflake format) or else throw
     } catch (e) {
-        res.send('Error: The link you followed appears to be malformed. Try verifying again.');
-        return;
+        return res.send('Error: The link you followed appears to be malformed. Try requesting a new verification link.');
     }
 
-    const discordId = decodedUID.replace('-sebot', '');
-
-    const getTokenParams = new URLSearchParams();
-    getTokenParams.append('client_id', process.env.CLIENT_ID);
-    getTokenParams.append('scope', 'user.read offline_access');
-    getTokenParams.append('redirect_uri', `${process.env.SERVER_URI}/authorize`);
-    getTokenParams.append('grant_type', 'authorization_code');
-    getTokenParams.append('client_secret', process.env.CLIENT_SECRET);
-    getTokenParams.append('code', code);
-
     try {
-        const getTokenRes = await axios.post(
-            `https://login.microsoftonline.com/${process.env.TENANT_ID}/oauth2/v2.0/token`,
-            getTokenParams
-        );
+        const { access_token, refresh_token } = await OAuthService.exchangeCodeForToken(code, source);
+        const { userPrincipalName, givenName, surname, department, createdDateTime } = await OAuthService.fetchUserData(access_token);
 
-        const { access_token, refresh_token } = getTokenRes.data;
-
-        const userDataReq = await axios.get(
-            `https://graph.microsoft.com/v1.0/me?$select=department,createdDateTime,userPrincipalName,givenName,surname`,
-            {
-                headers: {
-                    Authorization: `Bearer ${access_token}`,
-                },
-            }
-        );
-
-        const { userPrincipalName, givenName, surname, department, createdDateTime } = userDataReq.data;
+        if (!userPrincipalName || !userPrincipalName.endsWith('@uwaterloo.ca')) {
+            return res.send(
+                'Error: The Microsoft account email you authenticated with does not end with @uwaterloo.ca. Please ensure you are logging in with the correct account.'
+            );
+        }
         const uwid = userPrincipalName.replace('@uwaterloo.ca', '');
 
         const existingUser = await UserModel.findOne({ discordId: discordId, department: { $ne: null } });
@@ -83,6 +64,7 @@ router.get('/authorize', async (req, res) => {
                     department: department,
                     o365CreatedDate: new Date(createdDateTime),
                     refreshToken: refresh_token,
+                    authSource: source,
                 },
             },
             { upsert: true }
@@ -94,10 +76,11 @@ router.get('/authorize', async (req, res) => {
         res.send("You've been verified successfully! You can close this window and return to Discord.");
     } catch (e: unknown) {
         if (axios.isAxiosError(e)) {
+            const sourceLabel = source === 'uw' ? 'using UW OAuth flow' : 'using common OAuth flow';
             req.log.warn(
                 `Axios Error: Graph API responded with status code ${e.response?.status} and error object ${JSON.stringify(
                     e.response?.data
-                )} for user ${discordId}.`
+                )} for user ${discordId} ${sourceLabel}.`
             );
         } else if (e instanceof Error) {
             req.log.error(e, e.message);
@@ -107,6 +90,18 @@ router.get('/authorize', async (req, res) => {
             `We ran into an error verifying your account. Please try again later or join the support server for help: https://discord.gg/KHByMmrrw2`
         );
     }
+}
+
+router.get('/', (req, res) => {
+    res.sendFile(path.join(process.cwd(), 'src', 'web', 'public', 'index.html'));
+});
+
+router.get('/authorize', async (req, res) => {
+    await handleAuthorization(req, res, 'uw');
+});
+
+router.get('/common/authorize', async (req, res) => {
+    await handleAuthorization(req, res, 'common');
 });
 
 export default router;
