@@ -43,7 +43,6 @@ export class AdminConfigCache {
      * @returns The configuration values as a string array, or an empty array if no values exist
      */
     static async getConfigAsArray(key: string): Promise<string[]> {
-        // TODO: generate unit tests
         const rawString = await this.getConfig(key, '');
         const parsed = rawString
             .split(',')
