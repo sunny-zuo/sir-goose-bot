@@ -154,7 +154,9 @@ describe('AdminConfigCache', () => {
 
         it('should handle guild IDs correctly (real-world use case)', async () => {
             const mockConfig: AdminConfig = {
-                configs: new Map([['guildIds', { value: '123456789012345678,987654321098765432,111222333444555666', updatedAt: new Date() }]]),
+                configs: new Map([
+                    ['guildIds', { value: '123456789012345678,987654321098765432,111222333444555666', updatedAt: new Date() }],
+                ]),
             };
             mockAdminConfigModel.findOne.mockResolvedValue(mockConfig);
 
@@ -165,7 +167,9 @@ describe('AdminConfigCache', () => {
 
         it('should handle user IDs correctly (real-world use case)', async () => {
             const mockConfig: AdminConfig = {
-                configs: new Map([['userIds', { value: '100200300400500600, 200300400500600700 ,300400500600700800', updatedAt: new Date() }]]),
+                configs: new Map([
+                    ['userIds', { value: '100200300400500600, 200300400500600700 ,300400500600700800', updatedAt: new Date() }],
+                ]),
             };
             mockAdminConfigModel.findOne.mockResolvedValue(mockConfig);
 
