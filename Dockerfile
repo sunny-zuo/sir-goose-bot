@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1
 
-FROM node:18-alpine AS builder
+FROM node:22-alpine AS builder
 
 WORKDIR /usr/src/goose
 COPY package.json package-lock.json tsconfig.json ./
@@ -8,7 +8,7 @@ COPY src ./src
 RUN npm ci
 RUN npm run build
 
-FROM node:18-alpine as runner
+FROM node:22-alpine as runner
 
 WORKDIR /usr/src/goose
 ARG GIT_COMMIT
