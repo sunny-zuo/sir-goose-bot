@@ -32,7 +32,7 @@ async function handleAuthorization(req: express.Request, res: express.Response, 
         if (!decodedUID.endsWith('-sebot')) throw new Error('Malformed verification link');
 
         discordId = decodedUID.replace('-sebot', '');
-        // TODO: check if discord id is numeric (snowflake format) or else throw
+        if (!discordId.match(/^\d+$/)) throw new Error('Malformed verification link');
     } catch (e) {
         return res.send('Error: The link you followed appears to be malformed. Try requesting a new verification link.');
     }
