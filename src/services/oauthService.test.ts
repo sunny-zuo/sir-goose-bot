@@ -3,6 +3,16 @@ import { OAuthService } from './oauthService';
 // Mock axios
 jest.mock('axios');
 
+// Mock logger to prevent console output during tests
+jest.mock('#util/logger', () => ({
+    logger: {
+        error: jest.fn(),
+        info: jest.fn(),
+        warn: jest.fn(),
+        debug: jest.fn(),
+    },
+}));
+
 describe('OAuthService', () => {
     const originalEnv = process.env;
 
@@ -61,16 +71,16 @@ describe('OAuthService', () => {
             });
         });
 
-        it('should throw error when uw environment variables are missing', async () => {
+        it('should throw error when uw environment variables are missing', () => {
             delete process.env.CLIENT_ID;
 
-            await expect(OAuthService.getCredentials('uw')).rejects.toThrow();
+            expect(() => OAuthService.getCredentials('uw')).toThrow();
         });
 
-        it('should throw error when common environment variables are missing', async () => {
+        it('should throw error when common environment variables are missing', () => {
             delete process.env.CLIENT_ID_COMMON;
 
-            await expect(OAuthService.getCredentials('common')).rejects.toThrow();
+            expect(() => OAuthService.getCredentials('common')).toThrow();
         });
     });
 
