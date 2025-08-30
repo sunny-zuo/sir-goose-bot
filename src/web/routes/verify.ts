@@ -56,10 +56,3 @@ router.get('/:encodedId', async (req, res) => {
 });
 
 export default router;
-
-// https://login.microsoftonline.com/af6992b1-ce00-40cb-9011-ff45a90f5001/oauth2/v2.0/authorize?client_id=e318abaa-1914-4405-986b-40cd603adb86&response_type=code&redirect_uri=http://localhost:3000/generic/authorize&response_mode=query&scope=offline_access%20user.read&state=test`
-// https://login.microsoftonline.com/organizations/oauth2/v2.0/authorize?client_id=e318abaa-1914-4405-986b-40cd603adb86&response_type=code&redirect_uri=http://localhost:3000/common/authorize&response_mode=query&scope=offline_access%20user.read&state=test&prompt=select_account
-// https://login.microsoftonline.com/723a5a87-f39a-4a22-9247-3fc240c01396/oauth2/v2.0/authorize?client_id=e318abaa-1914-4405-986b-40cd603adb86&response_type=code&redirect_uri=http://localhost:3000/common/authorize&response_mode=query&scope=offline_access%20user.read&state=test&prompt=select_account
-
-// link for other similar bot
-// https://login.microsoftonline.com/723a5a87-f39a-4a22-9247-3fc240c01396/oauth2/v2.0/authorize?client_id=1565c008-269f-42d0-99d4-ea1df00fd174&scope=user.read%20openid%20profile%20offline_access&redirect_uri=https%3A%2F%2Fuwdiscord.gibstick.net%2Fredirect&client-request-id=3fbd26c8-a36f-460f-a18b-96655b5fb38f&response_mode=query&response_type=code&x-client-SKU=msal.js.node&x-client-VER=1.14.6&x-client-OS=linux&x-client-CPU=x64&client_info=1&prompt=select_account
