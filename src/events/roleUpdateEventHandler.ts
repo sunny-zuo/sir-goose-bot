@@ -23,7 +23,7 @@ export class RoleUpdateEventHandler implements EventHandler {
     }
 
     async updateVerificationRules(oldRole: Role, newRole: Role): Promise<void> {
-        // skip verification rule update checks if the role is newly created or if no name changes occured
+        // skip verification rule update checks if the role is newly created or if no name changes occurred
         if (oldRole.name === newRole.name || oldRole.name === 'new role' || newRole.name === 'new role') {
             return;
         }

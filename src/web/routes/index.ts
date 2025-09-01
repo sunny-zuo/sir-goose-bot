@@ -26,7 +26,7 @@ async function handleAuthorization(req: express.Request, res: express.Response, 
 
     let discordId: string;
     try {
-        const decodedUID = AES.decrypt(req.params.encodedId.replace(/_/g, '/').replace(/-/g, '+'), process.env.AES_PASSPHRASE).toString(
+        const decodedUID = AES.decrypt(state.replace(/_/g, '/').replace(/-/g, '+'), process.env.AES_PASSPHRASE).toString(
             enc.Utf8
         );
         if (!decodedUID.endsWith('-sebot')) throw new Error('Malformed verification link');
@@ -92,7 +92,7 @@ async function handleAuthorization(req: express.Request, res: express.Response, 
     }
 }
 
-router.get('/', (req, res) => {
+router.get('/', (_, res) => {
     res.sendFile(path.join(process.cwd(), 'src', 'web', 'public', 'index.html'));
 });
 

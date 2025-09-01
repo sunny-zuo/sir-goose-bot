@@ -49,7 +49,7 @@ router.get('/:encodedId', async (req, res) => {
     } catch (e) {
         logger.error(e, 'Error redirecting user to authorization URL');
         res.send(
-            `An unexpected error occured. Please try again or notify the support server (https://discord.gg/KHByMmrrw2) if this continues happening.`
+            `An unexpected error occurred. Please try again or notify the support server (https://discord.gg/KHByMmrrw2) if this continues happening.`
         );
         return;
     }
