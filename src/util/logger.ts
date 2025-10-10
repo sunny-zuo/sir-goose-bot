@@ -6,7 +6,7 @@ const transport =
               targets: [
                   {
                       target: 'pino-loki',
-                      level: 'info',
+                      level: 'debug',
                       options: { batching: false, host: 'http://loki:3100' },
                   },
                   {
