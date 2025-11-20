@@ -1,6 +1,7 @@
 import { Snowflake } from 'discord.js';
 import { FilterQuery, Schema, model } from 'mongoose';
 import VerificationOverrideModel, { OverrideScope, VerificationOverride } from './verificationOverride.model';
+import { OAuthSource } from '#services/oauthService';
 
 export interface User {
     discordId: string;
@@ -15,6 +16,7 @@ export interface User {
     verifyRequestedServerId?: Snowflake;
     verifiedAt?: Date;
     verifiedClickedAt?: Date;
+    authSource?: OAuthSource; // either 'uw' or 'common' based on the OAuth app the user authenticated with
 }
 
 // specific fields required for user verification to be processed
@@ -34,6 +36,7 @@ const schema = new Schema<User>(
         verifyRequestedServerId: String,
         verifiedAt: Date,
         verifiedClickedAt: Date,
+        authSource: String,
     },
     {
         timestamps: true,

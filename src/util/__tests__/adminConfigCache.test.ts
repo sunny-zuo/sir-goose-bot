@@ -77,6 +77,117 @@ describe('AdminConfigCache', () => {
         });
     });
 
+    describe('getConfigAsArray', () => {
+        it('should return empty array for non-existent config', async () => {
+            mockAdminConfigModel.findOne.mockResolvedValue(null);
+
+            const result = await AdminConfigCache.getConfigAsArray('nonexistent');
+
+            expect(result).toEqual([]);
+        });
+
+        it('should return empty array for empty string config', async () => {
+            const mockConfig: AdminConfig = {
+                configs: new Map([['emptyKey', { value: '', updatedAt: new Date() }]]),
+            };
+            mockAdminConfigModel.findOne.mockResolvedValue(mockConfig);
+
+            const result = await AdminConfigCache.getConfigAsArray('emptyKey');
+
+            expect(result).toEqual([]);
+        });
+
+        it('should parse single value correctly', async () => {
+            const mockConfig: AdminConfig = {
+                configs: new Map([['singleKey', { value: 'value1', updatedAt: new Date() }]]),
+            };
+            mockAdminConfigModel.findOne.mockResolvedValue(mockConfig);
+
+            const result = await AdminConfigCache.getConfigAsArray('singleKey');
+
+            expect(result).toEqual(['value1']);
+        });
+
+        it('should parse comma-separated values correctly', async () => {
+            const mockConfig: AdminConfig = {
+                configs: new Map([['multiKey', { value: 'value1,value2,value3', updatedAt: new Date() }]]),
+            };
+            mockAdminConfigModel.findOne.mockResolvedValue(mockConfig);
+
+            const result = await AdminConfigCache.getConfigAsArray('multiKey');
+
+            expect(result).toEqual(['value1', 'value2', 'value3']);
+        });
+
+        it('should trim whitespace from values', async () => {
+            const mockConfig: AdminConfig = {
+                configs: new Map([['spacedKey', { value: ' value1 , value2 ,  value3  ', updatedAt: new Date() }]]),
+            };
+            mockAdminConfigModel.findOne.mockResolvedValue(mockConfig);
+
+            const result = await AdminConfigCache.getConfigAsArray('spacedKey');
+
+            expect(result).toEqual(['value1', 'value2', 'value3']);
+        });
+
+        it('should filter out empty values after trimming', async () => {
+            const mockConfig: AdminConfig = {
+                configs: new Map([['mixedKey', { value: 'value1,,value2,   ,value3,', updatedAt: new Date() }]]),
+            };
+            mockAdminConfigModel.findOne.mockResolvedValue(mockConfig);
+
+            const result = await AdminConfigCache.getConfigAsArray('mixedKey');
+
+            expect(result).toEqual(['value1', 'value2', 'value3']);
+        });
+
+        it('should handle values with only commas and spaces', async () => {
+            const mockConfig: AdminConfig = {
+                configs: new Map([['commasOnly', { value: ' , , ,  ', updatedAt: new Date() }]]),
+            };
+            mockAdminConfigModel.findOne.mockResolvedValue(mockConfig);
+
+            const result = await AdminConfigCache.getConfigAsArray('commasOnly');
+
+            expect(result).toEqual([]);
+        });
+
+        it('should handle guild IDs correctly (real-world use case)', async () => {
+            const mockConfig: AdminConfig = {
+                configs: new Map([
+                    ['guildIds', { value: '123456789012345678,987654321098765432,111222333444555666', updatedAt: new Date() }],
+                ]),
+            };
+            mockAdminConfigModel.findOne.mockResolvedValue(mockConfig);
+
+            const result = await AdminConfigCache.getConfigAsArray('guildIds');
+
+            expect(result).toEqual(['123456789012345678', '987654321098765432', '111222333444555666']);
+        });
+
+        it('should handle user IDs correctly (real-world use case)', async () => {
+            const mockConfig: AdminConfig = {
+                configs: new Map([
+                    ['userIds', { value: '100200300400500600, 200300400500600700 ,300400500600700800', updatedAt: new Date() }],
+                ]),
+            };
+            mockAdminConfigModel.findOne.mockResolvedValue(mockConfig);
+
+            const result = await AdminConfigCache.getConfigAsArray('userIds');
+
+            expect(result).toEqual(['100200300400500600', '200300400500600700', '300400500600700800']);
+        });
+
+        it('should handle database errors gracefully', async () => {
+            mockAdminConfigModel.findOne.mockRejectedValue(new Error('Database error'));
+
+            const result = await AdminConfigCache.getConfigAsArray('testKey');
+
+            expect(result).toEqual([]);
+            expect(mockLogger.error).toHaveBeenCalledWith(expect.any(Error), 'Failed to load admin configs from database');
+        });
+    });
+
     describe('getAllConfigs', () => {
         it('should return empty object when no configs exist', async () => {
             mockAdminConfigModel.findOne.mockResolvedValue(null);
