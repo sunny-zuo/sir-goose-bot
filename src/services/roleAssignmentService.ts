@@ -16,7 +16,13 @@ import VerificationOverrideModel, { OverrideScope } from '#models/verificationOv
 type CustomFileImport = { type: 'hash' | 'uwid'; department: string | null; entranceYear: number | null; ids: string[] };
 type CustomValues = { departments: string[]; entranceYear: number | null };
 type AssignGuildRolesParams = { log?: boolean; returnMissing?: boolean; oldDepartment?: string; oldYear?: number; oldConfig?: GuildConfig };
-export type RoleAssignmentResult = { assignedRoles: Role[]; isVerified: boolean; updatedName?: string };
+export type RoleAssignmentResult = {
+    assignedRoles: Role[];
+    addedRoles: Role[];
+    removedRoles: Role[];
+    isVerified: boolean;
+    updatedName?: string;
+};
 
 export class RoleAssignmentService {
     static customImport: Collection<string, CustomValues> = new Collection<string, CustomValues>();
@@ -64,20 +70,32 @@ export class RoleAssignmentService {
         this.userId = userId;
     }
 
-    async assignAllRoles(client: Client, oldDepartment?: string): Promise<void> {
+    async assignAllRoles(
+        client: Client,
+        oldDepartment?: string
+    ): Promise<{ changedGuildIds: Snowflake[]; unchangedGuildIds: Snowflake[] }> {
         const guildModels = await GuildModel.find({ enableVerification: true });
+        const changedGuildIds: Snowflake[] = [];
+        const unchangedGuildIds: Snowflake[] = [];
 
         logger.info({ verification: 'assignAll', user: { id: this.userId } }, 'Assigning roles to user in all possible guilds');
         for (const guildModel of guildModels) {
             try {
                 const guild = client.guilds.cache.get(guildModel.guildId);
                 if (guild) {
-                    await this.assignGuildRoles(guild, { oldDepartment });
+                    const result = await this.assignGuildRoles(guild, { oldDepartment });
+                    if (result.success && (result.value.assignedRoles.length > 0 || result.value.removedRoles.length > 0)) {
+                        changedGuildIds.push(guild.id);
+                    } else {
+                        unchangedGuildIds.push(guild.id);
+                    }
                 }
             } catch (e) {
                 logger.error(e, e.message);
+                unchangedGuildIds.push(guildModel.guildId);
             }
         }
+        return { changedGuildIds, unchangedGuildIds };
     }
 
     async assignGuildRoles(guild: Guild, params: AssignGuildRolesParams = {}): Promise<Result<RoleAssignmentResult, string>> {
@@ -241,14 +259,15 @@ export class RoleAssignmentService {
             const newRoles = await getNewUserRolesToAssign();
             const oldRoles = await getOldUserRolesToRemove();
 
-            const rolesToSet = member.roles.cache.clone();
+            const originalRoles = member.roles.cache.clone();
+            const rolesToSet = originalRoles.clone();
             const missingRoles = newRoles.filter((role) => !member.roles.cache.has(role.id));
 
             // remove unverified roles if they exist and user is now verified
             const unverifiedRolesToRemove = await this.getUnverifiedRoles(guild, guildConfig);
             unverifiedRolesToRemove.forEach((role) => rolesToSet.delete(role.id));
-            oldRoles.map((role) => rolesToSet.delete(role.id)); // then, remove any old roles
-            newRoles.map((role) => rolesToSet.set(role.id, role)); // lastly, assign the new roles
+            oldRoles.forEach((role) => rolesToSet.delete(role.id)); // then, remove any old roles
+            newRoles.forEach((role) => rolesToSet.set(role.id, role)); // lastly, assign the new roles
 
             // custom actions for specific servers that want behavior not supported by rules
             // TODO: migrate these servers to use the "Unverified" roles feature once it is generally available
@@ -259,6 +278,10 @@ export class RoleAssignmentService {
                 // Co-op Connection server, remove the "Unverified" role
                 rolesToSet.delete('800477641978806334');
             }
+
+            // compute added and removed roles via set difference
+            const addedRoles = Array.from(rolesToSet.difference(originalRoles).values());
+            const removedRoles = Array.from(originalRoles.difference(rolesToSet).values());
 
             // only print override info to logs if the override is a GUILD override
             // this is because GLOBAL overrides are meant to be invisible to admins
@@ -317,6 +340,8 @@ export class RoleAssignmentService {
                 success: true,
                 value: {
                     assignedRoles: params.returnMissing ? missingRoles : newRoles,
+                    addedRoles: addedRoles,
+                    removedRoles: removedRoles,
                     isVerified: true,
                     updatedName: newNickname,
                 },
@@ -375,12 +400,17 @@ export class RoleAssignmentService {
         // if the config changes, remove a user's old unverified role (if it exists)
         const unverifiedRolesToRemove = params.oldConfig ? await this.getUnverifiedRoles(guild, params.oldConfig) : [];
 
-        const rolesToSet = member.roles.cache.clone();
+        const originalRoles = member.roles.cache.clone();
+        const rolesToSet = originalRoles.clone();
         const missingRoles = unverifiedRoles.filter((role) => !member.roles.cache.has(role.id));
 
         // remove old unverified rules, then add unverified roles to the member's role set
         unverifiedRolesToRemove.forEach((role) => rolesToSet.delete(role.id));
         unverifiedRoles.forEach((role) => rolesToSet.set(role.id, role));
+
+        // compute added and removed roles via set difference
+        const addedRoles = Array.from(rolesToSet.difference(originalRoles).values());
+        const removedRoles = Array.from(originalRoles.difference(rolesToSet).values());
 
         if (!rolesToSet.equals(member.roles.cache)) {
             try {
@@ -406,6 +436,8 @@ export class RoleAssignmentService {
             success: true,
             value: {
                 assignedRoles: params.returnMissing ? missingRoles : unverifiedRoles,
+                addedRoles: addedRoles,
+                removedRoles: removedRoles,
                 isVerified: false,
             },
         };

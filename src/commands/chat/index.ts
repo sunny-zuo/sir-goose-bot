@@ -20,6 +20,7 @@ import { Unban } from './moderation/unban';
 /* Owner Commands */
 import { AdminConfig } from './owner/adminconfig';
 import { Deploy } from './owner/deploy';
+import { GlobalOverride } from './owner/globaloverride';
 import { GuildList } from './owner/guildlist';
 import { Reload } from './owner/reload';
 
@@ -54,6 +55,7 @@ export default [
     Unban,
     AdminConfig,
     Deploy,
+    GlobalOverride,
     GuildList,
     Reload,
     ButtonRole,
