@@ -274,7 +274,11 @@ export class GlobalOverride extends ChatCommand {
                             { name: 'User ID', value: inlineCode(userId), inline: true },
                             { name: 'Department', value: inlineCode(department ?? '<not set>'), inline: true },
                             { name: 'Entrance Year', value: inlineCode(entranceYear?.toString() ?? '<not set>'), inline: true },
-                            { name: 'Roles Updated', value: `Roles have been updated in ${result.changedGuildIds.length}/${totalGuilds} guilds.` , inline: false }
+                            {
+                                name: 'Roles Updated',
+                                value: `Roles have been updated in ${result.changedGuildIds.length}/${totalGuilds} guilds.`,
+                                inline: false,
+                            }
                         );
 
                     await reassignInteraction.editReply({ embeds: [successEmbed], components: [] });
@@ -324,7 +328,11 @@ export class GlobalOverride extends ChatCommand {
             .addFields(
                 { name: 'User ID', value: inlineCode(userId), inline: true },
                 { name: 'Department', value: inlineCode(override.department ?? '<not set>'), inline: true },
-                { name: 'Entrance Year', value: inlineCode(override.o365CreatedDate?.getFullYear().toString() ?? '<not set>'), inline: true },
+                {
+                    name: 'Entrance Year',
+                    value: inlineCode(override.o365CreatedDate?.getFullYear().toString() ?? '<not set>'),
+                    inline: true,
+                },
                 { name: 'Created By', value: `<@${override.createdBy}>`, inline: true },
                 { name: 'Created At', value: `<t:${Math.floor(override.createdAt.getTime() / 1000)}:R>`, inline: true }
             );
@@ -376,7 +384,11 @@ export class GlobalOverride extends ChatCommand {
             .addFields(
                 { name: 'User ID', value: inlineCode(userId), inline: true },
                 { name: 'Previous Department', value: inlineCode(override.department ?? '<not set>'), inline: true },
-                { name: 'Previous Year', value: inlineCode(override.o365CreatedDate?.getFullYear().toString() ?? '<not set>'), inline: true }
+                {
+                    name: 'Previous Year',
+                    value: inlineCode(override.o365CreatedDate?.getFullYear().toString() ?? '<not set>'),
+                    inline: true,
+                }
             );
 
         await interaction.editReply({ embeds: [embed] });

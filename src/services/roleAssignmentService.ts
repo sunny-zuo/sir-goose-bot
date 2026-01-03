@@ -16,7 +16,13 @@ import VerificationOverrideModel, { OverrideScope } from '#models/verificationOv
 type CustomFileImport = { type: 'hash' | 'uwid'; department: string | null; entranceYear: number | null; ids: string[] };
 type CustomValues = { departments: string[]; entranceYear: number | null };
 type AssignGuildRolesParams = { log?: boolean; returnMissing?: boolean; oldDepartment?: string; oldYear?: number; oldConfig?: GuildConfig };
-export type RoleAssignmentResult = { assignedRoles: Role[]; addedRoles: Role[]; removedRoles: Role[]; isVerified: boolean; updatedName?: string };
+export type RoleAssignmentResult = {
+    assignedRoles: Role[];
+    addedRoles: Role[];
+    removedRoles: Role[];
+    isVerified: boolean;
+    updatedName?: string;
+};
 
 export class RoleAssignmentService {
     static customImport: Collection<string, CustomValues> = new Collection<string, CustomValues>();
@@ -78,10 +84,7 @@ export class RoleAssignmentService {
                 const guild = client.guilds.cache.get(guildModel.guildId);
                 if (guild) {
                     const result = await this.assignGuildRoles(guild, { oldDepartment });
-                    if (
-                        result.success &&
-                        (result.value.assignedRoles.length > 0 || result.value.removedRoles.length > 0)
-                    ) {
+                    if (result.success && (result.value.assignedRoles.length > 0 || result.value.removedRoles.length > 0)) {
                         changedGuildIds.push(guild.id);
                     } else {
                         unchangedGuildIds.push(guild.id);
