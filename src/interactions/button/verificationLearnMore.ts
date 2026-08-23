@@ -1,6 +1,7 @@
 import { ButtonInteraction, EmbedBuilder } from 'discord.js';
 import { ButtonInteractionHandler } from './buttonInteractionHandler';
 import { Cooldown } from '#util/cooldown';
+import { PRIVACY_POLICY_URL } from '#util/constants';
 import Client from '#src/Client';
 
 export class VerificationLearnMore implements ButtonInteractionHandler {
@@ -19,25 +20,25 @@ export class VerificationLearnMore implements ButtonInteractionHandler {
         embed.addFields([
             {
                 name: 'What is verification?',
-                value: "Verification is feature used by servers to confirm that users are UWaterloo students, for enhanced safety and privacy. Upon successful verification, you'll be automatically assigned roles configured by the server admins.",
+                value: "Verification is a feature used by servers to confirm that users are UWaterloo students, for enhanced safety and privacy. Upon successful verification, you'll be automatically assigned roles configured by the server admins.",
             },
             {
                 name: 'How do I verify?',
-                value: `You can verify by pressing the verify button, and logging in with your UWaterloo account. You'll need to grant the bot permission to read your UW Office 365 profile, which includes your name, email, faculty and year.
+                value: `You can verify by pressing the verify button and logging in with your UWaterloo account. You'll need to grant the bot permission to read your UW Office 365 profile, which includes your name, email, faculty and year.
 
                 Once you've verified with Sir Goose, you'll be automatically verified on all servers using Sir Goose for verification!`,
             },
             {
-                name: 'Does Sir Goose get access to my password?',
-                value: 'No. Authentication uses [OAuth 2.0](https://oauth.net/2/), an industry standard protocol for authorization. Logging in will authorize the bot to read your profile info, without sharing your password with the bot.',
+                name: 'What is my data used for?',
+                value: `Your data will be used to assign roles configured by server admins, prevent ban circumvention, and assist in misconduct investigations when there is clear evidence of wrongdoing. For more details, see our [Privacy Policy](${PRIVACY_POLICY_URL}).`,
             },
             {
-                name: 'What is my data used for?',
-                value: 'Your data will be used to assign roles configured by server admins, and may be used to assist in misconduct investigations when there is clear evidence of wrongdoing. Your data may also be used to prevent ban circumvention.',
+                name: 'Does Sir Goose get access to my password?',
+                value: 'No. Authentication uses [OAuth 2.0](https://oauth.net/2/), an industry-standard protocol for authorization. Logging in will authorize the bot to read your profile info without sharing your password with the bot.',
             },
             {
                 name: 'Who has access to my data?',
-                value: `${process.env.OWNER_DISCORD_USERNAME} (bot developer) is the only person with access to your data. Server owners do not have access, and your data will not be used for any purposes other than what is described without your consent.`,
+                value: `Only the bot developer has access to your data. Server owners do not have access, and your data will not be used for any purposes other than what is described without your consent. For more details, see our [Privacy Policy](${PRIVACY_POLICY_URL}).`,
             },
             {
                 name: "What if I'm not a UWaterloo student?",
