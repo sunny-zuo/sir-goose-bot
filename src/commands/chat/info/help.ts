@@ -9,8 +9,11 @@ import {
     PermissionsBitField,
 } from 'discord.js';
 import Client from '#src/Client';
+import { PRIVACY_POLICY_URL, VERIFICATION_GUIDE_URL } from '#util/constants';
 import { Category } from '#types/Command';
 import { ChatCommand } from '../ChatCommand';
+
+const VERIFICATION_COMMAND_NAMES = ['reverify', 'verify', 'verifyall', 'verifybutton', 'verifyoverride', 'verifyrules'];
 
 export class Help extends ChatCommand {
     private static readonly options: ApplicationCommandOption[] = [
@@ -76,6 +79,8 @@ export class Help extends ChatCommand {
                 )
                 .setTimestamp();
 
+            Help.addVerificationResources(embed, command);
+
             await interaction.reply({ embeds: [embed] });
         } else {
             const categories: Category[] = [...new Set(client.chatCommands.map((command) => command.category))].sort();
@@ -88,7 +93,7 @@ export class Help extends ChatCommand {
                     )} in the chat box followed by the command name.
 
                     Some commands may only be available in servers and may have permission requirements to be used.
-                    
+
                     For more info on a specific command, use ${inlineCode('/help (command name)')}.`
                 )
                 .setColor('Aqua')
@@ -110,10 +115,19 @@ export class Help extends ChatCommand {
 
             embed.addFields({
                 name: 'Verification Guide',
-                value: 'Looking to setup verification for your server? [Check out the guide!](https://sir-goose.notion.site/sir-goose/Setting-Up-Verification-0f309b2a00fc4e198b5f2182d2452fcd)',
+                value: `Looking to setup verification for your server? [Check out the guide!](${VERIFICATION_GUIDE_URL})`,
             });
 
             await interaction.reply({ embeds: [embed] });
+        }
+    }
+
+    private static addVerificationResources(embed: EmbedBuilder, command?: ChatCommand): void {
+        if (command?.category === 'Verification' || VERIFICATION_COMMAND_NAMES.includes(command?.name ?? '')) {
+            embed.addFields({
+                name: 'Verification Resources',
+                value: `[Privacy Policy](${PRIVACY_POLICY_URL}) | [Verification Guide](${VERIFICATION_GUIDE_URL})`,
+            });
         }
     }
 
