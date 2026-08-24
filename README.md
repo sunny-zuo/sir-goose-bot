@@ -48,6 +48,8 @@ docker compose -f docker-compose.yml -f docker-compose.oracle.yml up -d
 
 In Cloudflare Zero Trust, route the public hostname to `http://sir-goose:5000`. The VM does not need inbound ports `80` or `443`.
 
+The container healthcheck reports whether the web app is accepting requests. It becomes ready only after Discord login succeeds, so a slow Discord startup can temporarily show the container as unhealthy without causing a restart.
+
 The production container runs as UID/GID `1000`. Before starting it on a new host, give it access to its bind mounts:
 
 ```sh
@@ -72,8 +74,19 @@ Copy the logrotate policy and Docker log limit configuration:
 
 ```sh
 sudo cp docker/logrotate.conf /etc/logrotate.d/sir-goose
-sudo cp docker/daemon.json /etc/docker/daemon.json
 sudo systemctl restart docker
+```
+
+`docker/daemon.json` is a reference configuration for Docker's stdout log limits. If `/etc/docker/daemon.json` already exists, merge these settings into it instead of overwriting the file:
+
+```json
+{
+    "log-driver": "json-file",
+    "log-opts": {
+        "max-size": "10m",
+        "max-file": "3"
+    }
+}
 ```
 
 Recreate running containers after changing Docker's logging settings, then verify the rotation policy:
