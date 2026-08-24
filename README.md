@@ -30,7 +30,58 @@ cd sir-goose-bot
 npm install
 ```
 
-Note that this requires at least version 16.6 of [Node](https://nodejs.org/en/). After, create a copy of `.env.example`, rename it to `.env` and set your environment variables.
+The project currently targets Node.js 22 LTS. After, create a copy of `.env.example`, rename it to `.env` and set your environment variables.
+
+## Production Deployment on Oracle Cloud
+
+The default Compose deployment runs only the bot and Watchtower. Caddy and the monitoring services are opt-in through profiles:
+
+```sh
+docker compose --profile edge --profile monitoring up -d
+```
+
+For an Oracle free-tier VM using Cloudflare Tunnel, create `docker/cloudflared/.env` from its example and add the tunnel token. Then run:
+
+```sh
+docker compose -f docker-compose.yml -f docker-compose.oracle.yml up -d
+```
+
+In Cloudflare Zero Trust, route the public hostname to `http://sir-goose:5000`. The VM does not need inbound ports `80` or `443`.
+
+The production container runs as UID/GID `1000`. Before starting it on a new host, give it access to its bind mounts:
+
+```sh
+mkdir -p logs src/data/verification
+sudo chown -R 1000:1000 logs src/data/verification
+```
+
+### Updating
+
+Automatic updates are disabled by default. To update the bot manually:
+
+```sh
+docker compose pull sir-goose
+docker compose up -d sir-goose
+```
+
+To re-enable automatic bot updates temporarily, start Compose with the `updates` profile.
+
+### Log retention
+
+Copy the logrotate policy and Docker log limit configuration:
+
+```sh
+sudo cp docker/logrotate.conf /etc/logrotate.d/sir-goose
+sudo cp docker/daemon.json /etc/docker/daemon.json
+sudo systemctl restart docker
+```
+
+Recreate running containers after changing Docker's logging settings, then verify the rotation policy:
+
+```sh
+docker compose up -d --force-recreate
+sudo logrotate --debug /etc/logrotate.d/sir-goose
+```
 
 ## Contributing
 
