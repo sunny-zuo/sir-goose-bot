@@ -38,11 +38,7 @@ export class CreateVerificationOverride extends UserContextMenuCommand {
         // also exit if verification overrides are still in preview mode and this guild is excluded
         const inPreview = (await AdminConfigCache.getConfig(AdminConfigCache.FLAGS.VERIFY_OVERRIDE_PREVIEW, 'false')) === 'true';
         if (inPreview) {
-            const allowedGuildsRaw = await AdminConfigCache.getConfig(AdminConfigCache.FLAGS.VERIFY_OVERRIDE_GUILDS, '');
-            const allowedGuildIds = allowedGuildsRaw
-                .split(',')
-                .map((id) => id.trim())
-                .filter((id) => id.length > 0);
+            const allowedGuildIds = await AdminConfigCache.getConfigAsArray(AdminConfigCache.FLAGS.VERIFY_OVERRIDE_GUILDS);
 
             if (!allowedGuildIds.includes(interaction.guildId)) {
                 await interaction.editReply({
