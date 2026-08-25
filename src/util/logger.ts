@@ -4,15 +4,19 @@ const transport =
     process.env.NODE_ENV === 'production'
         ? pino.transport({
               targets: [
-                  {
-                      target: 'pino-loki',
-                      level: 'debug',
-                      options: { batching: false, host: 'http://loki:3100' },
-                  },
+                  ...(process.env.LOKI_URL
+                      ? [
+                            {
+                                target: 'pino-loki',
+                                level: 'debug',
+                                options: { batching: false, host: process.env.LOKI_URL },
+                            },
+                        ]
+                      : []),
                   {
                       target: 'pino/file',
                       level: 'info',
-                      options: { destination: './logs' },
+                      options: { destination: './logs/app.log', mkdir: true },
                   },
               ],
           })

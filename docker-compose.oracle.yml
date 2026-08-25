@@ -1,0 +1,8 @@
+services:
+    cloudflared:
+        image: cloudflare/cloudflared:2025.8.0
+        container_name: cloudflared
+        hostname: cloudflared
+        restart: unless-stopped
+        env_file: ./docker/cloudflared/.env
+        command: tunnel --no-autoupdate run

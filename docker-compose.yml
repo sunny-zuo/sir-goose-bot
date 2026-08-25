@@ -7,6 +7,7 @@ services:
         env_file: ./.env
         environment:
             - NODE_ENV=production
+        init: true
         volumes:
             - type: bind
               source: ./logs
@@ -19,10 +20,12 @@ services:
             - '8080'
 
     caddy:
-        image: caddy
+        image: caddy:2
         container_name: caddy
         hostname: caddy
         restart: unless-stopped
+        profiles:
+            - edge
         ports:
             - '80:80'
             - '443:443'
@@ -39,6 +42,8 @@ services:
         hostname: prometheus
         user: root
         restart: unless-stopped
+        profiles:
+            - monitoring
         depends_on:
             - cadvisor
         command:
@@ -62,6 +67,8 @@ services:
         hostname: grafana
         user: root
         restart: unless-stopped
+        profiles:
+            - monitoring
         volumes:
             - grafana-storage:/var/lib/grafana
         expose:
@@ -74,6 +81,8 @@ services:
         container_name: nodeexporter
         hostname: nodeexporter
         restart: unless-stopped
+        profiles:
+            - monitoring
         command:
             - '--path.procfs=/host/proc'
             - '--path.rootfs=/rootfs'
@@ -92,6 +101,8 @@ services:
         image: gcr.io/cadvisor/cadvisor:v0.47.2
         container_name: cadvisor
         hostname: cadvisor
+        profiles:
+            - monitoring
         restart: unless-stopped
         privileged: true
         devices:
@@ -113,6 +124,8 @@ services:
         hostname: loki
         user: root
         restart: unless-stopped
+        profiles:
+            - monitoring
         volumes:
             - loki-storage:/loki
             - ./docker/loki/loki-config.yml:/etc/loki-config.yml
@@ -124,7 +137,9 @@ services:
             org.label-schema.group: 'monitoring'
 
     watchtower:
-        image: containrrr/watchtower
+        image: containrrr/watchtower:1
+        profiles:
+            - updates
         restart: unless-stopped
         volumes:
             - /var/run/docker.sock:/var/run/docker.sock

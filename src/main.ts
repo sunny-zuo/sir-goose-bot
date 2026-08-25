@@ -19,6 +19,8 @@ const intents = [
 const partials: Partials[] = [Partials.Channel, Partials.Message];
 const client = new Client({ intents: intents, partials: partials });
 
+const SHUTDOWN_TIMEOUT_MS = Number(process.env.SHUTDOWN_TIMEOUT_MS ?? 8000);
+
 async function init(): Promise<void> {
     register.setDefaultLabels({ app: 'sir-goose-bot' });
     collectDefaultMetrics({ register, prefix: 'sir_goose_bot_' });
@@ -37,4 +39,33 @@ async function init(): Promise<void> {
     await client.login(process.env.DISCORD_TOKEN);
 }
 
-init().catch((error) => console.error('Error initializing application.', { error }));
+async function shutdown(signal: NodeJS.Signals): Promise<void> {
+    let isShuttingDown = false;
+
+    if (isShuttingDown) return;
+    isShuttingDown = true;
+
+    logger.info({ signal }, 'Shutting down');
+
+    const cleanup = Promise.all([client.destroy(), mongoose.disconnect()]);
+    const timeout = new Promise<never>((_, reject) => {
+        const timeoutId = setTimeout(() => reject(new Error('Timed out waiting for connections to close')), SHUTDOWN_TIMEOUT_MS);
+        timeoutId.unref();
+    });
+
+    try {
+        await Promise.race([cleanup, timeout]);
+    } catch (e) {
+        logger.warn(e, 'Shutdown did not finish cleanly');
+    }
+
+    process.exit(0);
+}
+
+process.once('SIGTERM', () => void shutdown('SIGTERM'));
+process.once('SIGINT', () => void shutdown('SIGINT'));
+
+init().catch((error) => {
+    logger.error(error, 'Error initializing application.');
+    process.exit(1);
+});
