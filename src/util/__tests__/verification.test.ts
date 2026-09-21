@@ -1,6 +1,7 @@
-import { serializeVerificationRules, parseRule } from '../verification';
+import { serializeVerificationRules, parseRule, parseRenameConfig } from '../verification';
+import { formatVerifiedNickname } from '../nickname';
 import * as VerificationRoleUtil from '../verificationRoles';
-import { VerificationRules, VerificationImportV2, VerificationRuleImportV2 } from '#types/Verification';
+import { VerificationRules, VerificationImportV2, VerificationRuleImportV2, RenameType } from '#types/Verification';
 import { Collection, Role, Snowflake } from 'discord.js';
 import { bigSERules } from './testData/sampleRules';
 
@@ -514,6 +515,119 @@ describe('verification utilities', () => {
                 const result = parseRule(rule, mockGuildRoles);
                 expect(result.success).toBe(true);
             }
+        });
+    });
+    describe('rename config', () => {
+        const baseRules: VerificationRules = {
+            baseYear: -1,
+            rules: [
+                {
+                    roles: [{ id: '123', name: 'Student' }],
+                    department: 'MAT/Mathematics Computer Science',
+                    matchType: 'exact',
+                    yearMatch: 'all',
+                },
+            ],
+        };
+
+        it('should not include rename fields when rename is not configured', () => {
+            const parsed = JSON.parse(serializeVerificationRules(baseRules)) as VerificationImportV2;
+            expect(parsed.rename).toBeUndefined();
+            expect(parsed.forceRename).toBeUndefined();
+        });
+
+        it('should serialize rename settings when configured', () => {
+            const parsed = JSON.parse(
+                serializeVerificationRules({ ...baseRules, renameType: RenameType.FULL_NAME, forceRename: true })
+            ) as VerificationImportV2;
+            expect(parsed.rename).toBe('FULL_NAME');
+            expect(parsed.forceRename).toBe(true);
+        });
+
+        it('should omit forceRename when false', () => {
+            const parsed = JSON.parse(
+                serializeVerificationRules({ ...baseRules, renameType: RenameType.FIRST_NAME, forceRename: false })
+            ) as VerificationImportV2;
+            expect(parsed.rename).toBe('FIRST_NAME');
+            expect(parsed.forceRename).toBeUndefined();
+        });
+
+        it('should return an empty config when rename is omitted', () => {
+            expect(parseRenameConfig({})).toEqual({ success: true, value: {} });
+        });
+
+        it('should parse valid rename settings', () => {
+            expect(parseRenameConfig({ rename: RenameType.FULL_NAME, forceRename: true })).toEqual({
+                success: true,
+                value: { renameType: RenameType.FULL_NAME, forceRename: true },
+            });
+            expect(parseRenameConfig({ rename: RenameType.FIRST_NAME })).toEqual({
+                success: true,
+                value: { renameType: RenameType.FIRST_NAME, forceRename: false },
+            });
+        });
+
+        it('should reject an invalid rename type', () => {
+            const result = parseRenameConfig({ rename: 'NICKNAME' as RenameType });
+            expect(result.success).toBe(false);
+        });
+
+        it('should reject a non-boolean forceRename', () => {
+            const result = parseRenameConfig({ rename: RenameType.FULL_NAME, forceRename: 'yes' as unknown as boolean });
+            expect(result.success).toBe(false);
+        });
+
+        it('should reject forceRename without rename', () => {
+            const result = parseRenameConfig({ forceRename: true });
+            expect(result.success).toBe(false);
+        });
+
+        it('should round-trip rename settings through serialize and parse', () => {
+            const serialized = JSON.parse(
+                serializeVerificationRules({ ...baseRules, renameType: RenameType.FULL_NAME, forceRename: true })
+            ) as VerificationImportV2;
+            expect(parseRenameConfig(serialized)).toEqual({
+                success: true,
+                value: { renameType: RenameType.FULL_NAME, forceRename: true },
+            });
+        });
+    });
+    describe('formatVerifiedNickname', () => {
+        const user = { givenName: 'Amit', surname: 'Weis' };
+
+        it('should format full name', () => {
+            expect(formatVerifiedNickname(user, RenameType.FULL_NAME)).toBe('Amit Weis');
+        });
+
+        it('should format first name', () => {
+            expect(formatVerifiedNickname(user, RenameType.FIRST_NAME)).toBe('Amit');
+        });
+
+        it('should format first name with last initial', () => {
+            expect(formatVerifiedNickname(user, RenameType.FIRST_NAME_LAST_INITIAL)).toBe('Amit W.');
+        });
+
+        it('should use only the first given name and uppercase the initial', () => {
+            expect(formatVerifiedNickname({ givenName: 'Mary Jane', surname: 'watson' }, RenameType.FIRST_NAME_LAST_INITIAL)).toBe(
+                'Mary W.'
+            );
+        });
+
+        it('should fall back to first name when surname is missing', () => {
+            expect(formatVerifiedNickname({ givenName: 'Amit' }, RenameType.FIRST_NAME_LAST_INITIAL)).toBe('Amit');
+            expect(formatVerifiedNickname({ givenName: 'Amit' }, RenameType.FULL_NAME)).toBe('Amit');
+        });
+
+        it('should return undefined without a given name or rename type', () => {
+            expect(formatVerifiedNickname({ surname: 'Weis' }, RenameType.FULL_NAME)).toBeUndefined();
+            expect(formatVerifiedNickname(user, undefined)).toBeUndefined();
+        });
+
+        it('should accept FIRST_NAME_LAST_INITIAL in rule imports', () => {
+            expect(parseRenameConfig({ rename: RenameType.FIRST_NAME_LAST_INITIAL })).toEqual({
+                success: true,
+                value: { renameType: RenameType.FIRST_NAME_LAST_INITIAL, forceRename: false },
+            });
         });
     });
 });

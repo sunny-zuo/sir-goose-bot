@@ -17,7 +17,14 @@ import UserModel from '#models/user.model';
 import Client from '#src/Client';
 import { RoleAssignmentService } from '../services/roleAssignmentService';
 import { Modlog } from './modlog';
-import { VerificationRuleImportV2, VerificationRules, VerificationImportV2, VerificationRule } from '#types/Verification';
+import {
+    VerificationRuleImportV2,
+    VerificationRules,
+    VerificationImportV2,
+    VerificationRule,
+    RenameConfig,
+    RenameType,
+} from '#types/Verification';
 import { Result } from '#types/index';
 import { parseRoles } from './verificationRoles';
 
@@ -172,7 +179,47 @@ export function serializeVerificationRules(verificationRules: VerificationRules 
         };
     }
 
+    // include rename settings if configured
+    if (verificationRules.renameType) {
+        exportData.rename = verificationRules.renameType;
+        if (verificationRules.forceRename) exportData.forceRename = true;
+    }
+
     return JSON.stringify(exportData);
+}
+
+/**
+ * Parse the optional rename settings from a verification rule import
+ * @param imported the raw, imported verification rules
+ * @returns the parsed rename config if successful, otherwise a user readable error message
+ */
+export function parseRenameConfig(imported: Pick<VerificationImportV2, 'rename' | 'forceRename'>): Result<RenameConfig, string> {
+    const { rename, forceRename } = imported;
+
+    if (rename === undefined || rename === null) {
+        if (forceRename !== undefined && forceRename !== null) {
+            return {
+                success: false,
+                error: '`forceRename` was specified without `rename`. Set `rename` to `FULL_NAME`, `FIRST_NAME`, or `FIRST_NAME_LAST_INITIAL`.',
+            };
+        }
+        return { success: true, value: {} };
+    }
+
+    if (!Object.values(RenameType).includes(rename as RenameType)) {
+        return {
+            success: false,
+            error: `Invalid \`rename\` value. Expected one of: ${Object.values(RenameType)
+                .map((t) => `\`${t}\``)
+                .join(', ')}.`,
+        };
+    }
+
+    if (forceRename !== undefined && forceRename !== null && typeof forceRename !== 'boolean') {
+        return { success: false, error: '`forceRename` must be `true` or `false`.' };
+    }
+
+    return { success: true, value: { renameType: rename as RenameType, forceRename: forceRename === true } };
 }
 
 /**
