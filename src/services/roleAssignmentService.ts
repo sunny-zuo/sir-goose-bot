@@ -10,6 +10,7 @@ import { Result } from '../types';
 import { Modlog } from '#util/modlog';
 import { RoleData } from '#types/Verification';
 import { logger } from '#util/logger';
+import { formatVerifiedNickname } from '#util/nickname';
 import Client from '#src/Client';
 import VerificationOverrideModel, { OverrideScope } from '#models/verificationOverride.model';
 
@@ -485,8 +486,8 @@ export class RoleAssignmentService {
         renameType?: string,
         forceRename?: boolean
     ): Promise<string | undefined> {
-        if (renameType === 'FULL_NAME' || renameType === 'FIRST_NAME') {
-            const newNickname = renameType === 'FIRST_NAME' ? `${user.givenName?.split(' ')[0]}` : `${user.givenName} ${user.surname}`;
+        if (renameType) {
+            const newNickname = formatVerifiedNickname(user, renameType);
 
             if (newNickname !== undefined) {
                 if (!member.nickname || (member.nickname !== newNickname && forceRename)) {

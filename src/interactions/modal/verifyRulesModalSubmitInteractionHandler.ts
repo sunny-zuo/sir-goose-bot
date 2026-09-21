@@ -14,7 +14,7 @@ import { VerificationImportV2, VerificationRule, UnverifiedConfig } from '#types
 import { v4 as uuidv4 } from 'uuid';
 import { GuildConfigCache } from '#util/guildConfigCache';
 import { VerifyAll } from '#commands/chat/verification/verifyall';
-import { parseRule } from '#util/verification';
+import { parseRule, parseRenameConfig } from '#util/verification';
 import { parseRoles } from '#util/verificationRoles';
 import { AdminConfigCache } from '#util/adminConfigCache';
 
@@ -86,6 +86,15 @@ export class VerifyRulesModalSubmitInteractionHandler implements ModalSubmitInte
             }
         }
 
+        // then, parse the optional rename configuration
+        const renameConfig = parseRenameConfig(importedJSON);
+        if (!renameConfig.success) {
+            await interaction.editReply({
+                embeds: [new EmbedBuilder().setColor('Red').setDescription(renameConfig.error).setTitle('Verification Rule Import Error')],
+            });
+            return;
+        }
+
         // finally, update the config stored in the database
         const config = await GuildConfigCache.fetchOrCreate(interaction.guild!.id);
         const oldConfig = { ...config.toObject() }; // save a copy of the old config for role replacement
@@ -94,6 +103,7 @@ export class VerifyRulesModalSubmitInteractionHandler implements ModalSubmitInte
             baseYear: -1, // TODO: remove base year from code
             rules: newRules,
             unverified: unverifiedConfig,
+            ...renameConfig.value,
         };
         await config.save();
 

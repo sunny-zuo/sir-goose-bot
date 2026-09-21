@@ -1,8 +1,9 @@
 import { Snowflake } from 'discord.js';
 
-enum RenameType {
+export enum RenameType {
     FULL_NAME = 'FULL_NAME',
     FIRST_NAME = 'FIRST_NAME',
+    FIRST_NAME_LAST_INITIAL = 'FIRST_NAME_LAST_INITIAL',
 }
 
 export interface VerificationRules {
@@ -55,6 +56,13 @@ export interface VerificationImportV2 {
     v: number;
     rules: VerificationRuleImportV2[];
     unverified?: UnverifiedConfigImport;
+    rename?: RenameType; // rename verified users to their UW name; omit to disable
+    forceRename?: boolean; // overwrite nicknames users have already set
+}
+
+export interface RenameConfig {
+    renameType?: RenameType;
+    forceRename?: boolean;
 }
 
 export interface UnverifiedConfigImport {
